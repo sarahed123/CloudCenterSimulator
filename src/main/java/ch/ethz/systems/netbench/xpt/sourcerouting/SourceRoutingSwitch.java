@@ -12,7 +12,7 @@ public class SourceRoutingSwitch extends NetworkDevice {
     // Routing table
     private List<List<SourceRoutingPath>> destinationToPaths;
 
-    private boolean isWithinExtendedTopology;
+    protected boolean isWithinExtendedTopology;
 
     /**
      * Constructor for Source Routing switch WITH a transport layer attached to it.
