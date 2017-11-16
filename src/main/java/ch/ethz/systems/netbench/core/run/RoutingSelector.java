@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.core.run;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.run.routing.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchRouting;
 import ch.ethz.systems.netbench.ext.ecmp.ForwarderSwitchRouting;
@@ -60,6 +61,11 @@ public class RoutingSelector {
                 return new EcmpThenKspNoShortestRouting(
                         idToNetworkDevice
                 );
+            }
+            
+            case "remote_routing_populator": {
+                RemoteRoutingController.initRemoteRouting(Simulator.getConfiguration().getPropertyOrFail("centered_routing_type"));
+                return RemoteRoutingController.getInstance();
             }
 
             default:
