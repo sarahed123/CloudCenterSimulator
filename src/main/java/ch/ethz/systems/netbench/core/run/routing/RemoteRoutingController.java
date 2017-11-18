@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.core.run.routing;
 
+import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
 
@@ -27,6 +28,6 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		
 	}
 	
-	public abstract Path getRoute(int source,int dest);
+	public abstract SourceRoutingPath getRoute(int source,int dest);
 
 }

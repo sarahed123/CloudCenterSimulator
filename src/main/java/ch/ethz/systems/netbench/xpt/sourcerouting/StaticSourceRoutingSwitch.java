@@ -8,12 +8,13 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import edu.asu.emit.algorithm.graph.Vertex;
 
 public class StaticSourceRoutingSwitch extends SourceRoutingSwitch {
-	RemoteRoutingController mRemopteRouter;
+	RemoteRoutingController mRemoteRouter;
 	StaticSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
 		super(identifier, transportLayer, n, intermediary);
-		mRemopteRouter = RemoteRoutingController.getInstance();
+		mRemoteRouter = RemoteRoutingController.getInstance();
 	}
 	
 	/**
@@ -48,15 +49,13 @@ public class StaticSourceRoutingSwitch extends SourceRoutingSwitch {
                 // Retrieve ToR to which it is attached
                 SourceRoutingSwitch sourceTorDevice = (SourceRoutingSwitch) this.targetIdToOutputPort.get(sourceTor).getTargetDevice();
 
-                selectedPath = 
-                // Retrieve the src-ToR to dst-ToR path possibilities
-                possibilities = sourceTorDevice.getPathsList().get(destinationTor);
+                
+                // Retrieve the src-ToR to dst-ToR path possibilities, not needed for now
+                //possibilities = sourceTorDevice.getPathsList().get(destinationTor);
 
-                // Select a path out of all possibilities...
-                SourceRoutingPath orgPath = possibilities.get(packet.getHash(this.identifier) % possibilities.size());
-
-                // ... and add the path to the selected path for its own local copy
-                selectedPath.addAll(orgPath);
+                
+                // right now all thats needed is a single path.
+                selectedPath.addAll(mRemoteRouter.getRoute(sourceTor, destinationTor));
 
             } else {
 
@@ -70,11 +69,10 @@ public class StaticSourceRoutingSwitch extends SourceRoutingSwitch {
             selectedPath.add(packet.getDestinationId());
 
         } else {
-
-            // If it is not extended, just use stored paths (all ToRs are servers themselves)
-            possibilities = destinationToPaths.get(packet.getDestinationId());
-            selectedPath = possibilities.get(packet.getHash(this.identifier) % possibilities.size());
-
+        	
+        	// right now all thats needed is a single path.
+        	selectedPath = new SourceRoutingPath();
+        	selectedPath.addAll(mRemoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId()));
         }
         
         // Create encapsulation to propagate through the network
