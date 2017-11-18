@@ -109,6 +109,8 @@ class InfrastructureSelector {
 
             case "source_routing_switch":
                 return new SourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+            case "static_source_routing_switch":
+                return new SourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
 
             case "ecmp_then_source_routing_switch":
                 return new EcmpThenSourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());

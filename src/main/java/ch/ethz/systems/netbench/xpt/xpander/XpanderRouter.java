@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.run.routing.RemoteRoutingController;
+import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.VariableGraph;
@@ -25,9 +26,11 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 	
 	@Override
-	public Path getRoute(int source,int dest){ 
+	public SourceRoutingPath getRoute(int source,int dest){ 
 		DijkstraShortestPathAlg dijkstra = new DijkstraShortestPathAlg(mG);
-		Path p = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
+		
+		Path p  = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
+		SourceRoutingPath srp = new SourceRoutingPath(p);
 		List<Vertex> pathAsList = p.getVertexList();
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){
@@ -35,7 +38,7 @@ public class XpanderRouter extends RemoteRoutingController{
 			curr = pathAsList.get(i).getId();
 		}
 		mPaths.add(p);
-		return p;
+		return srp;
 		
 	}
 }

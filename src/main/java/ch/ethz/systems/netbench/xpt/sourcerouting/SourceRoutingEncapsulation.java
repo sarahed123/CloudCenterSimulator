@@ -22,7 +22,7 @@ public class SourceRoutingEncapsulation extends IpPacket {
 
     public int nextHop() {
         currentStep++;
-        return path.get(currentStep);
+        return path.getVertexList().get(currentStep).getId();
     }
 
     @Override

@@ -8,11 +8,11 @@ import ch.ethz.systems.netbench.core.run.infrastructure.NetworkDeviceGenerator;
 
 public class SourceRoutingSwitchGenerator extends NetworkDeviceGenerator {
 
-    private final int numNodes;
-    private final IntermediaryGenerator intermediaryGenerator;
+    protected final int numNodes;
+    protected final IntermediaryGenerator intermediaryGenerator;
 
     public SourceRoutingSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes) {
-        SimulationLogger.logInfo("Network device", "SOURCE_ROUTING_SWITCH(numNodes=" + numNodes + ")");
+        log();
 
         // Standard fields
         this.numNodes = numNodes;
@@ -23,6 +23,10 @@ public class SourceRoutingSwitchGenerator extends NetworkDeviceGenerator {
     @Override
     public NetworkDevice generate(int identifier) {
         return this.generate(identifier, null);
+    }
+    
+    protected void log(){
+    	SimulationLogger.logInfo("Network device", "SOURCE_ROUTING_SWITCH(numNodes=" + numNodes + ")");
     }
 
     @Override

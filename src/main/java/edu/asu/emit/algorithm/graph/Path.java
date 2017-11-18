@@ -33,6 +33,8 @@ package edu.asu.emit.algorithm.graph;
 import java.util.List;
 import java.util.Vector;
 
+import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
+
 /**
  * The class defines a path in graph.
  * 
@@ -97,6 +99,21 @@ public class Path implements BaseElementWithWeight {
      */
 	public List<Vertex> getVertexList() {
 		return vertexList;
+	}
+	
+	public void addAll(Path orgPath) {
+		getVertexList().addAll(orgPath.getVertexList());
+		
+	}
+	
+	public void add(int sourceTor) {
+		getVertexList().add(new Vertex(sourceTor));
+		
+	}
+	
+	public void add(int index,int sourceTor) {
+		getVertexList().add(index,new Vertex(sourceTor));
+		
 	}
 	
 	@Override

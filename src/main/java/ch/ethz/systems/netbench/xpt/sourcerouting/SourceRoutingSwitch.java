@@ -144,23 +144,23 @@ public class SourceRoutingSwitch extends NetworkDevice {
     void addPathToDestination(int destinationId, SourceRoutingPath path) {
 
         // Check for a valid path length
-        if (path.size() < 2) {
+        if (path.getVertexList().size() < 2) {
             throw new IllegalArgumentException("Cannot add a path of zero or one length (must have source and destination included).");
         }
 
         // Check for not possible next hop identifier
-        if (!connectedTo.contains(path.get(1))) {
-            throw new IllegalArgumentException("Cannot add path with source hop to a network device to which it is not connected (" + path.get(1) + ")");
+        if (!connectedTo.contains(path.getVertexList().get(1).getId())) {
+            throw new IllegalArgumentException("Cannot add path with source hop to a network device to which it is not connected (" + path.getVertexList().get(1) + ")");
         }
 
         // Source incorrect
-        if (path.get(0) != this.getIdentifier()) {
-            throw new IllegalArgumentException("First node on path should be this identifier (expected " + this.getIdentifier() + ", received " + path.get(0) + ")");
+        if (path.getVertexList().get(0).getId() != this.getIdentifier()) {
+            throw new IllegalArgumentException("First node on path should be this identifier (expected " + this.getIdentifier() + ", received " +path.getVertexList().get(0).getId() + ")");
         }
 
         // Destination incorrect
-        if (path.get(path.size() - 1) != destinationId) {
-            throw new IllegalArgumentException("Last node on path should be destination (expected " + destinationId + ", received " + path.get(path.size() - 1) + ")");
+        if (path.getVertexList().get(path.getVertexList().size()-1).getId() != destinationId) {
+            throw new IllegalArgumentException("Last node on path should be destination (expected " + destinationId + ", received " + path.getVertexList().get(path.getVertexList().size()-1).getId() + ")");
         }
 
         // To itself
