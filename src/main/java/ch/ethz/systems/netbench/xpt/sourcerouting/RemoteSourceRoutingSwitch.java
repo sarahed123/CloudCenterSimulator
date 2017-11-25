@@ -10,9 +10,9 @@ import ch.ethz.systems.netbench.core.run.routing.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import edu.asu.emit.algorithm.graph.Vertex;
 
-public class StaticSourceRoutingSwitch extends SourceRoutingSwitch {
+public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
 	RemoteRoutingController mRemoteRouter;
-	StaticSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
+	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
 		super(identifier, transportLayer, n, intermediary);
 		mRemoteRouter = RemoteRoutingController.getInstance();
 	}

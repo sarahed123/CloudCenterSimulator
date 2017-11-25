@@ -143,7 +143,9 @@ public class SourceRoutingSwitchExtendedTest {
 
     private SourceRoutingPath makePath(Integer[] path) {
         SourceRoutingPath p = new SourceRoutingPath();
-        Collections.addAll(p, path);
+        for(int i=0; i<path.length;i++) {
+        	p.add(path[i]);
+        }
         return p;
     }
 
