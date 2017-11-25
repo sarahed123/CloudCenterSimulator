@@ -11,7 +11,7 @@ import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import edu.asu.emit.algorithm.graph.Vertex;
 
 public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
-	RemoteRoutingController mRemoteRouter;
+	private RemoteRoutingController mRemoteRouter;
 	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
 		super(identifier, transportLayer, n, intermediary);
 		mRemoteRouter = RemoteRoutingController.getInstance();
@@ -80,7 +80,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
                 packet,
                 selectedPath
         );
-        
+
 	    // Send to network
         receive(encapsulation);
 

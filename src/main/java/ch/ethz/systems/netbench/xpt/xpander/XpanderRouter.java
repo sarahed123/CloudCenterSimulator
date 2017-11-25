@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.run.routing.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.VariableGraph;
@@ -21,7 +22,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	private VariableGraph mG;
 	
 	public XpanderRouter(){
-		mG = (VariableGraph) Simulator.getConfiguration().getGraph();
+		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
 		mPaths = new HashSet<Path>();
 	}
 	
@@ -32,6 +33,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		Path p  = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
 		SourceRoutingPath srp = new SourceRoutingPath(p);
 		List<Vertex> pathAsList = p.getVertexList();
+		if(pathAsList.size()==0){
+			throw new NoPathException(source,dest);
+		}
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){
 			mG.deleteEdge(new ImmutablePair<Integer, Integer>(curr, pathAsList.get(i).getId()));
