@@ -170,10 +170,10 @@ public class EcmpThenKspNoShortestRouting extends RoutingPopulator {
                             }
 
                             if (shortestPathLength == -1) {
-                                shortestPathLength = path.size();
+                                shortestPathLength = path.getVertexList().size();
                             }
 
-                            if (path.size() > shortestPathLength) {
+                            if (path.getVertexList().size() > shortestPathLength) {
 
                                 // Write away path line
                                 String temp = pathLine.substring(0, pathLine.length() - 1); // Remove last -

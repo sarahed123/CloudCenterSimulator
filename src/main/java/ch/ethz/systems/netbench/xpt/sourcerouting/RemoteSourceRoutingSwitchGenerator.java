@@ -5,10 +5,10 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.infrastructure.IntermediaryGenerator;
 
-public class StaticSourceRoutingSwitchGenerator extends
+public class RemoteSourceRoutingSwitchGenerator extends
 		SourceRoutingSwitchGenerator {
 
-	public StaticSourceRoutingSwitchGenerator(
+	public RemoteSourceRoutingSwitchGenerator(
 			IntermediaryGenerator intermediaryGenerator, int numNodes) {
 		super(intermediaryGenerator, numNodes);
 		// TODO Auto-generated constructor stub
@@ -20,7 +20,7 @@ public class StaticSourceRoutingSwitchGenerator extends
     }
 	
 	public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new StaticSourceRoutingSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier));
+        return new RemoteSourceRoutingSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier));
     }
 
 }

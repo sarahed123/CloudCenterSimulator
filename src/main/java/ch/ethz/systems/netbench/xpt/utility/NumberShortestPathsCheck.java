@@ -40,7 +40,7 @@ public class NumberShortestPathsCheck {
                     // Find shortest paths as many wanted
                     YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(graph, graph.getVertex(i), graph.getVertex(j));
                     int shortestPathLength = -1;
-                    List<List<Pair<Integer, Integer>>> paths  = new ArrayList<>();
+                    List<List<Pair<Vertex, Vertex>>> paths  = new ArrayList<>();
 
                     while(alg.hasNext())
                     {
@@ -51,16 +51,16 @@ public class NumberShortestPathsCheck {
                             path.add(v.getId());
                         }
 
-                        List<Pair<Integer, Integer>> edgePath = new ArrayList<>();
-                        for (int b = 1; b < path.size(); b++) {
-                            edgePath.add(new ImmutablePair<>(path.get(b - 1), path.get(b)));
+                        List<Pair<Vertex, Vertex>> edgePath = new ArrayList<>();
+                        for (int b = 1; b < path.getVertexList().size(); b++) {
+                            edgePath.add(new ImmutablePair<>(path.getVertexList().get(b - 1), path.getVertexList().get(b)));
                         }
 
                         if (shortestPathLength == -1) {
-                            shortestPathLength = path.size() - 1;
+                            shortestPathLength = path.getVertexList().size() - 1;
                         }
 
-                        if (path.size() - 1 != shortestPathLength) {
+                        if (path.getVertexList().size() - 1 != shortestPathLength) {
                             break;
                         } else {
                             paths.add(edgePath);
@@ -71,13 +71,13 @@ public class NumberShortestPathsCheck {
                     System.out.println(paths.size());
                     System.out.println(paths);
 
-                    List<List<Pair<Integer, Integer>>> nonConflictingPaths  = new ArrayList<>();
-                    for (List<Pair<Integer, Integer>> p1 : paths) {
+                    List<List<Pair<Vertex, Vertex>>> nonConflictingPaths  = new ArrayList<>();
+                    for (List<Pair<Vertex, Vertex>> p1 : paths) {
                         assert(p1.size() == shortestPathLength);
 
                         boolean conflict = false;
-                        for (List<Pair<Integer, Integer>> p2 : nonConflictingPaths) {
-                            for (Pair<Integer, Integer> e : p2) {
+                        for (List<Pair<Vertex, Vertex>> p2 : nonConflictingPaths) {
+                            for (Pair<Vertex, Vertex> e : p2) {
                                 if (p1.contains(e)) {
                                     conflict = true;
                                 }
