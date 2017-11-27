@@ -18,8 +18,7 @@ import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 
 public class XpanderRouter extends RemoteRoutingController{
-	private HashSet<Path> mPaths;
-	private VariableGraph mG;
+
 	
 	public XpanderRouter(){
 		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
@@ -44,5 +43,17 @@ public class XpanderRouter extends RemoteRoutingController{
 		mPaths.add(p);
 		return srp;
 		
+	}
+	
+	public void reset(){
+		mG.recoverDeletedEdges();
+	}
+	
+	public void recoverPath(Path p){
+		for(int i=0; i< p.getVertexList().size() - 1;i++){
+			Vertex v = p.getVertexList().get(i);
+			Vertex u = p.getVertexList().get(i+1);
+			mG.recoverDeletedEdge(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
+		}
 	}
 }
