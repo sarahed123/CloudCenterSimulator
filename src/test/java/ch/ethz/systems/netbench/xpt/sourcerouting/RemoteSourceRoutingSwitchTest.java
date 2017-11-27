@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.BufferedWriter;
@@ -40,7 +41,7 @@ public class RemoteSourceRoutingSwitchTest {
      *     3---4
      */
     private TestTopologyPortsConstruction topology;
-
+    private RemoteRoutingController remoteRouter;
     @Mock()
     private TcpPacket packet;
 
@@ -64,7 +65,8 @@ public class RemoteSourceRoutingSwitchTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-        
+        RoutingSelector.selectPopulator(null);
+        this.remoteRouter = RemoteRoutingController.getInstance();
         RoutingSelector.selectPopulator(null);
         topology = new TestTopologyPortsConstruction(
                 "0-1,1-2,2-4,4-3,3-1"
@@ -116,19 +118,23 @@ public class RemoteSourceRoutingSwitchTest {
         TransportLayer transportLayer = mock(TransportLayer.class);
 
         // Create device 4 with ports 4->2 and 4->3
-        SourceRoutingSwitch device = new SourceRoutingSwitch(4, transportLayer, 5, new IdentityFlowletIntermediary());
+        RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(4, transportLayer, 5, new IdentityFlowletIntermediary());
         device.addConnection(topology.getPort(4, 2));
         device.addConnection(topology.getPort(4, 3));
-
+        
+        
+        // Add path to a certain destination - not necessary because the remote
+        // controller will hold the path.
         // Add path from 1 to 4
-        SourceRoutingPath path = new SourceRoutingPath();
+        /*SourceRoutingPath path = new SourceRoutingPath();
         path.add(1);
         path.add(3);
-        path.add(4);
+        path.add(4);*/
 
         // Create encapsulation and hop it two times (such that it "arrives" at 4)
         when(packet.getDestinationId()).thenReturn(4);
-        SourceRoutingEncapsulation encapsulation = new SourceRoutingEncapsulation(packet, path);
+        SourceRoutingPath srp = remoteRouter.getRoute(1, 4);
+        SourceRoutingEncapsulation encapsulation = new SourceRoutingEncapsulation(packet, srp);
         encapsulation.nextHop();
         encapsulation.nextHop();
 
@@ -143,123 +149,22 @@ public class RemoteSourceRoutingSwitchTest {
     }
 
     @Test
-    public void testAddPathToDestination() {
+    public void testPacketArrival() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary());
-        device.addConnection(topology.getPort(1, 0));
-        device.addConnection(topology.getPort(1, 2));
-        device.addConnection(topology.getPort(1, 3));
+        RemoteSourceRoutingSwitch source = new RemoteSourceRoutingSwitch(0, null, 5, new IdentityFlowletIntermediary());
+        source.addConnection(topology.getPort(0, 1));
+        
+        RemoteSourceRoutingSwitch target = Mockito.spy(new RemoteSourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary()));
+        target.addConnection(topology.getPort(1, 0));
 
-        // Correct addition
-        device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-
-        // Duplicate path
-        boolean thrown = false;
-        try {
-            device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-        // Empty path
-        thrown = false;
-        try {
-            device.addPathToDestination(4, makePath(new Integer[]{}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-        // Non-existing first hop
-        thrown = false;
-        try {
-            device.addPathToDestination(4, makePath(new Integer[]{1, 4, 4}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-        // Source incorrect
-        thrown = false;
-        try {
-            device.addPathToDestination(4, makePath(new Integer[]{4, 2, 4}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-        // Destination incorrect
-        thrown = false;
-        try {
-            device.addPathToDestination(4, makePath(new Integer[]{1, 2, 1}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-        // To itself (I)
-        thrown = false;
-        try {
-            device.addPathToDestination(1, makePath(new Integer[]{1, 2, 1}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-        // To itself
-        thrown = false;
-        try {
-            device.addPathToDestination(1, makePath(new Integer[]{1, 2, 1}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
+        when(packet.getDestinationId()).thenReturn(1);
+        
+        source.receiveFromTransportLayer(packet);
+        verify(target,times(1)).receive(packet);
 
     }
 
-    @Test
-    public void testAllowingDuplicatePaths() {
-
-        // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary());
-        device.addConnection(topology.getPort(1, 0));
-        device.addConnection(topology.getPort(1, 2));
-        device.addConnection(topology.getPort(1, 3));
-
-        // Correct addition
-        device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-
-        // Duplicate path should be skipped if property is set
-        Simulator.getConfiguration().setProperty("allow_source_routing_skip_duplicate_paths", "true");
-        device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-
-        // Duplicate path should FAIL after skip duplicate property disabled
-        Simulator.getConfiguration().setProperty("allow_source_routing_skip_duplicate_paths", "false");
-        boolean thrown = false;
-        try {
-            device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-        // Duplicate path should be added if property is set
-        Simulator.getConfiguration().setProperty("allow_source_routing_add_duplicate_paths", "true");
-        device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-
-        // Duplicate path should FAIL after add duplicate property disabled
-        Simulator.getConfiguration().setProperty("allow_source_routing_add_duplicate_paths", "false");
-        thrown = false;
-        try {
-            device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-        } catch (IllegalArgumentException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
-
-    }
 
     @Test
     public void testToString() {
@@ -270,23 +175,9 @@ public class RemoteSourceRoutingSwitchTest {
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
 
-        // Correct addition
-        device.addPathToDestination(0, makePath(new Integer[]{1, 0}));
-        device.addPathToDestination(2, makePath(new Integer[]{1, 2}));
-        device.addPathToDestination(3, makePath(new Integer[]{1, 3}));
-        device.addPathToDestination(4, makePath(new Integer[]{1, 2, 4}));
-        device.addPathToDestination(4, makePath(new Integer[]{1, 3, 4}));
-
         System.out.println(device.toString());
 
     }
 
-    private SourceRoutingPath makePath(Integer[] path) {
-        SourceRoutingPath p = new SourceRoutingPath();
-        for(int i=0; i<path.length;i++) {
-        	p.add(path[i]);
-        }
-        return p;
-    }
 
 }

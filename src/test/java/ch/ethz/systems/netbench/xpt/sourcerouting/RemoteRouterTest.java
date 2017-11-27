@@ -85,10 +85,12 @@ public class RemoteRouterTest {
     
 
     @Test
-    public void testBasicPath() {
+    public void testAddRemovePaths() {
+    	SourceRoutingPath srp1 = remoteRouter.getRoute(1, 4);
+    	SourceRoutingPath srp2 = remoteRouter.getRoute(1, 4);
+    	System.out.println("path one " + srp1.toString());
+    	System.out.println("path two " + srp2.toString());
     	
-    	System.out.println(remoteRouter.getRoute(1, 4).toString());
-    	System.out.println(remoteRouter.getRoute(1, 4).toString());
     	boolean thrown = false;
     	try{
     		System.out.println(remoteRouter.getRoute(1, 4).toString());
@@ -97,7 +99,24 @@ public class RemoteRouterTest {
     		thrown = true;
     	}
     	assert(thrown);
-    	
+    	System.out.println("recovering path one");
+    	remoteRouter.recoverPath(srp1);
+    	srp1 = remoteRouter.getRoute(1, 4);
+    	System.out.println("path one " + srp1.toString());
+    	thrown = false;
+    	try{
+    		System.out.println(remoteRouter.getRoute(1, 4).toString());
+    		
+    	}catch(NoPathException e){
+    		thrown = true;
+    	}
+    	assert(thrown);
+    	System.out.println("reseting all paths");
+    	remoteRouter.reset();
+    	srp1 = remoteRouter.getRoute(1, 4);
+    	srp2 = remoteRouter.getRoute(1, 4);
+    	System.out.println("path one " + srp1.toString());
+    	System.out.println("path two " + srp2.toString());
     	
     }
 

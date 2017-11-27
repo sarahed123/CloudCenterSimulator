@@ -85,5 +85,17 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         receive(encapsulation);
 
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("RemoteSourceRoutingSwitch<id=");
+        builder.append(getIdentifier());
+        builder.append(", connected=");
+        builder.append(connectedTo);
+        builder.append(", routing: ");
+        builder.append(">");
+        return builder.toString();
+    }
 
 }

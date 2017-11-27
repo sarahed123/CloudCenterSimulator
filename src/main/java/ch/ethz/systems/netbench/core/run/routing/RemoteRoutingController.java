@@ -1,12 +1,16 @@
 package ch.ethz.systems.netbench.core.run.routing;
 
+import java.util.HashSet;
+
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
+import edu.asu.emit.algorithm.graph.VariableGraph;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
 	private static RemoteRoutingController mInstance;
-
+	protected HashSet<Path> mPaths;
+	protected VariableGraph mG;
 	public static RemoteRoutingController getInstance() {
 		
 		return mInstance;
@@ -22,12 +26,30 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		}
 	}
 
+	/**
+	 * does nothting here
+	 */
 	@Override
 	public void populateRoutingTables() {
 		
 		
 	}
-	
+	/**
+	 * gets a route from source to dest, removing the corresponding
+	 * edges from the graph
+	 * @param source
+	 * @param dest
+	 */
 	public abstract SourceRoutingPath getRoute(int source,int dest);
+	
+	/**
+	 * resets the graph to its original state
+	 */
+	public abstract void reset();
 
+	/**
+	 * recover a path, returning all its edges to the graph
+	 * @param p the path to recover
+	 */
+	public abstract void recoverPath(Path p);
 }
