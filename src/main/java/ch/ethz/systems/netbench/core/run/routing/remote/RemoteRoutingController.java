@@ -1,7 +1,9 @@
-package ch.ethz.systems.netbench.core.run.routing;
+package ch.ethz.systems.netbench.core.run.routing.remote;
 
 import java.util.HashSet;
 
+import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
+import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
@@ -39,8 +41,10 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * edges from the graph
 	 * @param source
 	 * @param dest
+	 * @return 
+	 * @parma the switch that to return the path to.
 	 */
-	public abstract SourceRoutingPath getRoute(int source,int dest);
+	public abstract SourceRoutingPath getRoute(int source,int dest, RemoteSourceRoutingSwitch s);
 	
 	/**
 	 * resets the graph to its original state

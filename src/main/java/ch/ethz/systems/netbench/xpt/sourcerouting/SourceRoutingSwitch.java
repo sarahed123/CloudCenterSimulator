@@ -141,7 +141,7 @@ public class SourceRoutingSwitch extends NetworkDevice {
      *                          argument exception. Path must be of non-zero length.
      *                          Path must include this network's identifier as well as the first entry.
      */
-    void addPathToDestination(int destinationId, SourceRoutingPath path) {
+    protected void addPathToDestination(int destinationId, SourceRoutingPath path) {
 
         // Check for a valid path length
         if (path.getVertexList().size() < 2) {
