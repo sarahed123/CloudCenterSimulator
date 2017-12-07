@@ -6,7 +6,7 @@ import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
-import ch.ethz.systems.netbench.core.run.routing.RemoteRoutingController;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import edu.asu.emit.algorithm.graph.Vertex;
 
@@ -55,7 +55,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
 
                 
                 // right now all thats needed is a single path.
-                selectedPath.addAll(mRemoteRouter.getRoute(sourceTor, destinationTor));
+                selectedPath.addAll(mRemoteRouter.getRoute(sourceTor, destinationTor,this));
 
             } else {
 
@@ -72,7 +72,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         	
         	// right now all thats needed is a single path.
         	selectedPath = new SourceRoutingPath();
-        	selectedPath.addAll(mRemoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId()));
+        	selectedPath.addAll(mRemoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId(),this));
         }
         
         // Create encapsulation to propagate through the network
