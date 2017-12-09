@@ -44,7 +44,7 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 public class Path implements BaseElementWithWeight {
 
 	// List of vertices in the path
-	private final List<Vertex> vertexList;
+	protected final List<Vertex> vertexList;
 
     // Total path weight
 	private long weight;

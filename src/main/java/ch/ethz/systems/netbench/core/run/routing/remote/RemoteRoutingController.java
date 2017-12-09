@@ -1,6 +1,9 @@
 package ch.ethz.systems.netbench.core.run.routing.remote;
 
+import java.util.HashMap;
 import java.util.HashSet;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitch;
@@ -11,7 +14,7 @@ import edu.asu.emit.algorithm.graph.VariableGraph;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
 	private static RemoteRoutingController mInstance;
-	protected HashSet<Path> mPaths;
+	protected HashMap<ImmutablePair<Integer,Integer>,SourceRoutingPath> mPaths;
 	protected VariableGraph mG;
 	public static RemoteRoutingController getInstance() {
 		
@@ -56,4 +59,15 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * @param p the path to recover
 	 */
 	public abstract void recoverPath(Path p);
+	
+	/**
+	 * public for testing but should be a private method to handle path switching
+	 * @param src the id of the switch that will get the new path
+	 * @param dst the destination of the path
+	 * @param old the  old path to switch from
+	 * @param newPath the new path
+	 */
+	protected void switchPath(int src,int dst,SourceRoutingPath old, SourceRoutingPath newPath) {
+		
+	}
 }

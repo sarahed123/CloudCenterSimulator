@@ -39,7 +39,6 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
             // Determine source and destination ToR to which the source and destination servers are attached
             int sourceTor = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getSourceId());
             int destinationTor = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
-
             // Create path
             selectedPath = new SourceRoutingPath();
 
@@ -74,7 +73,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         	selectedPath = new SourceRoutingPath();
         	selectedPath.addAll(mRemoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId(),this));
         }
-        
+        addPathToDestination(packet.getDestinationId(), selectedPath);
         // Create encapsulation to propagate through the network
         SourceRoutingEncapsulation encapsulation = new SourceRoutingEncapsulation(
                 packet,
@@ -84,6 +83,12 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
 	    // Send to network
         receive(encapsulation);
 
+    }
+    
+    @Override
+    public void switchPathToDestination(int destinationId, SourceRoutingPath oldPath, SourceRoutingPath newPath) {
+    	super.switchPathToDestination(destinationId, oldPath, newPath);
+    	mRemoteRouter.recoverPath(oldPath);
     }
     
     @Override
@@ -97,5 +102,6 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         builder.append(">");
         return builder.toString();
     }
+
 
 }

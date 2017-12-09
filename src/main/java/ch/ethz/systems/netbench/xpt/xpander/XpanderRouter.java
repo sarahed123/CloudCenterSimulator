@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.xpander;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	
 	public XpanderRouter(){
 		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
-		mPaths = new HashSet<Path>();
+		mPaths = new HashMap<ImmutablePair<Integer,Integer>,SourceRoutingPath>();
 	}
 	
 	@Override
@@ -31,7 +32,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		DijkstraShortestPathAlg dijkstra = new DijkstraShortestPathAlg(mG);
 		
 		Path p  = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
-		SourceRoutingPath srp = new SourceRoutingPath(p);
+		SourceRoutingPath srp = new SourceRoutingPath(p,s);
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
 			throw new NoPathException(source,dest);
@@ -41,7 +42,7 @@ public class XpanderRouter extends RemoteRoutingController{
 			mG.deleteEdge(new ImmutablePair<Integer, Integer>(curr, pathAsList.get(i).getId()));
 			curr = pathAsList.get(i).getId();
 		}
-		mPaths.add(p);
+		mPaths.put(new ImmutablePair<Integer, Integer>(source, dest), srp);
 		return srp;
 		
 	}
@@ -55,6 +56,13 @@ public class XpanderRouter extends RemoteRoutingController{
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);
 			mG.recoverDeletedEdge(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
+			
 		}
+	}
+	
+	@Override
+	protected void switchPath(int src,int dst, SourceRoutingPath oldPath, SourceRoutingPath newPath) {
+		
+		newPath.getSourceSwitch().switchPathToDestination(dst, oldPath, newPath);
 	}
 }
