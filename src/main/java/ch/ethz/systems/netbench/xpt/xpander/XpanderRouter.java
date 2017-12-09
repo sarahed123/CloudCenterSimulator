@@ -32,6 +32,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		DijkstraShortestPathAlg dijkstra = new DijkstraShortestPathAlg(mG);
 		
 		Path p  = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
+		
 		SourceRoutingPath srp = new SourceRoutingPath(p,s);
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
@@ -52,6 +53,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 	
 	public void recoverPath(Path p){
+		
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);

@@ -210,4 +210,20 @@ public class Graph implements BaseGraph {
         }
     }
     
+    @Override
+    public String toString() {
+    	String g = "";
+    	for(Vertex v: vertexList) {
+    		for(Vertex u : vertexList) {
+    			try {
+    				g += v.getId() + " " + u.getId() + " " + getEdgeWeight(v, u) + "\n";
+    			}catch (Exception e) {
+					continue;
+				}
+    		}
+    	}
+		return g;
+    	
+    }
+    
 }

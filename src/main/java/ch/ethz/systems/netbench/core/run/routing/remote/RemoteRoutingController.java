@@ -5,6 +5,8 @@ import java.util.HashSet;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
@@ -17,17 +19,16 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	protected HashMap<ImmutablePair<Integer,Integer>,SourceRoutingPath> mPaths;
 	protected VariableGraph mG;
 	public static RemoteRoutingController getInstance() {
-		
 		return mInstance;
 	}
 	
-	public static void initRemoteRouting(String type){
+	public static void initRemoteRouting(String type, String property_type){
 		switch(type) {
 		case "Xpander":
 			mInstance = new XpanderRouter();
 			break;
 		default:
-			mInstance = null;
+			throw new PropertyValueInvalidException(Simulator.getConfiguration(),property_type);
 		}
 	}
 
