@@ -37,14 +37,5 @@ public class SourceRoutingPath extends Path {
 		return id;
 	}
 	
-	@Override
-	public boolean equals(Object o) {
-		SourceRoutingPath other = (SourceRoutingPath) o;
-		if(other.getIdentifier()!=getIdentifier()) {
-			return false;
-		}
-		return true;
-		
-	}
 
 }
