@@ -143,7 +143,48 @@ public class SourceRoutingSwitch extends NetworkDevice {
      */
     protected void addPathToDestination(int destinationId, SourceRoutingPath path) {
 
-        // Check for a valid path length
+        verifyPath(path,destinationId);
+
+        // Check for duplicate
+        List<SourceRoutingPath> current = this.destinationToPaths.get(destinationId);
+        if (current.contains(path)) {
+            if (Simulator.getConfiguration().getBooleanPropertyWithDefault("allow_source_routing_skip_duplicate_paths", false)) {
+                System.out.println("For (" + this.getIdentifier() + "->" + destinationId + ") skipped duplicate path : " + path);
+                return;
+            } else if (Simulator.getConfiguration().getBooleanPropertyWithDefault("allow_source_routing_add_duplicate_paths", false)) {
+                System.out.println("For (" + this.getIdentifier() + "->" + destinationId + ") added duplicate path : " + path);
+            } else {
+                throw new IllegalArgumentException("Cannot add a duplicate path (" + path + ")");
+            }
+        }
+
+        // Add to current ones
+        current.add(path);
+
+    }
+    
+    
+    /**
+     * switches a path to the destination by the oldpath id
+     * @param destinationId the destination device id
+     * @param oldPath the oldpath to switch from
+     * @param newPath the new path to set
+     */
+    public void switchPathToDestination(int destinationId, SourceRoutingPath oldPath, SourceRoutingPath newPath) {
+    	verifyPath(newPath,destinationId);
+    	List<SourceRoutingPath> current = this.destinationToPaths.get(destinationId);
+    	for(int i=0; i<current.size();i++) {
+    		if(current.get(i).getIdentifier()==oldPath.getIdentifier()) {
+    			current.set(i, newPath);
+    			
+    			return;
+    		}
+    	}
+    	throw new IllegalArgumentException("Couldnt switch paths, old path not found");
+    }
+
+    private void verifyPath(SourceRoutingPath path, int destinationId) {
+    	// Check for a valid path length
         if (path.getVertexList().size() < 2) {
             throw new IllegalArgumentException("Cannot add a path of zero or one length (must have source and destination included).");
         }
@@ -167,26 +208,10 @@ public class SourceRoutingSwitch extends NetworkDevice {
         if (this.getIdentifier() == destinationId) {
             throw new IllegalArgumentException("Cannot add a path going to itself (" + this.getIdentifier() + ")");
         }
+		
+	}
 
-        // Check for duplicate
-        List<SourceRoutingPath> current = this.destinationToPaths.get(destinationId);
-        if (current.contains(path)) {
-            if (Simulator.getConfiguration().getBooleanPropertyWithDefault("allow_source_routing_skip_duplicate_paths", false)) {
-                System.out.println("For (" + this.getIdentifier() + "->" + destinationId + ") skipped duplicate path : " + path);
-                return;
-            } else if (Simulator.getConfiguration().getBooleanPropertyWithDefault("allow_source_routing_add_duplicate_paths", false)) {
-                System.out.println("For (" + this.getIdentifier() + "->" + destinationId + ") added duplicate path : " + path);
-            } else {
-                throw new IllegalArgumentException("Cannot add a duplicate path (" + path + ")");
-            }
-        }
-
-        // Add to current ones
-        current.add(path);
-
-    }
-
-    @Override
+	@Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("SourceRoutingSwitch<id=");

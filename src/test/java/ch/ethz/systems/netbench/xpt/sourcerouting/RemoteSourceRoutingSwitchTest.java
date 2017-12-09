@@ -67,7 +67,6 @@ public class RemoteSourceRoutingSwitchTest {
         ));
         RoutingSelector.selectPopulator(null);
         this.remoteRouter = RemoteRoutingController.getInstance();
-        RoutingSelector.selectPopulator(null);
         topology = new TestTopologyPortsConstruction(
                 "0-1,1-2,2-4,4-3,3-1"
         );
@@ -87,14 +86,6 @@ public class RemoteSourceRoutingSwitchTest {
         RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(0, null, 5, new IdentityFlowletIntermediary());
         device.addConnection(topology.getPort(0, 1));
 
-
-        // Add path to a certain destination - not necessary because the remote
-        // controller will hold the path.
-        /*SourceRoutingPath path = new SourceRoutingPath();
-        path.add(1);
-        path.add(3);
-        path.add(4);
-        device.addPathToDestination(4, path);*/
 
         // Initialize packet for that destination
         when(packet.getDestinationId()).thenReturn(4);
@@ -122,18 +113,10 @@ public class RemoteSourceRoutingSwitchTest {
         device.addConnection(topology.getPort(4, 2));
         device.addConnection(topology.getPort(4, 3));
         
-        
-        // Add path to a certain destination - not necessary because the remote
-        // controller will hold the path.
-        // Add path from 1 to 4
-        /*SourceRoutingPath path = new SourceRoutingPath();
-        path.add(1);
-        path.add(3);
-        path.add(4);*/
 
         // Create encapsulation and hop it two times (such that it "arrives" at 4)
         when(packet.getDestinationId()).thenReturn(4);
-        SourceRoutingPath srp = remoteRouter.getRoute(1, 4);
+        SourceRoutingPath srp = remoteRouter.getRoute(1, 4,device);
         SourceRoutingEncapsulation encapsulation = new SourceRoutingEncapsulation(packet, srp);
         encapsulation.nextHop();
         encapsulation.nextHop();
@@ -149,22 +132,44 @@ public class RemoteSourceRoutingSwitchTest {
     }
 
     @Test
-    public void testPacketArrival() {
+    public void switchPath() {
+        TransportLayer transportLayer = mock(TransportLayer.class);
 
-        // Create device with ports
-        RemoteSourceRoutingSwitch source = new RemoteSourceRoutingSwitch(0, null, 5, new IdentityFlowletIntermediary());
-        source.addConnection(topology.getPort(0, 1));
+        // Create device 4 with ports 4->2 and 4->3
+        RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(1, transportLayer, 5, new IdentityFlowletIntermediary());
+        device.addConnection(topology.getPort(1, 2));
+        device.addConnection(topology.getPort(1, 3));
         
-        RemoteSourceRoutingSwitch target = Mockito.spy(new RemoteSourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary()));
-        target.addConnection(topology.getPort(1, 0));
 
-        when(packet.getDestinationId()).thenReturn(1);
+        // first checkk simple switch
+        SourceRoutingPath srp = remoteRouter.getRoute(1, 4,device);
+        System.out.println(srp.toString());
+        device.addPathToDestination(4, srp);
+        SourceRoutingPath old = device.getPathsList().get(4).get(0);
+        srp = remoteRouter.getRoute(1, 4,device);
+        System.out.println(srp.toString());
+        device.switchPathToDestination(4, old, srp);
+        assert(device.getPathsList().get(4).get(0).equals(srp));
         
-        source.receiveFromTransportLayer(packet);
-        verify(target,times(1)).receive(packet);
+        //check that an error is thrown on illegal switch
+        boolean thrown = false;
+        try {
+        	device.switchPathToDestination(4, old, srp);
+        }catch (IllegalArgumentException e) {
+			thrown = true;
+		}
+        assert(thrown);
+        
+        // test an additional switch
+        srp = remoteRouter.getRoute(1, 4,device);
+        System.out.println(srp.toString());
+        old = device.getPathsList().get(4).get(0);
 
+        device.switchPathToDestination(4, old, srp);
+        assert(device.getPathsList().get(4).get(0).equals(srp));
+        
+        
     }
-
 
     @Test
     public void testToString() {
