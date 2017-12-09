@@ -24,6 +24,7 @@ import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpTransportLayerG
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.EcmpThenSourceRoutingSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.voijslav.ports.BoundedPriorityOutputPortGenerator;
 import ch.ethz.systems.netbench.xpt.voijslav.ports.PriorityOutputPortGenerator;
@@ -109,8 +110,8 @@ class InfrastructureSelector {
 
             case "source_routing_switch":
                 return new SourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
-            case "static_source_routing_switch":
-                return new SourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+            case "remote_source_routing_switch":
+                return new RemoteSourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
 
             case "ecmp_then_source_routing_switch":
                 return new EcmpThenSourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());

@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.sourcerouting;
 
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import edu.asu.emit.algorithm.graph.Path;
 
 public class SourceRoutingEncapsulation extends IpPacket {
 
@@ -29,5 +30,10 @@ public class SourceRoutingEncapsulation extends IpPacket {
     public void markCongestionEncountered() {
         this.packet.markCongestionEncountered();
     }
+
+	public Path getPath() {
+		// TODO Auto-generated method stub
+		return path;
+	}
 
 }

@@ -8,15 +8,20 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Vertex;
 
 public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
-	private RemoteRoutingController mRemoteRouter;
+
 	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
 		super(identifier, transportLayer, n, intermediary);
-		mRemoteRouter = RemoteRoutingController.getInstance();
 	}
 	
+	@Override
+	protected void passToIntermediary(TcpPacket packet, Path path) {
+   	 	this.passToIntermediary(packet);
+		RemoteRoutingController.getInstance().recoverPath(path);
+	}
 	/**
      * Receives a TCP packet from the transport layer, which
      * is oblivious to the source routing happening underneath.
@@ -29,7 +34,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
     @Override
     public void receiveFromIntermediary(Packet genericPacket) {
         TcpPacket packet = (TcpPacket) genericPacket;
-        
+        RemoteRoutingController remoteRouter = RemoteRoutingController.getInstance();
 	    // Retrieve possible valiant paths to choose from
         List<SourceRoutingPath> possibilities;
         SourceRoutingPath selectedPath;
@@ -54,7 +59,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
 
                 
                 // right now all thats needed is a single path.
-                selectedPath.addAll(mRemoteRouter.getRoute(sourceTor, destinationTor,this));
+                selectedPath.addAll(remoteRouter.getRoute(sourceTor, destinationTor,this));
 
             } else {
 
@@ -71,7 +76,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         	
         	// right now all thats needed is a single path.
         	selectedPath = new SourceRoutingPath();
-        	selectedPath.addAll(mRemoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId(),this));
+        	selectedPath.addAll(remoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId(),this));
         }
         addPathToDestination(packet.getDestinationId(), selectedPath);
         // Create encapsulation to propagate through the network
@@ -88,7 +93,8 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
     @Override
     public void switchPathToDestination(int destinationId, SourceRoutingPath oldPath, SourceRoutingPath newPath) {
     	super.switchPathToDestination(destinationId, oldPath, newPath);
-    	mRemoteRouter.recoverPath(oldPath);
+    	RemoteRoutingController remoteRouter = RemoteRoutingController.getInstance();
+    	remoteRouter.recoverPath(oldPath);
     }
     
     @Override

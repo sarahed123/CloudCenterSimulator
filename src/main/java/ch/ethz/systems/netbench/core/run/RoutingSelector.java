@@ -64,7 +64,7 @@ public class RoutingSelector {
             }
             
             case "remote_routing_populator": {
-                RemoteRoutingController.initRemoteRouting(Simulator.getConfiguration().getPropertyOrFail("centered_routing_type"));
+                RemoteRoutingController.initRemoteRouting(Simulator.getConfiguration().getPropertyOrFail("centered_routing_type"),"centered_routing_type");
                 return RemoteRoutingController.getInstance();
             }
 
