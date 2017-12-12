@@ -6,18 +6,18 @@ import edu.asu.emit.algorithm.graph.Path;
 
 public class SourceRoutingEncapsulation extends IpPacket {
 
-    private final TcpPacket packet;
+    private final IpPacket packet;
     private final SourceRoutingPath path;
     private int currentStep;
 
-    public SourceRoutingEncapsulation(TcpPacket packet, SourceRoutingPath path) {
+    public SourceRoutingEncapsulation(IpPacket packet, SourceRoutingPath path) {
         super(packet.getFlowId(), packet.getSizeBit() - 480L, packet.getSourceId(), packet.getDestinationId(), packet.getTTL());
         this.packet = packet;
         this.path = path;
         this.currentStep = 0;
     }
 
-    public TcpPacket getPacket() {
+    public IpPacket getPacket() {
         return packet;
     }
 
@@ -31,7 +31,7 @@ public class SourceRoutingEncapsulation extends IpPacket {
         this.packet.markCongestionEncountered();
     }
 
-	public Path getPath() {
+	public SourceRoutingPath getPath() {
 		// TODO Auto-generated method stub
 		return path;
 	}

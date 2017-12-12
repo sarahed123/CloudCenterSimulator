@@ -116,7 +116,7 @@ public class RemoteSourceRoutingSwitchTest {
 
         // Create encapsulation and hop it two times (such that it "arrives" at 4)
         when(packet.getDestinationId()).thenReturn(4);
-        SourceRoutingPath srp = remoteRouter.getRoute(1, 4,device);
+        SourceRoutingPath srp = remoteRouter.getRoute(1, 4,device,0);
         SourceRoutingEncapsulation encapsulation = new SourceRoutingEncapsulation(packet, srp);
         encapsulation.nextHop();
         encapsulation.nextHop();
@@ -142,11 +142,11 @@ public class RemoteSourceRoutingSwitchTest {
         
 
         // first checkk simple switch
-        SourceRoutingPath srp = remoteRouter.getRoute(1, 4,device);
+        SourceRoutingPath srp = remoteRouter.getRoute(1, 4,device,0);
         System.out.println(srp.toString());
         device.addPathToDestination(4, srp);
         SourceRoutingPath old = device.getPathsList().get(4).get(0);
-        srp = remoteRouter.getRoute(1, 4,device);
+        srp = remoteRouter.getRoute(1, 4,device,0);
         System.out.println(srp.toString());
         device.switchPathToDestination(4, old, srp);
         assert(device.getPathsList().get(4).get(0).equals(srp));
@@ -161,7 +161,7 @@ public class RemoteSourceRoutingSwitchTest {
         assert(thrown);
         
         // test an additional switch
-        srp = remoteRouter.getRoute(1, 4,device);
+        srp = remoteRouter.getRoute(1, 4,device,0);
         System.out.println(srp.toString());
         old = device.getPathsList().get(4).get(0);
 
