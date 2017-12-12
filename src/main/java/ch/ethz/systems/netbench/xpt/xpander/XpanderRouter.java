@@ -28,12 +28,12 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 	
 	@Override
-	public SourceRoutingPath getRoute(int source,int dest,RemoteSourceRoutingSwitch s){ 
+	public SourceRoutingPath getRoute(int source,int dest,RemoteSourceRoutingSwitch s,long flowId){ 
 		DijkstraShortestPathAlg dijkstra = new DijkstraShortestPathAlg(mG);
 		
 		Path p  = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
 		
-		SourceRoutingPath srp = new SourceRoutingPath(p,s);
+		SourceRoutingPath srp = new SourceRoutingPath(p,s,flowId);
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
 			throw new NoPathException(source,dest);
@@ -52,8 +52,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		mG.recoverDeletedEdges();
 	}
 	
-	public void recoverPath(Path p){
-		
+	public void recoverPath(SourceRoutingPath p){
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);

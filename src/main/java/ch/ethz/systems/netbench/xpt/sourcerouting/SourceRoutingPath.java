@@ -9,30 +9,34 @@ import edu.asu.emit.algorithm.graph.Vertex;
 public class SourceRoutingPath extends Path {
 	SourceRoutingSwitch source;
 	private static int classCounter = 0;
-	private int id;
-	public SourceRoutingPath() {
+	private long id;
+	public SourceRoutingPath(long id) {
 		super(0);
-		this.id = classCounter;
+		this.id = id;
 		classCounter++;
 		// TODO Auto-generated constructor stub
 	}
     // No adaptations needed, it is only created for
     // semantic purpose.
 
-	public SourceRoutingPath(Path p,SourceRoutingSwitch source) {
+	public SourceRoutingPath(Path p,SourceRoutingSwitch source, long id) {
 		super(p.getVertexList(),0);
 		this.source = source;
-		this.id = classCounter;
+		this.id = id;
 		classCounter++;
 		// TODO Auto-generated constructor stub
 	}
 	
 
+	public SourceRoutingPath() {
+		super(0);
+	}
+
 	public SourceRoutingSwitch getSourceSwitch() {
 		return source;
 	}
 
-	public int getIdentifier() {
+	public long getIdentifier() {
 		// TODO Auto-generated method stub
 		return id;
 	}

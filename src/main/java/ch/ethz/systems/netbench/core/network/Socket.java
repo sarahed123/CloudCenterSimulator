@@ -52,13 +52,19 @@ public abstract class Socket {
 
         // Remove references to the socket after finish
         if (isAllFlowConfirmed()) {
-            transportLayer.cleanupSockets(flowId);
-            Simulator.registerFlowFinished(flowId);
+        	onAllFlowConfirmed();
+            
         }
 
     }
 
-    /**
+    protected void onAllFlowConfirmed() {
+    	transportLayer.cleanupSockets(flowId);
+        Simulator.registerFlowFinished(flowId);
+		
+	}
+
+	/**
      * Check whether all flow has been confirmed via {@link #confirmFlow(long) confirmFlow}.
      *
      * @return  True iff all flow has been confirmed

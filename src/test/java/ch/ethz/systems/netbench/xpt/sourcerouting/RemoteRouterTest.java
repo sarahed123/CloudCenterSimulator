@@ -87,14 +87,14 @@ public class RemoteRouterTest {
     @Test
     public void testAddRemovePaths() {
     	RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(0, null, 5, new IdentityFlowletIntermediary());
-    	SourceRoutingPath srp1 = remoteRouter.getRoute(1, 4,device);
-    	SourceRoutingPath srp2 = remoteRouter.getRoute(1, 4,device);
+    	SourceRoutingPath srp1 = remoteRouter.getRoute(1, 4,device,0);
+    	SourceRoutingPath srp2 = remoteRouter.getRoute(1, 4,device,0);
     	System.out.println("path one " + srp1.toString());
     	System.out.println("path two " + srp2.toString());
     	
     	boolean thrown = false;
     	try{
-    		System.out.println(remoteRouter.getRoute(1, 4,device).toString());
+    		System.out.println(remoteRouter.getRoute(1, 4,device,0).toString());
     		
     	}catch(NoPathException e){
     		thrown = true;
@@ -102,11 +102,11 @@ public class RemoteRouterTest {
     	assert(thrown);
     	System.out.println("recovering path one");
     	remoteRouter.recoverPath(srp1);
-    	srp1 = remoteRouter.getRoute(1, 4,device);
+    	srp1 = remoteRouter.getRoute(1, 4,device,0);
     	System.out.println("path one " + srp1.toString());
     	thrown = false;
     	try{
-    		System.out.println(remoteRouter.getRoute(1, 4,device).toString());
+    		System.out.println(remoteRouter.getRoute(1, 4,device,0).toString());
     		
     	}catch(NoPathException e){
     		thrown = true;
@@ -114,8 +114,8 @@ public class RemoteRouterTest {
     	assert(thrown);
     	System.out.println("reseting all paths");
     	remoteRouter.reset();
-    	srp1 = remoteRouter.getRoute(1, 4,device);
-    	srp2 = remoteRouter.getRoute(1, 4,device);
+    	srp1 = remoteRouter.getRoute(1, 4,device,0);
+    	srp2 = remoteRouter.getRoute(1, 4,device,0);
     	System.out.println("path one " + srp1.toString());
     	System.out.println("path two " + srp2.toString());
     	

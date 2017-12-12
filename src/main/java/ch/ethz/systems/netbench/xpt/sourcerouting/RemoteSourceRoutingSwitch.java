@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Vertex;
@@ -16,12 +17,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
 	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
 		super(identifier, transportLayer, n, intermediary);
 	}
-	
-	@Override
-	protected void passToIntermediary(TcpPacket packet, Path path) {
-   	 	this.passToIntermediary(packet);
-		RemoteRoutingController.getInstance().recoverPath(path);
-	}
+
 	/**
      * Receives a TCP packet from the transport layer, which
      * is oblivious to the source routing happening underneath.
@@ -33,10 +29,10 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
      */
     @Override
     public void receiveFromIntermediary(Packet genericPacket) {
-        TcpPacket packet = (TcpPacket) genericPacket;
+    	IpPacket packet = (IpPacket) genericPacket;
         RemoteRoutingController remoteRouter = RemoteRoutingController.getInstance();
 	    // Retrieve possible valiant paths to choose from
-        List<SourceRoutingPath> possibilities;
+
         SourceRoutingPath selectedPath;
 
         if (isWithinExtendedTopology) {
@@ -45,7 +41,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
             int sourceTor = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getSourceId());
             int destinationTor = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
             // Create path
-            selectedPath = new SourceRoutingPath();
+            selectedPath = new SourceRoutingPath(packet.getFlowId());
 
             // If the servers are not on the same ToR
             if (sourceTor != destinationTor) {
@@ -59,7 +55,7 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
 
                 
                 // right now all thats needed is a single path.
-                selectedPath.addAll(remoteRouter.getRoute(sourceTor, destinationTor,this));
+                selectedPath.addAll(remoteRouter.getRoute(sourceTor, destinationTor,this,packet.getFlowId()));
 
             } else {
 
@@ -75,9 +71,10 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         } else {
         	
         	// right now all thats needed is a single path.
-        	selectedPath = new SourceRoutingPath();
-        	selectedPath.addAll(remoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId(),this));
+        	selectedPath = remoteRouter.getRoute(packet.getSourceId(), packet.getDestinationId(),this,packet.getFlowId());
+
         }
+
         addPathToDestination(packet.getDestinationId(), selectedPath);
         // Create encapsulation to propagate through the network
         SourceRoutingEncapsulation encapsulation = new SourceRoutingEncapsulation(
@@ -108,6 +105,20 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         builder.append(">");
         return builder.toString();
     }
+
+	public void releasePath(int dest, long id) {
+		List<SourceRoutingPath> current = this.destinationToPaths.get(dest);
+    	for(int i=0; i<current.size();i++) {
+    		if(current.get(i).getIdentifier()==id) {
+    			RemoteRoutingController.getInstance().recoverPath(current.get(i));
+    			current.remove(i);
+    			
+    			return;
+    		}
+		
+    	}
+		
+	}
 
 
 }

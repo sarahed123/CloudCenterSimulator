@@ -27,7 +27,7 @@ public abstract class TransportLayer {
     private Map<Long, Socket> flowIdToSocket;
     private Set<Long> finishedFlowIds;
 
-    private NetworkDevice networkDevice;
+    protected NetworkDevice networkDevice;
     protected final int identifier;
 
     public TransportLayer(int identifier) {

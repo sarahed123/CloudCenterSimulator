@@ -45,10 +45,12 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * edges from the graph
 	 * @param source
 	 * @param dest
+	 * @param flowId the flow id
+	 * @param sourceSwitch the source switch for this path
 	 * @return 
 	 * @parma the switch that to return the path to.
 	 */
-	public abstract SourceRoutingPath getRoute(int source,int dest, RemoteSourceRoutingSwitch s);
+	public abstract SourceRoutingPath getRoute(int source,int dest, RemoteSourceRoutingSwitch sourceSwitch, long flowId);
 	
 	/**
 	 * resets the graph to its original state
@@ -59,7 +61,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * recover a path, returning all its edges to the graph
 	 * @param p the path to recover
 	 */
-	public abstract void recoverPath(Path p);
+	public abstract void recoverPath(SourceRoutingPath p);
 	
 	/**
 	 * public for testing but should be a private method to handle path switching

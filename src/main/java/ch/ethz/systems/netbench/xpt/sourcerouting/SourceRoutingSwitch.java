@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.sourcerouting;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.*;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import edu.asu.emit.algorithm.graph.Path;
 
@@ -11,7 +12,7 @@ import java.util.List;
 public class SourceRoutingSwitch extends NetworkDevice {
 
     // Routing table
-    private List<List<SourceRoutingPath>> destinationToPaths;
+    protected List<List<SourceRoutingPath>> destinationToPaths;
 
     protected boolean isWithinExtendedTopology;
 
@@ -42,7 +43,7 @@ public class SourceRoutingSwitch extends NetworkDevice {
         if (encapsulation.getDestinationId() == this.identifier) {
 
             // Hand to the underlying server
-            this.passToIntermediary(encapsulation.getPacket(),encapsulation.getPath()); // Will throw null-pointer if this network device does not have a server attached to it
+            this.passToIntermediary(encapsulation.getPacket()); // Will throw null-pointer if this network device does not have a server attached to it
             
         } else {
 
@@ -53,10 +54,7 @@ public class SourceRoutingSwitch extends NetworkDevice {
 
     }
 
-    protected void passToIntermediary(TcpPacket packet, Path path) {
-    	 this.passToIntermediary(packet);
-		
-	}
+
 
 	/**
      * Returns the paths list originating from this ToR switch.
@@ -91,7 +89,7 @@ public class SourceRoutingSwitch extends NetworkDevice {
             int destinationTor = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
 
             // Create path
-            selectedPath = new SourceRoutingPath();
+            selectedPath = new SourceRoutingPath(packet.getFlowId());
 
             // If the servers are not on the same ToR
             if (sourceTor != destinationTor) {
@@ -236,4 +234,15 @@ public class SourceRoutingSwitch extends NetworkDevice {
         return builder.toString();
     }
 
+	public void removePathToDestination(long l, int dest) {
+		List<SourceRoutingPath> current = this.destinationToPaths.get(dest);
+    	for(int i=0; i<current.size();i++) {
+    		if(current.get(i).getIdentifier()==l) {
+    			current.remove(i);
+    			
+    			return;
+    		}
+		
+    	}
+	}		
 }
