@@ -2,6 +2,9 @@ package ch.ethz.systems.netbench.core.network;
 
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,7 +27,7 @@ public abstract class TransportLayer {
     private static Map<Long, TransportLayer> flowIdToReceiver = new HashMap<>();
 
     // Map the flow identifier to the responsible socket
-    private Map<Long, Socket> flowIdToSocket;
+    protected Map<Long, Socket> flowIdToSocket;
     private Set<Long> finishedFlowIds;
 
     protected NetworkDevice networkDevice;
@@ -64,7 +67,7 @@ public abstract class TransportLayer {
      * @param genericPacket    Packet instance
      */
     public void receive(Packet genericPacket) {
-
+	    
         IpPacket packet = (IpPacket) genericPacket;
         Socket socket = flowIdToSocket.get(packet.getFlowId());
 
@@ -79,7 +82,6 @@ public abstract class TransportLayer {
         if (socket != null) {
             socket.handle(packet);
         }
-
     }
 
     /**

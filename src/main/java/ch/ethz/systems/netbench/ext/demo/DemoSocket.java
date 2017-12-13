@@ -33,7 +33,6 @@ public class DemoSocket extends Socket {
 
     @Override
     public void start() {
-
         // Send out single data packet at start
         transportLayer.send(new DemoPacket(flowId, getNextPayloadSizeByte(), sourceId, destinationId, 100, 0));
 
@@ -45,7 +44,7 @@ public class DemoSocket extends Socket {
 
         // As receiver, send an ACK packet back to acknowledge reception
         if (this.isReceiver()) {
-            transportLayer.send(new DemoPacket(flowId, 0, sourceId, destinationId, 100, packet.getDataSizeByte()));
+            receivePacket(packet);
 
         // As sender, save that flow is confirmed, and send another packet out
         } else {
@@ -56,13 +55,17 @@ public class DemoSocket extends Socket {
         }
 
     }
+    
+    protected void receivePacket(DemoPacket packet) {
+    	transportLayer.send(new DemoPacket(flowId, 0, sourceId, destinationId, 100, packet.getDataSizeByte()));
+    }
 
     /**
      * Determine the payload size of the next packet.
      *
      * @return  Next payload size in bytes
      */
-    private long getNextPayloadSizeByte() {
+    protected long getNextPayloadSizeByte() {
         return Math.min(MAX_PACKET_PAYLOAD_BYTE, getRemainderToConfirmFlowSizeByte());
     }
 
