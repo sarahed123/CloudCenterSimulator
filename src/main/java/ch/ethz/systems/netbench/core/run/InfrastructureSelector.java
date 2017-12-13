@@ -7,6 +7,8 @@ import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.NetworkDeviceGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.OutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.TransportLayerGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.ext.bare.BareTransportLayerGenerator;
 import ch.ethz.systems.netbench.ext.basic.EcnTailDropOutputPortGenerator;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
@@ -185,6 +187,8 @@ class InfrastructureSelector {
 
             case "unlimited":
                 return new UnlimitedOutputPortGenerator();
+            case "remote":
+                return new RemoteRoutingOutputPortGenerator();
 
             default:
                 throw new PropertyValueInvalidException(
@@ -249,6 +253,9 @@ class InfrastructureSelector {
 
             case "simple_dctcp":
                 return new SimpleDctcpTransportLayerGenerator();
+                
+            case "remote":
+                return new RemoteRoutingTransportLayerGenerator();
 
             default:
                 throw new PropertyValueInvalidException(

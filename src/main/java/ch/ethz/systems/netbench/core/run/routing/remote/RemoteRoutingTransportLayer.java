@@ -20,6 +20,12 @@ public class RemoteRoutingTransportLayer extends TransportLayer {
 		((RemoteSourceRoutingSwitch) networkDevice).releasePath(destinationId,flowId);
 		
 	}
+
+	public void continueFlow(long flowId) {
+		RemoteRoutingSocket rrs = (RemoteRoutingSocket) flowIdToSocket.get(flowId);
+		rrs.continueFlow();
+		
+	}
     
 
 }

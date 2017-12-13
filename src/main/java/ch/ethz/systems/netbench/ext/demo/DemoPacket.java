@@ -2,7 +2,7 @@ package ch.ethz.systems.netbench.ext.demo;
 
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
-class DemoPacket extends IpPacket implements DemoPacketHeader {
+public class DemoPacket extends IpPacket implements DemoPacketHeader {
 
     private final long dataSizeByte;
     private final long ackSizeByte;

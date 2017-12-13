@@ -23,7 +23,7 @@ public abstract class OutputPort {
 
     // Constants
     private final int ownId;                            // Own network device identifier
-    private final NetworkDevice ownNetworkDevice;       // Network device this output port is attached to
+    protected final NetworkDevice ownNetworkDevice;       // Network device this output port is attached to
     private final int targetId;                         // Target network device identifier
     private final NetworkDevice targetNetworkDevice;    // Target network device
     private final Link link;                            // Link type, defines latency and bandwidth of the medium
@@ -81,7 +81,6 @@ public abstract class OutputPort {
 
             // Link is now being utilized
             logger.logLinkUtilized(true);
-
             // Add event when sending is finished
             Simulator.registerEvent(new PacketDispatchedEvent(
                     packet.getSizeBit() / link.getBandwidthBitPerNs(),
@@ -107,7 +106,7 @@ public abstract class OutputPort {
      *
      * @param packet    Packet instance that was being sent
      */
-    void dispatch(Packet packet) {
+    protected void dispatch(Packet packet) {
 
         // Finished sending packet, the last bit of the packet should arrive the link-delay later
         if (!link.doesNextTransmissionFail(packet.getSizeBit())) {
