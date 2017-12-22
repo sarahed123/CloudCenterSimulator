@@ -17,7 +17,7 @@ public class RemoteRoutingTransportLayer extends TransportLayer {
     }
 
 	public void releasePath(int destinationId, long flowId) {
-		((RemoteSourceRoutingSwitch) networkDevice).releasePath(destinationId,flowId);
+		((RemoteSourceRoutingSwitch) networkDevice).releasePath(flowId);
 		
 	}
 

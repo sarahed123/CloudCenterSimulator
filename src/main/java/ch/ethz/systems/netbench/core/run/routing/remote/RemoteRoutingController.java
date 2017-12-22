@@ -2,11 +2,13 @@ package ch.ethz.systems.netbench.core.run.routing.remote;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
+import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
@@ -16,16 +18,16 @@ import edu.asu.emit.algorithm.graph.VariableGraph;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
 	private static RemoteRoutingController mInstance;
-	protected HashMap<ImmutablePair<Integer,Integer>,SourceRoutingPath> mPaths;
+	protected HashMap<Long, Path> mPaths;
 	protected VariableGraph mG;
 	public static RemoteRoutingController getInstance() {
 		return mInstance;
 	}
 	
-	public static void initRemoteRouting(String type, String property_type){
+	public static void initRemoteRouting(String type, String property_type, Map<Integer, NetworkDevice> idToNetworkDevice){
 		switch(type) {
 		case "Xpander":
-			mInstance = new XpanderRouter();
+			mInstance = new XpanderRouter(idToNetworkDevice);
 			break;
 		default:
 			throw new PropertyValueInvalidException(Simulator.getConfiguration(),property_type);
@@ -47,10 +49,8 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * @param dest
 	 * @param flowId the flow id
 	 * @param sourceSwitch the source switch for this path
-	 * @return 
-	 * @parma the switch that to return the path to.
 	 */
-	public abstract SourceRoutingPath getRoute(int source,int dest, RemoteSourceRoutingSwitch sourceSwitch, long flowId);
+	public abstract void initRoute(int source,int dest, long flowId);
 	
 	/**
 	 * resets the graph to its original state
@@ -61,7 +61,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * recover a path, returning all its edges to the graph
 	 * @param p the path to recover
 	 */
-	public abstract void recoverPath(SourceRoutingPath p);
+	public abstract void recoverPath(long flowId);
 	
 	/**
 	 * public for testing but should be a private method to handle path switching
@@ -70,7 +70,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * @param old the  old path to switch from
 	 * @param newPath the new path
 	 */
-	protected void switchPath(int src,int dst,SourceRoutingPath old, SourceRoutingPath newPath) {
+	protected void switchPath(int src,int dst,Path p,long flowId) {
 		
 	}
 }

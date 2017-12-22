@@ -51,13 +51,19 @@ public class SourceRoutingSwitch extends NetworkDevice {
 		} else {
 
 			// Forward to the next switch (automatically advances path progress)
-			this.targetIdToOutputPort.get(encapsulation.nextHop()).enqueue(encapsulation);
+			forwardToNextSwitch(encapsulation);
+			
 
 		}
 
 	}
 
 
+
+	protected void forwardToNextSwitch(SourceRoutingEncapsulation encapsulation) {
+		this.targetIdToOutputPort.get(encapsulation.nextHop()).enqueue(encapsulation);
+		
+	}
 
 	/**
 	 * Returns the paths list originating from this ToR switch.

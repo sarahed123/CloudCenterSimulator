@@ -20,7 +20,7 @@ public class RemoteSourceRoutingSwitchGenerator extends
     }
 	
 	public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new RemoteSourceRoutingSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier));
+        return new RemoteSourceRoutingSwitch(identifier, transportLayer, intermediaryGenerator.generate(identifier));
     }
 
 }
