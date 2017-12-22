@@ -1,9 +1,16 @@
 package ch.ethz.systems.netbench.xpt.sourcerouting;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.Intermediary;
+import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
@@ -13,10 +20,11 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Vertex;
 
-public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
-
-	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
-		super(identifier, transportLayer, n, intermediary);
+public class RemoteSourceRoutingSwitch extends NetworkDevice {
+	private Map<Long,OutputPort> forwardingTable;
+	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary) {
+		super(identifier, transportLayer, intermediary);
+		this.forwardingTable = new HashMap<Long,OutputPort>();
 	}
 
 	/**
@@ -31,41 +39,18 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
     @Override
     public void receiveFromIntermediary(Packet genericPacket) {
     	IpPacket packet = (IpPacket) genericPacket;
-
-    	SourceRoutingPath selectedPath;
-    	try {
-    		selectedPath = getPathToDestinationById(packet.getFlowId(), packet.getDestinationId());
-    		 // Create encapsulation to propagate through the network
-            SourceRoutingEncapsulation encapsulation = new SourceRoutingEncapsulation(
-                    packet,
-                    selectedPath
-            );
-
-    	    // Send to network
-            receive(encapsulation);
-    	}catch (NoPathException e) {
-    		super.receiveFromIntermediary(genericPacket);
-		}
-        
+    	RemoteRoutingController.getInstance().initRoute(packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
+    	receive(packet);
        
 
     }
     
-    @Override
-    protected SourceRoutingPath getPathToDestination(SourceRoutingSwitch src, int dest, Packet packet) {
-    	RemoteRoutingController remoteRouter = RemoteRoutingController.getInstance();
-		SourceRoutingPath srp =  remoteRouter.getRoute(src.getIdentifier(), dest,(RemoteSourceRoutingSwitch)src,packet.getFlowId());
-		addPathToDestination(dest, srp);
-
-		return srp;
+    protected void forwardToNextSwitch(IpPacket packet) {
+    	
+    	forwardingTable.get(packet.getFlowId()).enqueue(packet);
+		
 	}
     
-    @Override
-    public void switchPathToDestination(int destinationId, SourceRoutingPath oldPath, SourceRoutingPath newPath) {
-    	super.switchPathToDestination(destinationId, oldPath, newPath);
-    	RemoteRoutingController remoteRouter = RemoteRoutingController.getInstance();
-    	remoteRouter.recoverPath(oldPath);
-    }
     
     @Override
     public String toString() {
@@ -79,19 +64,37 @@ public class RemoteSourceRoutingSwitch extends SourceRoutingSwitch {
         return builder.toString();
     }
 
-	public void releasePath(int dest, long id) {
 
-		List<SourceRoutingPath> current = this.destinationToPaths.get(dest);
-    	for(int i=0; i<current.size();i++) {
-    		if(current.get(i).getIdentifier()==id) {
-    			RemoteRoutingController.getInstance().recoverPath(current.get(i));
-    			current.remove(i);
-    			
-    			return;
-    		}
+	@Override
+	public void receive(Packet genericPacket) {
+		IpPacket packet = (IpPacket) genericPacket;
+		if (packet.getDestinationId() == this.identifier) {
+
+			// Hand to the underlying server
+			this.passToIntermediary(packet); // Will throw null-pointer if this network device does not have a server attached to it
+
+		} else {
+			// Forward to the next switch (automatically advances path progress)
+			forwardToNextSwitch(packet);
+			
+
+		}
 		
-    	}
+	}
+
+	public void releasePath(long flowId) {
+		RemoteRoutingController.getInstance().recoverPath(flowId);
 		
+	}
+
+	public void updateForwardingTable(long flowId, int nextHop) {
+		forwardingTable.put(flowId, targetIdToOutputPort.get(nextHop));
+		
+	}
+
+	public Object getNextHop(long flowId) {
+		// TODO Auto-generated method stub
+		return forwardingTable.get(flowId);
 	}
 
 
