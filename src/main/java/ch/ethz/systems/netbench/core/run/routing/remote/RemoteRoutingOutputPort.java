@@ -8,7 +8,7 @@ import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitch;
+import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 
 public class RemoteRoutingOutputPort extends OutputPort{
 

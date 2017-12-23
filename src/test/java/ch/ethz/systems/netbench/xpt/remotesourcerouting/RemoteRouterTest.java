@@ -1,4 +1,4 @@
-package ch.ethz.systems.netbench.xpt.sourcerouting;
+package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
 
 import ch.ethz.systems.netbench.core.Simulator;

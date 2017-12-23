@@ -1,4 +1,4 @@
-package ch.ethz.systems.netbench.xpt.sourcerouting;
+package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+import ch.ethz.systems.netbench.core.run.infrastructure.NetworkDeviceGenerator;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
@@ -53,7 +54,8 @@ public class RemoteSourceRoutingSwitchTest {
     private TcpPacket packet;
 
     private File tempRunConfig;
-    private Map<Integer, NetworkDevice> idToNetworkDevice;
+    private Map<Integer, NetworkDevice> realIdToNetworkDevice;
+    private Map<Integer, NetworkDevice> mockIdToNetworkDevice;
     @Before
     public void setup() throws IOException {
 
@@ -71,11 +73,34 @@ public class RemoteSourceRoutingSwitchTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-        BaseInitializer b = new BaseInitializer(new RemoteRoutingOutputPortGenerator(), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(), 5),
+        NetworkDeviceGenerator generator = new NetworkDeviceGenerator() {
+        	DemoIntermediaryGenerator inermediaryGenerator = new DemoIntermediaryGenerator();
+			@Override
+			public NetworkDevice generate(int identifier, TransportLayer server) {
+				// TODO Auto-generated method stub
+				return new MockRemoteRoutingSwitch(identifier, server, inermediaryGenerator.generate(identifier));
+			}
+			
+			@Override
+			public NetworkDevice generate(int identifier) {
+				// TODO Auto-generated method stub
+				return generate(identifier,null);
+			}
+		};
+
+        BaseInitializer b = new BaseInitializer(new RemoteRoutingOutputPortGenerator(),generator,
         		new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator()) ;
         b.createInfrastructure();
-        idToNetworkDevice = b.getIdToNetworkDevice();
-        RoutingSelector.selectPopulator(b.getIdToNetworkDevice());
+        realIdToNetworkDevice = b.getIdToNetworkDevice();
+        
+        mockIdToNetworkDevice = (Map<Integer, NetworkDevice>) mock(Map.class);
+        for(int i = 0;i<realIdToNetworkDevice.size();i++) {
+        	NetworkDevice device = spy(realIdToNetworkDevice.get(i));
+        	
+        	when(mockIdToNetworkDevice.get(i)).thenReturn(device);
+        }
+        
+        RoutingSelector.selectPopulator(mockIdToNetworkDevice);
         this.remoteRouter = RemoteRoutingController.getInstance();
         topology = new TestTopologyPortsConstruction(
                 "0-1,1-2,2-4,4-3,3-1"
@@ -88,23 +113,44 @@ public class RemoteSourceRoutingSwitchTest {
         assertTrue(tempRunConfig.delete());
     }
 
-    
+    /**
+     * tests the package is received in the source and is transfered correctly twice
+     */
     @Test
-    public void testSingleForward() {
+    public void testDoubleForward() {
 
-        // Create device with ports
-        RemoteSourceRoutingSwitch device = (RemoteSourceRoutingSwitch) idToNetworkDevice.get(0);
-
+    	// init source
+    	MockRemoteRoutingSwitch source = (MockRemoteRoutingSwitch) mockIdToNetworkDevice.get(0);
+        // init next
+    	MockRemoteRoutingSwitch next = (MockRemoteRoutingSwitch) mockIdToNetworkDevice.get(1);
 
         // Initialize packet for that destination
         when(packet.getDestinationId()).thenReturn(4);
-
+        when(packet.getFlowId()).thenReturn((long) 0);
         
         // Give device the packet
-        device.receiveFromTransportLayer(packet);
+        source.receiveFromTransportLayer(packet);
+        verify(source,times(1)).receive(packet);
+        verify(source,times(1)).forwardToNextSwitch(packet);
 
+        next.receive(packet);
+        verify(next,times(1)).forwardToNextSwitch(packet);
+    }
+    
+    @Test
+    public void testPacketAcceptance() {
 
+    	// init source
+        RemoteSourceRoutingSwitch dest = (MockRemoteRoutingSwitch) mockIdToNetworkDevice.get(4);
+    
 
+        // Initialize packet for that destination
+        when(packet.getDestinationId()).thenReturn(4);
+        when(packet.getFlowId()).thenReturn((long) 0);
+        
+
+        dest.receive(packet);
+        verify(dest,times(0)).forwardToNextSwitch(packet);
     }
 
     @Test
