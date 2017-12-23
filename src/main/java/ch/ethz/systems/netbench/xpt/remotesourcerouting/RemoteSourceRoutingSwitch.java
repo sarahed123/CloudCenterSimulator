@@ -1,4 +1,4 @@
-package ch.ethz.systems.netbench.xpt.sourcerouting;
+package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
 import java.util.HashMap;
 import java.util.List;

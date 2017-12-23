@@ -15,7 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
-import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitch;
+import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;

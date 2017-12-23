@@ -3,7 +3,7 @@ package ch.ethz.systems.netbench.core.run.routing.remote;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.bare.BareSocket;
-import ch.ethz.systems.netbench.xpt.sourcerouting.RemoteSourceRoutingSwitch;
+import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 
 public class RemoteRoutingTransportLayer extends TransportLayer {
 

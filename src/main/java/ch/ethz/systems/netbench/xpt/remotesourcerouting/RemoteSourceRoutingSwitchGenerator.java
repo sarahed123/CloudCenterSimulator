@@ -1,9 +1,10 @@
-package ch.ethz.systems.netbench.xpt.sourcerouting;
+package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.infrastructure.IntermediaryGenerator;
+import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingSwitchGenerator;
 
 public class RemoteSourceRoutingSwitchGenerator extends
 		SourceRoutingSwitchGenerator {
