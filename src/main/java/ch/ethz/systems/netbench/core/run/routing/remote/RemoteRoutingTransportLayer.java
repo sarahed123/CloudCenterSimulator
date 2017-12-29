@@ -4,6 +4,7 @@ import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.bare.BareSocket;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceException;
 
 public class RemoteRoutingTransportLayer extends TransportLayer {
 
@@ -23,6 +24,9 @@ public class RemoteRoutingTransportLayer extends TransportLayer {
 
 	public void continueFlow(long flowId) {
 		RemoteRoutingSocket rrs = (RemoteRoutingSocket) flowIdToSocket.get(flowId);
+		if(rrs==null) {
+			throw new DeviceNotSourceException(flowId,networkDevice.getIdentifier());
+		}
 		rrs.continueFlow();
 		
 	}

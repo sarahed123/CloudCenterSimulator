@@ -16,6 +16,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Vertex;
@@ -39,7 +40,12 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     @Override
     public void receiveFromIntermediary(Packet genericPacket) {
     	IpPacket packet = (IpPacket) genericPacket;
-    	RemoteRoutingController.getInstance().initRoute(packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
+    	try {
+    		RemoteRoutingController.getInstance().initRoute(packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
+    	}catch(FlowPathExists e) {
+    		
+    	}
+    	
     	receive(packet);
        
 
