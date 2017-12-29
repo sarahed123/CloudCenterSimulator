@@ -20,6 +20,8 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLa
 import ch.ethz.systems.netbench.ext.flowlet.IdentityFlowletIntermediary;
 import ch.ethz.systems.netbench.testutility.TestTopologyPortsConstruction;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
+import edu.asu.emit.algorithm.graph.Path;
+import edu.asu.emit.algorithm.graph.Vertex;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
@@ -59,7 +61,7 @@ public class RemoteRouterTest {
     private TcpPacket packet;
 
     private File tempRunConfig;
-    private RemoteRoutingController remoteRouter;
+    private MockRemoteRouter remoteRouter;
     private Map<Integer, NetworkDevice> idToNetworkDevice;
     @Before
     public void setup() throws IOException {
@@ -83,8 +85,7 @@ public class RemoteRouterTest {
         		new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator()) ;
         b.createInfrastructure();
         idToNetworkDevice = b.getIdToNetworkDevice();
-        RoutingSelector.selectPopulator(b.getIdToNetworkDevice());
-        this.remoteRouter = RemoteRoutingController.getInstance();
+        this.remoteRouter = spy(new MockRemoteRouter(idToNetworkDevice));
     }
 
     @After
@@ -95,16 +96,10 @@ public class RemoteRouterTest {
 
     @Test
     public void testRemoteRoutingInitilization() {
-    	
+    	RoutingSelector.selectPopulator(idToNetworkDevice);
     	assertTrue(RemoteRoutingController.getInstance() != null);
     }
     
-    @Test
-    public void switchPath() {
-        // to test this we need first to know under which conditions will a switch happen
-        
-        
-    }
     
 
     @Test
@@ -148,6 +143,18 @@ public class RemoteRouterTest {
     	remoteRouter.initRoute(1, 4,1);
     	assert(device.getNextHop(0) != null);
     	assert(device.getNextHop(1) != null);
+    	
+    }
+    
+    @Test
+    public void testSwitchPath() {
+    	remoteRouter.initRoute(1, 4,0);
+    	Path oldP = remoteRouter.getPath(0);
+    	remoteRouter.switchPath(1, 4, remoteRouter.generatePathFromGraph(1, 4), 0);
+    	Path newP = remoteRouter.getPath(0);
+    	assert(!oldP.equals(newP));
+    	assert(newP.getVertexList().get(0).getId()==1);
+    	assert(newP.getVertexList().get(newP.getVertexList().size()-1).getId()==4);
     	
     }
 

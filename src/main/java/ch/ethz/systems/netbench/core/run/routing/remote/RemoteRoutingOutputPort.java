@@ -9,6 +9,7 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceException;
 
 public class RemoteRoutingOutputPort extends OutputPort{
 
@@ -26,9 +27,13 @@ public class RemoteRoutingOutputPort extends OutputPort{
 	@Override
 	 protected void dispatch(Packet packet) {
 		super.dispatch(packet);
+		try {
+			RemoteRoutingTransportLayer tl = (RemoteRoutingTransportLayer) ownNetworkDevice.getTransportLayer();
+			tl.continueFlow(packet.getFlowId());
+		}catch(DeviceNotSourceException e){
+			
+		}
 		
-		RemoteRoutingTransportLayer tl = (RemoteRoutingTransportLayer) ownNetworkDevice.getTransportLayer();
-		tl.continueFlow(packet.getFlowId());
 	}
 
 }
