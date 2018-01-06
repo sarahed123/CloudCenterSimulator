@@ -64,7 +64,9 @@ public class RoutingSelector {
             }
             
             case "remote_routing_populator": {
-                RemoteRoutingController.initRemoteRouting(Simulator.getConfiguration().getPropertyOrFail("centered_routing_type"),"centered_routing_type",idToNetworkDevice);
+            	String remoteRoutingType = Simulator.getConfiguration().getPropertyOrFail("centered_routing_type");
+            	long headerSize = Simulator.getConfiguration().getLongPropertyWithDefault("remote_routing_header_size", 0L);
+                RemoteRoutingController.initRemoteRouting(remoteRoutingType,idToNetworkDevice,headerSize);
                 
                 return RemoteRoutingController.getInstance();
             }

@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.OutputPort;
@@ -44,6 +45,9 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     		RemoteRoutingController.getInstance().initRoute(packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
     	}catch(FlowPathExists e) {
     		
+    	}catch(NoPathException e) {
+    		SimulationLogger.increaseStatisticCounter("num_path_failures");
+    		return;
     	}
     	
     	receive(packet);

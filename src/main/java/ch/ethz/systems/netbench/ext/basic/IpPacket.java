@@ -29,6 +29,14 @@ public abstract class IpPacket extends Packet implements IpHeader {
         this.ECN = false;
         this.TTL = TTL;
     }
+    
+    public IpPacket(long flowId, long payloadSizeBit, int sourceId, int destinationId, int TTL,long headerSize) {
+        super(flowId, headerSize + payloadSizeBit);
+        this.sourceId = sourceId;
+        this.destinationId = destinationId;
+        this.ECN = false;
+        this.TTL = TTL;
+    }
 
     /**
      * Get packet source node identifier.
