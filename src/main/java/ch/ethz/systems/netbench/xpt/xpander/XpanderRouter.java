@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
@@ -37,6 +38,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	@Override
 	public void initRoute(int source,int dest,long flowId){ 
+
 		if(mPaths.containsKey(flowId)) {
 			throw new FlowPathExists(flowId);
 		}
@@ -98,6 +100,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
 			throw new NoPathException(source,dest);
+			
 		}
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){

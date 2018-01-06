@@ -95,6 +95,7 @@ public class BaseAllowedProperties {
             "enable_log_congestion_window",
             "enable_log_packet_burst_gap",
             "centered_routing_type",
+            "remote_routing_header_size",
             // K-shortest-paths
             "k_for_k_shortest_paths",
 

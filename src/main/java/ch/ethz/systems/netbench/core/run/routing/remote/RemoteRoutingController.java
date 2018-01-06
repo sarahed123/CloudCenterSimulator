@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
@@ -20,18 +22,30 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	private static RemoteRoutingController mInstance;
 	protected HashMap<Long, Path> mPaths;
 	protected VariableGraph mG;
+	private static long headerSize;
 	public static RemoteRoutingController getInstance() {
 		return mInstance;
 	}
 	
-	public static void initRemoteRouting(String type, String property_type, Map<Integer, NetworkDevice> idToNetworkDevice){
+	public static void initRemoteRouting(String type, Map<Integer, NetworkDevice> idToNetworkDevice, long headerSize){
+		
 		switch(type) {
 		case "Xpander":
 			mInstance = new XpanderRouter(idToNetworkDevice);
 			break;
 		default:
-			throw new PropertyValueInvalidException(Simulator.getConfiguration(),property_type);
+			throw new PropertyValueInvalidException(Simulator.getConfiguration(),"centered_routing_type");
 		}
+		mInstance.setHeaderSize(headerSize);
+	}
+
+	private void setHeaderSize(long headerSize) {
+		this.headerSize = headerSize;
+		
+	}
+	
+	public static long getHeaderSize() {
+		return headerSize;
 	}
 
 	/**
