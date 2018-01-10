@@ -28,12 +28,13 @@ import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 
 public class XpanderRouter extends RemoteRoutingController{
-
+	private int flowCounter;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice){
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
 		mPaths = new HashMap<Long,Path>();
+		flowCounter = 0;
 	}
 
 	@Override
@@ -46,6 +47,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		updateForwardingTables(source,dest,p,flowId);
 		removePathFromGraph(p);
 		mPaths.put(flowId, p);
+		flowCounter++;
 
 	}
 
@@ -110,5 +112,10 @@ public class XpanderRouter extends RemoteRoutingController{
 			rsrs.updateForwardingTable(flowId,curr);
 		}
 
+	}
+
+	public String getCurrentState() {
+		// TODO Auto-generated method stub
+		return "Allocated paths " + mPaths.size() + ". Flow count " + flowCounter;
 	}
 }
