@@ -5,6 +5,8 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.random.RandomManager;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
+import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -184,7 +186,14 @@ public class Simulator {
                 long realTimeNow = System.currentTimeMillis();
                 System.out.println("Elapsed 0.01s simulation in " + ((realTimeNow - realTime) / 1000.0) + "s real (total progress: " + ((((double) now) / ((double) runtimeNanoseconds)) * 100) + "%).");
                 realTime = realTimeNow;
+                
+                if(configuration.getPropertyWithDefault("centered_routing_type", "none").equals("Xpander")) {
+                	XpanderRouter xpander = (XpanderRouter) RemoteRoutingController.getInstance();
+                	System.out.println(xpander.getCurrentState());
+                }
             }
+            
+            
 
             if (finishedFlows.size() >= flowsFromStartToFinish) {
                 endedDueToFlowThreshold = true;
