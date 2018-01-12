@@ -187,7 +187,7 @@ public class Simulator {
                 System.out.println("Elapsed 0.01s simulation in " + ((realTimeNow - realTime) / 1000.0) + "s real (total progress: " + ((((double) now) / ((double) runtimeNanoseconds)) * 100) + "%).");
                 realTime = realTimeNow;
                 
-                if(configuration.getPropertyWithDefault("centered_routing_type", "none").equals("Xpander")) {
+                if(configuration != null && configuration.getPropertyWithDefault("centered_routing_type", "none").equals("Xpander")) {
                 	XpanderRouter xpander = (XpanderRouter) RemoteRoutingController.getInstance();
                 	System.out.println(xpander.getCurrentState());
                 }
