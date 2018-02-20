@@ -23,7 +23,7 @@ import java.util.Set;
 public class Simulator {
 
     // Time interval at which to show the percentage of progress
-    private static final long PROGRESS_SHOW_INTERVAL_NS = 10000000L; // 0.01s = 10mss
+    private static final long PROGRESS_SHOW_INTERVAL_NS = 1000000L; // 0.01s = 10mss
 
     // Main ordered event queue (run variable)
     private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();

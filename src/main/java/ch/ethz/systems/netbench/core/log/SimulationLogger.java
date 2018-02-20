@@ -2,7 +2,11 @@ package ch.ethz.systems.netbench.core.log;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.run.MainFromProperties;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingPacket;
+import edu.asu.emit.algorithm.graph.Path;
+
 import org.apache.commons.io.output.TeeOutputStream;
 
 import java.io.*;
@@ -23,6 +27,8 @@ public class SimulationLogger {
     private static BufferedWriter writerPortQueueStateFile;
     private static BufferedWriter writerPortUtilizationFile;
     private static BufferedWriter writerPortUtilizationCsvFile;
+    private static BufferedWriter writerRemoteRouterLog;
+
     private static Map<String, BufferedWriter> writersAdded = new HashMap<>();
 
     // Specific component loggers
@@ -151,6 +157,8 @@ public class SimulationLogger {
             writerPortQueueStateFile = openWriter("port_queue_length.csv.log");
             writerPortUtilizationCsvFile = openWriter("port_utilization.csv.log");
             writerPortUtilizationFile = openWriter("port_utilization.log");
+            
+            writerRemoteRouterLog = openWriter("remote_router.log");
 
             // Flow log writers
             writerFlowThroughputFile = openWriter("flow_throughput.csv.log");
@@ -247,6 +255,7 @@ public class SimulationLogger {
             writerPortUtilizationFile.close();
             writerPortUtilizationCsvFile.close();
             writerFlowCompletionFile.close();
+            writerRemoteRouterLog.close();
 
             // Also added ones are closed automatically at the end
             for (BufferedWriter writer : writersAdded.values()) {
@@ -306,6 +315,18 @@ public class SimulationLogger {
         }
     }
 
+    public static void logRemoteRoute(Path p, int source, int dest, long flowId, long time,boolean adding) throws IOException {
+    	String add = adding ? "+" : "-";
+    	writerRemoteRouterLog.write(String.format(
+    			add + " %-11s %-6s%-6s%-13s%-13s\n",
+                p.toString(),
+                flowId,
+                source,
+                dest,
+                time
+        ));
+    }
+    
     /**
      * Log the queue length of a specific output port at a certain point in time.
      *
@@ -315,9 +336,11 @@ public class SimulationLogger {
      * @param bufferOccupiedBits    Amount of bits occupied in the buffer
      * @param absTimeNs             Absolute timestamp in nanoseconds since simulation epoch
      */
-    static void logPortQueueState(long ownId, long targetId, int queueLength, long bufferOccupiedBits, long absTimeNs) {
+    static void logPortQueueState(long ownId, long targetId, int queueLength, long bufferOccupiedBits,Packet p, long absTimeNs) {
+    	RemoteRoutingPacket rp = (RemoteRoutingPacket) p;
         try {
-            writerPortQueueStateFile.write(ownId + "," + targetId + "," + queueLength + "," + bufferOccupiedBits + "," + absTimeNs + "\n");
+            writerPortQueueStateFile.write(ownId + "," + targetId + "," + queueLength + "," + bufferOccupiedBits + "," 
+            								+ rp.getSourceId() + "," + rp.getDestinationId() + "," + absTimeNs + "\n");
         } catch (IOException e) {
             throw new LogFailureException(e);
         }

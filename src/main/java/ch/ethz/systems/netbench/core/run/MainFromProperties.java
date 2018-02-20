@@ -57,7 +57,12 @@ public class MainFromProperties {
 
         // Perform run
         System.out.println("ACTUAL RUN\n==================");
-        Simulator.runNs(runtimeNs, Simulator.getConfiguration().getLongPropertyWithDefault("finish_when_first_flows_finish", -1));
+        try {
+        	Simulator.runNs(runtimeNs, Simulator.getConfiguration().getLongPropertyWithDefault("finish_when_first_flows_finish", -1));
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
+        
         Simulator.reset(false);
         System.out.println("Finished run.\n");
 
