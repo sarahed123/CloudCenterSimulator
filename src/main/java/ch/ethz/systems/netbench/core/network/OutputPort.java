@@ -94,7 +94,7 @@ public abstract class OutputPort {
         } else { // If it is still sending, the packet is added to the queue, making it non-empty
             bufferOccupiedBits += packet.getSizeBit();
             queue.add(packet);
-            logger.logQueueState(queue.size(), bufferOccupiedBits);
+            logger.logQueueState(queue.size(), bufferOccupiedBits,packet);
         }
 
     }
@@ -128,7 +128,7 @@ public abstract class OutputPort {
             // Pop from queue
             Packet packetFromQueue = queue.poll();
             decreaseBufferOccupiedBits(packetFromQueue.getSizeBit());
-            logger.logQueueState(queue.size(), bufferOccupiedBits);
+            logger.logQueueState(queue.size(), bufferOccupiedBits,packetFromQueue);
 
             // Register when the packet is actually dispatched
             Simulator.registerEvent(new PacketDispatchedEvent(

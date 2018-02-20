@@ -28,8 +28,11 @@ public class RemoteRoutingOutputPort extends OutputPort{
 	 protected void dispatch(Packet packet) {
 		super.dispatch(packet);
 		try {
-			RemoteRoutingTransportLayer tl = (RemoteRoutingTransportLayer) ownNetworkDevice.getTransportLayer();
-			tl.continueFlow(packet.getFlowId());
+			if(ownNetworkDevice.isServer()){
+				RemoteRoutingTransportLayer tl = (RemoteRoutingTransportLayer) ownNetworkDevice.getTransportLayer();
+				tl.continueFlow(packet.getFlowId());
+			}
+			
 		}catch(DeviceNotSourceException e){
 			
 		}

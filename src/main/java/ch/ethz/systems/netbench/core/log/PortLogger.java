@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.core.log;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.OutputPort;
+import ch.ethz.systems.netbench.core.network.Packet;
 
 public class PortLogger {
 
@@ -38,12 +39,13 @@ public class PortLogger {
      *
      * @param length                Current queue length in packets
      * @param bufferOccupiedBits    Amount of bits occupied in the buffer
+     * @param packetFromQueue the most recent packet from the queue
      */
-    public void logQueueState(int length, long bufferOccupiedBits) {
+    public void logQueueState(int length, long bufferOccupiedBits, Packet packet) {
         if (this.logQueueStateEnabled) {
             iterator++;
             if (iterator % STATISTIC_SAMPLE_RATE == 0) { // TODO: get rid of statistic sample rate?
-                SimulationLogger.logPortQueueState(ownId, targetId, length, bufferOccupiedBits, Simulator.getCurrentTime());
+                SimulationLogger.logPortQueueState(ownId, targetId, length, bufferOccupiedBits,packet, Simulator.getCurrentTime());
             }
         }
     }

@@ -48,6 +48,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		removePathFromGraph(p);
 		mPaths.put(flowId, p);
 		flowCounter++;
+		logRoute(p,source,dest,flowId,Simulator.getCurrentTime(),true);
 
 	}
 
@@ -72,6 +73,8 @@ public class XpanderRouter extends RemoteRoutingController{
 			mG.recoverDeletedEdge(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
 
 		}
+		logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
+				,flowId,Simulator.getCurrentTime(),false);
 		mPaths.remove(flowId);
 	}
 
@@ -79,7 +82,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		List<Vertex> pathAsList = p.getVertexList();
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){
-			mG.deleteEdge(new ImmutablePair<Integer, Integer>(curr, pathAsList.get(i).getId()));
+			int next = pathAsList.get(i).getId();
+			mG.deleteEdge(new ImmutablePair<Integer, Integer>(curr, next));
+			curr = next;
 		}
 	}
 

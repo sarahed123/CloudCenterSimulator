@@ -163,7 +163,7 @@ public class DijkstraShortestPathAlg
 					
 			distance += isSource2sink ? graph.getEdgeWeight(vertex, curAdjacentVertex)
 					: graph.getEdgeWeight(curAdjacentVertex, vertex);
-
+			
 			// 2.3 update the distance if necessary
 			if (!startVertexDistanceIndex.containsKey(curAdjacentVertex)
 			|| startVertexDistanceIndex.get(curAdjacentVertex) > distance) {
