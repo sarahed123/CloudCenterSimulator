@@ -59,7 +59,8 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	
 	protected void logRoute(Path p, int source, int dest, long flowId, long time,boolean adding) {
 		try {
-			SimulationLogger.logRemoteRoute(p,source,dest,flowId,time,adding);
+			if(Simulator.getConfiguration().getBooleanPropertyWithDefault("log_remote_paths", false))
+				SimulationLogger.logRemoteRoute(p,source,dest,flowId,time,adding);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
