@@ -29,12 +29,14 @@ import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 
 public class XpanderRouter extends RemoteRoutingController{
 	private int flowCounter;
+	private int flowFailuresSample;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice){
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
 		mPaths = new HashMap<Long,Path>();
 		flowCounter = 0;
+		flowFailuresSample = 0;
 	}
 
 	@Override
@@ -106,7 +108,9 @@ public class XpanderRouter extends RemoteRoutingController{
 	protected void updateForwardingTables(int source, int dest, Path p, long flowId) {
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
+			flowFailuresSample++;
 			throw new NoPathException(source,dest);
+			
 			
 		}
 		int curr = pathAsList.get(0).getId();
@@ -121,6 +125,18 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	public String getCurrentState() {
 		// TODO Auto-generated method stub
-		return "Allocated paths " + mPaths.size() + ". Flow count " + flowCounter;
+		
+		return "Allocated paths " + mPaths.size() + ". Flow dropps " + flowFailuresSample + ". Flow count " + flowCounter;
+	}
+
+	public void logCurrentState() {
+		logCurrentState(mPaths.size(),flowFailuresSample,flowCounter);
+		
+		
+	}
+
+	public void resetCurrentState() {
+		flowFailuresSample = 0;
+		
 	}
 }

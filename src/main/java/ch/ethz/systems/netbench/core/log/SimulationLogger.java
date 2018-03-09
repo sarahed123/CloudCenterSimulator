@@ -27,8 +27,10 @@ public class SimulationLogger {
     private static BufferedWriter writerPortQueueStateFile;
     private static BufferedWriter writerPortUtilizationFile;
     private static BufferedWriter writerPortUtilizationCsvFile;
-    private static BufferedWriter writerRemoteRouterLog;
-
+    private static BufferedWriter writerRemoteRouterPathLog;
+    private static BufferedWriter writerRemoteRouterStateLog;
+    private static BufferedWriter writerRemoteRouterStateLogCSV;
+    
     private static Map<String, BufferedWriter> writersAdded = new HashMap<>();
 
     // Specific component loggers
@@ -158,8 +160,10 @@ public class SimulationLogger {
             writerPortUtilizationCsvFile = openWriter("port_utilization.csv.log");
             writerPortUtilizationFile = openWriter("port_utilization.log");
             
-            writerRemoteRouterLog = openWriter("remote_router.log");
-
+            writerRemoteRouterPathLog = openWriter("remote_router_path.log");
+            writerRemoteRouterStateLog = openWriter("remote_router_state.log");
+            writerRemoteRouterStateLogCSV = openWriter("remote_router_state.csv.log");
+            
             // Flow log writers
             writerFlowThroughputFile = openWriter("flow_throughput.csv.log");
             writerFlowCompletionCsvFile = openWriter("flow_completion.csv.log");
@@ -255,7 +259,9 @@ public class SimulationLogger {
             writerPortUtilizationFile.close();
             writerPortUtilizationCsvFile.close();
             writerFlowCompletionFile.close();
-            writerRemoteRouterLog.close();
+            writerRemoteRouterPathLog.close();
+            writerRemoteRouterStateLog.close();
+            writerRemoteRouterStateLogCSV.close();
 
             // Also added ones are closed automatically at the end
             for (BufferedWriter writer : writersAdded.values()) {
@@ -317,7 +323,7 @@ public class SimulationLogger {
 
     public static void logRemoteRoute(Path p, int source, int dest, long flowId, long time,boolean adding) throws IOException {
     	String add = adding ? "+" : "-";
-    	writerRemoteRouterLog.write(String.format(
+    	writerRemoteRouterPathLog.write(String.format(
     			add + " %-11s %-6s%-6s%-13s%-13s\n",
                 p.toString(),
                 flowId,
@@ -337,10 +343,10 @@ public class SimulationLogger {
      * @param absTimeNs             Absolute timestamp in nanoseconds since simulation epoch
      */
     static void logPortQueueState(long ownId, long targetId, int queueLength, long bufferOccupiedBits,Packet p, long absTimeNs) {
-    	RemoteRoutingPacket rp = (RemoteRoutingPacket) p;
+    	
         try {
             writerPortQueueStateFile.write(ownId + "," + targetId + "," + queueLength + "," + bufferOccupiedBits + "," 
-            								+ rp.getSourceId() + "," + rp.getDestinationId() + "," + absTimeNs + "\n");
+            								 + absTimeNs + "\n");
         } catch (IOException e) {
             throw new LogFailureException(e);
         }
@@ -545,5 +551,21 @@ public class SimulationLogger {
         close();
         throwaway();
     }
+
+	public static void logRemoteRouterState(int currentAllocatedPatsh, int flowFailuresSample, int flowCounter) throws IOException {
+		
+		writerRemoteRouterStateLog.write(String.format(
+    			"%-6s %-6s %-6s\n",
+    			currentAllocatedPatsh,
+    			flowFailuresSample,
+    			flowCounter
+        ));
+		writerRemoteRouterStateLogCSV.write(
+ 
+    			currentAllocatedPatsh + "," +
+    			flowFailuresSample + "," +
+    			flowCounter + "\n"
+        );
+	}
 
 }

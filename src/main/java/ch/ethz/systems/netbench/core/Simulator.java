@@ -189,7 +189,9 @@ public class Simulator {
                 
                 if(configuration != null && configuration.getPropertyWithDefault("centered_routing_type", "none").equals("Xpander")) {
                 	XpanderRouter xpander = (XpanderRouter) RemoteRoutingController.getInstance();
+                	xpander.logCurrentState();
                 	System.out.println(xpander.getCurrentState());
+                	xpander.resetCurrentState();
                 }
             }
             
