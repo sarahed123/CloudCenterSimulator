@@ -66,6 +66,16 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 			e.printStackTrace();
 		}
 	}
+	
+	protected void logCurrentState(int currentAllocatedPatsh, int flowFailuresSample, int flowCounter){
+		try {
+			if(Simulator.getConfiguration().getBooleanPropertyWithDefault("log_remote_router_state", false))
+				SimulationLogger.logRemoteRouterState(currentAllocatedPatsh,flowFailuresSample,flowCounter);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * gets a route from source to dest, removing the corresponding
 	 * edges from the graph
