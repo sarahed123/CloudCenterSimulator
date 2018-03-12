@@ -28,8 +28,9 @@ public class SimulationLogger {
     private static BufferedWriter writerPortUtilizationFile;
     private static BufferedWriter writerPortUtilizationCsvFile;
     private static BufferedWriter writerRemoteRouterPathLog;
-    private static BufferedWriter writerRemoteRouterStateLog;
+
     private static BufferedWriter writerRemoteRouterStateLogCSV;
+    private static BufferedWriter writerRemoteRouterDropStatisticsCSV;
     
     private static Map<String, BufferedWriter> writersAdded = new HashMap<>();
 
@@ -161,9 +162,8 @@ public class SimulationLogger {
             writerPortUtilizationFile = openWriter("port_utilization.log");
             
             writerRemoteRouterPathLog = openWriter("remote_router_path.log");
-            writerRemoteRouterStateLog = openWriter("remote_router_state.log");
             writerRemoteRouterStateLogCSV = openWriter("remote_router_state.csv.log");
-            
+            writerRemoteRouterDropStatisticsCSV = openWriter("remote_router_drop_statistics.csv.log");
             // Flow log writers
             writerFlowThroughputFile = openWriter("flow_throughput.csv.log");
             writerFlowCompletionCsvFile = openWriter("flow_completion.csv.log");
@@ -260,9 +260,9 @@ public class SimulationLogger {
             writerPortUtilizationCsvFile.close();
             writerFlowCompletionFile.close();
             writerRemoteRouterPathLog.close();
-            writerRemoteRouterStateLog.close();
             writerRemoteRouterStateLogCSV.close();
-
+            writerRemoteRouterDropStatisticsCSV.close();
+            
             // Also added ones are closed automatically at the end
             for (BufferedWriter writer : writersAdded.values()) {
                 writer.close();
@@ -553,19 +553,21 @@ public class SimulationLogger {
     }
 
 	public static void logRemoteRouterState(int currentAllocatedPatsh, int flowFailuresSample, int flowCounter) throws IOException {
-		
-		writerRemoteRouterStateLog.write(String.format(
-    			"%-6s %-6s %-6s\n",
-    			currentAllocatedPatsh,
-    			flowFailuresSample,
-    			flowCounter
-        ));
 		writerRemoteRouterStateLogCSV.write(
  
     			currentAllocatedPatsh + "," +
     			flowFailuresSample + "," +
     			flowCounter + "\n"
         );
+	}
+	
+	public static void logRemoteRouterDropStatistics(long flowId,int source, int dest, int currentAllocPaths) throws IOException {
+		writerRemoteRouterDropStatisticsCSV.write(
+				flowId + "," +
+				source + "," +
+				dest + "," +
+				currentAllocPaths + "\n"
+		);
 	}
 
 }
