@@ -109,9 +109,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
 			flowFailuresSample++;
-			throw new NoPathException(source,dest);
-			
-			
+			logDrop(flowId, source, dest, mPaths.size());
+			throw new NoPathException(source,dest);	
 		}
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){
