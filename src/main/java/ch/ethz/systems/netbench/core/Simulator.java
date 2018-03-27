@@ -44,6 +44,8 @@ public class Simulator {
     // Configuration
     private static NBProperties configuration;
 
+	private static int currentCommand;
+
     private Simulator() {
         // Static class only
     }
@@ -155,7 +157,7 @@ public class Simulator {
 
         // Reset run variables (queue is not cleared because it has to start somewhere, e.g. flow start events)
         now = 0;
-
+        NonblockingBufferedReader reader = new NonblockingBufferedReader(System.in);
         // Finish flow threshold, if it is negative the flow finish will be very far in the future
         finishFlowIdThreshold = flowsFromStartToFinish;
         if (flowsFromStartToFinish <= 0) {
@@ -171,6 +173,19 @@ public class Simulator {
         long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
         boolean endedDueToFlowThreshold = false;
         while (!eventQueue.isEmpty() && now <= runtimeNanoseconds) {
+        	while(currentCommand!=0) {
+        		readUserInput(reader);
+        		
+        		if(currentCommand==(int)'c') {
+        			currentCommand = reader.resetCommand();
+        			
+        		}
+        		try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					throw new RuntimeException("thread interrupted");
+				}
+        	}
 
             // Go to next event
             Event event = eventQueue.peek();
@@ -201,7 +216,8 @@ public class Simulator {
                 endedDueToFlowThreshold = true;
                 break;
             }
-
+            
+            readUserInput(reader);
         }
 
         // Make sure run ends at the final time if it ended because there were no
@@ -213,6 +229,11 @@ public class Simulator {
         // Log end
         System.out.println("Simulation finished (simulated " + (runtimeNanoseconds / 1e9) + "s in a real-world time of " + ((System.currentTimeMillis() - startTime) / 1000.0) + "s).");
 
+    }
+    
+    static private void readUserInput(NonblockingBufferedReader reader) {
+    	int command = reader.readChar();
+    	currentCommand = command;
     }
 
     /**

@@ -78,7 +78,6 @@ public class XpanderRouter extends RemoteRoutingController{
 
 
 		}
-
 		logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
 				,flowId,Simulator.getCurrentTime(),false);
 		mPaths.remove(flowId);
@@ -94,6 +93,7 @@ public class XpanderRouter extends RemoteRoutingController{
 			mG.deleteEdge(new ImmutablePair<Integer, Integer>(next, curr));
 			curr = next;
 		}
+		
 	}
 
 	@Override
