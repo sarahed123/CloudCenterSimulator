@@ -8,6 +8,9 @@ import ch.ethz.systems.netbench.core.random.RandomManager;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -173,18 +176,21 @@ public class Simulator {
         long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
         boolean endedDueToFlowThreshold = false;
         while (!eventQueue.isEmpty() && now <= runtimeNanoseconds) {
-        	while(currentCommand!=0) {
-        		readUserInput(reader);
+        	while(reader.isPaused()) {
         		
-        		if(currentCommand==(int)'c') {
-        			currentCommand = reader.resetCommand();
-        			
-        		}
         		try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					throw new RuntimeException("thread interrupted");
+        			System.out.println("Input command");
+        			BufferedReader buffer=new BufferedReader(new InputStreamReader(System.in));
+        			//System.out.println(buffer.readLine());
+					if(!handleUserInput(buffer.readLine())) {
+						reader.reset();
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					throw new RuntimeException(e);
 				}
+        		
+        		
         	}
 
             // Go to next event
@@ -217,7 +223,6 @@ public class Simulator {
                 break;
             }
             
-            readUserInput(reader);
         }
 
         // Make sure run ends at the final time if it ended because there were no
@@ -231,10 +236,16 @@ public class Simulator {
 
     }
     
-    static private void readUserInput(NonblockingBufferedReader reader) {
-    	int command = reader.readChar();
-    	currentCommand = command;
-    }
+    private static boolean handleUserInput(String input) {
+		switch(input) {
+		case "s":
+		case "start":
+			return false;
+		}
+		return true;
+		
+	}
+
 
     /**
      * Register to the simulator that a flow has been finished.
