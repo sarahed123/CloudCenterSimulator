@@ -12,12 +12,14 @@ public class NonblockingBufferedReader {
 	private int command;
     private volatile boolean closed = false;
     private Thread backgroundReaderThread = null;
-    
+    BufferedReader bufferedReader;
+    final Object lock = new Object();
+
     public NonblockingBufferedReader(InputStream input) {
         this(new InputStreamReader(input));
       }
     public NonblockingBufferedReader(final InputStreamReader reader) {
-    	BufferedReader bufferedReader = new BufferedReader(reader);
+    	bufferedReader = new BufferedReader(reader);
         backgroundReaderThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -27,10 +29,13 @@ public class NonblockingBufferedReader {
                         if(c!='\n') {
                         	command = c;
                         }
-                        
-                       
+                        if(command == 'p') {
+                        	System.out.println("Pausing");
+                        	stopReading();
+                        }
+                    
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 } finally {
                     closed = true;
@@ -42,7 +47,9 @@ public class NonblockingBufferedReader {
     }
 
     public int readChar()  {
-        return command;
+    	int tmp = command;
+    	command = 0;
+        return tmp;
     }
 
     public void close() {
@@ -51,9 +58,29 @@ public class NonblockingBufferedReader {
             backgroundReaderThread = null;
         }
     }
-	public int resetCommand() {
+	public void reset() {
 		command = 0;
-		return command;
+		synchronized (lock) {
+			lock.notify();
+		}
+		
 		
 	}
+	
+	private void stopReading(){
+		try {
+			synchronized (lock) {
+				lock.wait();
+			}
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			throw new RuntimeException(e);
+		}
+	}
+	public boolean isPaused() {
+		
+		return command=='p';
+	}
+	
 }
