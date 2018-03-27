@@ -1,23 +1,27 @@
 import random
+import copy
 import sys
 
+def super_shuffle(lst):
+    new_lst = copy.copy(lst)
+    random.shuffle(new_lst)
+    for old, new in zip(lst, new_lst):
+        if old == new:
+            return super_shuffle(lst)
+
+    return new_lst
+
 def main(outname, n,servers):
-    if n%(2) != 0:
-        print("set size must be even")
-        sys.exit(0)
-    setSize = n/2
+
     s=list(range(n))
     #random.shuffle(s) # << shuffle before print or assignment
-    s1 = s[0:int(setSize)]
-    s2 = s[int(setSize):n]
+    s2 = super_shuffle(s);
     
     
     with open(outname, 'w') as f:
-        for j in range(servers):
-            for i in range(int(setSize)):
-                f.write("%d->%d"%(s1[i],s2[int((i+j)%setSize)]))
-                
-                if not (j==servers-1 and i==n/2-1):
+        for i in range(len(s)):
+            f.write("%d->%d"%(s[i],s2[i]))
+            if i<len(s)-1:
                    f.write(",") 
     
 if __name__ == "__main__":
@@ -26,3 +30,5 @@ if __name__ == "__main__":
         print("Usage: fat_tree_traffic.py <outname> <set_size> <servers_per_node>")
     else:
         main(args[0],int(args[1]),int(args[2]))
+    
+    
