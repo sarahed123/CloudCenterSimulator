@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.random.RandomManager;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
+import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 
 import java.io.BufferedReader;
@@ -41,6 +42,7 @@ public class Simulator {
     // Whether the simulator is setup
     private static boolean isSetup = false;
 
+    private static long totalRuntimeNs;
     // Randomness manager
     private static RandomManager randomManager;
 
@@ -146,6 +148,10 @@ public class Simulator {
     public static void runNs(long runtimeNanoseconds) {
         runNs(runtimeNanoseconds, -1);
     }
+    
+    public static long getTotalRunTimeNs() {
+    	return totalRuntimeNs;
+    }
 
     /**
      * Run the simulator for at most the specified amount of time, or
@@ -160,6 +166,7 @@ public class Simulator {
 
         // Reset run variables (queue is not cleared because it has to start somewhere, e.g. flow start events)
         now = 0;
+        totalRuntimeNs = runtimeNanoseconds;
         NonblockingBufferedReader reader = new NonblockingBufferedReader(System.in);
         // Finish flow threshold, if it is negative the flow finish will be very far in the future
         finishFlowIdThreshold = flowsFromStartToFinish;
@@ -241,6 +248,9 @@ public class Simulator {
 		case "s":
 		case "start":
 			return false;
+		case "dump-state":
+			SimulatorStateSaver.save(eventQueue);
+			break;
 		}
 		return true;
 		
