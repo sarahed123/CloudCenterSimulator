@@ -19,6 +19,7 @@ import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
+import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingSwitch;
@@ -38,6 +39,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
 		mPaths = new HashMap<Long,Path>();
+		
 		flowCounter = 0;
 		flowFailuresSample = 0;
 	}
@@ -158,6 +160,19 @@ public class XpanderRouter extends RemoteRoutingController{
 		
 		oos.writeObject(mPaths);
 		System.out.println("Done writing paths");
+		
+	}
+
+	@Override
+	protected void reset_state() {
+		String dumpFolder = Simulator.getConfiguration().getPropertyOrFail("from_state");
+		mG = (VariableGraph) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_graph.ser");
+		mPaths = (HashMap<Long, Path>) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_paths.ser");
+		for(Long flow : mPaths.keySet()) {
+			int source = mPaths.get(flow).getVertexList().get(0).getId();
+			int dest = mPaths.get(flow).getVertexList().get(mPaths.get(flow).getVertexList().size()-1).getId();
+			updateForwardingTables(source, dest, mPaths.get(flow), flow);
+		}
 		
 	}
 }

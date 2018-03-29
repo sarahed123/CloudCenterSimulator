@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.exceptions.PropertyMissingException;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
@@ -37,7 +38,14 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 			throw new PropertyValueInvalidException(Simulator.getConfiguration(),"centered_routing_type");
 		}
 		mInstance.setHeaderSize(headerSize);
+		try {
+			mInstance.reset_state();
+		}catch(PropertyMissingException e) {
+			
+		}
 	}
+
+	protected abstract void reset_state();
 
 	private void setHeaderSize(long headerSize) {
 		this.headerSize = headerSize;

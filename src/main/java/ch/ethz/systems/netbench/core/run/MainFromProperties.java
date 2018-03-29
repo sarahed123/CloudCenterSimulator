@@ -50,7 +50,12 @@ public class MainFromProperties {
         // Initialization of the three components
         BaseInitializer initializer = generateInfrastructure();
         populateRoutingState(initializer.getIdToNetworkDevice());
-        planTraffic(runtimeNs, initializer.getIdToTransportLayer());
+        if(runConfiguration.contains("from_state")) {
+        	
+        }else {
+        	planTraffic(runtimeNs, initializer.getIdToTransportLayer());
+        }
+        
 
         // Save analysis command
         String analysisCommand = Simulator.getConfiguration().getPropertyWithDefault("analysis_command", null);
