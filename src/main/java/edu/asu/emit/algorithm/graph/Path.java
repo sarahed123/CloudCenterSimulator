@@ -30,6 +30,7 @@
  */
 package edu.asu.emit.algorithm.graph;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Vector;
 
@@ -41,7 +42,7 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
  * @author yqi
  * @author snkas
  */
-public class Path implements BaseElementWithWeight {
+public class Path implements BaseElementWithWeight, Serializable {
 
 	// List of vertices in the path
 	protected final List<Vertex> vertexList;

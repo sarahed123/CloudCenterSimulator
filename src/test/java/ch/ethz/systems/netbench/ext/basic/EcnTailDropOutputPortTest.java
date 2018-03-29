@@ -5,6 +5,8 @@ import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +39,9 @@ public class EcnTailDropOutputPortTest {
     public void setup() {
 
         Simulator.setup(0, new NBProperties(BaseAllowedProperties.LOG, BaseAllowedProperties.PROPERTIES_RUN));
-
+        BaseInitializer.init(null, null, null, null);
+        BaseInitializer.getInstance().getIdToNetworkDevice().put(10, sourceNetworkDevice);
+        BaseInitializer.getInstance().getIdToNetworkDevice().put(67, targetNetworkDevice);
         // Two network devices
         when(sourceNetworkDevice.getIdentifier()).thenReturn(10);
         when(targetNetworkDevice.getIdentifier()).thenReturn(67);
@@ -194,7 +198,7 @@ public class EcnTailDropOutputPortTest {
 
         // Port with 100 packets and 40 packets ECN limit
         EcnTailDropOutputPort port = new EcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
-
+        
         // Queue two packets
         port.enqueue(packet);
         port.enqueue(packet);

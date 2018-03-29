@@ -2,13 +2,13 @@ package ch.ethz.systems.netbench.core.run.traffic;
 
 import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 
 public class FlowStartEvent extends Event {
 
-    private final TransportLayer transportLayer;
     private final int targetId;
     private final long flowSizeByte;
-
+    private final int networkDeviceId; 
     /**
      * Create event which will happen the given amount of nanoseconds later.
      *
@@ -19,14 +19,15 @@ public class FlowStartEvent extends Event {
      */
     public FlowStartEvent(long timeFromNowNs, TransportLayer transportLayer, int targetId, long flowSizeByte) {
         super(timeFromNowNs);
-        this.transportLayer = transportLayer;
         this.targetId = targetId;
         this.flowSizeByte = flowSizeByte;
+        this.networkDeviceId = transportLayer.getNetworkDevice().getIdentifier();
     }
 
     @Override
     public void trigger() {
-        transportLayer.startFlow(targetId, flowSizeByte);
+    	TransportLayer tl = BaseInitializer.getInstance().getIdToNetworkDevice().get(networkDeviceId).getTransportLayer();
+    	tl.startFlow(targetId, flowSizeByte);
     }
 
 }

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -83,6 +84,18 @@ public class NBProperties extends Properties {
 		// Make sure all properties are legal
 		this.checkProperties();
 
+	}
+
+	public NBProperties(NBProperties configuration) {
+		super();
+		configuration.forEach((key, value) -> {
+		    this.setProperty((String) key, (String) value);
+		});
+		fileName = configuration.fileName;
+		graphIsRead = configuration.graphIsRead;
+		graph = configuration.graph;
+		graphDetails = configuration.graphDetails;
+		allowedProperties = configuration.allowedProperties;
 	}
 
 	/**
@@ -472,6 +485,16 @@ public class NBProperties extends Properties {
 			res.append("\"\n");
 		}
 		return res.toString();
+	}
+
+	public void saveToFile(String file) throws IOException {
+		
+		FileOutputStream out = new FileOutputStream(file);
+		this.store(out, "");
+		out.close();
+		
+		
+		
 	}
 
 }

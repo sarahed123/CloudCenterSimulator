@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class BaseInitializer {
 
+	private static BaseInitializer sInstance;
     // Mappings
     private final Map<Integer, NetworkDevice> idToNetworkDevice;
     private final Map<Integer, TransportLayer> idToTransportLayer;
@@ -55,6 +56,14 @@ public class BaseInitializer {
         this.runningNodeId = 0;
         this.infrastructureAlreadyCreated = false;
         this.linkPairs = new ArrayList<>();
+    }
+    
+    public static BaseInitializer init(OutputPortGenerator outputPortGenerator,
+            NetworkDeviceGenerator networkDeviceGenerator,
+            LinkGenerator linkGenerator,
+            TransportLayerGenerator transportLayerGenerator) {
+				sInstance = new BaseInitializer(outputPortGenerator, networkDeviceGenerator, linkGenerator, transportLayerGenerator);
+				return sInstance;
     }
 
     /**
@@ -195,5 +204,10 @@ public class BaseInitializer {
     public Map<Integer, TransportLayer> getIdToTransportLayer() {
         return idToTransportLayer;
     }
+
+	public static BaseInitializer getInstance() {
+		// TODO Auto-generated method stub
+		return sInstance;
+	}
 
 }

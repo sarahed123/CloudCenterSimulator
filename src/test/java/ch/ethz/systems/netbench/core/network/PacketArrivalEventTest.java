@@ -29,7 +29,7 @@ public class PacketArrivalEventTest {
     @Test
     public void testTriggerIsolated() {
         NetworkDevice networkDevice = mock(NetworkDevice.class);
-        PacketArrivalEvent event = new PacketArrivalEvent(1000, packet, networkDevice);
+        PacketArrivalEvent event = new MockedArivalEvent(1000, packet, networkDevice);
         event.trigger();
         verify(networkDevice, times(1)).receive(packet);
     }
@@ -37,7 +37,8 @@ public class PacketArrivalEventTest {
     @Test
     public void testTriggerInSimulation() {
         NetworkDevice networkDevice = mock(NetworkDevice.class);
-        PacketArrivalEvent event = new PacketArrivalEvent(1000, packet, networkDevice);
+        
+        PacketArrivalEvent event = new MockedArivalEvent(1000, packet, networkDevice);
         Simulator.registerEvent(event);
         Simulator.runNs(2000);
         verify(networkDevice, times(1)).receive(packet);
@@ -47,6 +48,7 @@ public class PacketArrivalEventTest {
     public void testTriggerInSimulationJustNot() {
         NetworkDevice networkDevice = mock(NetworkDevice.class);
         PacketArrivalEvent event = new PacketArrivalEvent(1000, packet, networkDevice);
+        
         Simulator.registerEvent(event);
         Simulator.runNs(999);
         verify(networkDevice, times(0)).receive(packet);
@@ -55,7 +57,7 @@ public class PacketArrivalEventTest {
     @Test
     public void testTriggerInSimulationJust() {
         NetworkDevice networkDevice = mock(NetworkDevice.class);
-        PacketArrivalEvent event = new PacketArrivalEvent(999, packet, networkDevice);
+        PacketArrivalEvent event = new MockedArivalEvent(999, packet, networkDevice);
         Simulator.registerEvent(event);
         Simulator.runNs(999);
         verify(networkDevice, times(1)).receive(packet);
