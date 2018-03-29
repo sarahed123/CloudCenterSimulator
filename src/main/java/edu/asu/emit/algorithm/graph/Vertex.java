@@ -30,13 +30,15 @@
  */
 package edu.asu.emit.algorithm.graph;
 
+import java.io.Serializable;
+
 /**
  * The class defines a vertex in the graph.
  * 
  * @author yqi
  * @author snkas
  */
-public class Vertex implements Comparable<Vertex> {
+public class Vertex implements Comparable<Vertex>, Serializable {
 
     // Vertex identifier
 	private final int id;

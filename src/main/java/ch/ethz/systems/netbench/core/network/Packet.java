@@ -1,12 +1,14 @@
 package ch.ethz.systems.netbench.core.network;
 
+import java.io.Serializable;
+
 import ch.ethz.systems.netbench.core.Simulator;
 
 /**
  * The packet is the unit of transfer through the network.
  * It must be part of a flow and have a fixed size.
  */
-public abstract class Packet implements PacketHeader {
+public abstract class Packet implements PacketHeader,Serializable {
 
     private int flowletId;
     private final long flowId;

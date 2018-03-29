@@ -28,7 +28,7 @@ public class BaseAllowedProperties {
             "run_folder_base_dir",
             "analysis_command",
             "finish_when_first_flows_finish",
-
+            "from_state",
             // Infrastructure
             "transport_layer",
             "network_device",

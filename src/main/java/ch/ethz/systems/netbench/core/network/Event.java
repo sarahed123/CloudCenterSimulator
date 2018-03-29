@@ -1,8 +1,10 @@
 package ch.ethz.systems.netbench.core.network;
 
+import java.io.Serializable;
+
 import ch.ethz.systems.netbench.core.Simulator;
 
-public abstract class Event implements Comparable<Event> {
+public abstract class Event implements Comparable<Event>, Serializable {
 
     // Added for absolute determinism in the event priority queue
     private static long c = 0;

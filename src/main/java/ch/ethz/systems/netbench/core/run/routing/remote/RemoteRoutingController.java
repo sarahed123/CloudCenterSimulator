@@ -19,7 +19,7 @@ import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.VariableGraph;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
-	private static RemoteRoutingController mInstance;
+	private static RemoteRoutingController mInstance = null;
 	protected HashMap<Long, Path> mPaths;
 	protected VariableGraph mG;
 	private static long headerSize;
@@ -47,7 +47,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	public static long getHeaderSize() {
 		return headerSize;
 	}
-
+	
 	/**
 	 * does nothting here
 	 */
@@ -118,5 +118,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	protected void switchPath(int src,int dst,Path p,long flowId) {
 		
 	}
+
+	public abstract void dumpState(String dumpFolderName) throws IOException;
 
 }

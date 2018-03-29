@@ -35,6 +35,7 @@ package edu.asu.emit.algorithm.graph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -43,7 +44,7 @@ import java.util.*;
  * @author yqi
  * @author snkas
  */
-public class Graph implements BaseGraph {
+public class Graph implements BaseGraph, Serializable {
 
     public static final long DISCONNECTED = 1000000000;
 

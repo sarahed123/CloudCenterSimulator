@@ -29,7 +29,7 @@ public class PacketDispatchedEventTest {
     @Test
     public void testTriggerIsolated() {
         OutputPort port = mock(OutputPort.class);
-        PacketDispatchedEvent event = new PacketDispatchedEvent(1000, packet, port);
+        PacketDispatchedEvent event = new MockedDispatchEvent(1000, packet, port);
         event.trigger();
         verify(port, times(1)).dispatch(packet);
     }
@@ -37,7 +37,7 @@ public class PacketDispatchedEventTest {
     @Test
     public void testTriggerInSimulation() {
         OutputPort port = mock(OutputPort.class);
-        PacketDispatchedEvent event = new PacketDispatchedEvent(1000, packet, port);
+        PacketDispatchedEvent event = new MockedDispatchEvent(1000, packet, port);
         Simulator.registerEvent(event);
         Simulator.runNs(2000);
         verify(port, times(1)).dispatch(packet);
@@ -55,7 +55,7 @@ public class PacketDispatchedEventTest {
     @Test
     public void testTriggerInSimulationJust() {
         OutputPort port = mock(OutputPort.class);
-        PacketDispatchedEvent event = new PacketDispatchedEvent(999, packet, port);
+        PacketDispatchedEvent event = new MockedDispatchEvent(999, packet, port);
         Simulator.registerEvent(event);
         Simulator.runNs(999);
         verify(port, times(1)).dispatch(packet);

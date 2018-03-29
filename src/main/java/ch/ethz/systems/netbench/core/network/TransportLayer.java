@@ -59,6 +59,10 @@ public abstract class TransportLayer {
     public final void setNetworkDevice(NetworkDevice networkDevice) {
         this.networkDevice = networkDevice;
     }
+    
+    public NetworkDevice getNetworkDevice() {
+		return networkDevice;
+	}
 
     /**
      * Reception of a packet from its network device (through the intermediary).

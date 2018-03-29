@@ -1,5 +1,8 @@
 package ch.ethz.systems.netbench.xpt.xpander;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -142,6 +145,19 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	public void resetCurrentState() {
 		flowFailuresSample = 0;
+		
+	}
+
+	@Override
+	public void dumpState(String dumpFolderName) throws IOException {
+		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dumpFolderName + "/" + "central_router_graph.ser")); 
+		
+		oos.writeObject(mG);
+		System.out.println("Done writing graph");
+		oos = new ObjectOutputStream(new FileOutputStream(dumpFolderName + "/" + "central_router_paths.ser")); 
+		
+		oos.writeObject(mPaths);
+		System.out.println("Done writing paths");
 		
 	}
 }

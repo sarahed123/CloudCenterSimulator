@@ -152,13 +152,13 @@ public class MainFromProperties {
         System.out.println("\nINFRASTRUCTURE\n==================");
 
         // 1.1) Generate nodes
-        BaseInitializer initializer = new BaseInitializer(
+        BaseInitializer.init(
                 InfrastructureSelector.selectOutputPortGenerator(),
                 InfrastructureSelector.selectNetworkDeviceGenerator(),
                 InfrastructureSelector.selectLinkGenerator(),
                 InfrastructureSelector.selectTransportLayerGenerator()
         );
-
+        BaseInitializer initializer = BaseInitializer.getInstance();
         // 1.2) Generate the links from the topology between the nodes
         initializer.createInfrastructure();
 
@@ -198,7 +198,8 @@ public class MainFromProperties {
 
         // Start traffic generation
         System.out.println("TRAFFIC\n==================");
-
+        
+        
         // 3.1) Create flow plan for the simulator
         TrafficPlanner planner = TrafficSelector.selectPlanner(idToTransportLayer);
         planner.createPlan(runtimeNs);

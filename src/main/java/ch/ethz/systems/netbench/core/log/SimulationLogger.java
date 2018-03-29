@@ -570,4 +570,8 @@ public class SimulationLogger {
 		);
 	}
 
+	public static void dumpState(String dumpFolderName) {
+		
+	}
+
 }

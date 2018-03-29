@@ -1,11 +1,13 @@
 package ch.ethz.systems.netbench.core.network;
 
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+
 /**
  * Event for the complete arrival of a packet in its entirety.
  */
 public class PacketArrivalEvent extends Event {
 
-    private final NetworkDevice arrivalNetworkDevice;
+    private final int arrivalNetworkDeviceId;
     private final Packet packet;
 
     /**
@@ -18,17 +20,22 @@ public class PacketArrivalEvent extends Event {
     PacketArrivalEvent(long timeFromNowNs, Packet packet, NetworkDevice arrivalNetworkDevice) {
         super(timeFromNowNs);
         this.packet = packet;
-        this.arrivalNetworkDevice = arrivalNetworkDevice;
+        this.arrivalNetworkDeviceId = arrivalNetworkDevice.getIdentifier();
     }
 
     @Override
     public void trigger() {
-        arrivalNetworkDevice.receive(packet);
+        getNetworkDevice().receive(packet);
+    }
+    
+    protected NetworkDevice getNetworkDevice() {
+		return BaseInitializer.getInstance().getIdToNetworkDevice().get(arrivalNetworkDeviceId);
+    	
     }
 
     @Override
     public String toString() {
-        return "PacketArrivalEvent<" + arrivalNetworkDevice.getIdentifier() + ", " + this.getTime() + ", " + this.packet + ">";
+        return "PacketArrivalEvent<" + arrivalNetworkDeviceId + ", " + this.getTime() + ", " + this.packet + ">";
     }
 
 }
