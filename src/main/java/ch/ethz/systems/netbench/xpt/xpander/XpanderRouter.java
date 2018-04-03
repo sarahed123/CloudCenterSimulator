@@ -46,11 +46,12 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	@Override
 	public void initRoute(int source,int dest,long flowId){ 
-
+		
 		if(mPaths.containsKey(flowId)) {
 			throw new FlowPathExists(flowId);
 		}
 		Path p = generatePathFromGraph(source, dest);
+		
 		updateForwardingTables(source,dest,p,flowId);
 		removePathFromGraph(p);
 		mPaths.put(flowId, p);
@@ -171,6 +172,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		for(Long flow : mPaths.keySet()) {
 			int source = mPaths.get(flow).getVertexList().get(0).getId();
 			int dest = mPaths.get(flow).getVertexList().get(mPaths.get(flow).getVertexList().size()-1).getId();
+			//System.out.println("flow " + flow);
+			//System.out.println("path " + mPaths.get(flow));
 			updateForwardingTables(source, dest, mPaths.get(flow), flow);
 		}
 		

@@ -10,6 +10,11 @@ import ch.ethz.systems.netbench.core.Simulator;
  */
 public abstract class Packet implements PacketHeader,Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4933576864019549829L;
+
     private int flowletId;
     private final long flowId;
     private final long sizeBit;
@@ -23,10 +28,12 @@ public abstract class Packet implements PacketHeader,Serializable {
      * @param sizeBit   Total size of the packet in bits (must be total, as it is used by the {@link Link link}).
      */
     public Packet(long flowId, long sizeBit) {
+
         this.flowletId = 0;
         this.flowId = flowId;
         this.sizeBit = sizeBit;
         this.departureTime = Simulator.getCurrentTime();
+        
     }
 
     /**
@@ -85,7 +92,7 @@ public abstract class Packet implements PacketHeader,Serializable {
         return "Packet<" +
                     "flow #" + flowId + " (flowlet " + flowletId + ")" +
                     ", size: " + sizeBit +
-                    ", departure: " + departureTime +
+                    ", departure: " + departureTime + 
                 ">";
     }
 

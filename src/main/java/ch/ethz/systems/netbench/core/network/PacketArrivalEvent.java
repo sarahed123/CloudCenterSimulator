@@ -7,7 +7,11 @@ import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
  */
 public class PacketArrivalEvent extends Event {
 
-    private final int arrivalNetworkDeviceId;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3494066931483272486L;
+	private final int arrivalNetworkDeviceId;
     private final Packet packet;
 
     /**

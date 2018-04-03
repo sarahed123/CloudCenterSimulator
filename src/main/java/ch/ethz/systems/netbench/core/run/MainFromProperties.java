@@ -50,10 +50,10 @@ public class MainFromProperties {
         // Initialization of the three components
         BaseInitializer initializer = generateInfrastructure();
         populateRoutingState(initializer.getIdToNetworkDevice());
-        if(runConfiguration.contains("from_state")) {
-        	
-        }else {
+        if(runConfiguration.getPropertyWithDefault("from_state",null)==null) {
         	planTraffic(runtimeNs, initializer.getIdToTransportLayer());
+        }else {
+        	
         }
         
 

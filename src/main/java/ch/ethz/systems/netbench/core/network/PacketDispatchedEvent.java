@@ -8,7 +8,11 @@ import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
  */
 public class PacketDispatchedEvent extends Event {
 
-    private final Packet packet;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8099553808355024992L;
+	private final Packet packet;
     private final int deviceId;
     private final int targetId;
 

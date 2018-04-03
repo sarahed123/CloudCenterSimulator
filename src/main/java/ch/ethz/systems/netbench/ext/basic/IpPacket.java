@@ -4,7 +4,12 @@ import ch.ethz.systems.netbench.core.network.Packet;
 
 public abstract class IpPacket extends Packet implements IpHeader {
 
-    // IP header is [20, 60] bytes, assume maximum: 60 * 8
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8357459540883151699L;
+
+	// IP header is [20, 60] bytes, assume maximum: 60 * 8
     private static final long IP_HEADER_SIZE_BIT = 480L;
 
     // IP header fields

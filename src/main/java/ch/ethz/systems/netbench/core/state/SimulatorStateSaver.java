@@ -20,6 +20,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Event;
+import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 
@@ -49,6 +50,7 @@ public class SimulatorStateSaver {
 			NBProperties p = new NBProperties(Simulator.getConfiguration());
 			Simulator.dumpState(dumpFolderName);
 			SimulationLogger.dumpState(dumpFolderName);
+			TransportLayer.dumpState(dumpFolderName);
 			rrc.dumpState(dumpFolderName);
 			p.put("from_state", dumpFolderName);
 			p.saveToFile(dumpFolderName + "/" + confFile.getName());

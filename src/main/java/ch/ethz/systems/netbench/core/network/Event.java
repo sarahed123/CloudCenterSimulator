@@ -6,7 +6,11 @@ import ch.ethz.systems.netbench.core.Simulator;
 
 public abstract class Event implements Comparable<Event>, Serializable {
 
-    // Added for absolute determinism in the event priority queue
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1727738476698681545L;
+	// Added for absolute determinism in the event priority queue
     private static long c = 0;
     private final long eid;
 

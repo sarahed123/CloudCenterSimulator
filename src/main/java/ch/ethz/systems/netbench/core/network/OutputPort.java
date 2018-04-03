@@ -87,7 +87,7 @@ public abstract class OutputPort {
                     packet,
                     this
             ));
-
+            
             // It is now sending again
             isSending = true;
 
@@ -107,7 +107,6 @@ public abstract class OutputPort {
      * @param packet    Packet instance that was being sent
      */
     protected void dispatch(Packet packet) {
-
         // Finished sending packet, the last bit of the packet should arrive the link-delay later
         if (!link.doesNextTransmissionFail(packet.getSizeBit())) {
             Simulator.registerEvent(
@@ -129,7 +128,6 @@ public abstract class OutputPort {
             Packet packetFromQueue = queue.poll();
             decreaseBufferOccupiedBits(packetFromQueue.getSizeBit());
             logger.logQueueState(queue.size(), bufferOccupiedBits,packetFromQueue);
-
             // Register when the packet is actually dispatched
             Simulator.registerEvent(new PacketDispatchedEvent(
                     packetFromQueue.getSizeBit() / link.getBandwidthBitPerNs(),
