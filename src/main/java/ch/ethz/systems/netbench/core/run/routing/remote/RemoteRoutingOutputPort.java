@@ -20,23 +20,31 @@ public class RemoteRoutingOutputPort extends OutputPort{
 
 	@Override
 	public void enqueue(Packet packet) {
-		 guaranteedEnqueue(packet);
 		
+		guaranteedEnqueue(packet);
+
 	}
-	
+
 	@Override
-	 protected void dispatch(Packet packet) {
+	protected void dispatch(Packet packet) {
+		
+
+		RemoteRoutingPacket rrpacket = (RemoteRoutingPacket) packet;
+		
+
+
 		super.dispatch(packet);
 		try {
-			if(ownNetworkDevice.isServer()){
+			if(ownNetworkDevice.isServer() && rrpacket.getSourceId()==ownNetworkDevice.getIdentifier()){
 				RemoteRoutingTransportLayer tl = (RemoteRoutingTransportLayer) ownNetworkDevice.getTransportLayer();
-				tl.continueFlow(packet.getFlowId());
+
+				tl.continueFlow(rrpacket);
 			}
-			
+
 		}catch(DeviceNotSourceException e){
-			
+
 		}
-		
+
 	}
 
 }

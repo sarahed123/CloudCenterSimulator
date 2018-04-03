@@ -42,6 +42,7 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     @Override
     public void receiveFromIntermediary(Packet genericPacket) {
     	IpPacket packet = (IpPacket) genericPacket;
+
     	try {
     		RemoteRoutingController.getInstance().initRoute(packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
     	}catch(FlowPathExists e) {
@@ -57,6 +58,7 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     }
     
     protected void forwardToNextSwitch(IpPacket packet) {
+
     	
     	forwardingTable.get(packet.getFlowId()).enqueue(packet);
 		
@@ -80,11 +82,12 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	public void receive(Packet genericPacket) {
 		IpPacket packet = (IpPacket) genericPacket;
 		if (packet.getDestinationId() == this.identifier) {
-
+			
 			// Hand to the underlying server
 			this.passToIntermediary(packet); // Will throw null-pointer if this network device does not have a server attached to it
 
 		} else {
+			
 			// Forward to the next switch (automatically advances path progress)
 			forwardToNextSwitch(packet);
 			

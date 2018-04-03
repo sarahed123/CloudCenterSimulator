@@ -46,12 +46,14 @@ public abstract class Socket {
      * @param newlyConfirmedFlowByte     Amount of flow (> 0) newly confirmed
      */
     protected void confirmFlow(long newlyConfirmedFlowByte) {
+    	
         assert(!this.isReceiver && this.remainderToConfirmFlowSizeByte >= newlyConfirmedFlowByte && newlyConfirmedFlowByte > 0);
         this.remainderToConfirmFlowSizeByte -= newlyConfirmedFlowByte;
         this.privateLogger.logFlowAcknowledged(newlyConfirmedFlowByte);
-
+        
         // Remove references to the socket after finish
         if (isAllFlowConfirmed()) {
+        	
         	onAllFlowConfirmed();
             
         }
@@ -70,6 +72,7 @@ public abstract class Socket {
      * @return  True iff all flow has been confirmed
      */
     protected boolean isAllFlowConfirmed() {
+    	
         return remainderToConfirmFlowSizeByte == 0;
     }
 
@@ -100,7 +103,7 @@ public abstract class Socket {
      * socket is constructed, it is assumed that it is the receiver.
      * Do not override.
      */
-    void markAsSender() {
+    public void markAsSender() {
         this.isReceiver = false;
     }
 

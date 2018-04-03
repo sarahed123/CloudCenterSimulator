@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.core.run.routing.remote;
 
+import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.bare.BareSocket;
@@ -22,12 +23,16 @@ public class RemoteRoutingTransportLayer extends TransportLayer {
 		
 	}
 
-	public void continueFlow(long flowId) {
-		RemoteRoutingSocket rrs = (RemoteRoutingSocket) flowIdToSocket.get(flowId);
+	public void continueFlow(RemoteRoutingPacket packet) {
+    	
+		RemoteRoutingSocket rrs = (RemoteRoutingSocket) flowIdToSocket.get(packet.getFlowId());
 		if(rrs==null) {
-			throw new DeviceNotSourceException(flowId,networkDevice.getIdentifier());
+			//this can happen in state reset
+			rrs = (RemoteRoutingSocket) createSocket(packet.getFlowId(), packet.getDestinationId(), packet.flowRemainder);
+			rrs.markAsSender();
+			flowIdToSocket.put(packet.getFlowId(), rrs);
 		}
-		rrs.continueFlow();
+		rrs.continueFlow(packet);
 		
 	}
     

@@ -6,7 +6,11 @@ import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 
 public class FlowStartEvent extends Event {
 
-    private final int targetId;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -953241448509175658L;
+	private final int targetId;
     private final long flowSizeByte;
     private final int networkDeviceId; 
     /**

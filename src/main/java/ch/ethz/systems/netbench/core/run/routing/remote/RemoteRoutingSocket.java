@@ -15,11 +15,13 @@ public class RemoteRoutingSocket extends Socket{
 	public RemoteRoutingSocket(RemoteRoutingTransportLayer transportLayer, long flowId, int sourceId, int destinationId,
 			long flowSizeByte) {
 		super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
+		
 		// TODO Auto-generated constructor stub
 	}
 
     @Override
     protected void onAllFlowConfirmed() {
+
     	((RemoteRoutingTransportLayer) transportLayer).releasePath(destinationId,flowId);
     	//super.onAllFlowConfirmed();
     }
@@ -27,7 +29,7 @@ public class RemoteRoutingSocket extends Socket{
     @Override
     public void start() {
         // Send out single data packet at start
-         transportLayer.send(new RemoteRoutingPacket(flowId, getNextPayloadSizeByte(), sourceId, destinationId, 100));
+         transportLayer.send(new RemoteRoutingPacket(flowId, getNextPayloadSizeByte(), sourceId, destinationId, 100,getRemainderToConfirmFlowSizeByte()));
 
       
     }
@@ -42,10 +44,19 @@ public class RemoteRoutingSocket extends Socket{
         return Math.min(1000L, getRemainderToConfirmFlowSizeByte());
     }
 
-	public void continueFlow() {
+	public void continueFlow(RemoteRoutingPacket packet) {
+	
+		if(getNextPayloadSizeByte()==0) {
+			
+			new Exception().printStackTrace();
+		}
 		confirmFlow(getNextPayloadSizeByte());
-		if(!isAllFlowConfirmed())
-			transportLayer.send(new RemoteRoutingPacket(flowId, getNextPayloadSizeByte(), sourceId, destinationId, 100));
+		long nextPayload = getNextPayloadSizeByte();
+		
+		if(!isAllFlowConfirmed()) {
+			transportLayer.send(new RemoteRoutingPacket(flowId,nextPayload, sourceId, destinationId, 100,getRemainderToConfirmFlowSizeByte()));
+		}
+			
 	}
 
     

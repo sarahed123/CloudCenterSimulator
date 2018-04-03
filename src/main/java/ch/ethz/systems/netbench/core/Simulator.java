@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -136,6 +137,7 @@ public class Simulator {
 			JSONObject json = SimulatorStateSaver.loadJson(folderName + "/" + "simulator_data.json");
 			now = (long) json.get("now");
 			eventQueue = (PriorityQueue<Event>) SimulatorStateSaver.readObjectFromFile(folderName + "/" + "simulator_queue.ser");
+			TransportLayer.restorState();
 			System.out.println("Done restoring simulator");
 		}
 		
@@ -182,7 +184,7 @@ public class Simulator {
 	public static void runNs(long runtimeNanoseconds, long flowsFromStartToFinish) {
 
 		// Reset run variables (queue is not cleared because it has to start somewhere, e.g. flow start events)
-		now = 0;
+		//now = 0;
 		totalRuntimeNs = runtimeNanoseconds;
 		NonblockingBufferedReader reader = new NonblockingBufferedReader(System.in);
 		// Finish flow threshold, if it is negative the flow finish will be very far in the future
@@ -190,7 +192,8 @@ public class Simulator {
 		if (flowsFromStartToFinish <= 0) {
 			flowsFromStartToFinish = Long.MAX_VALUE;
 		}
-
+		
+		
 		// Log start
 		System.out.println("Starting simulation (total time: " + runtimeNanoseconds + "ns);...");
 
@@ -216,13 +219,15 @@ public class Simulator {
 
 
 			}
-
+			
 			// Go to next event
 			Event event = eventQueue.peek();
 			now = event.getTime();
 			if (now <= runtimeNanoseconds) {
-				event.trigger();
 				eventQueue.poll();
+				event.trigger();
+						
+
 			}
 
 			// Log elapsed time

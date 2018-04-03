@@ -1,14 +1,22 @@
 package ch.ethz.systems.netbench.core.network;
 
+import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
+
+import org.json.simple.JSONObject;
 
 /**
  * The transport layer represents the entity that communicates
@@ -149,5 +157,27 @@ public abstract class TransportLayer {
         flowIdCounter = 0;
         flowIdToReceiver.clear();
     }
+
+	public static void dumpState(String dumpFolderName) throws IOException {
+		JSONObject obj = new JSONObject();
+		obj.put("flowIdCounter", flowIdCounter);
+		FileWriter file = new FileWriter(dumpFolderName + "/" + "transport_layer_data.json");
+		file.write(obj.toJSONString());
+		file.flush();
+
+	}
+	
+	public static void restorState() {
+		NBProperties configuration = Simulator.getConfiguration();
+		if(configuration.getPropertyWithDefault("from_state", null)!=null) {
+			System.out.println("Restoring transport layer");
+			String folderName = configuration.getPropertyWithDefault("from_state", null);
+			JSONObject json = SimulatorStateSaver.loadJson(folderName + "/" + "transport_layer_data.json");
+			flowIdCounter = (long) json.get("flowIdCounter");
+			System.out.println("Done restoring simulator");
+		}
+	}
+	
+	
 
 }

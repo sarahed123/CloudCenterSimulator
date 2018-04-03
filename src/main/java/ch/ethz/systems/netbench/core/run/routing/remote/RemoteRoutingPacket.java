@@ -4,10 +4,15 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 public class RemoteRoutingPacket extends IpPacket {
 	
-
-	public RemoteRoutingPacket(long flowId, long payloadSizeBit, int sourceId, int destinationId, int TTL) {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 520197092371233676L;
+	public long flowRemainder;
+	public RemoteRoutingPacket(long flowId, long payloadSizeBit, int sourceId, int destinationId, int TTL, long remainder) {
 		super(flowId, payloadSizeBit, sourceId, destinationId, TTL,RemoteRoutingController.getHeaderSize());
-		// TODO Auto-generated constructor stub
+		flowRemainder = remainder;
+		
 	}
 
 
