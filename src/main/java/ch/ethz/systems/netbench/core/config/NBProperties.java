@@ -8,6 +8,7 @@ import edu.asu.emit.algorithm.graph.Graph;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -30,11 +31,13 @@ public class NBProperties extends Properties {
 
 	// Master run properties file (not the default)
 	private final String fileName;
-
+	private LinkedList<NBProperties> subConfigs;
 	// Cache properties variables
 	private boolean graphIsRead;
 	private Graph graph;
 	private GraphDetails graphDetails;
+
+	private NBProperties currSubConfig;
 
 	/**
 	 * Create property manager without anything set.
@@ -80,10 +83,32 @@ public class NBProperties extends Properties {
 		this.graphDetails = null;
 		this.allowedProperties = new HashSet<>();
 		initializeAllowedProperties(additionalAllowedProperties);
-
+		
 		// Make sure all properties are legal
 		this.checkProperties();
+		loadSubConfigurtations();
 
+	}
+
+	private void loadSubConfigurtations() {
+		if(this.containsKey("sub_configurations_folder")) {
+			File dir = new File(this.getProperty("sub_configurations_folder"));
+			subConfigs = new LinkedList<NBProperties>();
+			if(dir.isDirectory()) {
+				File[] files = dir.listFiles();
+				if(files.length==0) {
+					throw new RuntimeException("no files in sub configuration folder");
+				}
+				for(int i = 0; i<files.length; i++) {
+					subConfigs.add(new NBProperties(files[i].getAbsolutePath(), allowedProperties.toArray(new String[allowedProperties.size()])));
+				}
+				currSubConfig = subConfigs.poll();
+			}else {
+				throw new PropertyValueInvalidException(this, "sub_configurations_folder");
+				
+			}
+		}
+		
 	}
 
 	public NBProperties(NBProperties configuration) {
@@ -96,6 +121,7 @@ public class NBProperties extends Properties {
 		graph = configuration.graph;
 		graphDetails = configuration.graphDetails;
 		allowedProperties = configuration.allowedProperties;
+		subConfigs = configuration.subConfigs;
 	}
 
 	/**
@@ -149,6 +175,19 @@ public class NBProperties extends Properties {
 			}
 		}
 		throw new PropertyNotExistingException(this, key);
+	}
+	
+	@Override
+	public String getProperty(String key) {
+		if(currSubConfig==null) {
+			return super.getProperty(key);
+		}
+		String prop = currSubConfig.getProperty(key);
+		
+		if(prop==null) {
+			return super.getProperty(key);
+		}
+		return prop;
 	}
 
 	/**
@@ -496,5 +535,17 @@ public class NBProperties extends Properties {
 		
 		
 	}
+
+	public boolean hasSubConfiguration() {
+		// TODO Auto-generated method stub
+		return currSubConfig!=null;
+	}
+
+	public void nextSubConfiguration() {
+		currSubConfig = subConfigs.poll();
+		
+	}
+
+
 
 }

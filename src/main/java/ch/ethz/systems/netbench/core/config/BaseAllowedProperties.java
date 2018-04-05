@@ -35,7 +35,7 @@ public class BaseAllowedProperties {
             "network_device_intermediary",
             "output_port",
             "link",
-
+            
             // Routing
             "network_device_routing",
 
@@ -84,7 +84,8 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
-
+    		"sub_configurations_folder",
+    		"common_base_dir",
             // TCP
             "TCP_ROUND_TRIP_TIMEOUT_NS",
             "TCP_MAX_SEGMENT_SIZE",
