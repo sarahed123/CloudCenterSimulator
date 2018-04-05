@@ -30,6 +30,7 @@ public class BaseInitializer {
     private final Map<Integer, NetworkDevice> idToNetworkDevice;
     private final Map<Integer, TransportLayer> idToTransportLayer;
 
+    private NetworkDevice[] idtoNetworkDeviceArray;
     // Generators
     private final OutputPortGenerator outputPortGenerator;
     private final NetworkDeviceGenerator networkDeviceGenerator;
@@ -56,6 +57,7 @@ public class BaseInitializer {
         this.runningNodeId = 0;
         this.infrastructureAlreadyCreated = false;
         this.linkPairs = new ArrayList<>();
+        this.idtoNetworkDeviceArray = null;
     }
     
     public static BaseInitializer init(OutputPortGenerator outputPortGenerator,
@@ -80,6 +82,7 @@ public class BaseInitializer {
         Graph graph = Simulator.getConfiguration().getGraph();
         GraphDetails details = Simulator.getConfiguration().getGraphDetails();
 
+        idtoNetworkDeviceArray = new NetworkDevice[details.getNumNodes()];
         // Create nodes
         for (int i = 0; i < details.getNumNodes(); i++) {
             createNode(i, details.getServerNodeIds().contains(i));
@@ -152,7 +155,7 @@ public class BaseInitializer {
         
         // Add to mappings
         idToNetworkDevice.put(id, networkDevice);
-
+        idtoNetworkDeviceArray[id] = networkDevice;
     }
 
     /**
@@ -194,6 +197,10 @@ public class BaseInitializer {
      */
     public Map<Integer, NetworkDevice> getIdToNetworkDevice() {
         return idToNetworkDevice;
+    }
+    
+    public NetworkDevice getNetworkDeviceById(int id) {
+    	return idtoNetworkDeviceArray[id];
     }
 
     /**

@@ -33,7 +33,7 @@ public class PacketArrivalEvent extends Event {
     }
     
     protected NetworkDevice getNetworkDevice() {
-		return BaseInitializer.getInstance().getIdToNetworkDevice().get(arrivalNetworkDeviceId);
+		return BaseInitializer.getInstance().getNetworkDeviceById(arrivalNetworkDeviceId);
     	
     }
 

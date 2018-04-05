@@ -30,7 +30,7 @@ public class FlowStartEvent extends Event {
 
     @Override
     public void trigger() {
-    	TransportLayer tl = BaseInitializer.getInstance().getIdToNetworkDevice().get(networkDeviceId).getTransportLayer();
+    	TransportLayer tl = BaseInitializer.getInstance().getNetworkDeviceById(networkDeviceId).getTransportLayer();
     	tl.startFlow(targetId, flowSizeByte);
     }
 
