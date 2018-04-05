@@ -17,6 +17,7 @@ import ch.ethz.systems.netbench.core.run.traffic.TrafficPlanner;
 import ch.ethz.systems.netbench.core.utility.UnitConverter;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
@@ -32,53 +33,66 @@ public class MainFromProperties {
         // Load in the configuration properties
         NBProperties runConfiguration = generateRunConfigurationFromArgs(args);
 
-        // General property: random seed
-        long seed = runConfiguration.getLongPropertyOrFail("seed");
+    	SimulationLogger.openCommon(runConfiguration);
 
-        // General property: running time in nanoseconds
-        long runtimeNs = determineRuntimeNs(runConfiguration);
-
-        // Setup simulator (it is now public known)
-        Simulator.setup(seed, runConfiguration);
-
-        // Copy configuration files for reproducibility
-        SimulationLogger.copyRunConfiguration();
-
-        // Manage topology (e.g. extend with servers if said by configuration)
-        manageTopology();
-
-        // Initialization of the three components
-        BaseInitializer initializer = generateInfrastructure();
-        populateRoutingState(initializer.getIdToNetworkDevice());
-        if(runConfiguration.getPropertyWithDefault("from_state",null)==null) {
-        	planTraffic(runtimeNs, initializer.getIdToTransportLayer());
-        }else {
-        	
-        }
         
+        do {
+        	// General property: random seed
+            long seed = runConfiguration.getLongPropertyOrFail("seed");
 
-        // Save analysis command
-        String analysisCommand = Simulator.getConfiguration().getPropertyWithDefault("analysis_command", null);
+            // General property: running time in nanoseconds
+            long runtimeNs = determineRuntimeNs(runConfiguration);
 
-        // Perform run
-        System.out.println("ACTUAL RUN\n==================");
-        try {
-        	Simulator.runNs(runtimeNs, Simulator.getConfiguration().getLongPropertyWithDefault("finish_when_first_flows_finish", -1));
-        }catch(Exception e) {
-        	e.printStackTrace();
-        }
-        
-        Simulator.reset(false);
-        System.out.println("Finished run.\n");
+            // Setup simulator (it is now public known)
+            Simulator.setup(seed, runConfiguration);
 
-        // Perform analysis
-        System.out.println("ANALYSIS\n==================");
-        if (analysisCommand != null) {
-            runCommand(analysisCommand + " " + SimulationLogger.getRunFolderFull(), true);
-            System.out.println("Finished analysis.");
-        } else {
-            System.out.println("No analysis command given; analysis is skipped.");
-        }
+            // Copy configuration files for reproducibility
+            SimulationLogger.copyRunConfiguration();
+
+            // Manage topology (e.g. extend with servers if said by configuration)
+            manageTopology();
+
+            // Initialization of the three components
+            BaseInitializer initializer = generateInfrastructure();
+            populateRoutingState(initializer.getIdToNetworkDevice());
+            if(runConfiguration.getPropertyWithDefault("from_state",null)==null) {
+            	planTraffic(runtimeNs, initializer.getIdToTransportLayer());
+            }else {
+            	
+            }
+            
+
+            // Save analysis command
+            String analysisCommand = Simulator.getConfiguration().getPropertyWithDefault("analysis_command", null);
+
+            // Perform run
+            System.out.println("ACTUAL RUN\n==================");
+            try {
+            	Simulator.runNs(runtimeNs, Simulator.getConfiguration().getLongPropertyWithDefault("finish_when_first_flows_finish", -1));
+            }catch(Exception e) {
+            	e.printStackTrace();
+            }
+            
+            Simulator.reset(false);
+            System.out.println("Finished run.\n");
+
+            // Perform analysis
+            System.out.println("ANALYSIS\n==================");
+            if (analysisCommand != null) {
+                runCommand(analysisCommand + " " + SimulationLogger.getRunFolderFull(), true);
+                System.out.println("Finished analysis.");
+            } else {
+                System.out.println("No analysis command given; analysis is skipped.");
+            }
+            try {
+				SimulationLogger.logCommon(runConfiguration);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	runConfiguration.nextSubConfiguration();
+        }while(runConfiguration.hasSubConfiguration());
+        SimulationLogger.closeCommon();
 
     }
 

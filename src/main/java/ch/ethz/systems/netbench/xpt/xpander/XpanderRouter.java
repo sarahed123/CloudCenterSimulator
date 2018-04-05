@@ -32,14 +32,14 @@ import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 
 public class XpanderRouter extends RemoteRoutingController{
-	private int flowCounter;
 	private int flowFailuresSample;
+
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice){
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
 		mPaths = new HashMap<Long,Path>();
-		
+		totalDrops = 0;
 		flowCounter = 0;
 		flowFailuresSample = 0;
 	}
@@ -121,6 +121,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
 			flowFailuresSample++;
+			totalDrops++;
 			logDrop(flowId, source, dest, mPaths.size());
 			throw new NoPathException(source,dest);	
 		}
@@ -150,6 +151,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		flowFailuresSample = 0;
 		
 	}
+	
+
 
 	@Override
 	public void dumpState(String dumpFolderName) throws IOException {

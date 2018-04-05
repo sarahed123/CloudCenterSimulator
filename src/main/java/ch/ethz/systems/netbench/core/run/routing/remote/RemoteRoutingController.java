@@ -24,6 +24,9 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	protected HashMap<Long, Path> mPaths;
 	protected VariableGraph mG;
 	private static long headerSize;
+	protected long totalDrops;
+	protected long flowCounter;
+
 	public static RemoteRoutingController getInstance() {
 		return mInstance;
 	}
@@ -52,6 +55,14 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		
 	}
 	
+	public long getTotalDrops() {
+		return totalDrops;
+	}
+	
+	public long getTotalFlows() {
+		return flowCounter;
+	}
+	
 	public static long getHeaderSize() {
 		return headerSize;
 	}
@@ -75,10 +86,10 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		}
 	}
 	
-	protected void logCurrentState(int currentAllocatedPatsh, int flowFailuresSample, int flowCounter){
+	protected void logCurrentState(int currentAllocatedPatsh, int flowFailuresSample, long flowCounter2){
 		try {
 			if(Simulator.getConfiguration().getBooleanPropertyWithDefault("log_remote_router_state", false))
-				SimulationLogger.logRemoteRouterState(currentAllocatedPatsh,flowFailuresSample,flowCounter);
+				SimulationLogger.logRemoteRouterState(currentAllocatedPatsh,flowFailuresSample,flowCounter2);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
