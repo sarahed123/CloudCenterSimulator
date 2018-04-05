@@ -38,7 +38,7 @@ public class PacketDispatchedEvent extends Event {
     }
     
     protected NetworkDevice getOwnDevice() {
-    	return BaseInitializer.getInstance().getIdToNetworkDevice().get(this.deviceId); 
+		return BaseInitializer.getInstance().getNetworkDeviceById(this.deviceId);
     }
     
     protected OutputPort getOutputPort(NetworkDevice nd){
