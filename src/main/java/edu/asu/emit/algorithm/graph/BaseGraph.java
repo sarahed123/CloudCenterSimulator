@@ -42,7 +42,7 @@ import java.util.List;
  */
 public interface BaseGraph {
 	List<Vertex> getVertexList();
-	long getEdgeWeight(Vertex source, Vertex sink);
+	double getEdgeWeight(Vertex source, Vertex sink);
 	List<Vertex> getAdjacentVertices(Vertex vertex);
 	List<Vertex> getPrecedentVertices(Vertex vertex);
 }

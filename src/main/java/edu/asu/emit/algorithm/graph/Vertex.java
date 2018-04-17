@@ -44,7 +44,7 @@ public class Vertex implements Comparable<Vertex>, Serializable {
 	private final int id;
 
     // Weight of the node (typically: shortest distance found to the node)
-	private long weight = 0;
+	private double weight = 0;
 
     /**
      * Constructor.
@@ -69,28 +69,28 @@ public class Vertex implements Comparable<Vertex>, Serializable {
      *
      * @return  Status weight
      */
-	public long getWeight() {
+	public double getWeight() {
 		return weight;
 	}
 
 	/**
 	 * Set the current status weight of the node (typically: shortest distance found to the node).
 	 *
-	 * @param status	Status weight
+	 * @param distance	Status weight
      */
-	public void setWeight(long status) {
-		weight = status;
+	public void setWeight(double distance) {
+		weight = distance;
 	}
 
     @Override
 	public int compareTo(Vertex rVertex) {
-		long diff = this.weight - rVertex.weight;
+		double diff = this.weight - rVertex.weight;
 		if (diff > 0) {
 			return 1;
 		} else if (diff < 0) {
 			return -1;
 		} else {
-			return 0;
+			return Integer.compare(getId(), rVertex.getId());
 		}
 	}
 

@@ -37,7 +37,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.*;
-
+import ch.ethz.systems.netbench.core.Simulator;;
 /**
  * The class defines a directed graph.
  * 
@@ -45,8 +45,10 @@ import java.util.*;
  * @author snkas
  */
 public class Graph implements BaseGraph, Serializable {
+	
+	
 
-    public static final long DISCONNECTED = 1000000000;
+    public static final double DISCONNECTED = 1000000000;
 
     // Maps a vertex identifier to all vertices a directed edges exists from itself to them
     private final Map<Integer, List<Vertex>> outEdges;
@@ -62,6 +64,8 @@ public class Graph implements BaseGraph, Serializable {
 
     // List of all vertices in the graph
     private final List<Vertex> vertexList;
+    
+   
 
     /**
      * Constructor to create a graph of a certain size with the given edges.
@@ -91,6 +95,8 @@ public class Graph implements BaseGraph, Serializable {
         for (Pair<Integer, Integer> linkDirPair : linkDirectedPairs) {
             addEdge(linkDirPair.getLeft(), linkDirPair.getRight(), 1);
         }
+        
+        
 
     }
 
@@ -178,8 +184,8 @@ public class Graph implements BaseGraph, Serializable {
      * @return  Edge weight
      */
     @Override
-    public long getEdgeWeight(Vertex source, Vertex target) {
-        if (edgeWeights.containsKey(new ImmutablePair<>(source.getId(), target.getId()))) {
+    public double getEdgeWeight(Vertex source, Vertex target) {
+    	if (edgeWeights.containsKey(new ImmutablePair<>(source.getId(), target.getId()))) {
             return edgeWeights.get(new ImmutablePair<>(source.getId(), target.getId()));
         } else {
             throw new RuntimeException("Graph: getEdgeWeight: cannot retrieve edge weight of non-existing edge.");
