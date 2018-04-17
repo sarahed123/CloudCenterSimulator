@@ -38,5 +38,5 @@ package edu.asu.emit.algorithm.graph;
  * @author snkas
  */
 public interface BaseElementWithWeight {
-	long getWeight();
+	double getWeight();
 }

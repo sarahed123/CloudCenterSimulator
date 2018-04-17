@@ -86,6 +86,7 @@ public class BaseAllowedProperties {
     public static final String[] EXPERIMENTAL = new String[]{
     		"sub_configurations_folder",
     		"common_base_dir",
+    		"graph_edge_weight_rule",
             // TCP
             "TCP_ROUND_TRIP_TIMEOUT_NS",
             "TCP_MAX_SEGMENT_SIZE",

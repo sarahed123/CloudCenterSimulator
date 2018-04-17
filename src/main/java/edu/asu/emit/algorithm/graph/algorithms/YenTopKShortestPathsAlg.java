@@ -248,7 +248,7 @@ public class YenTopKShortestPathsAlg
                     curRecoverVertex.getId(), succVertex.getId()));
 			
 			//3.4.6 update cost if necessary
-            long cost1 = graph.getEdgeWeight(curRecoverVertex, succVertex)
+			double cost1 = graph.getEdgeWeight(curRecoverVertex, succVertex)
 				+ reverseTree.getStartVertexDistanceIndex().get(succVertex);
 			
 			if (reverseTree.getStartVertexDistanceIndex().get(curRecoverVertex) >  cost1) {

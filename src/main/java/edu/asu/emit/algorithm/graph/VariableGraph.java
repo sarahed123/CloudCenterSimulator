@@ -35,6 +35,8 @@ package edu.asu.emit.algorithm.graph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import ch.ethz.systems.netbench.core.Simulator;
+
 import java.util.*;
 
 /**
@@ -45,7 +47,11 @@ import java.util.*;
  * @author snkas
  */
 public class VariableGraph extends Graph {
-
+	enum EdgeWieghtRule{
+		BY_GRAPH_WEIGHT,
+		BY_LEAST_LOADED_SWITCH
+	}
+	 public final EdgeWieghtRule weightRule;
     // Set of identifiers of all removed vertices
 	private Set<Integer> remVertexIdSet = new HashSet<>();
 
@@ -59,6 +65,16 @@ public class VariableGraph extends Graph {
      */
 	public VariableGraph(Graph graph) {
 		super(graph);
+		switch(Simulator.getConfiguration().getPropertyWithDefault("graph_edge_weight_rule", "graph_edge_weight")) {
+        case "least_loaded_switch":
+        	weightRule = EdgeWieghtRule.BY_LEAST_LOADED_SWITCH;
+        	
+        	break;
+        default:
+        	weightRule = EdgeWieghtRule.BY_GRAPH_WEIGHT;
+        	break;
+        
+        }
 	}
 	
 	/**
@@ -121,7 +137,7 @@ public class VariableGraph extends Graph {
      * @return  Edge weight
      */
 	@Override
-	public long getEdgeWeight(Vertex source, Vertex target)	{
+	public double getEdgeWeight(Vertex source, Vertex target)	{
 
         // Check it is not deleted
 		int sourceId = source.getId();
@@ -130,8 +146,17 @@ public class VariableGraph extends Graph {
             throw new RuntimeException("VariableGraph: getEdgeWeight: cannot access removed vertices or edges.");
 		}
 
-        // Ask parent to retrieve normally
-		return super.getEdgeWeight(source, target);
+		switch(weightRule) {
+    	
+    	case BY_LEAST_LOADED_SWITCH:
+    		return 1.0/(double)getAdjacentVertices(target).size();
+    	default:
+    		// default to BY_GRAPH_WEIGHT
+    		// Ask parent to retrieve normally
+    		return super.getEdgeWeight(source, target);
+    	}
+        
+		
 
 	}
 
@@ -143,7 +168,7 @@ public class VariableGraph extends Graph {
      *
      * @return  Edge weight
      */
-	public long getEdgeWeightOfGraph(Vertex source, Vertex target) {
+	public double getEdgeWeightOfGraph(Vertex source, Vertex target) {
 		return super.getEdgeWeight(source, target);
 	}
 

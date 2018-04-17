@@ -48,7 +48,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 	protected final List<Vertex> vertexList;
 
     // Total path weight
-	private long weight;
+	private double weight;
 
     /**
      * Create a path which should have a pre-determined weight.
@@ -57,22 +57,22 @@ public class Path implements BaseElementWithWeight, Serializable {
      * all vertices on the path such that the weight is summed up correctly
      * to the total weight.
      *
-     * @param weight    Total path weight
+     * @param cost    Total path weight
      */
-	public Path(long weight) {
+	public Path(double cost) {
         this.vertexList = new Vector<>();
-        this.weight = weight;
+        this.weight = cost;
     }
 
     /**
      * Create a path with a pre-determined vertex list and weight.
      *
      * @param vertexList    Path vertex list
-     * @param weight        Total path weight
+     * @param weight2        Total path weight
      */
-	public Path(List<Vertex> vertexList, long weight) {
+	public Path(List<Vertex> vertexList, double weight2) {
 		this.vertexList = vertexList;
-		this.weight = weight;
+		this.weight = weight2;
 	}
 
     /**
@@ -80,17 +80,17 @@ public class Path implements BaseElementWithWeight, Serializable {
      *
      * @return Total path weight
      */
-	public long getWeight() {
+	public double getWeight() {
 		return weight;
 	}
 
     /**
      * Set the total weight of the path.
      *
-     * @param weight    Total path weight
+     * @param d    Total path weight
      */
-    public void setWeight(long weight) {
-        this.weight = weight;
+    public void setWeight(double d) {
+        this.weight = d;
     }
 
     /**
