@@ -13,7 +13,7 @@ public class PacketDispatchedEvent extends Event {
 	 */
 	private static final long serialVersionUID = 8099553808355024992L;
 	private final Packet packet;
-    private final int deviceId;
+    protected final int deviceId;
     private final int targetId;
 
     /**

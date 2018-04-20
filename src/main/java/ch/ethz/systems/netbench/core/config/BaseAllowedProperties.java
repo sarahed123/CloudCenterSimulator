@@ -84,8 +84,10 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+    		"base_dir_variants",
     		"sub_configurations_folder",
     		"common_base_dir",
+    		"path_algorithm",
     		"graph_edge_weight_rule",
             // TCP
             "TCP_ROUND_TRIP_TIMEOUT_NS",
@@ -114,6 +116,10 @@ public class BaseAllowedProperties {
             "spark_error_distribution",
             "routing_ecmp_then_source_routing_switch_threshold_bytes"
 
+    };
+    
+    public static final String[] BASE_DIR_VARIANTS = new String[] {
+    		"variant_graph_name"
     };
 
 }

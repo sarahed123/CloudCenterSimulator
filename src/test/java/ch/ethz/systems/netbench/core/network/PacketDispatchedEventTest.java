@@ -1,6 +1,8 @@
 package ch.ethz.systems.netbench.core.network;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +21,7 @@ public class PacketDispatchedEventTest {
     @Before
     public void setup() {
         Simulator.setup(0);
+        BaseInitializer.init(null, null, null, null);
     }
 
     @After

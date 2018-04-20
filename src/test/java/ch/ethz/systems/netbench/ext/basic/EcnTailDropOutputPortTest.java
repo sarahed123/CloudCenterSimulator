@@ -73,7 +73,7 @@ public class EcnTailDropOutputPortTest {
         when(packet.getSizeBit()).thenReturn(packetSizeDataBytes * 8L);
 
         // Port with 100 packets and 40 packets ECN limit
-        EcnTailDropOutputPort port = new EcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
+        MockedEcnTailDropOutputPort port = new MockedEcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
 
         // First 41 packets queued should not be marked for congestion
         // 40 in queue, 1 in dispatch position
@@ -110,7 +110,7 @@ public class EcnTailDropOutputPortTest {
         when(packet.getSizeBit()).thenReturn(packetSizeDataBytes * 8L);
 
         // Port with 100 packets and 40 packets ECN limit
-        EcnTailDropOutputPort port = new EcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
+        MockedEcnTailDropOutputPort port = new MockedEcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
 
         // Enqueue two packets
         port.enqueue(packet);
@@ -137,7 +137,7 @@ public class EcnTailDropOutputPortTest {
         when(packet.getSizeBit()).thenReturn(packetSizeDataBytes * 8L);
 
         // Port with 100 packets and 40 packets ECN limit
-        EcnTailDropOutputPort port = new EcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
+        MockedEcnTailDropOutputPort port = new MockedEcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
 
         // Queue two packets
         port.enqueue(packet);
@@ -166,7 +166,7 @@ public class EcnTailDropOutputPortTest {
         when(packet.getSizeBit()).thenReturn(packetSizeDataBytes * 8L);
 
         // Port with 100 packets and 40 packets ECN limit
-        EcnTailDropOutputPort port = new EcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
+        MockedEcnTailDropOutputPort port = new MockedEcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
 
         // Queue two packets
         port.enqueue(packet);
@@ -197,7 +197,7 @@ public class EcnTailDropOutputPortTest {
         when(packet.getSizeBit()).thenReturn(packetSizeDataBytes * 8L);
 
         // Port with 100 packets and 40 packets ECN limit
-        EcnTailDropOutputPort port = new EcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
+        MockedEcnTailDropOutputPort port = new MockedEcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
         
         // Queue two packets
         port.enqueue(packet);
@@ -227,7 +227,7 @@ public class EcnTailDropOutputPortTest {
         when(packet.getSizeBit()).thenReturn(packetSizeDataBytes * 8L);
 
         // Port with 100 packets and 40 packets ECN limit
-        EcnTailDropOutputPort port = new EcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
+        MockedEcnTailDropOutputPort port = new MockedEcnTailDropOutputPort(sourceNetworkDevice, targetNetworkDevice, link, 100 * packetSizeDataBytes, 40 * packetSizeDataBytes);
 
         // Enqueue two packets
         port.enqueue(packet);

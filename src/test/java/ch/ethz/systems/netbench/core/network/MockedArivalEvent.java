@@ -4,7 +4,7 @@ import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 
 public class MockedArivalEvent extends PacketArrivalEvent {
 	NetworkDevice arrivalNetworkDevice;
-	MockedArivalEvent(long timeFromNowNs, Packet packet, NetworkDevice arrivalNetworkDevice) {
+	public MockedArivalEvent(long timeFromNowNs, Packet packet, NetworkDevice arrivalNetworkDevice) {
 		super(timeFromNowNs, packet, arrivalNetworkDevice);
 		this.arrivalNetworkDevice = arrivalNetworkDevice;
 	}

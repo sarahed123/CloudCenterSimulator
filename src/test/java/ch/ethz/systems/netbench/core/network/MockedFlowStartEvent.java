@@ -1,0 +1,24 @@
+package ch.ethz.systems.netbench.core.network;
+
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
+
+public class MockedFlowStartEvent extends FlowStartEvent {
+
+	public MockedFlowStartEvent(long timeFromNowNs, TransportLayer transportLayer, int targetId, long flowSizeByte) {
+		super(timeFromNowNs, transportLayer, targetId, flowSizeByte);
+		
+	}
+
+	@Override
+	protected void setNetworkDeviceId(TransportLayer tl) {
+		this.networkDeviceId = -1;
+	}
+	
+	@Override
+    public void trigger() {
+    	TransportLayer tl = BaseInitializer.getInstance().getIdToNetworkDevice().get(networkDeviceId).getTransportLayer();
+    	tl.startFlow(targetId, flowSizeByte);
+    }
+
+}

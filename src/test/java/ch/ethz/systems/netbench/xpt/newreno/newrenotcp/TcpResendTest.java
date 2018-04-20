@@ -3,13 +3,16 @@ package ch.ethz.systems.netbench.xpt.newreno.newrenotcp;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.network.MockedFlowStartEvent;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -58,7 +61,8 @@ public class TcpResendTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-
+        BaseInitializer.init(null, null, null, null);
+        BaseInitializer.getInstance().getIdToNetworkDevice().put(-1, networkDeviceSender);
         // Packet captor
         ArgumentCaptor<Packet> senderOutgoingPacketCaptor = ArgumentCaptor.forClass(Packet.class);
         ArgumentCaptor<Packet> receiverOutgoingPacketCaptor = ArgumentCaptor.forClass(Packet.class);
@@ -68,7 +72,7 @@ public class TcpResendTest {
         final NewRenoTcpTransportLayer receiverLayer = new NewRenoTcpTransportLayer(1);
         senderLayer.setNetworkDevice(networkDeviceSender);
         receiverLayer.setNetworkDevice(networkDeviceReceiver);
-
+        Mockito.when(networkDeviceSender.getTransportLayer()).thenReturn(senderLayer);
         // Forward all packets excepts the fourth (data 100-200) directly originating from sender to receiver
         final AtomicInteger counterSenderOut = new AtomicInteger(0);
         doAnswer(new Answer<Void>() {
@@ -96,7 +100,7 @@ public class TcpResendTest {
         }).when(networkDeviceReceiver).receiveFromTransportLayer(receiverOutgoingPacketCaptor.capture());
 
         // Start a flow from 0 to 1 of size <bytes>
-        Simulator.registerEvent(new FlowStartEvent(0, senderLayer, 1, 700));
+        Simulator.registerEvent(new MockedFlowStartEvent(0, senderLayer, 1, 700));
 
         // Run the simulator for a 7 nanoseconds to allow a resend to happen
         Simulator.runNs(7);

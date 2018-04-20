@@ -132,6 +132,10 @@ public class Simulator {
 	}
 
 	private static void restoreState() {
+		if(configuration==null) {
+			//this can happen in tests.
+			return;
+		}
 		if(configuration.getPropertyWithDefault("from_state", null)!=null) {
 			String folderName = configuration.getPropertyWithDefault("from_state", null);
 			JSONObject json = SimulatorStateSaver.loadJson(folderName + "/" + "simulator_data.json");
