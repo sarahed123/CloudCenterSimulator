@@ -48,13 +48,13 @@ import java.util.*;
 public class DijkstraShortestPathAlg
 {
 	// Input
-	private final BaseGraph graph;
+	protected final BaseGraph graph;
 
 	// Intermediate variables
 	private Set<Vertex> determinedVertexSet = new HashSet<Vertex>();
 	private PriorityQueue<Vertex> vertexCandidateQueue = new PriorityQueue<Vertex>();
 	private Map<Vertex, Double> startVertexDistanceIndex = new HashMap<Vertex, Double>();
-	private Map<Vertex, Vertex> predecessorIndex = new HashMap<Vertex, Vertex>();
+	protected Map<Vertex, Vertex> predecessorIndex = new HashMap<Vertex, Vertex>();
 
 	/**
 	 * Default constructor.
@@ -139,6 +139,12 @@ public class DijkstraShortestPathAlg
 			updateVertex(curCandidate, isSource2sink);
 		}
 	}
+	
+	protected List<Vertex> getVertexNeighbours(Vertex v, boolean isSource2sink){
+		List<Vertex> neighborVertexList = isSource2sink ?
+				graph.getAdjacentVertices(v) : graph.getPrecedentVertices(v);
+		return neighborVertexList;
+	}
 
 	/**
 	 * Update the distance from the source to the concerned vertex.
@@ -146,8 +152,7 @@ public class DijkstraShortestPathAlg
 	 */
 	private void updateVertex(Vertex vertex, boolean isSource2sink)	{
 		// 1. get the neighboring vertices 
-        List<Vertex> neighborVertexList = isSource2sink ?
-			graph.getAdjacentVertices(vertex) : graph.getPrecedentVertices(vertex);
+        List<Vertex> neighborVertexList = getVertexNeighbours(vertex, isSource2sink);
 			
 		// 2. update the distance passing on current vertex
 		for (Vertex curAdjacentVertex : neighborVertexList) {
@@ -169,7 +174,8 @@ public class DijkstraShortestPathAlg
 			|| startVertexDistanceIndex.get(curAdjacentVertex) > distance) {
 				startVertexDistanceIndex.put(curAdjacentVertex, distance);
 
-				predecessorIndex.put(curAdjacentVertex, vertex);
+				addToPredecessorIndex(curAdjacentVertex, vertex);
+				
 				
 				curAdjacentVertex.setWeight(distance);
 				vertexCandidateQueue.add(curAdjacentVertex);
@@ -177,6 +183,11 @@ public class DijkstraShortestPathAlg
 		}
 	}
 	
+	protected void addToPredecessorIndex(Vertex curAdjacentVertex, Vertex vertex) {
+		predecessorIndex.put(curAdjacentVertex, vertex);
+		
+	}
+
 	/**
 	 * Note that, the source should not be as same as the sink! (we could extend 
 	 * this later on)

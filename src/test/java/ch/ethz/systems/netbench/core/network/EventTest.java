@@ -27,13 +27,13 @@ public class EventTest {
 
     @Test
     public void testQueueOrder() {
-
+    	
         // Events
-        Event e1 = new FlowStartEvent(1000, null, 0, 0);
-        Event e2 = new FlowStartEvent(0, null, 0, 0);
-        Event e3 = new FlowStartEvent(848, null, 0, 0);
-        Event e4 = new FlowStartEvent(1000, null, 0, 0);
-        Event e5 = new FlowStartEvent(999999, null, 0, 0);
+        Event e1 = new MockedFlowStartEvent(1000, null, 0, 0);
+        Event e2 = new MockedFlowStartEvent(0, null, 0, 0);
+        Event e3 = new MockedFlowStartEvent(848, null, 0, 0);
+        Event e4 = new MockedFlowStartEvent(1000, null, 0, 0);
+        Event e5 = new MockedFlowStartEvent(999999, null, 0, 0);
 
         // Create queue
         PriorityQueue<Event> queue = new PriorityQueue<>();

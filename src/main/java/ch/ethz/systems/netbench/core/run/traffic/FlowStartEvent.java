@@ -10,9 +10,9 @@ public class FlowStartEvent extends Event {
 	 * 
 	 */
 	private static final long serialVersionUID = -953241448509175658L;
-	private final int targetId;
-    private final long flowSizeByte;
-    private final int networkDeviceId; 
+	protected final int targetId;
+    protected final long flowSizeByte;
+    protected int networkDeviceId; 
     /**
      * Create event which will happen the given amount of nanoseconds later.
      *
@@ -25,7 +25,11 @@ public class FlowStartEvent extends Event {
         super(timeFromNowNs);
         this.targetId = targetId;
         this.flowSizeByte = flowSizeByte;
-        this.networkDeviceId = transportLayer.getNetworkDevice().getIdentifier();
+        setNetworkDeviceId(transportLayer);
+    }
+    
+    protected void setNetworkDeviceId(TransportLayer tl) {
+    	this.networkDeviceId = tl.getNetworkDevice().getIdentifier();
     }
 
     @Override

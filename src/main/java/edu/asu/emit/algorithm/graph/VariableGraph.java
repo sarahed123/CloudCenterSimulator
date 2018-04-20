@@ -49,7 +49,8 @@ import java.util.*;
 public class VariableGraph extends Graph {
 	enum EdgeWieghtRule{
 		BY_GRAPH_WEIGHT,
-		BY_LEAST_LOADED_SWITCH
+		BY_LEAST_LOADED_SWITCH,
+		BY_MOST_LOADED_SWITCH
 	}
 	 public final EdgeWieghtRule weightRule;
     // Set of identifiers of all removed vertices
@@ -65,14 +66,22 @@ public class VariableGraph extends Graph {
      */
 	public VariableGraph(Graph graph) {
 		super(graph);
-		switch(Simulator.getConfiguration().getPropertyWithDefault("graph_edge_weight_rule", "graph_edge_weight")) {
+		String weightRuleAsString = Simulator.getConfiguration().getProperty("graph_edge_weight_rule");
+		if(weightRuleAsString==null) {
+			weightRuleAsString = "graph_weight";
+		}
+		switch(weightRuleAsString) {
         case "least_loaded_switch":
         	weightRule = EdgeWieghtRule.BY_LEAST_LOADED_SWITCH;
-        	
         	break;
-        default:
+        case "most_loaded_switch":
+        	weightRule = EdgeWieghtRule.BY_MOST_LOADED_SWITCH;
+        	break;
+        case "graph_weight":
         	weightRule = EdgeWieghtRule.BY_GRAPH_WEIGHT;
         	break;
+        default:
+        	throw new RuntimeException("Illegal value for graph_edge_weight_rule " + weightRuleAsString);
         
         }
 	}
@@ -150,6 +159,10 @@ public class VariableGraph extends Graph {
     	
     	case BY_LEAST_LOADED_SWITCH:
     		return 1.0/(double)getAdjacentVertices(target).size();
+    		
+    	case BY_MOST_LOADED_SWITCH:
+    		return getAdjacentVertices(target).size();
+    		
     	default:
     		// default to BY_GRAPH_WEIGHT
     		// Ask parent to retrieve normally

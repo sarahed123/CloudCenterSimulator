@@ -83,17 +83,16 @@ public class NBProperties extends Properties {
 		this.graphDetails = null;
 		this.allowedProperties = new HashSet<>();
 		initializeAllowedProperties(additionalAllowedProperties);
-		
+		subConfigs = new LinkedList<NBProperties>();
 		// Make sure all properties are legal
 		this.checkProperties();
-		loadSubConfigurtations();
+		
 
 	}
 
-	private void loadSubConfigurtations() {
+	public void loadSubConfigurtations() {
 		if(this.containsKey("sub_configurations_folder")) {
 			File dir = new File(this.getProperty("sub_configurations_folder"));
-			subConfigs = new LinkedList<NBProperties>();
 			if(dir.isDirectory()) {
 				File[] files = dir.listFiles();
 				if(files.length==0) {
@@ -543,6 +542,24 @@ public class NBProperties extends Properties {
 
 	public void nextSubConfiguration() {
 		currSubConfig = subConfigs.poll();
+		
+	}
+
+	public void constructBaseDir() {
+		
+		if(getProperty("base_dir_variants")!=null) {
+			if(getProperty("run_folder_base_dir")==null) {
+				throw new RuntimeException("base_dir_variants propery requires run_folder_base_dir property");
+			}
+			String[] dirs = getProperty("base_dir_variants").split(",");
+			String baseDir = getProperty("run_folder_base_dir");
+			for(String dir : dirs) {
+				
+				baseDir += "/" +getPropertyOrFail(dir);
+			}
+			setProperty("run_folder_base_dir" , baseDir);
+			
+		}
 		
 	}
 

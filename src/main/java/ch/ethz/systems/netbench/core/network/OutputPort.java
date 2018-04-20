@@ -25,8 +25,8 @@ public abstract class OutputPort {
     private final int ownId;                            // Own network device identifier
     protected final NetworkDevice ownNetworkDevice;       // Network device this output port is attached to
     private final int targetId;                         // Target network device identifier
-    private final NetworkDevice targetNetworkDevice;    // Target network device
-    private final Link link;                            // Link type, defines latency and bandwidth of the medium
+    protected final NetworkDevice targetNetworkDevice;    // Target network device
+    protected final Link link;                            // Link type, defines latency and bandwidth of the medium
                                                         // that the output port uses
 
     // Logging utility
@@ -58,6 +58,14 @@ public abstract class OutputPort {
         this.logger = new PortLogger(this);
 
     }
+    
+    protected void registerPacketDispatchedEvent(Packet packet) {
+    	Simulator.registerEvent(new PacketDispatchedEvent(
+                packet.getSizeBit() / link.getBandwidthBitPerNs(),
+                packet,
+                this
+        ));
+    }
 
     /**
      * Enqueue the given packet for sending.
@@ -82,11 +90,8 @@ public abstract class OutputPort {
             // Link is now being utilized
             logger.logLinkUtilized(true);
             // Add event when sending is finished
-            Simulator.registerEvent(new PacketDispatchedEvent(
-                    packet.getSizeBit() / link.getBandwidthBitPerNs(),
-                    packet,
-                    this
-            ));
+            registerPacketDispatchedEvent(packet);
+            
             
             // It is now sending again
             isSending = true;
@@ -97,6 +102,16 @@ public abstract class OutputPort {
             logger.logQueueState(queue.size(), bufferOccupiedBits,packet);
         }
 
+    }
+    
+    protected void registerPacketArrivalEvent(Packet packet) {
+    	Simulator.registerEvent(
+                new PacketArrivalEvent(
+                        link.getDelayNs(),
+                        packet,
+                        targetNetworkDevice
+                )
+        );
     }
 
     /**
@@ -109,13 +124,7 @@ public abstract class OutputPort {
     protected void dispatch(Packet packet) {
         // Finished sending packet, the last bit of the packet should arrive the link-delay later
         if (!link.doesNextTransmissionFail(packet.getSizeBit())) {
-            Simulator.registerEvent(
-                    new PacketArrivalEvent(
-                            link.getDelayNs(),
-                            packet,
-                            targetNetworkDevice
-                    )
-            );
+            registerPacketArrivalEvent(packet);
         }
 
         // Again free to send other packets
@@ -129,11 +138,7 @@ public abstract class OutputPort {
             decreaseBufferOccupiedBits(packetFromQueue.getSizeBit());
             logger.logQueueState(queue.size(), bufferOccupiedBits,packetFromQueue);
             // Register when the packet is actually dispatched
-            Simulator.registerEvent(new PacketDispatchedEvent(
-                    packetFromQueue.getSizeBit() / link.getBandwidthBitPerNs(),
-                    packetFromQueue,
-                    this
-            ));
+            registerPacketDispatchedEvent(packetFromQueue);
 
             // It is sending again
             isSending = true;

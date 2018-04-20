@@ -30,10 +30,15 @@ import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.VariableGraph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
+import edu.asu.emit.algorithm.graph.algorithms.StrictUpDownDijkstra;
 
 public class XpanderRouter extends RemoteRoutingController{
 	private int flowFailuresSample;
-
+	enum PathAlgorithm{
+		DIJKSTRA,
+		STRICT_UP_DOWN_DIJKSTRA
+	}
+	PathAlgorithm pathAlg;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice){
 		mIdToNetworkDevice = idToNetworkDevice;
@@ -42,6 +47,21 @@ public class XpanderRouter extends RemoteRoutingController{
 		totalDrops = 0;
 		flowCounter = 0;
 		flowFailuresSample = 0;
+		
+		String pathAlgorithm = Simulator.getConfiguration().getProperty("path_algorithm");
+		if(pathAlgorithm==null) {
+			pathAlgorithm = "dijkstra";
+		}
+		switch(pathAlgorithm) {
+		case "dijkstra":
+			pathAlg = PathAlgorithm.DIJKSTRA;
+			break;
+		case "strict_up_down_dijkstra":
+			pathAlg = PathAlgorithm.STRICT_UP_DOWN_DIJKSTRA;
+			break;
+		default:
+			throw new RuntimeException("Illegal argument for path_algorithm " + pathAlgorithm);
+		}
 	}
 
 	@Override
@@ -59,9 +79,21 @@ public class XpanderRouter extends RemoteRoutingController{
 		logRoute(p,source,dest,flowId,Simulator.getCurrentTime(),true);
 
 	}
+	
+	
 
 	protected Path generatePathFromGraph(int source,int dest) {
-		DijkstraShortestPathAlg dijkstra = new DijkstraShortestPathAlg(mG);
+		DijkstraShortestPathAlg dijkstra = null;
+		switch (pathAlg) {
+		case DIJKSTRA:
+			dijkstra = new DijkstraShortestPathAlg(mG);
+			break;
+
+		case STRICT_UP_DOWN_DIJKSTRA:
+			dijkstra = new StrictUpDownDijkstra(mG);
+			break;
+		}
+		
 
 		Path p  = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
 		return p;

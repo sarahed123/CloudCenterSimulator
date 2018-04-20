@@ -119,8 +119,11 @@ public class MainFromProperties {
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXTENSION,
-                BaseAllowedProperties.EXPERIMENTAL
+                BaseAllowedProperties.EXPERIMENTAL,
+                BaseAllowedProperties.BASE_DIR_VARIANTS
         );
+        
+        
 
         // Dynamic overwrite of temporary config using arguments given from command line
         for (int i = 1; i < args.length; i++) {
@@ -130,7 +133,9 @@ public class MainFromProperties {
             String value = args[i].substring(index + 1);
             runConfiguration.overrideProperty(param, value);
         }
-
+        
+        runConfiguration.loadSubConfigurtations();
+        runConfiguration.constructBaseDir();
         return runConfiguration;
 
     }
