@@ -32,6 +32,10 @@ package edu.asu.emit.algorithm.graph;
 
 import java.io.Serializable;
 
+import edu.asu.emit.algorithm.utils.IndexTieBreaker;
+import edu.asu.emit.algorithm.utils.RandomTieBreaker;
+import edu.asu.emit.algorithm.utils.VertexWeightTieBreaker;
+
 /**
  * The class defines a vertex in the graph.
  * 
@@ -39,7 +43,9 @@ import java.io.Serializable;
  * @author snkas
  */
 public class Vertex implements Comparable<Vertex>, Serializable {
-
+	
+	static VertexWeightTieBreaker tieBreaker;
+	
     // Vertex identifier
 	private final int id;
 
@@ -81,6 +87,10 @@ public class Vertex implements Comparable<Vertex>, Serializable {
 	public void setWeight(double distance) {
 		weight = distance;
 	}
+	
+	public static void setTieBreaker(VertexWeightTieBreaker vwtb) {
+		tieBreaker = vwtb;
+	}
 
     @Override
 	public int compareTo(Vertex rVertex) {
@@ -90,7 +100,7 @@ public class Vertex implements Comparable<Vertex>, Serializable {
 		} else if (diff < 0) {
 			return -1;
 		} else {
-			return Integer.compare(getId(), rVertex.getId());
+			return tieBreaker.breakTie(this, rVertex);
 		}
 	}
 

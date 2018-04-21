@@ -7,6 +7,9 @@ import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Vertex;
+import edu.asu.emit.algorithm.utils.IndexTieBreaker;
+import edu.asu.emit.algorithm.utils.RandomTieBreaker;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -14,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.rowset.spi.TransactionalWriter;
 
 /**
  * Initializes the entire infrastructure in the most
@@ -80,6 +85,7 @@ public class BaseInitializer {
 
         // Fetch from configuration graph and its details
         Graph graph = Simulator.getConfiguration().getGraph();
+        setVertexTieBreaker();
         GraphDetails details = Simulator.getConfiguration().getGraphDetails();
 
         idtoNetworkDeviceArray = new NetworkDevice[details.getNumNodes()];
@@ -120,6 +126,25 @@ public class BaseInitializer {
     }
 
     /**
+     * Tie breaker is a routing mechanism that decides how to behave when
+     * vertices have the same weight
+     */
+    private void setVertexTieBreaker() {
+		String tieBreakRule = Simulator.getConfiguration().getPropertyWithDefault("vertex_tie_break_rule", "vertex_tie_break_by_index");
+		switch(tieBreakRule) {
+		case "vertex_tie_break_by_index":
+			Vertex.setTieBreaker(new IndexTieBreaker());
+			break;
+		case "vertex_tie_break_random":
+			Vertex.setTieBreaker(new RandomTieBreaker());
+			break;
+		default:
+			throw new RuntimeException("bad property value for vertex_tie_break_rule. Possible values are vertex_tie_break_by_index, vertex_tie_break_random");	
+		}
+		
+	}
+
+	/**
      * Create the implementation of a node in the network.
      *
      * @param id        Node identifier
