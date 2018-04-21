@@ -555,7 +555,7 @@ public class NBProperties extends Properties {
 			String baseDir = getProperty("run_folder_base_dir");
 			for(String dir : dirs) {
 				
-				baseDir += "/" +getPropertyOrFail(dir);
+				baseDir += "/" + dir + "/" +getPropertyOrFail(dir);
 			}
 			setProperty("run_folder_base_dir" , baseDir);
 			

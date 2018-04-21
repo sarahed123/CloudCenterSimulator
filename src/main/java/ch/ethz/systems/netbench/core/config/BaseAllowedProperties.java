@@ -85,6 +85,7 @@ public class BaseAllowedProperties {
 
     public static final String[] EXPERIMENTAL = new String[]{
     		"base_dir_variants",
+    		"vertex_tie_break_rule",
     		"sub_configurations_folder",
     		"common_base_dir",
     		"path_algorithm",
