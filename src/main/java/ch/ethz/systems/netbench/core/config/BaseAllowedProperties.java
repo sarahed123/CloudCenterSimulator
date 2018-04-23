@@ -85,7 +85,10 @@ public class BaseAllowedProperties {
 
     public static final String[] EXPERIMENTAL = new String[]{
     		"base_dir_variants",
+    		"k_shortest_paths",
+    		"k_shortest_paths_num",
     		"vertex_tie_break_rule",
+    		"paths_filter",
     		"sub_configurations_folder",
     		"common_base_dir",
     		"path_algorithm",

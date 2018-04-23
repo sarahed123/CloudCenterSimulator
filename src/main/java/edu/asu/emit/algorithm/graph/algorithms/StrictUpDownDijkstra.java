@@ -17,6 +17,12 @@ public class StrictUpDownDijkstra extends DijkstraShortestPathAlg {
 	}
 	
 	@Override
+	public void clear() {
+		super.clear();
+		isInDecsent.clear();
+	}
+	
+	@Override
 	protected void addToPredecessorIndex(Vertex curAdjacentVertex, Vertex vertex) {
 		if(vertex.getId() > curAdjacentVertex.getId()) {
 			isInDecsent.put(curAdjacentVertex, true);

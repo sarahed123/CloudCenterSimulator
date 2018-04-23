@@ -71,7 +71,8 @@ public class Path implements BaseElementWithWeight, Serializable {
      * @param weight2        Total path weight
      */
 	public Path(List<Vertex> vertexList, double weight2) {
-		this.vertexList = vertexList;
+		this.vertexList = new Vector<>();
+		this.vertexList.addAll(vertexList);
 		this.weight = weight2;
 	}
 
@@ -135,6 +136,22 @@ public class Path implements BaseElementWithWeight, Serializable {
     @Override
 	public String toString() {
 		return vertexList.toString() + ":" + weight;
+	}
+
+	public boolean endsWith(Vertex endVertex) {
+		// TODO Auto-generated method stub
+		return vertexList.get(vertexList.size()-1).equals(endVertex);
+	}
+
+	public Vertex getLastVertex() {
+		// TODO Auto-generated method stub
+		return vertexList.get(vertexList.size()-1);
+	}
+
+	public void addVertex(Vertex v, double edgeWeight) {
+		vertexList.add(v);
+		weight+=edgeWeight;
+		
 	}
 
 }

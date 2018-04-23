@@ -33,6 +33,7 @@ package edu.asu.emit.algorithm.graph.algorithms;
 
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
+import edu.asu.emit.algorithm.graph.Paths;
 import edu.asu.emit.algorithm.graph.BaseGraph;
 import edu.asu.emit.algorithm.graph.Vertex;
 
@@ -196,7 +197,7 @@ public class DijkstraShortestPathAlg
 	 * @param sinkVertex
 	 * @return
 	 */
-	public Path getShortestPath(Vertex sourceVertex, Vertex sinkVertex)	{
+	public Paths getShortestPath(Vertex sourceVertex, Vertex sinkVertex)	{
 		determineShortestPaths(sourceVertex, sinkVertex, true);
 		//
 		List<Vertex> vertexList = new Vector<Vertex>();
@@ -211,7 +212,7 @@ public class DijkstraShortestPathAlg
 			vertexList.add(sourceVertex);
 			Collections.reverse(vertexList);
 		}
-		return new Path(vertexList, weight);
+		return new Paths(new Path(vertexList, weight));
 	}
 
 	/**
