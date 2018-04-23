@@ -27,8 +27,12 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
+import edu.asu.emit.algorithm.graph.Paths;
+import edu.asu.emit.algorithm.graph.PathsFilter;
+import edu.asu.emit.algorithm.graph.PathsFilterFirst;
 import edu.asu.emit.algorithm.graph.VariableGraph;
 import edu.asu.emit.algorithm.graph.Vertex;
+import edu.asu.emit.algorithm.graph.algorithms.DijkstraKShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.StrictUpDownDijkstra;
 
@@ -38,6 +42,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		DIJKSTRA,
 		STRICT_UP_DOWN_DIJKSTRA
 	}
+	DijkstraShortestPathAlg dijkstraAlg;
+	PathsFilter pathsFilter;
 	PathAlgorithm pathAlg;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice){
@@ -47,6 +53,14 @@ public class XpanderRouter extends RemoteRoutingController{
 		totalDrops = 0;
 		flowCounter = 0;
 		flowFailuresSample = 0;
+		String pathsFilterKey = Simulator.getConfiguration().getPropertyWithDefault("paths_filter","filter_first");
+		switch(pathsFilterKey) {
+		case "filter_first":
+			pathsFilter = new PathsFilterFirst(mG);
+			break;
+		default:
+			throw new RuntimeException("Illegal argument for paths_filter " + pathsFilterKey);
+		}
 		
 		String pathAlgorithm = Simulator.getConfiguration().getProperty("path_algorithm");
 		if(pathAlgorithm==null) {
@@ -54,10 +68,14 @@ public class XpanderRouter extends RemoteRoutingController{
 		}
 		switch(pathAlgorithm) {
 		case "dijkstra":
-			pathAlg = PathAlgorithm.DIJKSTRA;
+			dijkstraAlg = new DijkstraShortestPathAlg(mG);
 			break;
 		case "strict_up_down_dijkstra":
-			pathAlg = PathAlgorithm.STRICT_UP_DOWN_DIJKSTRA;
+			dijkstraAlg = new StrictUpDownDijkstra(mG);
+			break;
+		case "k_shortest_paths":
+			int K = Simulator.getConfiguration().getIntegerPropertyOrFail("k_shortest_paths_num");
+			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for path_algorithm " + pathAlgorithm);
@@ -83,19 +101,9 @@ public class XpanderRouter extends RemoteRoutingController{
 	
 
 	protected Path generatePathFromGraph(int source,int dest) {
-		DijkstraShortestPathAlg dijkstra = null;
-		switch (pathAlg) {
-		case DIJKSTRA:
-			dijkstra = new DijkstraShortestPathAlg(mG);
-			break;
-
-		case STRICT_UP_DOWN_DIJKSTRA:
-			dijkstra = new StrictUpDownDijkstra(mG);
-			break;
-		}
-		
-
-		Path p  = dijkstra.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
+		Paths ps  = dijkstraAlg.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
+		System.out.println(ps);
+		Path p = pathsFilter.filterPaths(ps);
 		return p;
 	}
 

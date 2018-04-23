@@ -128,7 +128,7 @@ public class YenTopKShortestPathsAlg
 	 */
 	public Path getShortestPath(Vertex sourceVertex, Vertex targetVertex)	{
 		DijkstraShortestPathAlg dijkstraAlg = new DijkstraShortestPathAlg(graph);
-		return dijkstraAlg.getShortestPath(sourceVertex, targetVertex);
+		return dijkstraAlg.getShortestPath(sourceVertex, targetVertex).getPaths().getFirst();
 	}
 	
 	/**
