@@ -1,5 +1,7 @@
 package edu.asu.emit.algorithm.graph;
 
+import java.util.NoSuchElementException;
+
 public class PathsFilterFirst extends PathsFilter {
 
 	public PathsFilterFirst(Graph g) {
@@ -10,7 +12,12 @@ public class PathsFilterFirst extends PathsFilter {
 	@Override
 	public Path filterPaths(Paths paths) {
 		// TODO Auto-generated method stub
-		return paths.getPaths().getFirst();
+		try {
+			return paths.getPaths().getFirst();
+		}catch(NoSuchElementException e) {
+			return new Path(0);
+		}
+		
 	}
 
 }

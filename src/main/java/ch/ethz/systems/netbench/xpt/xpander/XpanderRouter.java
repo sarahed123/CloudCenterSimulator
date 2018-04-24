@@ -102,7 +102,6 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	protected Path generatePathFromGraph(int source,int dest) {
 		Paths ps  = dijkstraAlg.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
-		System.out.println(ps);
 		Path p = pathsFilter.filterPaths(ps);
 		return p;
 	}
