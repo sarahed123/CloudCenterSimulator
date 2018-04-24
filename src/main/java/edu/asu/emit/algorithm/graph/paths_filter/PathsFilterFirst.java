@@ -1,6 +1,10 @@
-package edu.asu.emit.algorithm.graph;
+package edu.asu.emit.algorithm.graph.paths_filter;
 
 import java.util.NoSuchElementException;
+
+import edu.asu.emit.algorithm.graph.Graph;
+import edu.asu.emit.algorithm.graph.Path;
+import edu.asu.emit.algorithm.graph.Paths;
 
 public class PathsFilterFirst extends PathsFilter {
 

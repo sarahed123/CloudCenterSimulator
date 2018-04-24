@@ -16,16 +16,16 @@ import edu.asu.emit.algorithm.graph.Paths;
 import edu.asu.emit.algorithm.graph.Vertex;
 
 public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
-	private LinkedList<Path> finalPaths;
 	private PriorityQueue<EqualCostPaths> foundPaths;
 	private HashMap<Integer,EqualCostPaths> visitedNodes;
 	private int K;
 	private double minDistance;
+	EqualCostPaths endPaths;
 	public DijkstraKShortestPathAlg(BaseGraph graph,int k) {
 		super(graph);
 		K = k;
 		visitedNodes = new HashMap<Integer,EqualCostPaths>();
-		finalPaths = new LinkedList<Path>();
+		endPaths = new EqualCostPaths(K);
 		foundPaths = new PriorityQueue<EqualCostPaths>(new Comparator<EqualCostPaths>() {
 
 			@Override
@@ -47,7 +47,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	public void clear() {
 		super.clear();
 		foundPaths.clear();
-		finalPaths.clear();
+		endPaths.clear();
 		visitedNodes.clear();
 		minDistance = Graph.DISCONNECTED;
 	}
@@ -55,7 +55,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	@Override
 	public Paths getShortestPath(Vertex sourceVertex, Vertex sinkVertex) {
 		determineShortestPaths(sourceVertex, sinkVertex, true);
-		return new Paths(finalPaths);
+		return endPaths;
 		
 	}
 	
@@ -72,24 +72,20 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		EqualCostPaths startPaths = new EqualCostPaths(startPath,0,K);
 		foundPaths.add(startPaths);
 		visitedNodes.put(startVertex.getId(),startPaths);
+		
+		visitedNodes.put(endVertex.getId(), endPaths);
 		//startVertexDistanceIndex.put(startVertex, 0.0);
 		//startVertex.setWeight(0.0);
 		//vertexCandidateQueue.add(startVertex);
 		// 2. start searching for the shortest path
 		//System.out.println("starting " + startVertex.getId() + " to " + endVertex.getId());
-		while (!foundPaths.isEmpty()) {
+		while (!foundPaths.isEmpty() && endPaths.getPaths().size() < K) {
 			EqualCostPaths curCandidate = foundPaths.poll();
 			//System.out.println("trying path " + curCandidate);
-			
-			if(curCandidate.getWeight() > minDistance) {
+			//System.out.println("end path " + endPaths);
+			//System.out.println("end path weight" + endPaths.getWeight());
+			if(curCandidate.getWeight() > endPaths.getWeight()) {
 				break;
-			}
-			
-			if (curCandidate.endsWith(endVertex)) {
-				//System.out.println();
-				//System.out.println("adding path " + curCandidate);
-				minDistance = curCandidate.getWeight();
-				finalPaths.addAll(curCandidate.getPaths());
 			}
 
 			updatePath(curCandidate, isSource2sink);
@@ -108,6 +104,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 					continue;
 				}
 			}
+			//System.out.println("adding path " + curCandidate);
 			EqualCostPaths newPaths = new EqualCostPaths(curCandidate);
 			newPaths.addVertex(curAdjacentVertex,edgeWeight);
 			if(pathsToNode!=null) {
