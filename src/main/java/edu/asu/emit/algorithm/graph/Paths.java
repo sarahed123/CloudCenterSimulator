@@ -7,7 +7,10 @@ public class Paths {
 	LinkedList<Path> mPaths;
 	
 	public Paths(LinkedList<Path> pathsSet) {
-		mPaths = pathsSet;
+		mPaths = new LinkedList<Path>();
+		for(Path p : pathsSet) {
+			mPaths.add(new Path(p.getVertexList(),p.getWeight()));
+		}
 	}
 	
 	public Paths(Path path) {
@@ -25,5 +28,22 @@ public class Paths {
 			ret += p.toString() + "\n";
 		}
 		return ret;
+	}
+	
+	private class VertexNode{
+		private Vertex vertex;
+		private LinkedList<VertexNode> pres;
+		private LinkedList<VertexNode> posts;
+		private VertexNode(Vertex v) {
+			vertex = v;
+		}
+		
+		private void addPre(VertexNode pre) {
+			pres.add(pre);
+		}
+		
+		private void addPost(VertexNode post) {
+			posts.add(post);
+		}
 	}
 }

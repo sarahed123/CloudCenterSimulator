@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 import edu.asu.emit.algorithm.graph.BaseGraph;
+import edu.asu.emit.algorithm.graph.EqualCostPaths;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
@@ -16,17 +17,19 @@ import edu.asu.emit.algorithm.graph.Vertex;
 
 public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	private LinkedList<Path> finalPaths;
-	private PriorityQueue<Path> foundPaths;
+	private PriorityQueue<EqualCostPaths> foundPaths;
+	private HashMap<Integer,EqualCostPaths> visitedNodes;
 	private int K;
 	private double minDistance;
 	public DijkstraKShortestPathAlg(BaseGraph graph,int k) {
 		super(graph);
 		K = k;
+		visitedNodes = new HashMap<Integer,EqualCostPaths>();
 		finalPaths = new LinkedList<Path>();
-		foundPaths = new PriorityQueue<Path>(new Comparator<Path>() {
+		foundPaths = new PriorityQueue<EqualCostPaths>(new Comparator<EqualCostPaths>() {
 
 			@Override
-			public int compare(Path p1, Path p2) {
+			public int compare(EqualCostPaths p1, EqualCostPaths p2) {
 				if(p1.getWeight() > p2.getWeight()) {
 					return 1;
 				}
@@ -45,6 +48,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		super.clear();
 		foundPaths.clear();
 		finalPaths.clear();
+		visitedNodes.clear();
 		minDistance = Graph.DISCONNECTED;
 	}
 	
@@ -64,24 +68,28 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		// 1. initialize members
 		Vertex endVertex = isSource2sink ? sinkVertex : sourceVertex;
 		Vertex startVertex = isSource2sink ? sourceVertex : sinkVertex;
-		
-		foundPaths.add(new Path(new LinkedList<Vertex>(Arrays.asList(startVertex)),0));
+		Path startPath = new Path(new LinkedList<Vertex>(Arrays.asList(startVertex)),0);
+		EqualCostPaths startPaths = new EqualCostPaths(startPath,0,K);
+		foundPaths.add(startPaths);
+		visitedNodes.put(startVertex.getId(),startPaths);
 		//startVertexDistanceIndex.put(startVertex, 0.0);
 		//startVertex.setWeight(0.0);
 		//vertexCandidateQueue.add(startVertex);
-		System.out.println(endVertex);
 		// 2. start searching for the shortest path
-		while (!foundPaths.isEmpty() && foundPaths.size()<K) {
-			Path curCandidate = foundPaths.poll();
-			System.out.println(curCandidate);
+		//System.out.println("starting " + startVertex.getId() + " to " + endVertex.getId());
+		while (!foundPaths.isEmpty()) {
+			EqualCostPaths curCandidate = foundPaths.poll();
+			//System.out.println("trying path " + curCandidate);
 			
 			if(curCandidate.getWeight() > minDistance) {
 				break;
 			}
 			
 			if (curCandidate.endsWith(endVertex)) {
+				//System.out.println();
+				//System.out.println("adding path " + curCandidate);
 				minDistance = curCandidate.getWeight();
-				finalPaths.add(curCandidate);
+				finalPaths.addAll(curCandidate.getPaths());
 			}
 
 			updatePath(curCandidate, isSource2sink);
@@ -89,16 +97,26 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	}
 	
 	
-	private void updatePath(Path curCandidate, boolean isSource2sink) {
+	private void updatePath(EqualCostPaths curCandidate, boolean isSource2sink) {
 		List<Vertex> neighborVertexList = getVertexNeighbours(curCandidate.getLastVertex(), isSource2sink);
 		for (Vertex curAdjacentVertex : neighborVertexList) {
-			if(curCandidate.getVertexList().contains(curAdjacentVertex)) {
-				continue;
-			}
-			Path newPath = new Path(curCandidate.getVertexList(),curCandidate.getWeight());
-			newPath.addVertex(curAdjacentVertex,graph.getEdgeWeight(curCandidate.getLastVertex(), curAdjacentVertex));
 			
-			foundPaths.add(newPath);
+			double edgeWeight = graph.getEdgeWeight(curCandidate.getLastVertex(), curAdjacentVertex);
+			EqualCostPaths pathsToNode = visitedNodes.get(curAdjacentVertex.getId());
+			if(pathsToNode!=null) {
+				if(pathsToNode.getWeight()<curCandidate.getWeight()+edgeWeight) {
+					continue;
+				}
+			}
+			EqualCostPaths newPaths = new EqualCostPaths(curCandidate);
+			newPaths.addVertex(curAdjacentVertex,edgeWeight);
+			if(pathsToNode!=null) {
+				pathsToNode.addPaths(newPaths);
+			}else {
+				visitedNodes.put(curAdjacentVertex.getId(),newPaths);
+				foundPaths.add(newPaths);
+			}
+		
 		}
 		
 	}
