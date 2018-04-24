@@ -18,6 +18,11 @@ public class EqualCostPaths extends Paths {
 		endVertex = ecpaths.endVertex;
 		this.limit = ecpaths.limit;
 	}
+	public EqualCostPaths(int limit) {
+		super();
+		weight = Graph.DISCONNECTED;
+		this.limit = limit;
+	}
 	public double getWeight() {
 		// TODO Auto-generated method stub
 		return weight;
@@ -39,6 +44,10 @@ public class EqualCostPaths extends Paths {
 		
 	}
 	public void addPaths(EqualCostPaths pathsToNode) {
+		if(pathsToNode.getWeight() > weight) {
+			throw new RuntimeException("new weight larger then old " +  weight + " " +pathsToNode.weight );
+		}
+		weight = pathsToNode.weight;
 		while(this.mPaths.size() <= limit) {
 			Path p = pathsToNode.mPaths.pollFirst();
 			if(p==null) {
@@ -48,5 +57,12 @@ public class EqualCostPaths extends Paths {
 		}
 		
 	}
+	
+	public void clear() {
+		this.weight = Graph.DISCONNECTED;
+		super.clear();
+		
+	}
+	
 
 }

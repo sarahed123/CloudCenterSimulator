@@ -28,13 +28,14 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
-import edu.asu.emit.algorithm.graph.PathsFilter;
-import edu.asu.emit.algorithm.graph.PathsFilterFirst;
 import edu.asu.emit.algorithm.graph.VariableGraph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraKShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.StrictUpDownDijkstra;
+import edu.asu.emit.algorithm.graph.paths_filter.LowestIndexFilter;
+import edu.asu.emit.algorithm.graph.paths_filter.PathsFilter;
+import edu.asu.emit.algorithm.graph.paths_filter.PathsFilterFirst;
 
 public class XpanderRouter extends RemoteRoutingController{
 	private int flowFailuresSample;
@@ -57,6 +58,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		switch(pathsFilterKey) {
 		case "filter_first":
 			pathsFilter = new PathsFilterFirst(mG);
+			break;
+		case "filter_by_lower_index":
+			pathsFilter = new LowestIndexFilter(mG);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for paths_filter " + pathsFilterKey);
