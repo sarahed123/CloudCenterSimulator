@@ -33,6 +33,7 @@ import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraKShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.StrictUpDownDijkstra;
+import edu.asu.emit.algorithm.graph.paths_filter.LeastLoadedPath;
 import edu.asu.emit.algorithm.graph.paths_filter.LowestIndexFilter;
 import edu.asu.emit.algorithm.graph.paths_filter.PathsFilter;
 import edu.asu.emit.algorithm.graph.paths_filter.PathsFilterFirst;
@@ -59,8 +60,11 @@ public class XpanderRouter extends RemoteRoutingController{
 		case "filter_first":
 			pathsFilter = new PathsFilterFirst(mG);
 			break;
-		case "filter_by_lower_index":
+		case "by_lower_index":
 			pathsFilter = new LowestIndexFilter(mG);
+			break;
+		case "least_loaded_path":
+			pathsFilter = new LeastLoadedPath(mG);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for paths_filter " + pathsFilterKey);

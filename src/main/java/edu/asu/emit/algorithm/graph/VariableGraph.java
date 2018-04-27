@@ -158,7 +158,7 @@ public class VariableGraph extends Graph {
 		switch(weightRule) {
     	
     	case BY_LEAST_LOADED_SWITCH:
-    		return 1.0/(double)getAdjacentVertices(target).size();
+    		return super.getAdjacentVertices(target).size() - getAdjacentVertices(target).size() + 1;
     		
     	case BY_MOST_LOADED_SWITCH:
     		return getAdjacentVertices(target).size();
