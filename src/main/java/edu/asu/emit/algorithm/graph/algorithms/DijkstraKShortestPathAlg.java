@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 import edu.asu.emit.algorithm.graph.BaseGraph;
 import edu.asu.emit.algorithm.graph.EqualCostPaths;
@@ -27,7 +28,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		visitedNodes = new HashMap<Integer,EqualCostPaths>();
 		endPaths = new EqualCostPaths(K);
 		foundPaths = new PriorityQueue<EqualCostPaths>(new Comparator<EqualCostPaths>() {
-
+			Random rand = new Random();
 			@Override
 			public int compare(EqualCostPaths p1, EqualCostPaths p2) {
 				if(p1.getWeight() > p2.getWeight()) {
@@ -36,6 +37,8 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 				if(p1.getWeight() < p2.getWeight()) {
 					return -1;
 				}
+				//int r =  rand.nextInt(2);
+				//return r == 0 ? -1 : 1;
 				return 0;
 			}
 		});
@@ -95,6 +98,15 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	
 	private void updatePath(EqualCostPaths curCandidate, boolean isSource2sink) {
 		List<Vertex> neighborVertexList = getVertexNeighbours(curCandidate.getLastVertex(), isSource2sink);
+		neighborVertexList.sort(new Comparator<Vertex>() {
+
+			@Override
+			public int compare(Vertex v1, Vertex v2) {
+				// TODO Auto-generated method stub
+				return v1.compareTo(v2);
+			}
+		});
+		//System.out.println("neighbouring vertices " + neighborVertexList);
 		for (Vertex curAdjacentVertex : neighborVertexList) {
 			
 			double edgeWeight = graph.getEdgeWeight(curCandidate.getLastVertex(), curAdjacentVertex);
