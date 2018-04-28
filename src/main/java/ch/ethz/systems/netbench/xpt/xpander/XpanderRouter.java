@@ -35,8 +35,10 @@ import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.StrictUpDownDijkstra;
 import edu.asu.emit.algorithm.graph.paths_filter.LeastLoadedPath;
 import edu.asu.emit.algorithm.graph.paths_filter.LowestIndexFilter;
+import edu.asu.emit.algorithm.graph.paths_filter.MostLoadedPathFilter;
 import edu.asu.emit.algorithm.graph.paths_filter.PathsFilter;
 import edu.asu.emit.algorithm.graph.paths_filter.PathsFilterFirst;
+import edu.asu.emit.algorithm.graph.paths_filter.RandomPathsFilter;
 
 public class XpanderRouter extends RemoteRoutingController{
 	private int flowFailuresSample;
@@ -65,6 +67,12 @@ public class XpanderRouter extends RemoteRoutingController{
 			break;
 		case "least_loaded_path":
 			pathsFilter = new LeastLoadedPath(mG);
+			break;
+		case "random_path" :
+			pathsFilter = new RandomPathsFilter(mG);
+			break;
+		case "most_loaded_path":
+			pathsFilter = new MostLoadedPathFilter(mG);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for paths_filter " + pathsFilterKey);
@@ -110,7 +118,9 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	protected Path generatePathFromGraph(int source,int dest) {
 		Paths ps  = dijkstraAlg.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
+		//System.out.println(ps);
 		Path p = pathsFilter.filterPaths(ps);
+		//System.out.println(p);
 		return p;
 	}
 

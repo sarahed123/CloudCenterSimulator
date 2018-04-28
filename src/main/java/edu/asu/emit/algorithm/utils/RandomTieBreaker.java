@@ -8,7 +8,7 @@ import edu.asu.emit.algorithm.graph.Vertex;
 public class RandomTieBreaker extends VertexWeightTieBreaker {
     Random rand;
     public RandomTieBreaker() {
-    	rand = new Random(Simulator.getConfiguration().getLongPropertyOrFail("seed"));
+    	rand = new Random();
     }
 	@Override
 	public int breakTie(Vertex v, Vertex u) {
