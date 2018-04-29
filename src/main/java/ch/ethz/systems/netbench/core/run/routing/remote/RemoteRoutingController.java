@@ -16,13 +16,14 @@ import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
+import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.VariableGraph;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
 	private static RemoteRoutingController mInstance = null;
 	protected HashMap<Long, Path> mPaths;
-	protected VariableGraph mG;
+	protected Graph mG;
 	private static long headerSize;
 	protected long totalDrops;
 	protected long flowCounter;

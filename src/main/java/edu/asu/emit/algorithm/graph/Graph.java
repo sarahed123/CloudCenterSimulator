@@ -49,6 +49,8 @@ public class Graph implements BaseGraph, Serializable {
 	
 
     public static final double DISCONNECTED = 1000000000;
+    
+	protected Map<Pair<Integer, Integer>,Long> edgeCapacities= new HashMap<Pair<Integer, Integer>,Long>();
 
     // Maps a vertex identifier to all vertices a directed edges exists from itself to them
     private final Map<Integer, List<Vertex>> outEdges;
@@ -94,6 +96,9 @@ public class Graph implements BaseGraph, Serializable {
         // Add edge presence to data structures
         for (Pair<Integer, Integer> linkDirPair : linkDirectedPairs) {
             addEdge(linkDirPair.getLeft(), linkDirPair.getRight(), 1);
+            edgeCapacities.put(linkDirPair,1l);
+             
+            
         }
         
         
@@ -232,5 +237,36 @@ public class Graph implements BaseGraph, Serializable {
 		return g;
     	
     }
+
+	@Override
+	public double getEdgeCapacity(Vertex v1, Vertex v2) {
+		
+		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
+	}
+
+	public void resetCapcities() {
+		edgeCapacities.replaceAll((k, v) -> initCapcity(k));
+
+		
+	}
+
+	private long initCapcity(Pair<Integer, Integer> linkDirPair) {
+		Integer TorIdLeft = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(linkDirPair.getLeft());
+        Integer TorIdRight = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(linkDirPair.getRight());
+        if(TorIdLeft!=null || TorIdRight!=null) {
+       	 return Long.MAX_VALUE;
+        }
+		return 1;
+	}
+
+	public void increaseCapacity(ImmutablePair<Integer, Integer> immutablePair) {
+		edgeCapacities.replace(immutablePair, edgeCapacities.get(immutablePair) + 1);
+		
+	}
+
+	public void decreaseCapacity(ImmutablePair<Integer, Integer> immutablePair) {
+		edgeCapacities.replace(immutablePair, edgeCapacities.get(immutablePair) - 1);
+		
+	}
     
 }

@@ -52,7 +52,8 @@ public class XpanderRouter extends RemoteRoutingController{
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice){
 		mIdToNetworkDevice = idToNetworkDevice;
-		mG = new VariableGraph(Simulator.getConfiguration().getGraph());
+		mG =  Simulator.getConfiguration().getGraph();
+		mG.resetCapcities();
 		mPaths = new HashMap<Long,Path>();
 		totalDrops = 0;
 		flowCounter = 0;
@@ -125,7 +126,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 	public void reset(){
-		mG.recoverDeletedEdges();
+		mG.resetCapcities();
 		mPaths.clear();
 	}
 
@@ -135,9 +136,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);
-			mG.recoverDeletedEdge(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
+			mG.increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
 			// recover the opisite edge
-			mG.recoverDeletedEdge(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
+			mG.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
 
 
 		}
@@ -151,9 +152,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){
 			int next = pathAsList.get(i).getId();
-			mG.deleteEdge(new ImmutablePair<Integer, Integer>(curr, next));
+			mG.decreaseCapacity(new ImmutablePair<Integer, Integer>(curr, next));
 			// delete the opisite edge
-			mG.deleteEdge(new ImmutablePair<Integer, Integer>(next, curr));
+			mG.decreaseCapacity(new ImmutablePair<Integer, Integer>(next, curr));
 			curr = next;
 		}
 		
