@@ -204,7 +204,7 @@ public class GraphReader {
 
             // Create graph
             Graph graph = new Graph(details.getNumNodes(), linkDirectedPairs);
-
+            
             // Return final instantiated network
             return new ImmutablePair<>(graph, details);
 

@@ -1,26 +1,33 @@
 package edu.asu.emit.algorithm.graph.paths_filter;
 
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
 import edu.asu.emit.algorithm.graph.Vertex;
 
 public class LeastLoadedPath extends PathsFilter {
+	BaseInitializer baseInitiallizer;
 
 	public LeastLoadedPath(Graph g) {
 		super(g);
-		// TODO Auto-generated constructor stub
+		baseInitiallizer = BaseInitializer.getInstance();
+
 	}
 
 	@Override
 	public Path filterPaths(Paths paths) {
-		double weight = 0;
+		long weight = 0l;
 		Path ret = new Path(0);
 		for(Path p : paths.getPaths()) {
-			double tmp = 0;
+			long tmp = 0l;
 			for(Vertex v : p.getVertexList()) {
 				for(Vertex u : G.getAdjacentVertices(v)) {
-					tmp+= G.getEdgeCapacity(v, u);
+					if(baseInitiallizer.getNetworkDeviceById(v.getId()).isServer() || baseInitiallizer.getNetworkDeviceById(u.getId()).isServer()) {
+						continue;
+					}
+					long tmpCapacity = G.getEdgeCapacity(v, u);
+					tmp+= tmpCapacity;
 				}
 				
 				
