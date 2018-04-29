@@ -51,7 +51,7 @@ public class Vertex implements Comparable<Vertex>, Serializable {
 
     // Weight of the node (typically: shortest distance found to the node)
 	private double weight = 0;
-
+	
     /**
      * Constructor.
      *

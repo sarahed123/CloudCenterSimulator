@@ -239,7 +239,7 @@ public class Graph implements BaseGraph, Serializable {
     }
 
 	@Override
-	public double getEdgeCapacity(Vertex v1, Vertex v2) {
+	public long getEdgeCapacity(Vertex v1, Vertex v2) {
 		
 		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
 	}
