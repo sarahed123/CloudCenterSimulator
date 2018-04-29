@@ -95,7 +95,6 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		}
 	}
 	
-	
 	private void updatePath(EqualCostPaths curCandidate, boolean isSource2sink) {
 		List<Vertex> neighborVertexList = getVertexNeighbours(curCandidate.getLastVertex(), isSource2sink);
 		neighborVertexList.sort(new Comparator<Vertex>() {
@@ -108,7 +107,10 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		});
 		//System.out.println("neighbouring vertices " + neighborVertexList);
 		for (Vertex curAdjacentVertex : neighborVertexList) {
-			
+			if(graph.getEdgeCapacity(curCandidate.getLastVertex(), curAdjacentVertex) == 0) {
+				
+				continue;
+			}
 			double edgeWeight = graph.getEdgeWeight(curCandidate.getLastVertex(), curAdjacentVertex);
 			EqualCostPaths pathsToNode = visitedNodes.get(curAdjacentVertex.getId());
 			if(pathsToNode!=null) {

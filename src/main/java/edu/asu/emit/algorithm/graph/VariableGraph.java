@@ -55,7 +55,6 @@ public class VariableGraph extends Graph {
 	 public final EdgeWieghtRule weightRule;
     // Set of identifiers of all removed vertices
 	private Set<Integer> remVertexIdSet = new HashSet<>();
-
     // Set of all removed edges
 	private Set<Pair<Integer, Integer>> remEdgeSet = new HashSet<>();
 

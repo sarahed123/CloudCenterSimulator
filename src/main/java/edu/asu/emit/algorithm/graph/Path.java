@@ -154,4 +154,8 @@ public class Path implements BaseElementWithWeight, Serializable {
 		
 	}
 
+	public Vertex getFirstVertex() {
+		return vertexList.get(0);
+	}
+
 }

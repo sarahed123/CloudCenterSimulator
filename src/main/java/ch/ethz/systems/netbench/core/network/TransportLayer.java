@@ -145,7 +145,7 @@ public abstract class TransportLayer {
      *
      * @param flowId    Flow identifier
      */
-    void cleanupSockets(long flowId) {
+    protected void cleanupSockets(long flowId) {
         this.removeSocket(flowId);
         flowIdToReceiver.get(flowId).removeSocket(flowId);
     }
