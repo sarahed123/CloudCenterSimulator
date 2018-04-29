@@ -15,16 +15,20 @@ public class MostLoadedPathFilter extends PathsFilter {
 	@Override
 	public Path filterPaths(Paths paths) {
 		// TODO Auto-generated method stub
-		double weight = Graph.DISCONNECTED;
+		double capacity = Long.MAX_VALUE;
+		
 		Path ret = new Path(0);
 		for(Path p : paths.getPaths()) {
 			double tmp = 0;
-			for(Vertex v : p.getVertexList()) {
-				tmp+= G.getAdjacentVertices(v).size();
+			for(int i = 0; i<p.getVertexList().size()-1;i++) {
+				Vertex curr = p.getVertexList().get(i);
+				Vertex next = p.getVertexList().get(i+1);
+				
+				tmp+= G.getEdgeCapacity(curr, next);
 				
 			}
-			if(weight > tmp) {
-				weight = tmp;
+			if(capacity > tmp) {
+				capacity = tmp;
 				ret = p;
 			}
 		}
