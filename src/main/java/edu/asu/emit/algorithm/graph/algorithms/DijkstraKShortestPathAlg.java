@@ -78,7 +78,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		foundPaths.add(startPaths);
 		visitedNodes.put(startVertex.getId(),startPaths);
 		
-
+		visitedNodes.put(endVertex.getId(), endPaths);
 		while (!foundPaths.isEmpty() && endPaths.getPaths().size() < K) {
 			EqualCostPaths curCandidate = foundPaths.poll();
 
