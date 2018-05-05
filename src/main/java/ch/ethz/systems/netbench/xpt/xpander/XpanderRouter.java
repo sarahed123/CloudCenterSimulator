@@ -92,7 +92,8 @@ public class XpanderRouter extends RemoteRoutingController{
 			break;
 		case "k_shortest_paths":
 			int K = Simulator.getConfiguration().getIntegerPropertyOrFail("k_shortest_paths_num");
-			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K);
+			double max_weigh = Simulator.getConfiguration().getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
+			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K,max_weigh);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for path_algorithm " + pathAlgorithm);

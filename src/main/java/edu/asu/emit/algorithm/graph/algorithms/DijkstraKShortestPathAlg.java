@@ -22,9 +22,11 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	private int K;
 	private double minDistance;
 	EqualCostPaths endPaths;
-	public DijkstraKShortestPathAlg(BaseGraph graph,int k) {
+	double maxPathWeight;
+	public DijkstraKShortestPathAlg(BaseGraph graph,int k, double max_weigh) {
 		super(graph);
 		K = k;
+		maxPathWeight = max_weigh;
 		visitedNodes = new HashMap<Integer,EqualCostPaths>();
 		endPaths = new EqualCostPaths(K);
 		foundPaths = new PriorityQueue<EqualCostPaths>(new Comparator<EqualCostPaths>() {
@@ -76,18 +78,11 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		foundPaths.add(startPaths);
 		visitedNodes.put(startVertex.getId(),startPaths);
 		
-		visitedNodes.put(endVertex.getId(), endPaths);
-		//startVertexDistanceIndex.put(startVertex, 0.0);
-		//startVertex.setWeight(0.0);
-		//vertexCandidateQueue.add(startVertex);
-		// 2. start searching for the shortest path
-		//System.out.println("starting " + startVertex.getId() + " to " + endVertex.getId());
+
 		while (!foundPaths.isEmpty() && endPaths.getPaths().size() < K) {
 			EqualCostPaths curCandidate = foundPaths.poll();
-			//System.out.println("trying path " + curCandidate);
-			//System.out.println("end path " + endPaths);
-			//System.out.println("end path weight" + endPaths.getWeight());
-			if(curCandidate.getWeight() > endPaths.getWeight()) {
+
+			if(curCandidate.getWeight() > endPaths.getWeight() || curCandidate.getWeight() > maxPathWeight) {
 				break;
 			}
 
