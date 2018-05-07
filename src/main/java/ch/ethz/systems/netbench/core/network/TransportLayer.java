@@ -82,7 +82,6 @@ public abstract class TransportLayer {
 	    
         IpPacket packet = (IpPacket) genericPacket;
         Socket socket = flowIdToSocket.get(packet.getFlowId());
-
         // If the socket does not yet exist, it is an incoming socket
         if (socket == null && !finishedFlowIds.contains(packet.getFlowId())) {
             socket = createSocket(packet.getFlowId(), packet.getSourceId(), -1);
@@ -134,7 +133,7 @@ public abstract class TransportLayer {
      *
      * @param flowId    Flow identifier
      */
-    private void removeSocket(long flowId) {
+    public void removeSocket(long flowId) {
         this.finishedFlowIds.add(flowId);
         this.flowIdToSocket.remove(flowId);
     }
@@ -145,7 +144,7 @@ public abstract class TransportLayer {
      *
      * @param flowId    Flow identifier
      */
-    protected void cleanupSockets(long flowId) {
+    public void cleanupSockets(long flowId) {
         this.removeSocket(flowId);
         flowIdToReceiver.get(flowId).removeSocket(flowId);
     }

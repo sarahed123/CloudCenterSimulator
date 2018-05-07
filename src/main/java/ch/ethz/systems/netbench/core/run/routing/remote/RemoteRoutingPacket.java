@@ -15,5 +15,9 @@ public class RemoteRoutingPacket extends IpPacket {
 		
 	}
 
+	public boolean isLast(){
+		return flowRemainder==getSizeBit();
+	}
+
 
 }

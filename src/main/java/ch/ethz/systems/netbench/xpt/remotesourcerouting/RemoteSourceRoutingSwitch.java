@@ -82,7 +82,7 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	public void receive(Packet genericPacket) {
 		IpPacket packet = (IpPacket) genericPacket;
 		if (packet.getDestinationId() == this.identifier) {
-			
+
 			// Hand to the underlying server
 			this.passToIntermediary(packet); // Will throw null-pointer if this network device does not have a server attached to it
 
