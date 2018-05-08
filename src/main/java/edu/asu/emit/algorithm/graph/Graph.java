@@ -37,7 +37,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.*;
-import ch.ethz.systems.netbench.core.Simulator;;
+import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;;
 /**
  * The class defines a directed graph.
  * 
@@ -251,11 +252,16 @@ public class Graph implements BaseGraph, Serializable {
 	}
 
 	private long initCapcity(Pair<Integer, Integer> linkDirPair) {
-		Integer TorIdLeft = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(linkDirPair.getLeft());
-        Integer TorIdRight = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(linkDirPair.getRight());
-        if(TorIdLeft!=null || TorIdRight!=null) {
-       	 return Long.MAX_VALUE;
-        }
+		BaseInitializer bi = BaseInitializer.getInstance();
+		boolean isServerRight = bi.getNetworkDeviceById(linkDirPair.getRight()).isServer();
+		boolean isServerLeft = bi.getNetworkDeviceById(linkDirPair.getLeft()).isServer();
+		boolean extendedTopology = Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
+		if(extendedTopology) {
+			if(isServerLeft || isServerRight) {
+		       	 return Long.MAX_VALUE;
+		    }
+		}
+        
 		return 1;
 	}
 
