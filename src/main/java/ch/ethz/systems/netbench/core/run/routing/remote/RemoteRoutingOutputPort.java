@@ -18,8 +18,8 @@ public class RemoteRoutingOutputPort extends OutputPort{
 	@Override
 	public void enqueue(Packet packet) {
 		
-		guaranteedEnqueue(packet);
-
+		//guaranteedEnqueue(packet);
+		registerPacketDispatchedEvent(packet);
 	}
 
 	@Override
