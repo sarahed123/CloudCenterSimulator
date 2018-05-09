@@ -10,16 +10,23 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceExce
 
 public class RemoteRoutingOutputPort extends OutputPort{
 	boolean extendedTopology;
+	boolean noQueues;
 	protected RemoteRoutingOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue) {
 		super(ownNetworkDevice, targetNetworkDevice, link,queue);
 		extendedTopology = Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
+		noQueues  = Simulator.getConfiguration().getBooleanPropertyWithDefault("no_queues_in_servers",false);
 	}
 
 	@Override
 	public void enqueue(Packet packet) {
 		
 		//guaranteedEnqueue(packet);
-		registerPacketDispatchedEvent(packet);
+		if(noQueues){
+			registerPacketDispatchedEvent(packet);
+		}else{
+			guaranteedEnqueue(packet);
+		}
+
 	}
 
 	@Override
