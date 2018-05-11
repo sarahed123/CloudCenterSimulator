@@ -196,8 +196,25 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	public String getCurrentState() {
 		// TODO Auto-generated method stub
-		
-		return "Allocated paths " + mPaths.size() + ". Flow dropps " + flowFailuresSample + ". Flow count " + flowCounter;
+		int numEdges = 0;
+		HashMap<Vertex,Integer> loadMap = new HashMap<Vertex,Integer>();
+		for(Path p : mPaths.values()){
+			numEdges += p.getVertexList().size();
+			int load = loadMap.getOrDefault(p.getFirstVertex(),0);
+			loadMap.put(p.getFirstVertex(),load+1);
+		}
+		HashMap<Integer,Integer> loadCounts = new HashMap<Integer,Integer>();
+		for(int load : loadMap.values()){
+			int loadCount = loadCounts.getOrDefault(load,0);
+			loadCounts.put(load,loadCount+1);
+		}
+		String state = "Allocated paths " + mPaths.size() + ". Flow dropps " + flowFailuresSample + ". Flow count " + flowCounter + "\n";
+		state+= "num edges " + numEdges + "\n";
+		for(int load : loadCounts.keySet()){
+			state +=  " load " + load + " count " + loadCounts.get(load) + "\n";
+		}
+
+		return state;
 	}
 
 	public void logCurrentState() {
