@@ -81,8 +81,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 		visitedNodes.put(endVertex.getId(), endPaths);
 		while (!foundPaths.isEmpty() && endPaths.getPaths().size() < K) {
 			EqualCostPaths curCandidate = foundPaths.poll();
-
-			if(curCandidate.getWeight() > endPaths.getWeight() || curCandidate.getWeight() > maxPathWeight) {
+			if(curCandidate.getWeight() > endPaths.getWeight()) {
 				break;
 			}
 
@@ -107,7 +106,12 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 				continue;
 			}
 			double edgeWeight = graph.getEdgeWeight(curCandidate.getLastVertex(), curAdjacentVertex);
+
+			if(curCandidate.getWeight() + edgeWeight > maxPathWeight) {
+				continue;
+			}
 			EqualCostPaths pathsToNode = visitedNodes.get(curAdjacentVertex.getId());
+
 			if(pathsToNode!=null) {
 				if(pathsToNode.getWeight()<curCandidate.getWeight()+edgeWeight) {
 					continue;
