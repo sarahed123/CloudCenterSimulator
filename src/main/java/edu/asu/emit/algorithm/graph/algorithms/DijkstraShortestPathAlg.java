@@ -157,7 +157,9 @@ public class DijkstraShortestPathAlg
 			
 		// 2. update the distance passing on current vertex
 		for (Vertex curAdjacentVertex : neighborVertexList) {
-
+			if(graph.getEdgeCapacity(vertex,curAdjacentVertex)==0){
+				continue;
+			}
 			// 2.1 skip if visited before
 			if (determinedVertexSet.contains(curAdjacentVertex)) {
                 continue;
@@ -212,6 +214,7 @@ public class DijkstraShortestPathAlg
 			vertexList.add(sourceVertex);
 			Collections.reverse(vertexList);
 		}
+		//System.out.println(new Path(vertexList, weight));
 		return new Paths(new Path(vertexList, weight));
 	}
 
@@ -235,6 +238,9 @@ public class DijkstraShortestPathAlg
 		
 		// 3. update the distance from the root to the input vertex if necessary
 		for (Vertex curVertex : adjVertexSet) {
+			if(graph.getEdgeCapacity(vertex,curVertex)==0){
+
+			}
 			// 3.1 get the distance from the root to one successor of the input vertex
 			double distance = startVertexDistanceIndex.containsKey(curVertex)?
 					startVertexDistanceIndex.get(curVertex) : Graph.DISCONNECTED;

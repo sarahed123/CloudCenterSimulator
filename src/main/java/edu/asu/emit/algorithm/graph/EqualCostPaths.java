@@ -48,7 +48,7 @@ public class EqualCostPaths extends Paths {
 			throw new RuntimeException("new weight larger then old " +  weight + " " +pathsToNode.weight );
 		}
 		weight = pathsToNode.weight;
-		while(this.mPaths.size() <= limit) {
+		while(true /* use to be this.mPaths.size() <= limit*/) {
 			Path p = pathsToNode.mPaths.pollFirst();
 			if(p==null) {
 				break;

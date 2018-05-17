@@ -57,7 +57,7 @@ public class Vertex implements Comparable<Vertex>, Serializable {
      *
      * @param id    Vertex identifier
      */
-	Vertex(int id) {
+	public Vertex(int id) {
 		this.id = id;
 	}
 
