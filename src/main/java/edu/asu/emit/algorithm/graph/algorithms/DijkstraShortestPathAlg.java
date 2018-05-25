@@ -56,13 +56,20 @@ public class DijkstraShortestPathAlg
 	private PriorityQueue<Vertex> vertexCandidateQueue = new PriorityQueue<Vertex>();
 	private Map<Vertex, Double> startVertexDistanceIndex = new HashMap<Vertex, Double>();
 	protected Map<Vertex, Vertex> predecessorIndex = new HashMap<Vertex, Vertex>();
-
+	private double maxWeight;
 	/**
 	 * Default constructor.
 	 * @param graph
+	 * @param max_weigh
 	 */
+	public DijkstraShortestPathAlg(final BaseGraph graph, double max_weigh) {
+        this.maxWeight = max_weigh;
+		this.graph = graph;
+	}
+
 	public DijkstraShortestPathAlg(final BaseGraph graph) {
-        this.graph = graph;
+		this.maxWeight = Long.MAX_VALUE;
+		this.graph = graph;
 	}
 
 	/**
@@ -130,7 +137,9 @@ public class DijkstraShortestPathAlg
 		// 2. start searching for the shortest path
 		while (!vertexCandidateQueue.isEmpty()) {
 			Vertex curCandidate = vertexCandidateQueue.poll();
-
+			if(startVertexDistanceIndex.containsKey(curCandidate) && startVertexDistanceIndex.get(curCandidate)>maxWeight){
+				break;
+			}
 			if (curCandidate.equals(endVertex)) {
                 break;
             }
@@ -154,7 +163,7 @@ public class DijkstraShortestPathAlg
 	private void updateVertex(Vertex vertex, boolean isSource2sink)	{
 		// 1. get the neighboring vertices 
         List<Vertex> neighborVertexList = getVertexNeighbours(vertex, isSource2sink);
-			
+
 		// 2. update the distance passing on current vertex
 		for (Vertex curAdjacentVertex : neighborVertexList) {
 			if(graph.getEdgeCapacity(vertex,curAdjacentVertex)==0){
@@ -239,7 +248,7 @@ public class DijkstraShortestPathAlg
 		// 3. update the distance from the root to the input vertex if necessary
 		for (Vertex curVertex : adjVertexSet) {
 			if(graph.getEdgeCapacity(vertex,curVertex)==0){
-
+				continue;
 			}
 			// 3.1 get the distance from the root to one successor of the input vertex
 			double distance = startVertexDistanceIndex.containsKey(curVertex)?
