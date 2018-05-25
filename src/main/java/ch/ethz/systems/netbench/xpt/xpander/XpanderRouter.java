@@ -3,36 +3,26 @@ package ch.ethz.systems.netbench.xpt.xpander;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import ch.ethz.systems.netbench.core.Simulator;
-import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
-import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
-import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
-import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
 import edu.asu.emit.algorithm.graph.VariableGraph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraKShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
-import edu.asu.emit.algorithm.graph.algorithms.StrictUpDownDijkstra;
+import edu.asu.emit.algorithm.graph.algorithms.FatTreeShortestPathAlg;
 import edu.asu.emit.algorithm.graph.paths_filter.LeastLoadedPath;
 import edu.asu.emit.algorithm.graph.paths_filter.LowestIndexFilter;
 import edu.asu.emit.algorithm.graph.paths_filter.MostLoadedPathFilter;
@@ -83,16 +73,17 @@ public class XpanderRouter extends RemoteRoutingController{
 		if(pathAlgorithm==null) {
 			pathAlgorithm = "dijkstra";
 		}
+		double max_weigh = Simulator.getConfiguration().getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
 		switch(pathAlgorithm) {
 		case "dijkstra":
-			dijkstraAlg = new DijkstraShortestPathAlg(mG);
+
+			dijkstraAlg = new DijkstraShortestPathAlg(mG,max_weigh);
 			break;
-		case "strict_up_down_dijkstra":
-			dijkstraAlg = new StrictUpDownDijkstra(mG);
+		case "fat_tree_dijkstra":
+			dijkstraAlg = new FatTreeShortestPathAlg(mG,6);
 			break;
 		case "k_shortest_paths":
 			int K = Simulator.getConfiguration().getIntegerPropertyOrFail("k_shortest_paths_num");
-			double max_weigh = Simulator.getConfiguration().getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
 			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K,max_weigh);
 			break;
 		default:

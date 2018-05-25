@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -24,7 +23,7 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	EqualCostPaths endPaths;
 	double maxPathWeight;
 	public DijkstraKShortestPathAlg(BaseGraph graph,int k, double max_weigh) {
-		super(graph);
+		super(graph, max_weigh);
 		K = k;
 		maxPathWeight = max_weigh;
 		visitedNodes = new HashMap<Integer,EqualCostPaths>();
