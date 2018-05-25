@@ -137,9 +137,7 @@ public class DijkstraShortestPathAlg
 		// 2. start searching for the shortest path
 		while (!vertexCandidateQueue.isEmpty()) {
 			Vertex curCandidate = vertexCandidateQueue.poll();
-			if(startVertexDistanceIndex.containsKey(curCandidate) && startVertexDistanceIndex.get(curCandidate)>maxWeight){
-				break;
-			}
+
 			if (curCandidate.equals(endVertex)) {
                 break;
             }
@@ -181,6 +179,10 @@ public class DijkstraShortestPathAlg
 			distance += isSource2sink ? graph.getEdgeWeight(vertex, curAdjacentVertex)
 					: graph.getEdgeWeight(curAdjacentVertex, vertex);
 			
+			if(distance > maxWeight) {
+				continue;
+			}
+			
 			// 2.3 update the distance if necessary
 			if (!startVertexDistanceIndex.containsKey(curAdjacentVertex)
 			|| startVertexDistanceIndex.get(curAdjacentVertex) > distance) {
@@ -214,6 +216,7 @@ public class DijkstraShortestPathAlg
 		List<Vertex> vertexList = new Vector<Vertex>();
 		double weight = startVertexDistanceIndex.containsKey(sinkVertex) ?
 			startVertexDistanceIndex.get(sinkVertex) : Graph.DISCONNECTED;
+
 		if (weight != Graph.DISCONNECTED) {
 			Vertex curVertex = sinkVertex;
 			do {
@@ -223,7 +226,7 @@ public class DijkstraShortestPathAlg
 			vertexList.add(sourceVertex);
 			Collections.reverse(vertexList);
 		}
-		//System.out.println(new Path(vertexList, weight));
+
 		return new Paths(new Path(vertexList, weight));
 	}
 
