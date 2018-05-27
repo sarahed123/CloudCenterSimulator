@@ -1,21 +1,23 @@
 package edu.asu.emit.algorithm.graph.algorithms;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
-import edu.asu.emit.algorithm.graph.BaseGraph;
-import edu.asu.emit.algorithm.graph.Vertex;
+import edu.asu.emit.algorithm.graph.*;
 
 public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
-	private Map<Vertex, Boolean> isInDecsent = new HashMap<Vertex, Boolean>();
+	int ftDegree;
+	boolean isInExtendedTopology;
+	HashMap<Vertex,Vertex> sourcePredecessorIndex;
+	HashMap<Vertex,Vertex> destPredecessorIndex;
+	public FatTreeShortestPathAlg(BaseGraph graph, int degree,boolean isInExtendedTopology) {
+		super(graph, 6);
+		ftDegree = degree;
+		isInExtendedTopology = isInExtendedTopology;
+		sourcePredecessorIndex = new HashMap<Vertex,Vertex>();
+		destPredecessorIndex = new HashMap<Vertex,Vertex>();
 
-	public FatTreeShortestPathAlg(BaseGraph graph,double max_weigh) {
-		super(graph, max_weigh);
-
-		
 	}
 	
 	/*@Override
@@ -43,17 +45,57 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 	
 	@Override
 	protected List<Vertex> getVertexNeighbours(Vertex v, boolean isSource2sink){
-		List<Vertex> neighborVertexList = super.getVertexNeighbours(v, isSource2sink);
-		/*if(isInDecsent.getOrDefault(v, false)) {
+		List<Vertex> neighbours = super.getVertexNeighbours(v,isSource2sink);
+		neighbours.removeIf(vertex -> graph.getEdgeCapacity(v,vertex)==0);
+		return neighbours;
+	}
 
-			neighborVertexList.removeIf(entry ->  !BaseInitializer.getInstance().getNetworkDeviceById(entry.getId()).isServer() && entry.getId() > v.getId());
+	@Override
+	public Paths getShortestPath(Vertex sourceVertex, Vertex sinkVertex)	{
+		clear();
+		Vertex s = sourceVertex;
+		Vertex t = sinkVertex;
+		if(isInExtendedTopology){
+			s = getVertexNeighbours(s,true).get(0);
+			t = getVertexNeighbours(t,true).get(0);
+		}
+		int level = 2; // level of least common ancestor
 
-		}*/
+		if(s.getId()%(ftDegree/2)==s.getId()%(ftDegree/2)){ // look only 1 level up
+			level = 1;
+		}
+		if(s.getId()==t.getId()){
+			level = 0;
+		}
+		HashSet<Vertex> sourceCores = getPathFromVToLevel(s,level,sourcePredecessorIndex);
+		HashSet<Vertex> destCores = getPathFromVToLevel(s,level,destPredecessorIndex);
 
-		//System.out.println(v);
-		//System.out.println(neighborVertexList);
-		Collections.shuffle(neighborVertexList);
-		return neighborVertexList;
+		return null;
+	}
+
+	@Override
+	public void clear() {
+		sourcePredecessorIndex.clear();
+		destPredecessorIndex.clear();
+	}
+
+	protected HashSet<Vertex> getPathFromVToLevel(Vertex s, int level, HashMap<Vertex, Vertex> predecessorIndex) {
+		HashSet<Vertex> coreSet = new HashSet<Vertex>();
+		coreSet.add(s);
+		while(level > 0){
+			HashSet<Vertex> newCoreSet = new HashSet<Vertex>();
+			for(Vertex v : coreSet){
+				for(Vertex u : getVertexNeighbours(v,true)){
+					if(u.getId()>v.getId()){
+						newCoreSet.add(u);
+						predecessorIndex.put(u,v);
+					}
+				}
+			}
+			coreSet = newCoreSet;
+			level--;
+		}
+		return coreSet;
 	}
 
 }

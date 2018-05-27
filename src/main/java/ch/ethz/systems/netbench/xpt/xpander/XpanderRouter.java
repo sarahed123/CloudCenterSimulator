@@ -80,7 +80,7 @@ public class XpanderRouter extends RemoteRoutingController{
 			dijkstraAlg = new DijkstraShortestPathAlg(mG,max_weigh);
 			break;
 		case "fat_tree_dijkstra":
-			dijkstraAlg = new FatTreeShortestPathAlg(mG,6);
+			dijkstraAlg = new FatTreeShortestPathAlg(mG,8);
 			break;
 		case "k_shortest_paths":
 			int K = Simulator.getConfiguration().getIntegerPropertyOrFail("k_shortest_paths_num");
