@@ -14,7 +14,7 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 	public FatTreeShortestPathAlg(BaseGraph graph, int degree,boolean isInExtendedTopology) {
 		super(graph, 6);
 		ftDegree = degree;
-		isInExtendedTopology = isInExtendedTopology;
+		this.isInExtendedTopology = isInExtendedTopology;
 		sourcePredecessorIndex = new HashMap<Vertex,Vertex>();
 		destPredecessorIndex = new HashMap<Vertex,Vertex>();
 
@@ -46,7 +46,7 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 	@Override
 	protected List<Vertex> getVertexNeighbours(Vertex v, boolean isSource2sink){
 		List<Vertex> neighbours = super.getVertexNeighbours(v,isSource2sink);
-		neighbours.removeIf(vertex -> graph.getEdgeCapacity(v,vertex)==0);
+		neighbours.removeIf(vertex -> graph.getEdgeCapacity(v,vertex)==0 || vertex.getId()<v.getId());
 		return neighbours;
 	}
 
@@ -86,10 +86,8 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 			HashSet<Vertex> newCoreSet = new HashSet<Vertex>();
 			for(Vertex v : coreSet){
 				for(Vertex u : getVertexNeighbours(v,true)){
-					if(u.getId()>v.getId()){
-						newCoreSet.add(u);
-						predecessorIndex.put(u,v);
-					}
+					newCoreSet.add(u);
+					predecessorIndex.put(u,v);
 				}
 			}
 			coreSet = newCoreSet;
