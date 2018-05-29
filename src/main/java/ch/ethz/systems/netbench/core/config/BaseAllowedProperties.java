@@ -84,6 +84,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+            "fat_tree_degree",
             "no_queues_in_servers",
     		"base_dir_variants",
     		"k_shortest_paths",

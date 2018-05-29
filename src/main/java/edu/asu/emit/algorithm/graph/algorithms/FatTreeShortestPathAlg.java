@@ -1,16 +1,15 @@
 package edu.asu.emit.algorithm.graph.algorithms;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import ch.ethz.systems.netbench.core.Simulator;
-import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import edu.asu.emit.algorithm.graph.*;
 
 public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 	int ftDegree;
 	boolean isInExtendedTopology;
-	HashMap<Vertex,Vertex> sourcePredecessorIndex;
-	HashMap<Vertex,Vertex> destPredecessorIndex;
+	protected HashMap<Vertex,Vertex> sourcePredecessorIndex;
+	protected HashMap<Vertex,Vertex> destPredecessorIndex;
 	public FatTreeShortestPathAlg(BaseGraph graph, int degree,boolean isInExtendedTopology) {
 		super(graph, 6);
 		ftDegree = degree;
@@ -43,11 +42,10 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 		
 	}*/
 	
-	@Override
-	protected List<Vertex> getVertexNeighbours(Vertex v, boolean isSource2sink){
+	protected List<Vertex> getFilteredVertexNeighbours(Vertex v, boolean isSource2sink){
 		List<Vertex> neighbours = super.getVertexNeighbours(v,isSource2sink);
-		neighbours.removeIf(vertex -> graph.getEdgeCapacity(v,vertex)==0 || vertex.getId()<v.getId());
-		return neighbours;
+		//neighbours.removeIf(vertex -> graph.getEdgeCapacity(v,vertex)==0 || vertex.getId()<v.getId());
+		return neighbours.stream().filter(vertex -> !(graph.getEdgeCapacity(v,vertex)==0 || vertex.getId()<v.getId())).collect(Collectors.toList());
 	}
 
 	protected int getCoreLevel(Vertex s, Vertex t) {
@@ -68,31 +66,33 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 		Vertex s = sourceVertex;
 		Vertex t = sinkVertex;
 		if(isInExtendedTopology){
-			s = getVertexNeighbours(s,true).get(0);
+			s =	getVertexNeighbours(s,true).get(0);
 			t = getVertexNeighbours(t,true).get(0);
 		}
 		int level = getCoreLevel(s,t);
-		
-		HashSet<Vertex> sourceCores = getPathFromVToLevel(s,level,sourcePredecessorIndex);
-		HashSet<Vertex> destCores = getPathFromVToLevel(s,level,destPredecessorIndex);
+
+		HashSet<Vertex> sourceCores = initCoreSet(s,level,sourcePredecessorIndex);
+		HashSet<Vertex> destCores = initCoreSet(t,level,destPredecessorIndex);
+
 		HashSet<Vertex> finalSet = sourceCores;
 		finalSet.retainAll(destCores);
-		Paths ps = calculatePaths(finalSet,s,t);
-		return null;
-	}
-
-
-
-	private  Paths calculatePaths(HashSet<Vertex> finalSet, Vertex s, Vertex t) {
+		Paths ps = new Paths();
 		for(Vertex coreVertex : finalSet) {
 			Path p = getPathForCoreVertex(coreVertex,s,t);
+			if(isInExtendedTopology){
+				p.getVertexList().add(0,sourceVertex);
+				p.getVertexList().add(sinkVertex);
+				p.setWeight(p.getWeight()+2);
+			}
+			ps.getPaths().add(p);
 		}
-		
-		return null;
-		
+
+		return ps;
 	}
 
-	private Path getPathForCoreVertex(Vertex coreVertex, Vertex s, Vertex t) {
+
+
+	protected Path getPathForCoreVertex(Vertex coreVertex, Vertex s, Vertex t) {
 		LinkedList<Vertex> sourceAlmostToCore = new LinkedList<Vertex>();
 		LinkedList<Vertex> destAlmostToCore = new LinkedList<Vertex>();
 		Vertex v = sourcePredecessorIndex.get(coreVertex);
@@ -115,7 +115,7 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 		for(Vertex u : destAlmostToCore) {
 			finalPath.add(u);
 		}
-		return new Path(finalPath,finalPath.size());
+		return new Path(finalPath,finalPath.size()-1);
 	}
 
 	@Override
@@ -124,13 +124,13 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 		destPredecessorIndex.clear();
 	}
 
-	protected HashSet<Vertex> getPathFromVToLevel(Vertex s, int level, HashMap<Vertex, Vertex> predecessorIndex) {
+	protected HashSet<Vertex> initCoreSet(Vertex s, int level, HashMap<Vertex, Vertex> predecessorIndex) {
 		HashSet<Vertex> coreSet = new HashSet<Vertex>();
 		coreSet.add(s);
 		while(level > 0){
 			HashSet<Vertex> newCoreSet = new HashSet<Vertex>();
 			for(Vertex v : coreSet){
-				for(Vertex u : getVertexNeighbours(v,true)){
+				for(Vertex u : getFilteredVertexNeighbours(v,true)){
 					newCoreSet.add(u);
 					predecessorIndex.put(u,v);
 				}
