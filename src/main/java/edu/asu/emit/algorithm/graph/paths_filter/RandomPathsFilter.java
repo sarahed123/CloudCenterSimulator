@@ -1,5 +1,7 @@
 package edu.asu.emit.algorithm.graph.paths_filter;
 import java.util.Random;
+
+import ch.ethz.systems.netbench.core.Simulator;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
@@ -8,7 +10,7 @@ public class RandomPathsFilter extends PathsFilter {
 	Random rand;
 	public RandomPathsFilter(Graph g) {
 		super(g);
-		rand = new Random();
+		rand = new Random(Simulator.getConfiguration().getLongPropertyOrFail("seed"));
 		// TODO Auto-generated constructor stub
 	}
 

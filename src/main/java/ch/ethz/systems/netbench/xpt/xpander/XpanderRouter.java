@@ -76,11 +76,12 @@ public class XpanderRouter extends RemoteRoutingController{
 		double max_weigh = Simulator.getConfiguration().getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
 		switch(pathAlgorithm) {
 		case "dijkstra":
-
 			dijkstraAlg = new DijkstraShortestPathAlg(mG,max_weigh);
 			break;
 		case "fat_tree_dijkstra":
-			dijkstraAlg = new FatTreeShortestPathAlg(mG,8);
+			boolean isInExtendedTopology = Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
+			int ftDegree = Simulator.getConfiguration().getIntegerPropertyOrFail("fat_tree_degree");
+			dijkstraAlg = new FatTreeShortestPathAlg(mG,ftDegree,isInExtendedTopology);
 			break;
 		case "k_shortest_paths":
 			int K = Simulator.getConfiguration().getIntegerPropertyOrFail("k_shortest_paths_num");
