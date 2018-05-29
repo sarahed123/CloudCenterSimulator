@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +35,15 @@ public class FatTreePathsAlgTest {
         
     }
 
+    @Test
+    public void tetsCorrectCoreLevel() {
+    	Pair<Graph, GraphDetails> result = GraphReader.read("example/topologies/fat_tree/fat_tree_k8.topology");
+    	g = result.getLeft();
+        alg = new MockedFatTreeAlg(g,8);
+        assertEquals(1, alg.getCoreLevel(new Vertex(5), new Vertex(6)));
+        assertEquals(2, alg.getCoreLevel(new Vertex(5), new Vertex(18)));
+        assertEquals(0,alg.getCoreLevel(new Vertex(5), new Vertex(5)));
+    }
 
     @Test
     public void testPathFromVToLevel(){
