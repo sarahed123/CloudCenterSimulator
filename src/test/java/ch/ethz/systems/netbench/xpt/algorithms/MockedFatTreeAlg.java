@@ -19,5 +19,9 @@ public class MockedFatTreeAlg extends FatTreeShortestPathAlg{
         return super.getPathFromVToLevel(s,level,predecessorIndex);
     }
 
+    @Override
+    protected int getCoreLevel(Vertex s , Vertex t) {
+    	return super.getCoreLevel(s, t);
+    }
 
 }

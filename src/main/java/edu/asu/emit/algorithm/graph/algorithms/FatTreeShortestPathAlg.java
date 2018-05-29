@@ -50,6 +50,18 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 		return neighbours;
 	}
 
+	protected int getCoreLevel(Vertex s, Vertex t) {
+		int level = 2; // level of least common ancestor
+
+		if(s.getId()/(ftDegree/2)==t.getId()/(ftDegree/2)){ // look only 1 level up
+			level = 1;
+		}
+		if(s.getId()==t.getId()){
+			level = 0;
+		}
+		return level;
+	}
+	
 	@Override
 	public Paths getShortestPath(Vertex sourceVertex, Vertex sinkVertex)	{
 		clear();
@@ -59,18 +71,51 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 			s = getVertexNeighbours(s,true).get(0);
 			t = getVertexNeighbours(t,true).get(0);
 		}
-		int level = 2; // level of least common ancestor
-
-		if(s.getId()%(ftDegree/2)==s.getId()%(ftDegree/2)){ // look only 1 level up
-			level = 1;
-		}
-		if(s.getId()==t.getId()){
-			level = 0;
-		}
+		int level = getCoreLevel(s,t);
+		
 		HashSet<Vertex> sourceCores = getPathFromVToLevel(s,level,sourcePredecessorIndex);
 		HashSet<Vertex> destCores = getPathFromVToLevel(s,level,destPredecessorIndex);
-
+		HashSet<Vertex> finalSet = sourceCores;
+		finalSet.retainAll(destCores);
+		Paths ps = calculatePaths(finalSet,s,t);
 		return null;
+	}
+
+
+
+	private  Paths calculatePaths(HashSet<Vertex> finalSet, Vertex s, Vertex t) {
+		for(Vertex coreVertex : finalSet) {
+			Path p = getPathForCoreVertex(coreVertex,s,t);
+		}
+		
+		return null;
+		
+	}
+
+	private Path getPathForCoreVertex(Vertex coreVertex, Vertex s, Vertex t) {
+		LinkedList<Vertex> sourceAlmostToCore = new LinkedList<Vertex>();
+		LinkedList<Vertex> destAlmostToCore = new LinkedList<Vertex>();
+		Vertex v = sourcePredecessorIndex.get(coreVertex);
+		while(v!=null) {
+			sourceAlmostToCore.add(v);
+			v=sourcePredecessorIndex.get(v);
+		}
+		
+		v = destPredecessorIndex.get(coreVertex);
+		while(v!=null) {
+			destAlmostToCore.add(v);
+			v=destPredecessorIndex.get(v);
+		}
+		Collections.reverse(sourceAlmostToCore);
+		LinkedList<Vertex> finalPath = new LinkedList<Vertex>();
+		for(Vertex u : sourceAlmostToCore) {
+			finalPath.add(u);
+		}
+		finalPath.add(coreVertex);
+		for(Vertex u : destAlmostToCore) {
+			finalPath.add(u);
+		}
+		return new Path(finalPath,finalPath.size());
 	}
 
 	@Override
