@@ -49,8 +49,18 @@ def main(outname, d, n, delim=','):
     if n%(d+1) != 0:
         print("This script supports only multiplications of d+1 (the degree plus 1), now quitting")
         sys.exit(0)
-    mat = random_k_lift(d, n//(d+1))
+
+    lambda2 = 999999
+    mat = 0
+    for i in range(100):
+        cur_mat = random_k_lift(d, n//(d+1))
+        cur_lambda = get_lambda2(cur_mat)
+        print(cur_lambda)
+        if(cur_lambda<lambda2):
+            lambda2 = cur_lambda
+            mat = cur_mat
     #np.savetxt(outname, mat, delimiter=delim)
+    print(lambda2)
     with open(outname, 'w') as f:
         for i in range(n):
             for j in range(n):
