@@ -212,11 +212,22 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         }
         int numChosenServers = (int) Math.floor(servers.size() * activeFractionX);
 
+        List<Integer> chosen = initRandomServerSet(servers,numChosenServers);
+
+
+        // Log chosen fraction
+        Collections.sort(chosen);
+        SimulationLogger.logInfo("A2A_FRACTION_CHOSEN_SERVERS", chosen.toString());
+
+        System.out.println(" done.");
+
+    }
+
+    protected List<Integer> initRandomServerSet(List<Integer> servers, int numChosenServers){
+        List<Integer> chosen = new ArrayList<>();
         // Probability between each server pair
         double serverPairProb = 1.0 / (numChosenServers * (numChosenServers - 1));
-
         // Go over every server pair
-        List<Integer> chosen = new ArrayList<>();
         for (int i = 0; i < numChosenServers; i++) {
             chosen.add(servers.get(i));
             for (int j = 0; j < numChosenServers; j++) {
@@ -226,13 +237,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
 
             }
         }
-
-        // Log chosen fraction
-        Collections.sort(chosen);
-        SimulationLogger.logInfo("A2A_FRACTION_CHOSEN_SERVERS", chosen.toString());
-
-        System.out.println(" done.");
-
+        return chosen;
     }
 
     /**
@@ -632,7 +637,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
      *
      * @return (src, dst) pair
      */
-    private Pair<Integer, Integer> choosePair() {
+    protected Pair<Integer, Integer> choosePair() {
         return this.randomPairGenerator.next();
     }
 
