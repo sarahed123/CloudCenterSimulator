@@ -52,7 +52,7 @@ def main(outname, d, n, delim=','):
 
     lambda2 = 999999
     mat = 0
-    for i in range(100):
+    for i in range(1):
         cur_mat = random_k_lift(d, n//(d+1))
         cur_lambda = get_lambda2(cur_mat)
         print(cur_lambda)

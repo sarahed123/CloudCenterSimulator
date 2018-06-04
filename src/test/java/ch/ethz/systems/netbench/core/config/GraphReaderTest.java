@@ -7,10 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -96,4 +93,41 @@ public class GraphReaderTest {
 
     }
 
+    @Test
+    public void readBigGraphTest() {
+        FileReader input = null;
+        try {
+            input = new FileReader("example/topologies/fat_tree/fat_tree_k100.topology");
+            BufferedReader br = new BufferedReader(input);
+            String line;
+            int lineNum = 0;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.length() == 0 || line.startsWith("#")) {
+                    continue;
+                }
+
+                // Check links
+                int index = line.indexOf("=");
+                if (index == -1) {
+                    String[] spl = line.split(" ");
+                    int srcId = Integer.valueOf(spl[0]);
+                    int dstId = Integer.valueOf(spl[1]);
+
+
+                }
+                if (lineNum % 10000 == 0) {
+                    System.out.println("on line " + lineNum);
+                }
+                lineNum++;
+            }
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

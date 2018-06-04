@@ -87,7 +87,7 @@ public class BaseInitializer {
         Graph graph = Simulator.getConfiguration().getGraph();
         setVertexTieBreaker();
         GraphDetails details = Simulator.getConfiguration().getGraphDetails();
-
+        System.out.println("finished reading graph");
         idtoNetworkDeviceArray = new NetworkDevice[details.getNumNodes()];
         // Create nodes
         for (int i = 0; i < details.getNumNodes(); i++) {
@@ -100,7 +100,7 @@ public class BaseInitializer {
                 createEdge(v.getId(), + w.getId());
             }
         }
-
+        System.out.println("finished creating nodes and edges");
         // Check the links for bi-directionality
         for (int i = 0; i < linkPairs.size(); i++) {
 

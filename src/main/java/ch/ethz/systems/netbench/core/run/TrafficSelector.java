@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.poissontraffic.FromStringArrivalPlanner;
 import ch.ethz.systems.netbench.core.run.traffic.TrafficPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.PoissonArrivalPlanner;
+import ch.ethz.systems.netbench.ext.simpletraffic.SimpleTrafficPlanner;
 import ch.ethz.systems.netbench.ext.trafficpair.TrafficPairPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.flowsize.*;
 
@@ -119,7 +120,7 @@ class TrafficSelector {
                             );
 
                         case "all_to_all_server_fraction":
-                            return new PoissonArrivalPlanner(
+                            return new SimpleTrafficPlanner(
                                     idToTransportLayer,
                                     Simulator.getConfiguration().getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
