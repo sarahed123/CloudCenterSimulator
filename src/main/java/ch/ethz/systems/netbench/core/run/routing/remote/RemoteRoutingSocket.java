@@ -32,7 +32,7 @@ public class RemoteRoutingSocket extends Socket{
     @Override
     public void start() {
         // Send out single data packet at start
-         transportLayer.send(new RemoteRoutingPacket(flowId, getNextPayloadSizeByte(), sourceId, destinationId, 100,getRemainderToConfirmFlowSizeByte()));
+         transportLayer.send(new RemoteRoutingPacket(flowId, 8*getNextPayloadSizeByte(), sourceId, destinationId, 100,getRemainderToConfirmFlowSizeByte()));
 
       
     }
@@ -63,7 +63,7 @@ public class RemoteRoutingSocket extends Socket{
 		long nextPayload = getNextPayloadSizeByte();
 
 		if(!isAllFlowConfirmed()) {
-			transportLayer.send(new RemoteRoutingPacket(flowId,nextPayload, sourceId, destinationId, 100,getRemainderToConfirmFlowSizeByte()));
+			transportLayer.send(new RemoteRoutingPacket(flowId,8*nextPayload, sourceId, destinationId, 100,getRemainderToConfirmFlowSizeByte()));
 		}
 
 	}

@@ -27,7 +27,7 @@ public class SimpleTrafficPlanner extends PoissonArrivalPlanner{
         double serverPairProb = 1.0 / (numChosenServers );
 
         for(int i = 0;i< numChosenServers ; i++){
-            chosen.add(i);
+            chosen.add(servers.get(i));
             randomServerGenerator.add(serverPairProb,servers.get(i));
         }
         return chosen;

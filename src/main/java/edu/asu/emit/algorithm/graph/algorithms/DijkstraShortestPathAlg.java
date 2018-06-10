@@ -31,6 +31,7 @@
 
 package edu.asu.emit.algorithm.graph.algorithms;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
@@ -161,7 +162,7 @@ public class DijkstraShortestPathAlg
 	private void updateVertex(Vertex vertex, boolean isSource2sink)	{
 		// 1. get the neighboring vertices 
         List<Vertex> neighborVertexList = getVertexNeighbours(vertex, isSource2sink);
-
+		Collections.shuffle(neighborVertexList, Simulator.selectIndependentRandom("vertex_neighbours_shuffle"));
 		// 2. update the distance passing on current vertex
 		for (Vertex curAdjacentVertex : neighborVertexList) {
 			if(graph.getEdgeCapacity(vertex,curAdjacentVertex)==0){
