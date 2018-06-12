@@ -4,24 +4,15 @@ package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.network.Intermediary;
-import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.network.TransportLayer;
-import ch.ethz.systems.netbench.core.run.MainFromProperties;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
-import ch.ethz.systems.netbench.core.run.infrastructure.IntermediaryGenerator;
-import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
-import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
-import ch.ethz.systems.netbench.ext.flowlet.IdentityFlowletIntermediary;
 import ch.ethz.systems.netbench.testutility.TestTopologyPortsConstruction;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Path;
-import edu.asu.emit.algorithm.graph.Vertex;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
@@ -30,7 +21,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -38,7 +28,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -81,7 +70,7 @@ public class RemoteRouterTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-        BaseInitializer.init(new RemoteRoutingOutputPortGenerator(), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(), 5),
+        BaseInitializer.extend(new RemoteRoutingOutputPortGenerator(), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(), 5),
 				new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator());
         BaseInitializer b = BaseInitializer.getInstance() ;
         b.createInfrastructure();

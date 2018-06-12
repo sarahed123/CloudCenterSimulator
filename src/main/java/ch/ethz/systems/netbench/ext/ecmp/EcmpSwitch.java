@@ -19,7 +19,7 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
      * @param n                 Number of network devices in the entire network (for routing table size)
      * @param intermediary      Flowlet intermediary instance (takes care of hash adaptation for flowlet support)
      */
-    public EcmpSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
+    public  EcmpSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
         super(identifier, transportLayer, intermediary);
         this.destinationToNextSwitch = new ArrayList<>();
         for (int i = 0; i < n; i++) {

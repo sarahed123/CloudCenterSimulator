@@ -19,6 +19,9 @@ import ch.ethz.systems.netbench.core.utility.UnitConverter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.InvalidPropertiesFormatException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class MainFromProperties {
@@ -31,21 +34,24 @@ public class MainFromProperties {
     public static void main(String args[]) {
 
         // Load in the configuration properties
-        NBProperties runConfiguration = generateRunConfigurationFromArgs(args);
+        List<NBProperties> runConfigurations = generateRunConfigurationFromArgs(args);
 
-    	SimulationLogger.openCommon(runConfiguration);
+    	SimulationLogger.openCommon(runConfigurations.get(0));
 
         
         do {
         	// General property: random seed
-            long seed = runConfiguration.getLongPropertyOrFail("seed");
+            long seed = runConfigurations.get(0).getLongPropertyOrFail("seed");
 
             // General property: running time in nanoseconds
-            long runtimeNs = determineRuntimeNs(runConfiguration);
+            long runtimeNs = determineRuntimeNs(runConfigurations.get(0));
 
             // Setup simulator (it is now public known)
-            Simulator.setup(seed, runConfiguration);
+            Simulator.setup(seed, runConfigurations.get(0));
 
+            for(int j = 0;j<runConfigurations.size();j++){
+
+            }
             // Copy configuration files for reproducibility
             SimulationLogger.copyRunConfiguration();
 
@@ -55,7 +61,7 @@ public class MainFromProperties {
             // Initialization of the three components
             BaseInitializer initializer = generateInfrastructure();
             populateRoutingState(initializer.getIdToNetworkDevice());
-            if(runConfiguration.getPropertyWithDefault("from_state",null)==null) {
+            if(runConfigurations.get(0).getPropertyWithDefault("from_state",null)==null) {
             	planTraffic(runtimeNs, initializer.getIdToTransportLayer());
             }else {
             	
@@ -85,13 +91,13 @@ public class MainFromProperties {
                 System.out.println("No analysis command given; analysis is skipped.");
             }
             try {
-				SimulationLogger.logCommon(runConfiguration);
+				SimulationLogger.logCommon(runConfigurations.get(0));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        	runConfiguration.nextSubConfiguration();
-        }while(runConfiguration.hasSubConfiguration());
+        	runConfigurations.get(0).nextSubConfiguration();
+        }while(runConfigurations.get(0).hasSubConfiguration());
         SimulationLogger.closeCommon();
 
     }
@@ -106,12 +112,15 @@ public class MainFromProperties {
      *
      * @return Final run configuration
      */
-    private static NBProperties generateRunConfigurationFromArgs(String[] args) {
+    private static List<NBProperties> generateRunConfigurationFromArgs(String[] args) {
 
         // Argument length of at least one
         if (args.length < 1) {
             throw new RuntimeException("Expecting first argument to be configuration properties file for the run.");
         }
+
+        List<NBProperties> propertiesList = new LinkedList<NBProperties>();
+
 
         // Load in the configuration properties
         NBProperties runConfiguration = new NBProperties(
@@ -122,21 +131,35 @@ public class MainFromProperties {
                 BaseAllowedProperties.EXPERIMENTAL,
                 BaseAllowedProperties.BASE_DIR_VARIANTS
         );
-        
+        propertiesList.add(runConfiguration);
         
 
         // Dynamic overwrite of temporary config using arguments given from command line
         for (int i = 1; i < args.length; i++) {
-            int index = args[i].indexOf('=');
-            assert( index != -1);
-            String param = args[i].substring(0, index);
-            String value = args[i].substring(index + 1);
-            runConfiguration.overrideProperty(param, value);
+            try{
+                int index = args[i].indexOf('=');
+                if(index!=-1){
+                    throw new InvalidPropertiesFormatException("arg " + i + " is not a valid property format");
+                }
+                String param = args[i].substring(0, index);
+                String value = args[i].substring(index + 1);
+                runConfiguration.overrideProperty(param, value);
+            } catch (InvalidPropertiesFormatException e) {
+                runConfiguration = new NBProperties(
+                        args[0],
+                        BaseAllowedProperties.PROPERTIES_RUN,
+                        BaseAllowedProperties.EXTENSION,
+                        BaseAllowedProperties.EXPERIMENTAL,
+                        BaseAllowedProperties.BASE_DIR_VARIANTS
+                );
+                propertiesList.add(runConfiguration);
+            }
+
         }
         
-        runConfiguration.loadSubConfigurtations();
-        runConfiguration.constructBaseDir();
-        return runConfiguration;
+        propertiesList.get(0).loadSubConfigurtations();
+        propertiesList.get(0).constructBaseDir();
+        return propertiesList;
 
     }
 
@@ -174,17 +197,14 @@ public class MainFromProperties {
 
         // Start infrastructure
         System.out.println("\nINFRASTRUCTURE\n==================");
-
+        BaseInitializer initializer = BaseInitializer.init();
         // 1.1) Generate nodes
-        BaseInitializer.init(
+        initializer.extend(
                 InfrastructureSelector.selectOutputPortGenerator(),
                 InfrastructureSelector.selectNetworkDeviceGenerator(),
                 InfrastructureSelector.selectLinkGenerator(),
                 InfrastructureSelector.selectTransportLayerGenerator()
         );
-        BaseInitializer initializer = BaseInitializer.getInstance();
-        // 1.2) Generate the links from the topology between the nodes
-        initializer.createInfrastructure();
 
         // Finished infrastructure
         System.out.println("Finished creating infrastructure.\n");

@@ -580,6 +580,7 @@ public class SimulationLogger {
 
 	/**
 	 * Copy the configuration files.
+	 * @param nbProperties
 	 */
 	public static void copyRunConfiguration() {
 		copyFileToRunFolder(Simulator.getConfiguration().getFileName());
