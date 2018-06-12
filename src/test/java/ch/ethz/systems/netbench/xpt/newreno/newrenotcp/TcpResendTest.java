@@ -7,7 +7,6 @@ import ch.ethz.systems.netbench.core.network.MockedFlowStartEvent;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
-import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -61,7 +60,7 @@ public class TcpResendTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-        BaseInitializer.init(null, null, null, null);
+        BaseInitializer.extend(null, null, null, null);
         BaseInitializer.getInstance().getIdToNetworkDevice().put(-1, networkDeviceSender);
         // Packet captor
         ArgumentCaptor<Packet> senderOutgoingPacketCaptor = ArgumentCaptor.forClass(Packet.class);

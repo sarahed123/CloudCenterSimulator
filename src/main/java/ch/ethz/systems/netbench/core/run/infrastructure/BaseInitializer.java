@@ -37,10 +37,10 @@ public class BaseInitializer {
 
     private NetworkDevice[] idtoNetworkDeviceArray;
     // Generators
-    private final OutputPortGenerator outputPortGenerator;
-    private final NetworkDeviceGenerator networkDeviceGenerator;
-    private final LinkGenerator linkGenerator;
-    private final TransportLayerGenerator transportLayerGenerator;
+    private  OutputPortGenerator outputPortGenerator;
+    private  NetworkDeviceGenerator networkDeviceGenerator;
+    private  LinkGenerator linkGenerator;
+    private  TransportLayerGenerator transportLayerGenerator;
 
     // Validation variables
     private int runningNodeId;
@@ -62,15 +62,41 @@ public class BaseInitializer {
         this.runningNodeId = 0;
         this.infrastructureAlreadyCreated = false;
         this.linkPairs = new ArrayList<>();
-        this.idtoNetworkDeviceArray = null;
+    }
+
+    public BaseInitializer(){
+        this.idToNetworkDevice = new HashMap<>();
+        this.idToTransportLayer = new HashMap<>();
+        outputPortGenerator = null;
+        networkDeviceGenerator = null;
+        linkGenerator = null;
+        transportLayerGenerator = null;
+        this.linkPairs = new ArrayList<>();
+        this.runningNodeId = 0;
+        this.infrastructureAlreadyCreated = false;
+    }
+
+    public static BaseInitializer init(){
+        return new BaseInitializer();
     }
     
-    public static BaseInitializer init(OutputPortGenerator outputPortGenerator,
-            NetworkDeviceGenerator networkDeviceGenerator,
-            LinkGenerator linkGenerator,
-            TransportLayerGenerator transportLayerGenerator) {
-				sInstance = new BaseInitializer(outputPortGenerator, networkDeviceGenerator, linkGenerator, transportLayerGenerator);
-				return sInstance;
+    public void extend(OutputPortGenerator outputPortGenerator,
+                                         NetworkDeviceGenerator networkDeviceGenerator,
+                                         LinkGenerator linkGenerator,
+                                         TransportLayerGenerator transportLayerGenerator) {
+
+        this.outputPortGenerator = outputPortGenerator;
+        this.networkDeviceGenerator = networkDeviceGenerator;
+        this.linkGenerator = linkGenerator;
+        this.transportLayerGenerator = transportLayerGenerator;
+        createInfrastructure();
+    }
+
+    public void finalize(){
+        idtoNetworkDeviceArray = new NetworkDevice[runningNodeId];
+        for(int id:idToNetworkDevice.keySet()){
+            idtoNetworkDeviceArray[id] = idToNetworkDevice.get(id);
+        }
     }
 
     /**
@@ -88,7 +114,7 @@ public class BaseInitializer {
         setVertexTieBreaker();
         GraphDetails details = Simulator.getConfiguration().getGraphDetails();
         System.out.println("finished reading graph");
-        idtoNetworkDeviceArray = new NetworkDevice[details.getNumNodes()];
+
         // Create nodes
         for (int i = 0; i < details.getNumNodes(); i++) {
             createNode(i, details.getServerNodeIds().contains(i));
@@ -180,7 +206,7 @@ public class BaseInitializer {
         
         // Add to mappings
         idToNetworkDevice.put(id, networkDevice);
-        idtoNetworkDeviceArray[id] = networkDevice;
+        //idtoNetworkDeviceArray[id] = networkDevice;
     }
 
     /**
