@@ -1,14 +1,15 @@
 package ch.ethz.systems.netbench.xpt.voijslav.tcp.sphalftcp;
 
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpSocket;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 
 public class SpHalfTcpSocket extends NewRenoTcpSocket {
 	
-    public SpHalfTcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
-		super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
+    public SpHalfTcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte,NBProperties configuration) {
+		super(transportLayer, flowId, sourceId, destinationId, flowSizeByte,configuration);
 	}
 
 	/**

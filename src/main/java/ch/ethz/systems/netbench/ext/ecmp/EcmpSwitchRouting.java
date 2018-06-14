@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.ecmp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
@@ -10,7 +11,8 @@ public class EcmpSwitchRouting extends RoutingPopulator {
 
     private final Map<Integer, NetworkDevice> idToNetworkDevice;
 
-    public EcmpSwitchRouting(Map<Integer, NetworkDevice> idToNetworkDevice) {
+    public EcmpSwitchRouting(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
+    	super(configuration);
         this.idToNetworkDevice = idToNetworkDevice;
         SimulationLogger.logInfo("Routing", "ECMP");
     }
@@ -20,7 +22,7 @@ public class EcmpSwitchRouting extends RoutingPopulator {
      */
     @Override
     public void populateRoutingTables() {
-        EcmpRoutingUtility.populateShortestPathRoutingTables(idToNetworkDevice, true);
+        EcmpRoutingUtility.populateShortestPathRoutingTables(idToNetworkDevice, true,configuration);
     }
 
 }

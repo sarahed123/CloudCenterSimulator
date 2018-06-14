@@ -74,7 +74,7 @@ public class EcmpThenSourceRoutingSwitchTest {
     public void testSingleForward() {
 
         // Create device with ports
-        EcmpThenSourceRoutingSwitch device = new EcmpThenSourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(), 5000);
+        EcmpThenSourceRoutingSwitch device = new EcmpThenSourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), 5000, null);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 4));
 

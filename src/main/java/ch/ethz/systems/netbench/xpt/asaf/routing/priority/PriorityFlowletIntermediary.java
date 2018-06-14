@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.asaf.routing.priority;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
@@ -25,8 +26,8 @@ public class PriorityFlowletIntermediary extends FixedGapFlowletIntermediary {
 
 	private HashMap<Long, Long> lowPriorityFlows = new HashMap<Long, Long>();
 	
-    PriorityFlowletIntermediary() {
-        super();
+    PriorityFlowletIntermediary(NBProperties configuration) {
+        super(configuration);
     }
 
     /**

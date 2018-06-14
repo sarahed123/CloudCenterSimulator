@@ -72,7 +72,7 @@ public class YenTopKShortestPathsAlg
 	 * @param graph
 	 */
 	public YenTopKShortestPathsAlg(BaseGraph graph)	{
-        this(graph, null, null);
+        this(graph, null, null,null);
 	}
 	
 	/**
@@ -83,11 +83,11 @@ public class YenTopKShortestPathsAlg
 	 * @param targetVertex
 	 */
 	public YenTopKShortestPathsAlg(BaseGraph graph, 
-			Vertex sourceVertex, Vertex targetVertex)	{
+			Vertex sourceVertex, Vertex targetVertex,String edgeWeightRule)	{
 		if (graph == null) {
 			throw new IllegalArgumentException("A NULL graph object occurs!");
 		}
-		this.graph = new VariableGraph((Graph)graph);
+		this.graph = new VariableGraph((Graph)graph,edgeWeightRule);
 		this.sourceVertex = sourceVertex;
 		this.targetVertex = targetVertex;
 		init();

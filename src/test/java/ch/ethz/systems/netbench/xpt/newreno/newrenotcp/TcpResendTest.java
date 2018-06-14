@@ -60,15 +60,15 @@ public class TcpResendTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-        BaseInitializer.extend(null, null, null, null);
+        BaseInitializer.getInstance().extend(null, null, null, null, null);
         BaseInitializer.getInstance().getIdToNetworkDevice().put(-1, networkDeviceSender);
         // Packet captor
         ArgumentCaptor<Packet> senderOutgoingPacketCaptor = ArgumentCaptor.forClass(Packet.class);
         ArgumentCaptor<Packet> receiverOutgoingPacketCaptor = ArgumentCaptor.forClass(Packet.class);
 
         // Create the layers and attach mocked network devices
-        final NewRenoTcpTransportLayer senderLayer = new NewRenoTcpTransportLayer(0);
-        final NewRenoTcpTransportLayer receiverLayer = new NewRenoTcpTransportLayer(1);
+        final NewRenoTcpTransportLayer senderLayer = new NewRenoTcpTransportLayer(0, null);
+        final NewRenoTcpTransportLayer receiverLayer = new NewRenoTcpTransportLayer(1, null);
         senderLayer.setNetworkDevice(networkDeviceSender);
         receiverLayer.setNetworkDevice(networkDeviceReceiver);
         Mockito.when(networkDeviceSender.getTransportLayer()).thenReturn(senderLayer);

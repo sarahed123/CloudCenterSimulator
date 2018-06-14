@@ -69,8 +69,8 @@ public class RemoteSourceRoutingSwitchTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-        NetworkDeviceGenerator generator = new NetworkDeviceGenerator() {
-        	DemoIntermediaryGenerator inermediaryGenerator = new DemoIntermediaryGenerator();
+        NetworkDeviceGenerator generator = new NetworkDeviceGenerator(null) {
+        	DemoIntermediaryGenerator inermediaryGenerator = new DemoIntermediaryGenerator(configuration);
 			@Override
 			public NetworkDevice generate(int identifier, TransportLayer server) {
 				// TODO Auto-generated method stub
@@ -83,8 +83,8 @@ public class RemoteSourceRoutingSwitchTest {
 				return generate(identifier,null);
 			}
 		};
-        BaseInitializer.extend(new RemoteRoutingOutputPortGenerator(), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(), 5),
-                new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator());
+        BaseInitializer.getInstance().extend(null, new RemoteRoutingOutputPortGenerator(null), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(null), 5, null),
+                new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator(null));
         BaseInitializer b = BaseInitializer.getInstance() ;
 
         b.createInfrastructure();
@@ -97,7 +97,7 @@ public class RemoteSourceRoutingSwitchTest {
         	when(mockIdToNetworkDevice.get(i)).thenReturn(device);
         }
         
-        RoutingSelector.selectPopulator(mockIdToNetworkDevice);
+        RoutingSelector.selectPopulator(mockIdToNetworkDevice, null);
         this.remoteRouter = RemoteRoutingController.getInstance();
         topology = new TestTopologyPortsConstruction(
                 "0-1,1-2,2-4,4-3,3-1"
@@ -159,7 +159,7 @@ public class RemoteSourceRoutingSwitchTest {
     	TransportLayer transportLayer = mock(TransportLayer.class);
 
         // Create device 4 with ports 4->2 and 4->3
-        RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(4, transportLayer, new IdentityFlowletIntermediary());
+        RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(4, transportLayer, new IdentityFlowletIntermediary(null), null);
         
 
         // Create encapsulation and hop it two times (such that it "arrives" at 4)
@@ -180,7 +180,7 @@ public class RemoteSourceRoutingSwitchTest {
     public void testToString() {
 
         // Create device with ports
-        RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(1, null, new IdentityFlowletIntermediary());
+        RemoteSourceRoutingSwitch device = new RemoteSourceRoutingSwitch(1, null, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));

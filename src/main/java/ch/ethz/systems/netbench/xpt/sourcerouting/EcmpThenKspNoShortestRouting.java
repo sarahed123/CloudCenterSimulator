@@ -20,17 +20,18 @@ public class EcmpThenKspNoShortestRouting extends RoutingPopulator {
     private final Map<Integer, NetworkDevice> idToNetworkDevice;
     private static final String PATHS_CACHE_DIRECTORY = "paths-cache";
 
-    public EcmpThenKspNoShortestRouting(Map<Integer, NetworkDevice> idToNetworkDevice) {
+    public EcmpThenKspNoShortestRouting(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
+    	super(configuration);
         this.idToNetworkDevice = idToNetworkDevice;
         SimulationLogger.logInfo("Routing", "ECMP_THEN_SR_NO_SHORTEST");
     }
 
 
     @Override
-    public void populateRoutingTables(NBProperties configuration) {
+    public void populateRoutingTables() {
 
         // Populate ECMP routing state
-        new EcmpSwitchRouting(idToNetworkDevice).populateRoutingTables();
+        new EcmpSwitchRouting(idToNetworkDevice,configuration).populateRoutingTables();
 
         // Select all the nodes which are ToR
         GraphDetails details = configuration.getGraphDetails();
@@ -153,7 +154,7 @@ public class EcmpThenKspNoShortestRouting extends RoutingPopulator {
                     if (!i.equals(j)) {
 
                         // Find shortest paths as many wanted
-                        YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(graph, graph.getVertex(i), graph.getVertex(j));
+                        YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(graph, graph.getVertex(i), graph.getVertex(j),configuration.getProperty("graph_edge_weight_rule"));
                         int found = 0;
                         int shortestPathLength = -1;
                         while (alg.hasNext()) {

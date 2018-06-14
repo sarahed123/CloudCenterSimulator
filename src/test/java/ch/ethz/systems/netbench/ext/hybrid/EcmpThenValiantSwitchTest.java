@@ -55,7 +55,7 @@ public class EcmpThenValiantSwitchTest {
         );
 
         // Initialize ECMP routing scheme for device number 1 with identity flowlet intermediary
-        device2identity = new EcmpThenValiantSwitch(2, layer1, 5, new IdentityFlowletIntermediary(), 0, 4, 100000);
+        device2identity = new EcmpThenValiantSwitch(2, layer1, 5, new IdentityFlowletIntermediary(null), 0, 4, 100000, null);
         device2identity.addConnection(topology.getPort(2, 1));
         device2identity.addConnection(topology.getPort(2, 4));
         device2identity.addDestinationToNextSwitch(0, 1);

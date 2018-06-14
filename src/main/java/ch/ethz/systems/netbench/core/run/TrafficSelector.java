@@ -94,7 +94,8 @@ class TrafficSelector {
 	                        idToTransportLayer,
 	                        configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
 	                        flowSizeDistribution,
-                            configuration.getPropertyOrFail("traffic_probabilities_file")
+                            configuration.getPropertyOrFail("traffic_probabilities_file"),
+                            configuration
 	                );
 
                 } else {
@@ -109,7 +110,8 @@ class TrafficSelector {
                                     idToTransportLayer,
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
-                                    PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL
+                                    PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL,
+                                    configuration
                             );
 
                         case "all_to_all_fraction":
@@ -117,7 +119,8 @@ class TrafficSelector {
                                     idToTransportLayer,
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
-                                    PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL_FRACTION
+                                    PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL_FRACTION,
+                                    configuration
                             );
 
                         case "all_to_all_server_fraction":
@@ -125,7 +128,7 @@ class TrafficSelector {
                                     idToTransportLayer,
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
-                                    PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL_SERVER_FRACTION
+                                    PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL_SERVER_FRACTION, configuration
                             );
 
                         case "pairings_fraction":
@@ -133,7 +136,8 @@ class TrafficSelector {
                                     idToTransportLayer,
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
-                                    PoissonArrivalPlanner.PairDistribution.PAIRINGS_FRACTION
+                                    PoissonArrivalPlanner.PairDistribution.PAIRINGS_FRACTION,
+                                    configuration
                             );
                             
                         case "skew_pareto_distribution":
@@ -141,7 +145,8 @@ class TrafficSelector {
                                     idToTransportLayer,
                                     configuration.getDoublePropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
-                                    PoissonArrivalPlanner.PairDistribution.PARETO_SKEW_DISTRIBUTION
+                                    PoissonArrivalPlanner.PairDistribution.PARETO_SKEW_DISTRIBUTION,
+                                    configuration
                             );
 
                         case "dual_all_to_all_fraction":
@@ -149,7 +154,8 @@ class TrafficSelector {
                                     idToTransportLayer,
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
-                                    PoissonArrivalPlanner.PairDistribution.DUAL_ALL_TO_ALL_FRACTION
+                                    PoissonArrivalPlanner.PairDistribution.DUAL_ALL_TO_ALL_FRACTION,
+                                    configuration
                             );
 
                         case "dual_all_to_all_server_fraction":
@@ -157,7 +163,8 @@ class TrafficSelector {
                                     idToTransportLayer,
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
-                                    PoissonArrivalPlanner.PairDistribution.DUAL_ALL_TO_ALL_SERVER_FRACTION
+                                    PoissonArrivalPlanner.PairDistribution.DUAL_ALL_TO_ALL_SERVER_FRACTION,
+                                    configuration
                             );
 
                         default:
@@ -176,9 +183,9 @@ class TrafficSelector {
                         return new TrafficPairPlanner(
                                 idToTransportLayer,
                                 TrafficPairPlanner.generateAllToAll(
-                                        configuration.getGraphDetails().getNumNodes()
+                                        configuration.getGraphDetails().getNumNodes(), configuration
                                 ),
-                                configuration.getLongPropertyOrFail("traffic_pair_flow_size_byte")
+                                configuration.getLongPropertyOrFail("traffic_pair_flow_size_byte"), configuration
                         );
 
                     case "stride":
@@ -188,7 +195,7 @@ class TrafficSelector {
                                         configuration.getGraphDetails().getNumNodes(),
                                         configuration.getIntegerPropertyOrFail("traffic_pair_stride")
                                 ),
-                                configuration.getLongPropertyOrFail("traffic_pair_flow_size_byte")
+                                configuration.getLongPropertyOrFail("traffic_pair_flow_size_byte"), configuration
                         );
 
                     case "custom":
@@ -200,12 +207,12 @@ class TrafficSelector {
                         return new TrafficPairPlanner(
                                 idToTransportLayer,
                                 pairs,
-                                configuration.getLongPropertyOrFail("traffic_pair_flow_size_byte")
+                                configuration.getLongPropertyOrFail("traffic_pair_flow_size_byte"), configuration
                         );
                 }
 
             case "traffic_arrivals_string":
-                return new FromStringArrivalPlanner(idToTransportLayer, configuration.getPropertyOrFail("traffic_arrivals_list"));
+                return new FromStringArrivalPlanner(idToTransportLayer, configuration.getPropertyOrFail("traffic_arrivals_list"), configuration);
 
             default:
                 throw new PropertyValueInvalidException(

@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.voijslav.tcp.buffertcp;
 
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpSocket;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
@@ -19,9 +20,10 @@ public class BufferTcpSocket extends NewRenoTcpSocket {
     	int sourceId,
     	int destinationId,
     	long flowSizeByte,
-    	long seed
+    	long seed,
+    	NBProperties configuration
     ) {
-		super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
+		super(transportLayer, flowId, sourceId, destinationId, flowSizeByte,configuration);
 		//6*(1200 + 96)*2*3
 		this.roundTripTimeout = 23328L;
 		this.congestionWindow = this.slowStartThreshold;

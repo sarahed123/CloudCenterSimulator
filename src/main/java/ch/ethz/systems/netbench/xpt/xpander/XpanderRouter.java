@@ -34,9 +34,6 @@ import edu.asu.emit.algorithm.graph.paths_filter.RandomPathsFilter;
 public class XpanderRouter extends RemoteRoutingController{
 	private int flowFailuresSample;
 
-    public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
-        super();
-    }
 
     enum PathAlgorithm{
 		DIJKSTRA,
@@ -47,9 +44,10 @@ public class XpanderRouter extends RemoteRoutingController{
 	PathAlgorithm pathAlg;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
+		super(configuration);
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG =  configuration.getGraph();
-		mG.resetCapcities();
+		mG.resetCapcities(configuration.isExtendedTopology());
 		mPaths = new HashMap<Long,Path>();
 		totalDrops = 0;
 		flowCounter = 0;
@@ -125,7 +123,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 	public void reset(){
-		mG.resetCapcities();
+		mG.resetCapcities(Simulator.getConfiguration().isExtendedTopology());
 		mPaths.clear();
 	}
 

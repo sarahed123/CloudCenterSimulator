@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.flowlet;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 
@@ -11,8 +12,8 @@ import ch.ethz.systems.netbench.ext.basic.TcpHeader;
  */
 public class IdentityFlowletIntermediary extends FlowletIntermediary {
 
-    public IdentityFlowletIntermediary() {
-        super();
+    public IdentityFlowletIntermediary(NBProperties configuration) {
+        super(configuration);
     }
 
     @Override

@@ -49,11 +49,11 @@ public class ForwarderSwitchTest {
     public void testTLChecks() {
 
         // Forward switch with one output port
-        ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary(null), null);
         assert(!device.isServer());
 
         TransportLayer layer = mock(TransportLayer.class);
-        ForwarderSwitch device2 = new ForwarderSwitch(33, layer, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device2 = new ForwarderSwitch(33, layer, 5, new IdentityFlowletIntermediary(null), null);
         assert(device2.isServer());
         assertEquals(layer, device2.getTransportLayer());
 
@@ -63,7 +63,7 @@ public class ForwarderSwitchTest {
     public void testSingleForward() {
 
         // Forward switch with one output port
-        ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(0, 1));
         device.setDestinationToNextSwitch(1, 1);
         device.setDestinationToNextSwitch(2, 1);
@@ -87,7 +87,7 @@ public class ForwarderSwitchTest {
     public void testSingleForwardTwoOptions() {
 
         // Forward switch with one output port
-        ForwarderSwitch device = new ForwarderSwitch(4, null, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(4, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(4, 2));
         device.addConnection(topology.getPort(4, 3));
         device.setDestinationToNextSwitch(0, 2);
@@ -109,7 +109,7 @@ public class ForwarderSwitchTest {
     public void testSingleForwardFromTransportLayer() {
 
         // Forward switch with one output port
-        ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(0, 1));
         device.setDestinationToNextSwitch(1, 1);
         device.setDestinationToNextSwitch(2, 1);
@@ -127,7 +127,7 @@ public class ForwarderSwitchTest {
     public void testInstNonExistingPort() {
         boolean thrown = false;
         try {
-            ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary());
+            ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary(null), null);
             device.addConnection(topology.getPort(0, 1));
             device.setDestinationToNextSwitch(1, 2);
         } catch (IllegalArgumentException e) {
@@ -142,7 +142,7 @@ public class ForwarderSwitchTest {
         // Illegal origin
         boolean thrown = false;
         try {
-            ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary());
+            ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary(null), null);
             device.addConnection(topology.getPort(1, 2));
         } catch (IllegalArgumentException e) {
             thrown = true;
@@ -152,7 +152,7 @@ public class ForwarderSwitchTest {
         // Already exists
         thrown = false;
         try {
-            ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary());
+            ForwarderSwitch device = new ForwarderSwitch(0, null, 5, new IdentityFlowletIntermediary(null), null);
             device.addConnection(topology.getPort(0, 1));
             device.addConnection(topology.getPort(0, 1));
         } catch (IllegalArgumentException e) {
@@ -164,7 +164,7 @@ public class ForwarderSwitchTest {
 
     @Test
     public void testGetIdentifier() {
-        ForwarderSwitch device = new ForwarderSwitch(3, null, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(3, null, 5, new IdentityFlowletIntermediary(null), null);
         assertEquals(3, device.getIdentifier());
     }
 
@@ -173,7 +173,7 @@ public class ForwarderSwitchTest {
 
         // Device 3 with ports to 1 and 4
         TransportLayer layer = mock(TransportLayer.class);
-        ForwarderSwitch device = new ForwarderSwitch(3, layer, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(3, layer, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(3, 1));
         device.addConnection(topology.getPort(3, 4));
         device.setDestinationToNextSwitch(0, 1);
@@ -195,7 +195,7 @@ public class ForwarderSwitchTest {
 
         // Device 3 with ports to 1 and 4
         TransportLayer layer = mock(TransportLayer.class);
-        ForwarderSwitch device = new ForwarderSwitch(3, layer, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(3, layer, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(3, 1));
         device.addConnection(topology.getPort(3, 4));
         device.setDestinationToNextSwitch(0, 1);
@@ -214,7 +214,7 @@ public class ForwarderSwitchTest {
 
     @Test
     public void testToString() {
-        ForwarderSwitch device = new ForwarderSwitch(3, null, 5, new IdentityFlowletIntermediary());
+        ForwarderSwitch device = new ForwarderSwitch(3, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(3, 1));
         device.addConnection(topology.getPort(3, 4));
         device.setDestinationToNextSwitch(0, 1);

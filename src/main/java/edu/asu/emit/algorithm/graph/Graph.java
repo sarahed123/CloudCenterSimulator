@@ -245,8 +245,8 @@ public class Graph implements BaseGraph, Serializable {
 		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
 	}
 
-	public void resetCapcities() {
-		edgeCapacities.replaceAll((k, v) -> initCapcity(k));
+	public void resetCapcities(boolean isExtended) {
+		edgeCapacities.replaceAll((k, v) -> initCapcity(k,isExtended));
 
 		
 	}

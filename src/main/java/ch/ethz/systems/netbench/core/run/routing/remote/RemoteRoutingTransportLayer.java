@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.core.run.routing.remote;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -12,8 +13,8 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceExce
 
 public class RemoteRoutingTransportLayer extends TransportLayer {
 	Queue<Flow> flowsQueue;
-	RemoteRoutingTransportLayer(int identifier) {
-        super(identifier);
+	RemoteRoutingTransportLayer(int identifier,NBProperties configuration) {
+        super(identifier,configuration);
         //flowsQueue = new LinkedList<RemoteRoutingTransportLayer.Flow>();
     }
 

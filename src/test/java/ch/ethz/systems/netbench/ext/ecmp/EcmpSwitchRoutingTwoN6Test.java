@@ -78,7 +78,7 @@ public class EcmpSwitchRoutingTwoN6Test {
         idToNetworkDevice.put(5, switch5);
 
         // Perform routing
-        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice);
+        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice, null);
         populator.populateRoutingTables();
 
         // Switch 0

@@ -47,8 +47,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
      * @param flowSizeDistribution      Flow size distribution
      * @param fileName                  Name of the input file with communication probability densities
      */
-    public PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution, String fileName) {
-        this(idToTransportLayerMap, lambdaFlowStartsPerSecond, flowSizeDistribution);
+    public PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution, String fileName,NBProperties configuration) {
+        this(idToTransportLayerMap, lambdaFlowStartsPerSecond, flowSizeDistribution,configuration);
         this.readPairProbabilitiesFromFile(fileName);
         SimulationLogger.logInfo("Flow planner", "POISSON_ARRIVAL(lambda=" + lambdaFlowStartsPerSecond + ", fileName=" + fileName + ")");
     }
@@ -62,7 +62,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
      * @param pairDistribution          Choice of static pair distribution which is valid for any topology
      */
     public PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution, PairDistribution pairDistribution, NBProperties configuration) {
-        this(idToTransportLayerMap, lambdaFlowStartsPerSecond, flowSizeDistribution);
+        this(idToTransportLayerMap, lambdaFlowStartsPerSecond, flowSizeDistribution,configuration);
         this.configuration = configuration;
         switch (pairDistribution) {
 

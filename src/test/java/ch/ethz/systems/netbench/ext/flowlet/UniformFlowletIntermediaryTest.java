@@ -45,7 +45,7 @@ public class UniformFlowletIntermediaryTest {
         when(packet.getFlowId()).thenReturn(100L);
 
         // Create intermediary
-        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary();
+        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary(null);
 
         // Receive packets at three different
         // points in time
@@ -70,7 +70,7 @@ public class UniformFlowletIntermediaryTest {
 
     @Test
     public void testIdentityIncoming() {
-        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary();
+        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary(null);
         assertEquals(packet, intermediary.adaptIncoming(packet));
         verifyZeroInteractions(packet);
     }

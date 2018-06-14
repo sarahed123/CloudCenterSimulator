@@ -34,7 +34,7 @@ public class SimpleTcpBaseTest {
 
     @Test
     public void testSend() {
-        SimpleTcpTransportLayer layer = new SimpleTcpTransportLayer(88);
+        SimpleTcpTransportLayer layer = new SimpleTcpTransportLayer(88, null);
         layer.setNetworkDevice(networkDevice);
         layer.send(packet);
         verify(networkDevice, times(1)).receiveFromTransportLayer(packet);
@@ -54,8 +54,8 @@ public class SimpleTcpBaseTest {
         ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
 
         // Create the layers and attach mocked network devices
-        SimpleTcpTransportLayer senderLayer = new SimpleTcpTransportLayer(88);
-        SimpleTcpTransportLayer receiverLayer = new SimpleTcpTransportLayer(77);
+        SimpleTcpTransportLayer senderLayer = new SimpleTcpTransportLayer(88, null);
+        SimpleTcpTransportLayer receiverLayer = new SimpleTcpTransportLayer(77, null);
         senderLayer.setNetworkDevice(networkDeviceSender);
         receiverLayer.setNetworkDevice(networkDeviceReceiver);
 

@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.ecmp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 
@@ -19,8 +20,8 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
      * @param n                 Number of network devices in the entire network (for routing table size)
      * @param intermediary      Flowlet intermediary instance (takes care of hash adaptation for flowlet support)
      */
-    public  EcmpSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
-        super(identifier, transportLayer, intermediary);
+    public  EcmpSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary,NBProperties configuration) {
+        super(identifier, transportLayer, intermediary,configuration);
         this.destinationToNextSwitch = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             this.destinationToNextSwitch.add(new ArrayList<>());

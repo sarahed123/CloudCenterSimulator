@@ -65,7 +65,7 @@ public class EcmpSwitchRoutingFatTreeK4Test {
         }
 
         // Perform routing
-        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice);
+        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice,null);
         populator.populateRoutingTables();
 
         // Every bottom node requires two possible next hops to its aggregation node to reach any other bottom node

@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.voijslav.tcp.lstftcp;
 
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpSocket;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
@@ -8,8 +9,8 @@ import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 
 public class LstfTcpSocket extends NewRenoTcpSocket {
 	
-    public LstfTcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
-		super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
+    public LstfTcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte,NBProperties configuration) {
+		super(transportLayer, flowId, sourceId, destinationId, flowSizeByte,configuration);
 	}
 
 	/**

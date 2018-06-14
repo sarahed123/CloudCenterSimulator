@@ -11,9 +11,9 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceExce
 
 public class RemoteRoutingOutputPort extends OutputPort{
 	boolean extendedTopology;
-	protected RemoteRoutingOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue, NBProperties configuration) {
+	protected RemoteRoutingOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue, boolean isExtended) {
 		super(ownNetworkDevice, targetNetworkDevice, link,queue);
-		extendedTopology = configuration.getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
+		extendedTopology = isExtended;
 	}
 
 	@Override

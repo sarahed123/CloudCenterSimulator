@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.flowlet;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 
@@ -14,8 +15,8 @@ import ch.ethz.systems.netbench.ext.basic.TcpHeader;
  */
 public class UniformFlowletIntermediary extends FixedGapFlowletIntermediary {
 
-    public UniformFlowletIntermediary() {
-        super();
+    public UniformFlowletIntermediary(NBProperties configuration) {
+        super(configuration);
     }
 
     /**

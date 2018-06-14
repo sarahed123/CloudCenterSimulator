@@ -38,7 +38,7 @@ public class NumberShortestPathsCheck {
                 if (i != j) {
 
                     // Find shortest paths as many wanted
-                    YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(graph, graph.getVertex(i), graph.getVertex(j));
+                    YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(graph, graph.getVertex(i), graph.getVertex(j),null);
                     int shortestPathLength = -1;
                     List<List<Pair<Vertex, Vertex>>> paths  = new ArrayList<>();
 

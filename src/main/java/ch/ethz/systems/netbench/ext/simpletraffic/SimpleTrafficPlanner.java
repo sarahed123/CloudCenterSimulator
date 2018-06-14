@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.ext.simpletraffic;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.poissontraffic.PoissonArrivalPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.RandomCollection;
@@ -15,8 +16,8 @@ import java.util.Map;
 public class SimpleTrafficPlanner extends PoissonArrivalPlanner{
     RandomCollection<Integer> randomServerGenerator;
 
-    public SimpleTrafficPlanner(Map<Integer, TransportLayer> idToTransportLayer, int traffic_lambda_flow_starts_per_s, FlowSizeDistribution flowSizeDistribution, PairDistribution allToAllServerFraction) {
-        super(idToTransportLayer,traffic_lambda_flow_starts_per_s,flowSizeDistribution,allToAllServerFraction);
+    public SimpleTrafficPlanner(Map<Integer, TransportLayer> idToTransportLayer, int traffic_lambda_flow_starts_per_s, FlowSizeDistribution flowSizeDistribution, PairDistribution allToAllServerFraction,NBProperties configuration) {
+        super(idToTransportLayer,traffic_lambda_flow_starts_per_s,flowSizeDistribution,allToAllServerFraction,configuration);
     }
 
     @Override

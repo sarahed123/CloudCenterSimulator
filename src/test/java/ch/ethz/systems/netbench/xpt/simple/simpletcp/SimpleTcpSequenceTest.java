@@ -87,8 +87,8 @@ public class SimpleTcpSequenceTest {
         ArgumentCaptor<Packet> receiverOutgoingPacketCaptor = ArgumentCaptor.forClass(Packet.class);
 
         // Create the layers and attach mocked network devices
-        final SimpleTcpTransportLayer senderLayer = new SimpleTcpTransportLayer(0);
-        final SimpleTcpTransportLayer receiverLayer = new SimpleTcpTransportLayer(1);
+        final SimpleTcpTransportLayer senderLayer = new SimpleTcpTransportLayer(0, null);
+        final SimpleTcpTransportLayer receiverLayer = new SimpleTcpTransportLayer(1, null);
         senderLayer.setNetworkDevice(networkDeviceSender);
         receiverLayer.setNetworkDevice(networkDeviceReceiver);
 

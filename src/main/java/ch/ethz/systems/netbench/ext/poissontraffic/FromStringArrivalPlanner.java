@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.poissontraffic;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.traffic.TrafficPlanner;
@@ -16,8 +17,8 @@ public class FromStringArrivalPlanner extends TrafficPlanner {
      * @param idToTransportLayerMap     Maps a network device identifier to its corresponding transport layer
      * @param arrivals                  File name of arrival plan
      */
-    public FromStringArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, String arrivals) {
-        super(idToTransportLayerMap);
+    public FromStringArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, String arrivals,NBProperties configuration) {
+        super(idToTransportLayerMap, configuration);
         this.arrivals = arrivals;
         SimulationLogger.logInfo("Flow planner", "FROM_STRING_ARRIVAL_PLANNER(arrivals=" + arrivals + ")");
     }

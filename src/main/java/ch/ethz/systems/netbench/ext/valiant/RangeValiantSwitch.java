@@ -39,7 +39,7 @@ public class RangeValiantSwitch extends ValiantEcmpSwitch {
      * @param highBoundValiantRangeIncl Higher bound (inclusive) of the range that determines which nodes can be valiant nodes
      */
     public RangeValiantSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary, int lowBoundValiantRangeIncl, int highBoundValiantRangeIncl, NBProperties configuration) {
-        super(identifier, transportLayer, n, intermediary);
+        super(identifier, transportLayer, n, intermediary,configuration);
         this.lowBoundValiantRangeIncl = lowBoundValiantRangeIncl;
         this.highBoundValiantRangeIncl = highBoundValiantRangeIncl;
         this.valiantRangeSize = this.highBoundValiantRangeIncl - this.lowBoundValiantRangeIncl + 1;

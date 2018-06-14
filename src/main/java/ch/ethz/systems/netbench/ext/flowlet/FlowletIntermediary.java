@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.ext.flowlet;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 
 import java.util.HashMap;
@@ -13,12 +14,14 @@ public abstract class FlowletIntermediary extends Intermediary {
 
     // Mapping of flow identifier to the time of the last sent packet
     private final Map<Long, Long> flowIdToLastSent;
-
+    protected NBProperties configuration;
     /**
      * Constructor.
      * Creates the mapping tables to track flow identifiers across time.
+     * @param configuration 
      */
-    protected FlowletIntermediary() {
+    protected FlowletIntermediary(NBProperties configuration) {
+    	this.configuration = configuration;
         this.flowIdToCurrentFlowlet = new HashMap<>();
         this.flowIdToLastSent = new HashMap<>();
     }

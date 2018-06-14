@@ -68,22 +68,22 @@ class InfrastructureSelector {
         switch (configuration.getPropertyOrFail("network_device_intermediary")) {
 
             case "demo": {
-                intermediaryGenerator = new DemoIntermediaryGenerator();
+                intermediaryGenerator = new DemoIntermediaryGenerator(configuration);
                 break;
             }
 
             case "identity": {
-                intermediaryGenerator = new IdentityFlowletIntermediaryGenerator();
+                intermediaryGenerator = new IdentityFlowletIntermediaryGenerator(configuration);
                 break;
             }
 
             case "uniform": {
-                intermediaryGenerator = new UniformFlowletIntermediaryGenerator();
+                intermediaryGenerator = new UniformFlowletIntermediaryGenerator(configuration);
                 break;
             }
 
             case "low_high_priority": {
-                intermediaryGenerator = new PriorityFlowletIntermediaryGenerator();
+                intermediaryGenerator = new PriorityFlowletIntermediaryGenerator(configuration);
                 break;
             }
 
@@ -101,24 +101,24 @@ class InfrastructureSelector {
         switch (configuration.getPropertyOrFail("network_device")) {
 
             case "forwarder_switch":
-                return new ForwarderSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
+                return new ForwarderSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(), configuration);
 
             case "ecmp_switch":
-                return new EcmpSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
+                return new EcmpSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(),configuration);
 
             case "random_valiant_ecmp_switch":
-                return new RangeValiantSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
+                return new RangeValiantSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(), configuration);
 
             case "ecmp_then_random_valiant_ecmp_switch":
-                return new EcmpThenValiantSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
+                return new EcmpThenValiantSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(), configuration);
 
             case "source_routing_switch":
-                return new SourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
+                return new SourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(), configuration);
             case "remote_source_routing_switch":
-                return new RemoteSourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
+                return new RemoteSourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(), configuration);
 
             case "ecmp_then_source_routing_switch":
-                return new EcmpThenSourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
+                return new EcmpThenSourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(), configuration);
 
             default:
                 throw new PropertyValueInvalidException(
@@ -178,21 +178,22 @@ class InfrastructureSelector {
 
                 return new EcnTailDropOutputPortGenerator(
                         configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes"),
-                        configuration.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes")
+                        configuration.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes"),
+                        configuration
                 );
 
             case "priority":
-                return new PriorityOutputPortGenerator();
+                return new PriorityOutputPortGenerator(configuration);
 
             case "bounded_priority":
                 return new BoundedPriorityOutputPortGenerator(
-                        configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes")*8
+                        configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes")*8, configuration
                 );
 
             case "unlimited":
-                return new UnlimitedOutputPortGenerator();
+                return new UnlimitedOutputPortGenerator(configuration);
             case "remote":
-                return new RemoteRoutingOutputPortGenerator();
+                return new RemoteRoutingOutputPortGenerator(configuration);
 
             default:
                 throw new PropertyValueInvalidException(
@@ -215,52 +216,52 @@ class InfrastructureSelector {
         switch (configuration.getPropertyOrFail("transport_layer")) {
 
             case "demo":
-                return new DemoTransportLayerGenerator();
+                return new DemoTransportLayerGenerator(configuration);
 
             case "bare":
-                return new BareTransportLayerGenerator();
+                return new BareTransportLayerGenerator(configuration);
 
             case "tcp":
-                return new NewRenoTcpTransportLayerGenerator();
+                return new NewRenoTcpTransportLayerGenerator(configuration);
 
             case "lstf_tcp":
-                return new LstfTcpTransportLayerGenerator();
+                return new LstfTcpTransportLayerGenerator(configuration);
 
             case "sp_tcp":
-                return new SpTcpTransportLayerGenerator();
+                return new SpTcpTransportLayerGenerator(configuration);
 
             case "sp_half_tcp":
-                return new SpHalfTcpTransportLayerGenerator();
+                return new SpHalfTcpTransportLayerGenerator(configuration);
 
             case "pfabric":
-                return new PfabricTransportLayerGenerator();
+                return new PfabricTransportLayerGenerator(configuration);
                 
             case "pfzero":
-                return new PfzeroTransportLayerGenerator();
+                return new PfzeroTransportLayerGenerator(configuration);
                 
             case "buffertcp":
-                return new BufferTcpTransportLayerGenerator();
+                return new BufferTcpTransportLayerGenerator(configuration);
 
             case "distmean":
-                return new DistMeanTcpTransportLayerGenerator();
+                return new DistMeanTcpTransportLayerGenerator(configuration);
 
             case "distrand":
-                return new DistRandTcpTransportLayerGenerator();
+                return new DistRandTcpTransportLayerGenerator(configuration);
             
             case "sparktcp":
-                return new SparkTransportLayerGenerator();
+                return new SparkTransportLayerGenerator(configuration);
                 
             case "dctcp":
-                return new NewRenoDctcpTransportLayerGenerator();
+                return new NewRenoDctcpTransportLayerGenerator(configuration);
 
             case "simple_tcp":
-                return new SimpleTcpTransportLayerGenerator();
+                return new SimpleTcpTransportLayerGenerator(configuration);
 
             case "simple_dctcp":
-                return new SimpleDctcpTransportLayerGenerator();
+                return new SimpleDctcpTransportLayerGenerator(configuration);
                 
             case "remote":
-                return new RemoteRoutingTransportLayerGenerator();
+                return new RemoteRoutingTransportLayerGenerator(configuration);
 
             default:
                 throw new PropertyValueInvalidException(

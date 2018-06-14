@@ -26,7 +26,7 @@ public class FlowLogger {
     // Logging
     private final boolean flowThroughputEnabled;
 
-    public FlowLogger(long flowId, int sourceId, int targetId, long flowSizeByte, NBProperties configuration) {
+    public FlowLogger(long flowId, int sourceId, int targetId, long flowSizeByte) {
         this.flowId = flowId;
         this.sourceId = sourceId;
         this.targetId = targetId;
@@ -44,7 +44,7 @@ public class FlowLogger {
         }
 
         // True iff the flow throughput is enabled (or defaulted)
-        flowThroughputEnabled = configuration.getBooleanPropertyWithDefault("enable_log_flow_throughput", true);
+        flowThroughputEnabled = Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_log_flow_throughput", true);
 
     }
 

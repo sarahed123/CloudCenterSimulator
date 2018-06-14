@@ -39,7 +39,7 @@ public class EcnTailDropOutputPortTest {
     public void setup() {
 
         Simulator.setup(0, new NBProperties(BaseAllowedProperties.LOG, BaseAllowedProperties.PROPERTIES_RUN));
-        BaseInitializer.extend(null, null, null, null);
+        BaseInitializer.getInstance().extend(null, null, null, null,null);
         BaseInitializer.getInstance().getIdToNetworkDevice().put(10, sourceNetworkDevice);
         BaseInitializer.getInstance().getIdToNetworkDevice().put(67, targetNetworkDevice);
         // Two network devices
@@ -256,7 +256,7 @@ public class EcnTailDropOutputPortTest {
 
     @Test
     public void testGenerator() {
-        EcnTailDropOutputPortGenerator generator = new EcnTailDropOutputPortGenerator(5000, 2000);
+        EcnTailDropOutputPortGenerator generator = new EcnTailDropOutputPortGenerator(5000, 2000,null);
         PerfectSimpleLink link = new PerfectSimpleLink(100, 200);
         when(networkDeviceA.getIdentifier()).thenReturn(77);
         when(networkDeviceB.getIdentifier()).thenReturn(88);

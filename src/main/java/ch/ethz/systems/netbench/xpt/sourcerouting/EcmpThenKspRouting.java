@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.sourcerouting;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
@@ -12,7 +13,8 @@ public class EcmpThenKspRouting extends RoutingPopulator {
 
     private final Map<Integer, NetworkDevice> idToNetworkDevice;
 
-    public EcmpThenKspRouting(Map<Integer, NetworkDevice> idToNetworkDevice) {
+    public EcmpThenKspRouting(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
+    	super(configuration);
         this.idToNetworkDevice = idToNetworkDevice;
         SimulationLogger.logInfo("Routing", "ECMP_THEN_SR");
     }
@@ -22,10 +24,10 @@ public class EcmpThenKspRouting extends RoutingPopulator {
     public void populateRoutingTables() {
 
         // Populate ECMP routing state
-        new EcmpSwitchRouting(idToNetworkDevice).populateRoutingTables();
+        new EcmpSwitchRouting(idToNetworkDevice,configuration).populateRoutingTables();
 
         // Populate source routing (SR) routing state
-        new KShortestPathsSwitchRouting(idToNetworkDevice).populateRoutingTables();
+        new KShortestPathsSwitchRouting(idToNetworkDevice,configuration).populateRoutingTables();
 
     }
 

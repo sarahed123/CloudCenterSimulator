@@ -16,6 +16,7 @@ public class RangeValiantSwitchGenerator extends NetworkDeviceGenerator {
     private final int nodeRangeUpper;
 
     public RangeValiantSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
+    	super(configuration);
         SimulationLogger.logInfo("Network device", "RANGE_VALIANT_SWITCH(numNodes=" + numNodes + ")");
 
         // Standard fields
@@ -40,7 +41,7 @@ public class RangeValiantSwitchGenerator extends NetworkDeviceGenerator {
 
     @Override
     public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new RangeValiantSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier), nodeRangeLower, nodeRangeUpper);
+        return new RangeValiantSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier), nodeRangeLower, nodeRangeUpper,configuration);
     }
 
 }

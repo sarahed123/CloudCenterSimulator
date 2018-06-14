@@ -11,7 +11,7 @@ import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 public class MockRemoteRouter extends XpanderRouter {
 
 	public MockRemoteRouter(Map<Integer, NetworkDevice> idToNetworkDevice) {
-		super(idToNetworkDevice);
+		super(idToNetworkDevice, null);
 		// TODO Auto-generated constructor stub
 	}
 	

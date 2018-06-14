@@ -15,7 +15,7 @@ public class EcmpThenSourceRoutingSwitchGenerator extends NetworkDeviceGenerator
     private final long switchThresholdBytes;
 
     public EcmpThenSourceRoutingSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
-
+    	super(configuration);
         // Standard fields
         this.numNodes = numNodes;
         this.intermediaryGenerator = intermediaryGenerator;
@@ -33,7 +33,7 @@ public class EcmpThenSourceRoutingSwitchGenerator extends NetworkDeviceGenerator
 
     @Override
     public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new EcmpThenSourceRoutingSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier), switchThresholdBytes);
+        return new EcmpThenSourceRoutingSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier), switchThresholdBytes,configuration);
     }
 
 }

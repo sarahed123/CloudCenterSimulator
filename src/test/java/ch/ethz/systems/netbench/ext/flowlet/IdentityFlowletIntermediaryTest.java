@@ -32,7 +32,7 @@ public class IdentityFlowletIntermediaryTest {
     public void testIdentity() {
 
         // Outgoing adaptation
-        IdentityFlowletIntermediary intermediary = new IdentityFlowletIntermediary();
+        IdentityFlowletIntermediary intermediary = new IdentityFlowletIntermediary(null);
         assertEquals(packet, intermediary.adaptOutgoing(packet));
 
         // Verify that the (src, dst, flow, flowlet)-hash generation is used

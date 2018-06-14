@@ -57,7 +57,7 @@ public class ValiantEcmpSwitchTest {
         );
 
         // Initialize ECMP routing scheme for device number 1 with identity flowlet intermediary
-        device0identity = new RangeValiantSwitch(0, layer1, 12, new IdentityFlowletIntermediary(), 0, 3);
+        device0identity = new RangeValiantSwitch(0, layer1, 12, new IdentityFlowletIntermediary(null), 0, 3, null);
         device0identity.addConnection(topology.getPort(0, 1));
         device0identity.addConnection(topology.getPort(0, 2));
         device0identity.addConnection(topology.getPort(0, 4));
