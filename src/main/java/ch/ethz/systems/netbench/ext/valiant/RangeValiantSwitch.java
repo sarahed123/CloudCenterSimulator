@@ -1,11 +1,14 @@
 package ch.ethz.systems.netbench.ext.valiant;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.GraphDetails;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +27,7 @@ public class RangeValiantSwitch extends ValiantEcmpSwitch {
     // Size of the valiant range; size = upper - lower + 1
     private final int valiantRangeSize;
 
+    private final GraphDetails grapDetails;
     /**
      * Constructor for Random Valiant ECMP switch.
      *
@@ -34,11 +38,12 @@ public class RangeValiantSwitch extends ValiantEcmpSwitch {
      * @param lowBoundValiantRangeIncl  Lower bound (inclusive) of the range that determines which nodes can be valiant nodes
      * @param highBoundValiantRangeIncl Higher bound (inclusive) of the range that determines which nodes can be valiant nodes
      */
-    public RangeValiantSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary, int lowBoundValiantRangeIncl, int highBoundValiantRangeIncl) {
+    public RangeValiantSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary, int lowBoundValiantRangeIncl, int highBoundValiantRangeIncl, NBProperties configuration) {
         super(identifier, transportLayer, n, intermediary);
         this.lowBoundValiantRangeIncl = lowBoundValiantRangeIncl;
         this.highBoundValiantRangeIncl = highBoundValiantRangeIncl;
         this.valiantRangeSize = this.highBoundValiantRangeIncl - this.lowBoundValiantRangeIncl + 1;
+        grapDetails = configuration.getGraphDetails();
     }
 
     /**
@@ -59,8 +64,8 @@ public class RangeValiantSwitch extends ValiantEcmpSwitch {
         int sourceToR;
         int destinationToR;
         if (isWithinExtendedTopology) {
-            sourceToR = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getSourceId());
-            destinationToR = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
+            sourceToR = grapDetails.getTorIdOfServer(packet.getSourceId());
+            destinationToR = grapDetails.getTorIdOfServer(packet.getDestinationId());
         } else {
             sourceToR =  packet.getSourceId();
             destinationToR = packet.getDestinationId();

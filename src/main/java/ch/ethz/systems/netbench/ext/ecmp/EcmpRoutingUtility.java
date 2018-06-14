@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.ecmp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.Simulator;
 import edu.asu.emit.algorithm.graph.Graph;
@@ -64,11 +65,11 @@ public class EcmpRoutingUtility {
      *
      * @param idToNetworkDevice     Mapping of network device identifier to network device
      */
-    public static void populateShortestPathRoutingTables(Map<Integer, NetworkDevice> idToNetworkDevice, boolean isEcmp) {
+    public static void populateShortestPathRoutingTables(Map<Integer, NetworkDevice> idToNetworkDevice, boolean isEcmp, NBProperties configuartion) {
 
         // Create graph and prepare shortest path algorithm
-        Graph graph = Simulator.getConfiguration().getGraph();
-        int numNodes = Simulator.getConfiguration().getGraphDetails().getNumNodes();
+        Graph graph = configuartion.getGraph();
+        int numNodes = configuartion.getGraphDetails().getNumNodes();
 
         // Calculate shortest path length
         int[][] shortestPathLen = EcmpRoutingUtility.calculateShortestPaths(graph);

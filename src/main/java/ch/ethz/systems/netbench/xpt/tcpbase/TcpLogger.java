@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.tcpbase;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.LogFailureException;
 import ch.ethz.systems.netbench.core.log.LoggerCallback;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
@@ -19,14 +20,14 @@ public class TcpLogger implements LoggerCallback {
     private final boolean logCongestionWindowEnabled;
     private final boolean isReceiver;
 
-    public TcpLogger(long flowId, boolean isReceiver) {
+    public TcpLogger(long flowId, boolean isReceiver, NBProperties configuration) {
         this.flowId = flowId;
         this.maxFlowlet = 0;
         this.congestionWindowWriter = SimulationLogger.getExternalWriter("congestion_window.csv.log");
         this.packetBurstGapWriter = SimulationLogger.getExternalWriter("packet_burst_gap.csv.log");
         this.maxFlowletWriter = SimulationLogger.getExternalWriter("max_flowlet.csv.log");
-        this.logPacketBurstGapEnabled = Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_log_packet_burst_gap", false);
-        this.logCongestionWindowEnabled = Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_log_congestion_window", false);
+        this.logPacketBurstGapEnabled = configuration.getBooleanPropertyWithDefault("enable_log_packet_burst_gap", false);
+        this.logCongestionWindowEnabled = configuration.getBooleanPropertyWithDefault("enable_log_congestion_window", false);
         this.isReceiver = isReceiver;
         SimulationLogger.registerCallbackBeforeClose(this);
     }

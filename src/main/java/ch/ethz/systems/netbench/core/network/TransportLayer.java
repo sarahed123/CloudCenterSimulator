@@ -166,8 +166,8 @@ public abstract class TransportLayer {
 
 	}
 	
-	public static void restorState() {
-		NBProperties configuration = Simulator.getConfiguration();
+	public static void restorState(NBProperties conf) {
+		NBProperties configuration = conf;
 		if(configuration.getPropertyWithDefault("from_state", null)!=null) {
 			System.out.println("Restoring transport layer");
 			String folderName = configuration.getPropertyWithDefault("from_state", null);

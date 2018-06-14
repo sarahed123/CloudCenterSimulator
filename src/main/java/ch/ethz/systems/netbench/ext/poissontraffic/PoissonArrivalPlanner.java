@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.ext.poissontraffic;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.run.traffic.TrafficPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.flowsize.FlowSizeDistribution;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
@@ -24,14 +25,14 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         DUAL_ALL_TO_ALL_FRACTION,
         DUAL_ALL_TO_ALL_SERVER_FRACTION
     }
-
+    private NBProperties configuration;
     private final double lambdaFlowStartsPerSecond;
     private final FlowSizeDistribution flowSizeDistribution;
     private final Random ownIndependentRng;
     private final RandomCollection<Pair<Integer, Integer>> randomPairGenerator;
 
-    private PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution) {
-        super(idToTransportLayerMap);
+    private PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution,NBProperties configuration) {
+        super(idToTransportLayerMap,configuration);
         this.lambdaFlowStartsPerSecond = lambdaFlowStartsPerSecond;
         this.flowSizeDistribution = flowSizeDistribution;
         this.ownIndependentRng = Simulator.selectIndependentRandom("poisson_inter_arrival");
@@ -60,8 +61,9 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
      * @param flowSizeDistribution      Flow size distribution
      * @param pairDistribution          Choice of static pair distribution which is valid for any topology
      */
-    public PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution, PairDistribution pairDistribution) {
+    public PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution, PairDistribution pairDistribution, NBProperties configuration) {
         this(idToTransportLayerMap, lambdaFlowStartsPerSecond, flowSizeDistribution);
+        this.configuration = configuration;
         switch (pairDistribution) {
 
             case ALL_TO_ALL:
@@ -109,13 +111,13 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         // Get the random generator for this part
         Random gen = Simulator.selectIndependentRandom("skew_pareto_distribution");
         ParetoDistribution pareto = new ParetoDistribution(
-                Simulator.getConfiguration().getDoublePropertyOrFail("traffic_pareto_skew_shape"),
+                configuration.getDoublePropertyOrFail("traffic_pareto_skew_shape"),
                 10, // Scale does not matter because of normalization
                 gen
         );
 
         // ToRs, shuffled
-        List<Integer> tors = new ArrayList<>(Simulator.getConfiguration().getGraphDetails().getTorNodeIds());
+        List<Integer> tors = new ArrayList<>(configuration.getGraphDetails().getTorNodeIds());
         Collections.shuffle(tors, gen);
 
         // For every ToR, draw its probability mass
@@ -146,8 +148,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                 if (i != j) {
 
                     double torPairProb = probRes.get(i) * probRes.get(j) / (1 - torExcluded); // ToR-pair probability with diagonal waste normalized out
-                    List<Integer> srcServers = new ArrayList<>(Simulator.getConfiguration().getGraphDetails().getServersOfTor(tors.get(i)));
-                    List<Integer> dstServers = new ArrayList<>(Simulator.getConfiguration().getGraphDetails().getServersOfTor(tors.get(j)));
+                    List<Integer> srcServers = new ArrayList<>(configuration.getGraphDetails().getServersOfTor(tors.get(i)));
+                    List<Integer> dstServers = new ArrayList<>(configuration.getGraphDetails().getServersOfTor(tors.get(j)));
 
                     double serverProb = torPairProb / (srcServers.size() * dstServers.size());
                     for (int src : srcServers) {
@@ -198,8 +200,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
 
 
         // Retrieve necessary parameters from the extension
-        double activeFractionX = Simulator.getConfiguration().getDoublePropertyOrFail("traffic_probabilities_active_fraction");
-        boolean fractionIsOrdered = Simulator.getConfiguration().getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
+        double activeFractionX = configuration.getDoublePropertyOrFail("traffic_probabilities_active_fraction");
+        boolean fractionIsOrdered = configuration.getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
 
         // Shuffle nodes
         List<Integer> servers = new ArrayList<>();
@@ -247,10 +249,10 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
 
 
         // Retrieve necessary parameters from the extension
-        int numTors = Simulator.getConfiguration().getGraphDetails().getNumTors();
-        int serversPerNodeToExtendWith = Simulator.getConfiguration().getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
-        boolean fractionIsOrdered = Simulator.getConfiguration().getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
-        double activeFractionX = Simulator.getConfiguration().getDoublePropertyOrFail("traffic_probabilities_active_fraction");
+        int numTors = configuration.getGraphDetails().getNumTors();
+        int serversPerNodeToExtendWith = configuration.getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
+        boolean fractionIsOrdered = configuration.getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
+        double activeFractionX = configuration.getDoublePropertyOrFail("traffic_probabilities_active_fraction");
 
         // Shuffle nodes
         List<Integer> tors = new ArrayList<>();
@@ -277,8 +279,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                     int torA = tors.get(i);
                     int torB = tors.get(j);
 
-                    for (Integer svrA : Simulator.getConfiguration().getGraphDetails().getServersOfTor(torA)) {
-                        for (Integer svrB : Simulator.getConfiguration().getGraphDetails().getServersOfTor(torB)) {
+                    for (Integer svrA : configuration.getGraphDetails().getServersOfTor(torA)) {
+                        for (Integer svrB : configuration.getGraphDetails().getServersOfTor(torB)) {
                             // Add to random pair generator
                             this.randomPairGenerator.add(serverPairProb, new ImmutablePair<>(svrA, svrB));
                         }
@@ -303,10 +305,10 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
     private void setPairProbabilitiesDualAllToAllFraction() {
 
         // Retrieve necessary parameters from the extension
-        int numTors = Simulator.getConfiguration().getGraphDetails().getNumTors();
-        boolean fractionIsOrdered = Simulator.getConfiguration().getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
-        double activeFractionA = Simulator.getConfiguration().getDoublePropertyOrFail("traffic_probabilities_fraction_A");
-        double probabilityMassA = Simulator.getConfiguration().getDoublePropertyOrFail("traffic_probabilities_mass_A");
+        int numTors = configuration.getGraphDetails().getNumTors();
+        boolean fractionIsOrdered = configuration.getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
+        double activeFractionA = configuration.getDoublePropertyOrFail("traffic_probabilities_fraction_A");
+        double probabilityMassA = configuration.getDoublePropertyOrFail("traffic_probabilities_mass_A");
 
 
         // Shuffle nodes
@@ -347,8 +349,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
 
                     // ToR-pair probability with diagonal waste normalized out
                     double torPairProb = torProbI * torProbJ / (1 - wastedProbability);
-                    List<Integer> srcServers = new ArrayList<>(Simulator.getConfiguration().getGraphDetails().getServersOfTor(tors.get(i)));
-                    List<Integer> dstServers = new ArrayList<>(Simulator.getConfiguration().getGraphDetails().getServersOfTor(tors.get(j)));
+                    List<Integer> srcServers = new ArrayList<>(configuration.getGraphDetails().getServersOfTor(tors.get(i)));
+                    List<Integer> dstServers = new ArrayList<>(configuration.getGraphDetails().getServersOfTor(tors.get(j)));
 
                     double serverProb = torPairProb / (srcServers.size() * dstServers.size());
                     for (int src : srcServers) {
@@ -372,10 +374,10 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
     private void setPairProbabilitiesDualAllToAllServerFraction() {
 
         // Retrieve necessary parameters from the extension
-        int numTors = Simulator.getConfiguration().getGraphDetails().getNumTors();
-        boolean fractionIsOrdered = Simulator.getConfiguration().getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
-        double activeFractionA = Simulator.getConfiguration().getDoublePropertyOrFail("traffic_probabilities_fraction_A");
-        double probabilityMassA = Simulator.getConfiguration().getDoublePropertyOrFail("traffic_probabilities_mass_A");
+        int numTors = configuration.getGraphDetails().getNumTors();
+        boolean fractionIsOrdered = configuration.getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
+        double activeFractionA = configuration.getDoublePropertyOrFail("traffic_probabilities_fraction_A");
+        double probabilityMassA = configuration.getDoublePropertyOrFail("traffic_probabilities_mass_A");
 
 
         // Shuffle nodes
@@ -432,10 +434,10 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
 
 
         // Retrieve necessary parameters from the extension
-        int numTors = Simulator.getConfiguration().getGraphDetails().getNumTors();
-        int serversPerNodeToExtendWith = Simulator.getConfiguration().getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
-        boolean fractionIsOrdered = Simulator.getConfiguration().getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
-        double activeFractionX = Simulator.getConfiguration().getDoublePropertyOrFail("traffic_probabilities_active_fraction");
+        int numTors = configuration.getGraphDetails().getNumTors();
+        int serversPerNodeToExtendWith = configuration.getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
+        boolean fractionIsOrdered = configuration.getBooleanPropertyOrFail("traffic_probabilities_active_fraction_is_ordered");
+        double activeFractionX = configuration.getDoublePropertyOrFail("traffic_probabilities_active_fraction");
 
         // Shuffle nodes
         List<Integer> tors = new ArrayList<>();
@@ -474,8 +476,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
             }
 
             // Add to random pair generator
-            for (Integer svrA : Simulator.getConfiguration().getGraphDetails().getServersOfTor(first)) {
-                for (Integer svrB : Simulator.getConfiguration().getGraphDetails().getServersOfTor(second)) {
+            for (Integer svrA : configuration.getGraphDetails().getServersOfTor(first)) {
+                for (Integer svrB : configuration.getGraphDetails().getServersOfTor(second)) {
                     this.randomPairGenerator.add(serverPairProb, new ImmutablePair<>(svrA, svrB));
                     this.randomPairGenerator.add(serverPairProb, new ImmutablePair<>(svrB, svrA));
                 }

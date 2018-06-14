@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.core.run;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
@@ -23,9 +24,9 @@ public class RoutingSelector {
      *
      * @param idToNetworkDevice     Identifier to instantiated network device
      */
-    public static RoutingPopulator selectPopulator(Map<Integer, NetworkDevice> idToNetworkDevice) {
+    public static RoutingPopulator selectPopulator(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
 
-        switch (Simulator.getConfiguration().getPropertyOrFail("network_device_routing")) {
+        switch (configuration.getPropertyOrFail("network_device_routing")) {
 
             case "single_forward": {
                 return new ForwarderSwitchRouting(
@@ -64,16 +65,16 @@ public class RoutingSelector {
             }
             
             case "remote_routing_populator": {
-            	String remoteRoutingType = Simulator.getConfiguration().getPropertyOrFail("centered_routing_type");
-            	long headerSize = Simulator.getConfiguration().getLongPropertyWithDefault("remote_routing_header_size", 0L);
-                RemoteRoutingController.initRemoteRouting(remoteRoutingType,idToNetworkDevice,headerSize);
+            	String remoteRoutingType = configuration.getPropertyOrFail("centered_routing_type");
+            	long headerSize = configuration.getLongPropertyWithDefault("remote_routing_header_size", 0L);
+                RemoteRoutingController.initRemoteRouting(remoteRoutingType,idToNetworkDevice,headerSize,configuration);
                 
                 return RemoteRoutingController.getInstance();
             }
 
             default:
                 throw new PropertyValueInvalidException(
-                        Simulator.getConfiguration(),
+                        configuration,
                         "network_device_routing"
                 );
 

@@ -251,12 +251,11 @@ public class Graph implements BaseGraph, Serializable {
 		
 	}
 
-	private long initCapcity(Pair<Integer, Integer> linkDirPair) {
+	private long initCapcity(Pair<Integer, Integer> linkDirPair,boolean isExended) {
 		BaseInitializer bi = BaseInitializer.getInstance();
 		boolean isServerRight = bi.getNetworkDeviceById(linkDirPair.getRight()).isServer();
 		boolean isServerLeft = bi.getNetworkDeviceById(linkDirPair.getLeft()).isServer();
-		boolean extendedTopology = Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
-		if(extendedTopology) {
+		if(isExended) {
 			if(isServerLeft || isServerRight) {
 		       	 return Long.MAX_VALUE;
 		    }

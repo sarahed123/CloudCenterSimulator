@@ -4,28 +4,21 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceException;
 
 public class RemoteRoutingOutputPort extends OutputPort{
 	boolean extendedTopology;
-	boolean noQueues;
-	protected RemoteRoutingOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue) {
+	protected RemoteRoutingOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue, NBProperties configuration) {
 		super(ownNetworkDevice, targetNetworkDevice, link,queue);
-		extendedTopology = Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
-		noQueues  = Simulator.getConfiguration().getBooleanPropertyWithDefault("no_queues_in_servers",false);
+		extendedTopology = configuration.getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
 	}
 
 	@Override
 	public void enqueue(Packet packet) {
-		
-		//guaranteedEnqueue(packet);
-		if(noQueues){
-			registerPacketDispatchedEvent(packet);
-		}else{
 			guaranteedEnqueue(packet);
-		}
 
 	}
 

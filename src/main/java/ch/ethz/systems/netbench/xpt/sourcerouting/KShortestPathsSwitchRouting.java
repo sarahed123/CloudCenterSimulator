@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.sourcerouting;
 
 import ch.ethz.systems.netbench.core.config.GraphDetails;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
@@ -11,7 +12,6 @@ import edu.asu.emit.algorithm.graph.algorithms.YenTopKShortestPathsAlg;
 import java.io.*;
 import java.util.*;
 
-import static ch.ethz.systems.netbench.core.Simulator.getConfiguration;
 
 public class KShortestPathsSwitchRouting extends RoutingPopulator {
 
@@ -29,14 +29,14 @@ public class KShortestPathsSwitchRouting extends RoutingPopulator {
      * create that cache.
      */
     @Override
-    public void populateRoutingTables() {
+    public void populateRoutingTables(NBProperties configuration) {
         
         // Select all the nodes which are ToR
-        GraphDetails details = getConfiguration().getGraphDetails();
-        int k = getConfiguration().getIntegerPropertyOrFail("k_for_k_shortest_paths");
+        GraphDetails details = configuration.getGraphDetails();
+        int k = configuration.getIntegerPropertyOrFail("k_for_k_shortest_paths");
 
         // Create graph and prepare shortest path algorithm
-        Graph graph = getConfiguration().getGraph();
+        Graph graph = configuration.getGraph();
         try {
             String fileName = getKspCacheFilename(details);
             File f = new File(fileName);

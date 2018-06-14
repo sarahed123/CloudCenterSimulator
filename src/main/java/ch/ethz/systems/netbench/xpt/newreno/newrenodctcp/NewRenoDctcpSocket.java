@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.newreno.newrenodctcp;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpSocket;
 
@@ -25,9 +26,9 @@ public class NewRenoDctcpSocket extends NewRenoTcpSocket {
      * @param destinationId  Target network device identifier
      * @param flowSizeByte   Size of the flow in bytes
      */
-    NewRenoDctcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
+    NewRenoDctcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte, NBProperties configuration) {
         super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
-        this.DCTCP_WEIGHT_NEW_ESTIMATION = Simulator.getConfiguration().getDoublePropertyWithDefault("DCTCP_WEIGHT_NEW_ESTIMATION", 0.0625);
+        this.DCTCP_WEIGHT_NEW_ESTIMATION = configuration.getDoublePropertyWithDefault("DCTCP_WEIGHT_NEW_ESTIMATION", 0.0625);
         this.DCTCP_WEIGHT_OLD_ESTIMATION = 1.0 - DCTCP_WEIGHT_NEW_ESTIMATION;
         this.alphaFraction = 0.0;
         this.totalBytes = 0;

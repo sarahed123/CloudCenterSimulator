@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.core.run.traffic;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.GraphDetails;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
 import java.util.Map;
@@ -10,17 +11,17 @@ public abstract class TrafficPlanner {
 
     protected final Map<Integer, TransportLayer> idToTransportLayerMap;
     protected final GraphDetails graphDetails;
-
+    protected final NBProperties configuration;
     /**
      * Constructor.
      *
      * @param idToTransportLayerMap     Maps a network device identifier to its corresponding transport layer
      */
-    public TrafficPlanner(Map<Integer, TransportLayer> idToTransportLayerMap) {
-
+    public TrafficPlanner(Map<Integer, TransportLayer> idToTransportLayerMap,NBProperties configuration) {
+        this.configuration = configuration;
         // Create mappings
         this.idToTransportLayerMap = idToTransportLayerMap;
-        this.graphDetails = Simulator.getConfiguration().getGraphDetails();
+        this.graphDetails = configuration.getGraphDetails();
 
     }
 

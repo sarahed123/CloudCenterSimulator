@@ -59,7 +59,7 @@ public class MainFromProperties {
             manageTopology();
 
             // Initialization of the three components
-            BaseInitializer initializer = generateInfrastructure();
+            BaseInitializer initializer = generateInfrastructure(runConfigurations.get(0));
             populateRoutingState(initializer.getIdToNetworkDevice());
             if(runConfigurations.get(0).getPropertyWithDefault("from_state",null)==null) {
             	planTraffic(runtimeNs, initializer.getIdToTransportLayer());
@@ -192,18 +192,20 @@ public class MainFromProperties {
      * links and transport layers) of the run.
      *
      * @return  Initializer of the infrastructure
+     * @param configuration
      */
-    private static BaseInitializer generateInfrastructure() {
+    private static BaseInitializer generateInfrastructure(NBProperties configuration) {
 
         // Start infrastructure
         System.out.println("\nINFRASTRUCTURE\n==================");
         BaseInitializer initializer = BaseInitializer.init();
         // 1.1) Generate nodes
         initializer.extend(
-                InfrastructureSelector.selectOutputPortGenerator(),
-                InfrastructureSelector.selectNetworkDeviceGenerator(),
-                InfrastructureSelector.selectLinkGenerator(),
-                InfrastructureSelector.selectTransportLayerGenerator()
+                configuration,
+                InfrastructureSelector.selectOutputPortGenerator(configuration),
+                InfrastructureSelector.selectNetworkDeviceGenerator(configuration),
+                InfrastructureSelector.selectLinkGenerator(configuration),
+                InfrastructureSelector.selectTransportLayerGenerator(configuration)
         );
 
         // Finished infrastructure
@@ -263,21 +265,21 @@ public class MainFromProperties {
      *
      * It will override the scenario_topology_file in the existing configuration.
      */
-    private static void manageTopology() {
+    private static void manageTopology(NBProperties configuration) {
 
         // Copy of original topology to the run folder
-        SimulationLogger.copyFileToRunFolder(Simulator.getConfiguration().getPropertyOrFail("scenario_topology_file"), "original_topology.txt");
+        SimulationLogger.copyFileToRunFolder(configuration.getPropertyOrFail("scenario_topology_file"), "original_topology.txt");
 
         // Topology extension
-        if (Simulator.getConfiguration().isPropertyDefined("scenario_topology_extend_with_servers")) {
-            if (Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("regular")) {
+        if (configuration.isPropertyDefined("scenario_topology_extend_with_servers")) {
+            if (configuration.getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("regular")) {
 
                 // Number of servers to add to each transport layer node
-                int serversPerNodeToExtendWith = Simulator.getConfiguration().getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
+                int serversPerNodeToExtendWith = configuration.getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
 
                 // Extend topology
                 new TopologyServerExtender(
-                        Simulator.getConfiguration().getTopologyFileNameOrFail(),
+                        configuration.getTopologyFileNameOrFail(),
                         SimulationLogger.getRunFolderFull() + "/extended_topology.txt"
                 ).extendRegular(serversPerNodeToExtendWith);
 
@@ -285,11 +287,11 @@ public class MainFromProperties {
                 SimulationLogger.logInfo("OVERRODE_TOPOLOGY_FILE_WITH_SERVER_EXTENSION", "servers/node=" + serversPerNodeToExtendWith);
 
             } else {
-                throw new PropertyValueInvalidException(Simulator.getConfiguration(), "scenario_topology_extend_with_servers");
+                throw new PropertyValueInvalidException(configuration, "scenario_topology_extend_with_servers");
             }
 
             // Override configuration property
-            Simulator.getConfiguration().overrideProperty("scenario_topology_file", SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
+            configuration.overrideProperty("scenario_topology_file", SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
             SimulationLogger.logInfo("ARG_OVERRIDE_PARAM(scenario_topology_file)", SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
 
         }

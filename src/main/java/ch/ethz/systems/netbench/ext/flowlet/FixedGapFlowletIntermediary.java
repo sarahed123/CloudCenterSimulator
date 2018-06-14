@@ -1,15 +1,16 @@
 package ch.ethz.systems.netbench.ext.flowlet;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 
 public abstract class FixedGapFlowletIntermediary extends FlowletIntermediary {
 
     // Flowlet gap in nanoseconds
     private final long FLOWLET_GAP_NS;
 
-    public FixedGapFlowletIntermediary() {
+    public FixedGapFlowletIntermediary(NBProperties configuration) {
         super();
-        this.FLOWLET_GAP_NS = Simulator.getConfiguration().getLongPropertyOrFail("FLOWLET_GAP_NS");
+        this.FLOWLET_GAP_NS = configuration.getLongPropertyOrFail("FLOWLET_GAP_NS");
     }
 
     /**

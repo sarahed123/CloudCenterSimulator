@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.core.run.infrastructure;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.GraphDetails;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -34,7 +35,7 @@ public class BaseInitializer {
     // Mappings
     private final Map<Integer, NetworkDevice> idToNetworkDevice;
     private final Map<Integer, TransportLayer> idToTransportLayer;
-
+    private NBProperties configuration;
     private NetworkDevice[] idtoNetworkDeviceArray;
     // Generators
     private  OutputPortGenerator outputPortGenerator;
@@ -74,17 +75,18 @@ public class BaseInitializer {
         this.linkPairs = new ArrayList<>();
         this.runningNodeId = 0;
         this.infrastructureAlreadyCreated = false;
+        this.configuration = null;
     }
 
     public static BaseInitializer init(){
         return new BaseInitializer();
     }
     
-    public void extend(OutputPortGenerator outputPortGenerator,
-                                         NetworkDeviceGenerator networkDeviceGenerator,
-                                         LinkGenerator linkGenerator,
-                                         TransportLayerGenerator transportLayerGenerator) {
-
+    public void extend(NBProperties configuration, OutputPortGenerator outputPortGenerator,
+                       NetworkDeviceGenerator networkDeviceGenerator,
+                       LinkGenerator linkGenerator,
+                       TransportLayerGenerator transportLayerGenerator) {
+        this.configuration = configuration;
         this.outputPortGenerator = outputPortGenerator;
         this.networkDeviceGenerator = networkDeviceGenerator;
         this.linkGenerator = linkGenerator;
@@ -110,9 +112,9 @@ public class BaseInitializer {
         }
 
         // Fetch from configuration graph and its details
-        Graph graph = Simulator.getConfiguration().getGraph();
+        Graph graph = configuration.getGraph();
         setVertexTieBreaker();
-        GraphDetails details = Simulator.getConfiguration().getGraphDetails();
+        GraphDetails details = configuration.getGraphDetails();
         System.out.println("finished reading graph");
 
         // Create nodes
@@ -156,7 +158,7 @@ public class BaseInitializer {
      * vertices have the same weight
      */
     private void setVertexTieBreaker() {
-		String tieBreakRule = Simulator.getConfiguration().getPropertyWithDefault("vertex_tie_break_rule", "vertex_tie_break_by_index");
+		String tieBreakRule = configuration.getPropertyWithDefault("vertex_tie_break_rule", "vertex_tie_break_by_index");
 		switch(tieBreakRule) {
 		case "vertex_tie_break_by_index":
 			Vertex.setTieBreaker(new IndexTieBreaker());

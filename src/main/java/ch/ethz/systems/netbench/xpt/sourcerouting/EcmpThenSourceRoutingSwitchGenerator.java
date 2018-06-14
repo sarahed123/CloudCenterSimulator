@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.sourcerouting;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -13,12 +14,12 @@ public class EcmpThenSourceRoutingSwitchGenerator extends NetworkDeviceGenerator
     private final IntermediaryGenerator intermediaryGenerator;
     private final long switchThresholdBytes;
 
-    public EcmpThenSourceRoutingSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes) {
+    public EcmpThenSourceRoutingSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
 
         // Standard fields
         this.numNodes = numNodes;
         this.intermediaryGenerator = intermediaryGenerator;
-        this.switchThresholdBytes = Simulator.getConfiguration().getIntegerPropertyOrFail("routing_ecmp_then_source_routing_switch_threshold_bytes");
+        this.switchThresholdBytes = configuration.getIntegerPropertyOrFail("routing_ecmp_then_source_routing_switch_threshold_bytes");
 
         // Log creation
         SimulationLogger.logInfo("Network device", "ECMP_THEN_SOURCE_ROUTING_SWITCH(numNodes=" + numNodes + ", threshold=" + switchThresholdBytes + ")");

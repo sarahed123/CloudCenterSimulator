@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.sourcerouting;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
@@ -19,7 +20,6 @@ public class SourceRoutingSwitch extends NetworkDevice {
 	protected List<List<SourceRoutingPath>> destinationToPaths;
 
 	protected boolean isWithinExtendedTopology;
-
 	/**
 	 * Constructor for Source Routing switch WITH a transport layer attached to it.
 	 *
@@ -28,13 +28,13 @@ public class SourceRoutingSwitch extends NetworkDevice {
 	 * @param n                     Number of network devices in the entire network (for routing table size)
 	 * @param intermediary          Flowlet intermediary instance (takes care of hash adaptation for flowlet support)
 	 */
-	SourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
-		super(identifier, transportLayer, intermediary);
+	SourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary,NBProperties configuration) {
+		super(identifier, transportLayer, intermediary,configuration);
 		this.destinationToPaths = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
 			this.destinationToPaths.add(new ArrayList<>());
 		}
-		isWithinExtendedTopology = Simulator.getConfiguration().getGraphDetails().isAutoExtended();
+		isWithinExtendedTopology = configuration.getGraphDetails().isAutoExtended();
 	}
 
 	@Override
@@ -94,8 +94,8 @@ public class SourceRoutingSwitch extends NetworkDevice {
 		if (isWithinExtendedTopology) {
 
 			// Determine source and destination ToR to which the source and destination servers are attached
-			int sourceTor = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getSourceId());
-			int destinationTor = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
+			int sourceTor = configuration.getGraphDetails().getTorIdOfServer(packet.getSourceId());
+			int destinationTor = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
 
 			// Create path
 			selectedPath = new SourceRoutingPath(packet.getFlowId());
@@ -167,10 +167,10 @@ public class SourceRoutingSwitch extends NetworkDevice {
 		// Check for duplicate
 		List<SourceRoutingPath> current = this.destinationToPaths.get(destinationId);
 		if (current.contains(path)) {
-			if (Simulator.getConfiguration().getBooleanPropertyWithDefault("allow_source_routing_skip_duplicate_paths", false)) {
+			if (configuration.getBooleanPropertyWithDefault("allow_source_routing_skip_duplicate_paths", false)) {
 				System.out.println("For (" + this.getIdentifier() + "->" + destinationId + ") skipped duplicate path : " + path);
 				return;
-			} else if (Simulator.getConfiguration().getBooleanPropertyWithDefault("allow_source_routing_add_duplicate_paths", false)) {
+			} else if (configuration.getBooleanPropertyWithDefault("allow_source_routing_add_duplicate_paths", false)) {
 				System.out.println("For (" + this.getIdentifier() + "->" + destinationId + ") added duplicate path : " + path);
 			} else {
 				throw new IllegalArgumentException("Cannot add a duplicate path (" + path + ")");

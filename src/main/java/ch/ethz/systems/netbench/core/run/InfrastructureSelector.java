@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.core.run;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.run.infrastructure.IntermediaryGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
@@ -56,14 +57,15 @@ class InfrastructureSelector {
      * network_device_intermediary=...
      *
      * @return  Network device generator.
+     * @param configuration
      */
-    static NetworkDeviceGenerator selectNetworkDeviceGenerator() {
+    static NetworkDeviceGenerator selectNetworkDeviceGenerator(NBProperties configuration) {
 
         /*
          * Select intermediary generator.
          */
         IntermediaryGenerator intermediaryGenerator;
-        switch (Simulator.getConfiguration().getPropertyOrFail("network_device_intermediary")) {
+        switch (configuration.getPropertyOrFail("network_device_intermediary")) {
 
             case "demo": {
                 intermediaryGenerator = new DemoIntermediaryGenerator();
@@ -87,7 +89,7 @@ class InfrastructureSelector {
 
             default:
                 throw new PropertyValueInvalidException(
-                        Simulator.getConfiguration(),
+                        configuration,
                         "network_device_intermediary"
                 );
 
@@ -96,31 +98,31 @@ class InfrastructureSelector {
         /*
          * Select network device generator.
          */
-        switch (Simulator.getConfiguration().getPropertyOrFail("network_device")) {
+        switch (configuration.getPropertyOrFail("network_device")) {
 
             case "forwarder_switch":
-                return new ForwarderSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+                return new ForwarderSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
 
             case "ecmp_switch":
-                return new EcmpSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+                return new EcmpSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
 
             case "random_valiant_ecmp_switch":
-                return new RangeValiantSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+                return new RangeValiantSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
 
             case "ecmp_then_random_valiant_ecmp_switch":
-                return new EcmpThenValiantSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+                return new EcmpThenValiantSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
 
             case "source_routing_switch":
-                return new SourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+                return new SourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
             case "remote_source_routing_switch":
-                return new RemoteSourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+                return new RemoteSourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
 
             case "ecmp_then_source_routing_switch":
-                return new EcmpThenSourceRoutingSwitchGenerator(intermediaryGenerator, Simulator.getConfiguration().getGraphDetails().getNumNodes());
+                return new EcmpThenSourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes());
 
             default:
                 throw new PropertyValueInvalidException(
-                        Simulator.getConfiguration(),
+                        configuration,
                         "network_device"
                 );
 
@@ -136,20 +138,21 @@ class InfrastructureSelector {
      * link=...
      *
      * @return  Link generator
+     * @param configuration
      */
-    static LinkGenerator selectLinkGenerator() {
+    static LinkGenerator selectLinkGenerator(NBProperties configuration) {
 
-        switch (Simulator.getConfiguration().getPropertyOrFail("link")) {
+        switch (configuration.getPropertyOrFail("link")) {
 
             case "perfect_simple":
                 return new PerfectSimpleLinkGenerator(
-                        Simulator.getConfiguration().getLongPropertyOrFail("link_delay_ns"),
-                        Simulator.getConfiguration().getLongPropertyOrFail("link_bandwidth_bit_per_ns")
+                        configuration.getLongPropertyOrFail("link_delay_ns"),
+                        configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns")
                 );
 
             default:
                 throw new PropertyValueInvalidException(
-                        Simulator.getConfiguration(),
+                        configuration,
                         "link"
                 );
 
@@ -165,16 +168,17 @@ class InfrastructureSelector {
      * output_port=...
      *
      * @return  Output port generator
+     * @param configuration
      */
-    static OutputPortGenerator selectOutputPortGenerator() {
+    static OutputPortGenerator selectOutputPortGenerator(NBProperties configuration) {
 
-        switch (Simulator.getConfiguration().getPropertyOrFail("output_port")) {
+        switch (configuration.getPropertyOrFail("output_port")) {
 
             case "ecn_tail_drop":
 
                 return new EcnTailDropOutputPortGenerator(
-                        Simulator.getConfiguration().getLongPropertyOrFail("output_port_max_queue_size_bytes"),
-                        Simulator.getConfiguration().getLongPropertyOrFail("output_port_ecn_threshold_k_bytes")
+                        configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes"),
+                        configuration.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes")
                 );
 
             case "priority":
@@ -182,7 +186,7 @@ class InfrastructureSelector {
 
             case "bounded_priority":
                 return new BoundedPriorityOutputPortGenerator(
-                        Simulator.getConfiguration().getLongPropertyOrFail("output_port_max_queue_size_bytes")*8
+                        configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes")*8
                 );
 
             case "unlimited":
@@ -192,7 +196,7 @@ class InfrastructureSelector {
 
             default:
                 throw new PropertyValueInvalidException(
-                        Simulator.getConfiguration(),
+                        configuration,
                         "output_port"
                 );
 
@@ -204,10 +208,11 @@ class InfrastructureSelector {
      * Select the transport layer generator.
      *
      * @return  Transport layer generator
+     * @param configuration
      */
-    static TransportLayerGenerator selectTransportLayerGenerator() {
+    static TransportLayerGenerator selectTransportLayerGenerator(NBProperties configuration) {
 
-        switch (Simulator.getConfiguration().getPropertyOrFail("transport_layer")) {
+        switch (configuration.getPropertyOrFail("transport_layer")) {
 
             case "demo":
                 return new DemoTransportLayerGenerator();
@@ -259,7 +264,7 @@ class InfrastructureSelector {
 
             default:
                 throw new PropertyValueInvalidException(
-                        Simulator.getConfiguration(),
+                        configuration,
                         "transport_layer"
                 );
 

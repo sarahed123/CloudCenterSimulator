@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.ext.hybrid;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -15,7 +16,7 @@ public class EcmpThenValiantSwitchGenerator extends NetworkDeviceGenerator {
     private final int nodeRangeUpper;
     private final long switchThresholdBytes;
 
-    public EcmpThenValiantSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes) {
+    public EcmpThenValiantSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
         SimulationLogger.logInfo("Network device", "ECMP_THEN_VALIANT_SWITCH(numNodes=" + numNodes + ")");
 
         // Standard fields
@@ -23,9 +24,9 @@ public class EcmpThenValiantSwitchGenerator extends NetworkDeviceGenerator {
         this.intermediaryGenerator = intermediaryGenerator;
 
         // Range of [lower, upper] for which nodes are eligible to be chosen as valiant node
-        this.nodeRangeLower = Simulator.getConfiguration().getIntegerPropertyOrFail("routing_random_valiant_node_range_lower_incl");
-        this.nodeRangeUpper = Simulator.getConfiguration().getIntegerPropertyOrFail("routing_random_valiant_node_range_upper_incl");
-        this.switchThresholdBytes = Simulator.getConfiguration().getIntegerPropertyOrFail("routing_ecmp_then_valiant_switch_threshold_bytes");
+        this.nodeRangeLower = configuration.getIntegerPropertyOrFail("routing_random_valiant_node_range_lower_incl");
+        this.nodeRangeUpper = configuration.getIntegerPropertyOrFail("routing_random_valiant_node_range_upper_incl");
+        this.switchThresholdBytes = configuration.getIntegerPropertyOrFail("routing_ecmp_then_valiant_switch_threshold_bytes");
 
         // Check range
         if (nodeRangeLower < 0 || nodeRangeUpper < 0 || nodeRangeLower > numNodes - 1 || nodeRangeUpper > numNodes - 1 || nodeRangeLower > nodeRangeUpper) {

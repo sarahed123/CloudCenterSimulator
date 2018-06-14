@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.ext.trafficpair;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.traffic.TrafficPlanner;
@@ -181,12 +182,12 @@ public class TrafficPairPlanner extends TrafficPlanner {
      *
      * @return  Traffic pair list
      */
-    public static List<TrafficPair> generateAllToAll(int n) {
+    public static List<TrafficPair> generateAllToAll(int n, NBProperties configuration) {
 
         // For each other server, create pair to target
         ArrayList<TrafficPair> ls = new ArrayList<>();
-        for (Integer i : Simulator.getConfiguration().getGraphDetails().getServerNodeIds()) {
-            for (Integer j : Simulator.getConfiguration().getGraphDetails().getServerNodeIds()) {
+        for (Integer i : configuration.getGraphDetails().getServerNodeIds()) {
+            for (Integer j : configuration.getGraphDetails().getServerNodeIds()) {
                 if (!i.equals(j)) {
                     ls.add(new TrafficPair(i, j));
                 }
