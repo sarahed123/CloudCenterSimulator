@@ -1,8 +1,8 @@
 package ch.ethz.systems.netbench.core.log;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 
-import static ch.ethz.systems.netbench.core.Simulator.getConfiguration;
 
 public class FlowLogger {
 
@@ -26,7 +26,7 @@ public class FlowLogger {
     // Logging
     private final boolean flowThroughputEnabled;
 
-    public FlowLogger(long flowId, int sourceId, int targetId, long flowSizeByte) {
+    public FlowLogger(long flowId, int sourceId, int targetId, long flowSizeByte, NBProperties configuration) {
         this.flowId = flowId;
         this.sourceId = sourceId;
         this.targetId = targetId;
@@ -44,7 +44,7 @@ public class FlowLogger {
         }
 
         // True iff the flow throughput is enabled (or defaulted)
-        flowThroughputEnabled = getConfiguration().getBooleanPropertyWithDefault("enable_log_flow_throughput", true);
+        flowThroughputEnabled = configuration.getBooleanPropertyWithDefault("enable_log_flow_throughput", true);
 
     }
 

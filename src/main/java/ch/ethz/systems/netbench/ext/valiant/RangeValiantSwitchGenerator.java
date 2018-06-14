@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.ext.valiant;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -14,7 +15,7 @@ public class RangeValiantSwitchGenerator extends NetworkDeviceGenerator {
     private final int nodeRangeLower;
     private final int nodeRangeUpper;
 
-    public RangeValiantSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes) {
+    public RangeValiantSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
         SimulationLogger.logInfo("Network device", "RANGE_VALIANT_SWITCH(numNodes=" + numNodes + ")");
 
         // Standard fields
@@ -22,8 +23,8 @@ public class RangeValiantSwitchGenerator extends NetworkDeviceGenerator {
         this.intermediaryGenerator = intermediaryGenerator;
 
         // Range of [lower, upper] for which nodes are eligible to be chosen as valiant node
-        this.nodeRangeLower = Simulator.getConfiguration().getIntegerPropertyOrFail("routing_random_valiant_node_range_lower_incl");
-        this.nodeRangeUpper = Simulator.getConfiguration().getIntegerPropertyOrFail("routing_random_valiant_node_range_upper_incl");
+        this.nodeRangeLower = configuration.getIntegerPropertyOrFail("routing_random_valiant_node_range_lower_incl");
+        this.nodeRangeUpper = configuration.getIntegerPropertyOrFail("routing_random_valiant_node_range_upper_incl");
 
         // Check range
         if (nodeRangeLower < 0 || nodeRangeUpper < 0 || nodeRangeLower > numNodes - 1 || nodeRangeUpper > numNodes - 1 || nodeRangeLower > nodeRangeUpper) {

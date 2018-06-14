@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Map.Entry;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 
 import java.util.Random;
 import java.util.TreeMap;
@@ -85,12 +86,12 @@ public class FctDistributions {
 	
 	private static TreeMap<Double, Double> priorities = null;
 	
-	protected static void init(){
+	protected static void init(NBProperties configuration){
 		priorities = new TreeMap<Double, Double>();
 		try {
 			@SuppressWarnings("resource")
 			BufferedReader reader = new BufferedReader(new FileReader(
-				Simulator.getConfiguration().getPropertyOrFail("spark_error_distribution")
+					configuration.getPropertyOrFail("spark_error_distribution")
 			));
 			
 			String line = reader.readLine();

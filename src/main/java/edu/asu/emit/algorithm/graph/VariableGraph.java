@@ -63,9 +63,9 @@ public class VariableGraph extends Graph {
      *
      * @param graph Graph instance
      */
-	public VariableGraph(Graph graph) {
+	public VariableGraph(Graph graph,String graphEdgeWeightRule) {
 		super(graph);
-		String weightRuleAsString = Simulator.getConfiguration().getProperty("graph_edge_weight_rule");
+		String weightRuleAsString = graphEdgeWeightRule;
 		if(weightRuleAsString==null) {
 			weightRuleAsString = "graph_weight";
 		}

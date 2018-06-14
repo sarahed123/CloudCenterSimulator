@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
@@ -32,7 +33,12 @@ import edu.asu.emit.algorithm.graph.paths_filter.RandomPathsFilter;
 
 public class XpanderRouter extends RemoteRoutingController{
 	private int flowFailuresSample;
-	enum PathAlgorithm{
+
+    public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
+        super();
+    }
+
+    enum PathAlgorithm{
 		DIJKSTRA,
 		STRICT_UP_DOWN_DIJKSTRA
 	}
@@ -40,15 +46,15 @@ public class XpanderRouter extends RemoteRoutingController{
 	PathsFilter pathsFilter;
 	PathAlgorithm pathAlg;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
-	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice){
+	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
 		mIdToNetworkDevice = idToNetworkDevice;
-		mG =  Simulator.getConfiguration().getGraph();
+		mG =  configuration.getGraph();
 		mG.resetCapcities();
 		mPaths = new HashMap<Long,Path>();
 		totalDrops = 0;
 		flowCounter = 0;
 		flowFailuresSample = 0;
-		String pathsFilterKey = Simulator.getConfiguration().getPropertyWithDefault("paths_filter","filter_first");
+		String pathsFilterKey = configuration.getPropertyWithDefault("paths_filter","filter_first");
 		switch(pathsFilterKey) {
 		case "filter_first":
 			pathsFilter = new PathsFilterFirst(mG);
@@ -69,22 +75,22 @@ public class XpanderRouter extends RemoteRoutingController{
 			throw new RuntimeException("Illegal argument for paths_filter " + pathsFilterKey);
 		}
 		
-		String pathAlgorithm = Simulator.getConfiguration().getProperty("path_algorithm");
+		String pathAlgorithm = configuration.getProperty("path_algorithm");
 		if(pathAlgorithm==null) {
 			pathAlgorithm = "dijkstra";
 		}
-		double max_weigh = Simulator.getConfiguration().getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
+		double max_weigh = configuration.getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
 		switch(pathAlgorithm) {
 		case "dijkstra":
 			dijkstraAlg = new DijkstraShortestPathAlg(mG,max_weigh);
 			break;
 		case "fat_tree_dijkstra":
-			boolean isInExtendedTopology = Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
-			int ftDegree = Simulator.getConfiguration().getIntegerPropertyOrFail("fat_tree_degree");
+			boolean isInExtendedTopology = configuration.getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
+			int ftDegree = configuration.getIntegerPropertyOrFail("fat_tree_degree");
 			dijkstraAlg = new FatTreeShortestPathAlg(mG,ftDegree,isInExtendedTopology);
 			break;
 		case "k_shortest_paths":
-			int K = Simulator.getConfiguration().getIntegerPropertyOrFail("k_shortest_paths_num");
+			int K = configuration.getIntegerPropertyOrFail("k_shortest_paths_num");
 			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K,max_weigh);
 			break;
 		default:
@@ -232,8 +238,8 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 	@Override
-	protected void reset_state() {
-		String dumpFolder = Simulator.getConfiguration().getPropertyOrFail("from_state");
+	protected void reset_state(NBProperties configuration) {
+		String dumpFolder = configuration.getPropertyOrFail("from_state");
 		mG = (VariableGraph) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_graph.ser");
 		mPaths = (HashMap<Long, Path>) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_paths.ser");
 		for(Long flow : mPaths.keySet()) {

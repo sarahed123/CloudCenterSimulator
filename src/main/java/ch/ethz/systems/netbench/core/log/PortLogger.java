@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.core.log;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.Packet;
 
@@ -26,12 +27,12 @@ public class PortLogger {
      *
      * @param port  Output port instance
      */
-    public PortLogger(OutputPort port) {
+    public PortLogger(OutputPort port, NBProperties configuration) {
         this.ownId = port.getOwnId();
         this.targetId = port.getTargetId();
         this.attachedToServer = port.getOwnDevice().isServer() || port.getTargetDevice().isServer();
         SimulationLogger.registerPortLogger(this);
-        this.logQueueStateEnabled = Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
+        this.logQueueStateEnabled = configuration.getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
     }
 
     /**
@@ -39,7 +40,7 @@ public class PortLogger {
      *
      * @param length                Current queue length in packets
      * @param bufferOccupiedBits    Amount of bits occupied in the buffer
-     * @param packetFromQueue the most recent packet from the queue
+     * @param packet the most recent packet from the queue
      */
     public void logQueueState(int length, long bufferOccupiedBits, Packet packet) {
         if (this.logQueueStateEnabled) {

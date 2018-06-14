@@ -26,7 +26,7 @@ import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 
 public class SimulatorStateSaver {
 
-	public static void save() {
+	public static void save(NBProperties configuration) {
 		RemoteRoutingController rrc;
 		rrc = RemoteRoutingController.getInstance();
 		if(rrc==null) {
@@ -41,13 +41,13 @@ public class SimulatorStateSaver {
 		String dumpFolderName = "dumps" + "/" + "test_dump";
 		//String dumpFolderName = SimulationLogger.getRunFolderFull() + "/" + df.format(percent) + "%";
 		new File(dumpFolderName).mkdirs();
-		String confFileName = Simulator.getConfiguration().getFileName();
+		String confFileName = configuration.getFileName();
 		File confFile = new File(confFileName);
 
 
 		try {
 			System.out.println("Starting to write state..");
-			NBProperties p = new NBProperties(Simulator.getConfiguration());
+			NBProperties p = new NBProperties(configuration);
 			Simulator.dumpState(dumpFolderName);
 			SimulationLogger.dumpState(dumpFolderName);
 			TransportLayer.dumpState(dumpFolderName);

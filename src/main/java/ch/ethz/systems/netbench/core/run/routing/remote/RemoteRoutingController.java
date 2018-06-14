@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
@@ -27,19 +28,19 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	private static long headerSize;
 	protected long totalDrops;
 	protected long flowCounter;
-
+	protected NBProperties configuration;
 	public static RemoteRoutingController getInstance() {
 		return mInstance;
 	}
 	
-	public static void initRemoteRouting(String type, Map<Integer, NetworkDevice> idToNetworkDevice, long headerSize){
+	public static void initRemoteRouting(String type, Map<Integer, NetworkDevice> idToNetworkDevice, long headerSize, NBProperties configuration){
 		
 		switch(type) {
 		case "Xpander":
-			mInstance = new XpanderRouter(idToNetworkDevice);
+			mInstance = new XpanderRouter(idToNetworkDevice , configuration);
 			break;
 		default:
-			throw new PropertyValueInvalidException(Simulator.getConfiguration(),"centered_routing_type");
+			throw new PropertyValueInvalidException(configuration,"centered_routing_type");
 		}
 		mInstance.setHeaderSize(headerSize);
 		try {
@@ -79,7 +80,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	
 	protected void logRoute(Path p, int source, int dest, long flowId, long time,boolean adding) {
 		try {
-			if(Simulator.getConfiguration().getBooleanPropertyWithDefault("log_remote_paths", false))
+			if(configuration.getBooleanPropertyWithDefault("log_remote_paths", false))
 				SimulationLogger.logRemoteRoute(p,source,dest,flowId,time,adding);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -89,7 +90,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	
 	protected void logCurrentState(int currentAllocatedPatsh, int flowFailuresSample, long flowCounter2){
 		try {
-			if(Simulator.getConfiguration().getBooleanPropertyWithDefault("log_remote_router_state", false))
+			if(configuration.getBooleanPropertyWithDefault("log_remote_router_state", false))
 				SimulationLogger.logRemoteRouterState(currentAllocatedPatsh,flowFailuresSample,flowCounter2);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -98,7 +99,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	}
 	
 	protected void logDrop(long flowId, int source,int dest,int allocPaths) {
-		if(Simulator.getConfiguration().getBooleanPropertyWithDefault("log_remote_router_drops", false)) {
+		if(configuration.getBooleanPropertyWithDefault("log_remote_router_drops", false)) {
 			try {
 				SimulationLogger.logRemoteRouterDropStatistics(flowId, source, dest, allocPaths);
 			} catch (IOException e) {
@@ -113,7 +114,6 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * @param source
 	 * @param dest
 	 * @param flowId the flow id
-	 * @param sourceSwitch the source switch for this path
 	 */
 	public abstract void initRoute(int source,int dest, long flowId);
 	
@@ -124,7 +124,6 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 
 	/**
 	 * recover a path, returning all its edges to the graph
-	 * @param p the path to recover
 	 */
 	public abstract void recoverPath(long flowId);
 	
@@ -132,8 +131,6 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * public for testing but should be a private method to handle path switching
 	 * @param src the id of the switch that will get the new path
 	 * @param dst the destination of the path
-	 * @param old the  old path to switch from
-	 * @param newPath the new path
 	 */
 	protected void switchPath(int src,int dst,Path p,long flowId) {
 		

@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.simple.simpletcp;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.Socket;
@@ -99,7 +100,7 @@ public class SimpleTcpSocket extends Socket {
      * @param destinationId     Target network device identifier
      * @param flowSizeByte      Size of the flow in bytes
      */
-    public SimpleTcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
+    public SimpleTcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte, NBProperties configuration) {
         super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
 
         // Load in TCP constant parameters
@@ -111,20 +112,20 @@ public class SimpleTcpSocket extends Socket {
         // Each hop takes: 20ns (delay) + 1200ns = 1220ns
         //
         // So: 2*120000 + 12 * 1220 = 254640ns ~= 300000ns = 300 microseconds
-        this.roundTripTimeout = Simulator.getConfiguration().getLongPropertyWithDefault("TCP_ROUND_TRIP_TIMEOUT_NS", 1000000L);
-        this.MINIMUM_ROUND_TRIP_TIMEOUT = Simulator.getConfiguration().getLongPropertyWithDefault("TCP_MINIMUM_ROUND_TRIP_TIMEOUT", 1000000L);
+        this.roundTripTimeout = configuration.getLongPropertyWithDefault("TCP_ROUND_TRIP_TIMEOUT_NS", 1000000L);
+        this.MINIMUM_ROUND_TRIP_TIMEOUT = configuration.getLongPropertyWithDefault("TCP_MINIMUM_ROUND_TRIP_TIMEOUT", 1000000L);
 
         // Ethernet: 1500 - 60 (TCP header) - 60 (IP header) = 1380 bytes
-        this.MAX_SEGMENT_SIZE = Simulator.getConfiguration().getLongPropertyWithDefault("TCP_MAX_SEGMENT_SIZE", 1380L);
+        this.MAX_SEGMENT_SIZE = configuration.getLongPropertyWithDefault("TCP_MAX_SEGMENT_SIZE", 1380L);
 
         // Conservative slow start threshold of 30 segments, which is 33120 bytes
-        long INITIAL_SLOW_START_THRESHOLD = Simulator.getConfiguration().getLongPropertyWithDefault("TCP_INITIAL_SLOW_START_THRESHOLD", 30 * MAX_SEGMENT_SIZE);
+        long INITIAL_SLOW_START_THRESHOLD = configuration.getLongPropertyWithDefault("TCP_INITIAL_SLOW_START_THRESHOLD", 30 * MAX_SEGMENT_SIZE);
 
         // Maximum window size is 2^16-1 bytes, which is what is the maximum allowed in the TCP header
-        this.MAX_WINDOW_SIZE = Simulator.getConfiguration().getLongPropertyWithDefault("TCP_MAX_WINDOW_SIZE", 1073741824L);
+        this.MAX_WINDOW_SIZE = configuration.getLongPropertyWithDefault("TCP_MAX_WINDOW_SIZE", 1073741824L);
 
         // Loss window is one segment (by default)
-        this.LOSS_WINDOW_SIZE = Simulator.getConfiguration().getLongPropertyWithDefault("TCP_LOSS_WINDOW_SIZE", MAX_SEGMENT_SIZE);
+        this.LOSS_WINDOW_SIZE = configuration.getLongPropertyWithDefault("TCP_LOSS_WINDOW_SIZE", MAX_SEGMENT_SIZE);
 
         // Pre-calculate for congestion-avoidance phase
         this.MAX_SEGMENT_SIZE_SQUARED = this.MAX_SEGMENT_SIZE * this.MAX_SEGMENT_SIZE;
@@ -134,7 +135,7 @@ public class SimpleTcpSocket extends Socket {
         // If (SMSS > 1095 bytes) and (SMSS <= 2190 bytes):
         //   IW = 3 * SMSS bytes and MUST NOT be more than 3 segments
         //
-        long INITIAL_WINDOW_SIZE = Simulator.getConfiguration().getLongPropertyWithDefault("TCP_INITIAL_WINDOW_SIZE", 3 * MAX_SEGMENT_SIZE);
+        long INITIAL_WINDOW_SIZE = configuration.getLongPropertyWithDefault("TCP_INITIAL_WINDOW_SIZE", 3 * MAX_SEGMENT_SIZE);
 
         // Illegal maximum segment size vs. window size
         if (this.MAX_SEGMENT_SIZE > INITIAL_WINDOW_SIZE) {

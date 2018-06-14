@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.simple.simpledctcp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpSocket;
@@ -25,9 +26,9 @@ public class SimpleDctcpSocket extends SimpleTcpSocket {
      * @param destinationId  Target network device identifier
      * @param flowSizeByte   Size of the flow in bytes
      */
-    SimpleDctcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
+    SimpleDctcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte, NBProperties configuration) {
         super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
-        this.DCTCP_WEIGHT_NEW_ESTIMATION = Simulator.getConfiguration().getDoublePropertyWithDefault("DCTCP_WEIGHT_NEW_ESTIMATION", 0.0625);
+        this.DCTCP_WEIGHT_NEW_ESTIMATION = configuration.getDoublePropertyWithDefault("DCTCP_WEIGHT_NEW_ESTIMATION", 0.0625);
         this.DCTCP_WEIGHT_OLD_ESTIMATION = 1.0 - DCTCP_WEIGHT_NEW_ESTIMATION;
         this.alphaFraction = 0.0;
         this.totalBytes = 0;

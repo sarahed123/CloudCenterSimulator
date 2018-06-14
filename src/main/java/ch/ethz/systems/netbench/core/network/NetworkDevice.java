@@ -1,5 +1,7 @@
 package ch.ethz.systems.netbench.core.network;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +28,7 @@ public abstract class NetworkDevice {
     protected final List<Integer> connectedTo;
     protected final Map<Integer, OutputPort> targetIdToOutputPort;
     protected final Intermediary intermediary;
-
+    protected final NBProperties configuration;
     /**
      * Constructor of a network device.
      *
@@ -34,8 +36,8 @@ public abstract class NetworkDevice {
      * @param transportLayer    Transport layer instance (null, if only router and not a server)
      * @param intermediary      Flowlet intermediary instance (takes care of flowlet support)
      */
-    protected NetworkDevice(int identifier, TransportLayer transportLayer, Intermediary intermediary) {
-
+    protected NetworkDevice(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
+        this.configuration = configuration;
         // Permanent unique identifier assigned
         this.identifier = identifier;
 
