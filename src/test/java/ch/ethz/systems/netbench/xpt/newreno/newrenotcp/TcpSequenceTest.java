@@ -87,8 +87,8 @@ public class TcpSequenceTest {
         ArgumentCaptor<Packet> receiverOutgoingPacketCaptor = ArgumentCaptor.forClass(Packet.class);
 
         // Create the layers and attach mocked network devices
-        final NewRenoTcpTransportLayer senderLayer = new NewRenoTcpTransportLayer(0);
-        final NewRenoTcpTransportLayer receiverLayer = new NewRenoTcpTransportLayer(1);
+        final NewRenoTcpTransportLayer senderLayer = new NewRenoTcpTransportLayer(0, null);
+        final NewRenoTcpTransportLayer receiverLayer = new NewRenoTcpTransportLayer(1, null);
         senderLayer.setNetworkDevice(networkDeviceSender);
         receiverLayer.setNetworkDevice(networkDeviceReceiver);
 

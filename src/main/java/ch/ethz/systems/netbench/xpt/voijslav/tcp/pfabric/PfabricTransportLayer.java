@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.voijslav.tcp.pfabric;
 
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
@@ -13,14 +14,14 @@ public class PfabricTransportLayer extends TransportLayer {
      *
      * @param identifier        Parent network device identifier
      */
-    public PfabricTransportLayer(int identifier, long seed) {
-        super(identifier);
+    public PfabricTransportLayer(int identifier, long seed,NBProperties configuration) {
+        super(identifier,configuration);
         this.seed = seed;
     }
 
     @Override
     protected Socket createSocket(long flowId, int destinationId, long flowSizeByte) {
-        return new PfabricSocket(this, flowId, this.identifier, destinationId, flowSizeByte, seed);
+        return new PfabricSocket(this, flowId, this.identifier, destinationId, flowSizeByte, seed,configuration);
     }
 
 }

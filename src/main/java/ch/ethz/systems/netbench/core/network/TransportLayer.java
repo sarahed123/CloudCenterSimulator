@@ -33,7 +33,7 @@ public abstract class TransportLayer {
     // Generator for unique flow identifiers amongst all transport layers
     private static long flowIdCounter = 0;
     private static Map<Long, TransportLayer> flowIdToReceiver = new HashMap<>();
-
+    protected NBProperties configuration;
     // Map the flow identifier to the responsible socket
     protected Map<Long, Socket> flowIdToSocket;
     private Set<Long> finishedFlowIds;
@@ -41,7 +41,8 @@ public abstract class TransportLayer {
     protected NetworkDevice networkDevice;
     protected final int identifier;
 
-    public TransportLayer(int identifier) {
+    public TransportLayer(int identifier,NBProperties configuration) {
+    	this.configuration = configuration;
         this.identifier = identifier;
         this.flowIdToSocket = new HashMap<>();
         this.finishedFlowIds = new HashSet<>();

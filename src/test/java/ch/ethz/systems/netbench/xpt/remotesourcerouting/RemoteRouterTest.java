@@ -70,8 +70,8 @@ public class RemoteRouterTest {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
         ));
-        BaseInitializer.extend(new RemoteRoutingOutputPortGenerator(), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(), 5),
-				new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator());
+        BaseInitializer.getInstance().extend(null, new RemoteRoutingOutputPortGenerator(null), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(null), 5, null),
+				new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator(null));
         BaseInitializer b = BaseInitializer.getInstance() ;
         b.createInfrastructure();
         idToNetworkDevice = b.getIdToNetworkDevice();
@@ -86,7 +86,7 @@ public class RemoteRouterTest {
 
     @Test
     public void testRemoteRoutingInitilization() {
-    	RoutingSelector.selectPopulator(idToNetworkDevice);
+    	RoutingSelector.selectPopulator(idToNetworkDevice, null);
     	assertTrue(RemoteRoutingController.getInstance() != null);
     }
     

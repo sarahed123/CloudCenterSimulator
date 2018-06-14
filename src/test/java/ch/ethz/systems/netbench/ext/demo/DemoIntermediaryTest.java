@@ -18,7 +18,7 @@ public class DemoIntermediaryTest {
     @Test
     public void testGenerator() {
         Simulator.setup(0);
-        DemoIntermediaryGenerator generator = new DemoIntermediaryGenerator();
+        DemoIntermediaryGenerator generator = new DemoIntermediaryGenerator(null);
         DemoIntermediary intermediary = (DemoIntermediary) generator.generate(22);
         intermediary.adaptIncoming(packet);
         intermediary.adaptOutgoing(packet);

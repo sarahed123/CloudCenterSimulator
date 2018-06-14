@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -11,8 +12,8 @@ public class RemoteSourceRoutingSwitchGenerator extends
 SourceRoutingSwitchGenerator {
 
 	public RemoteSourceRoutingSwitchGenerator(
-			IntermediaryGenerator intermediaryGenerator, int numNodes) {
-		super(intermediaryGenerator, numNodes);
+			IntermediaryGenerator intermediaryGenerator, int numNodes,NBProperties confifuration) {
+		super(intermediaryGenerator, numNodes,confifuration);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -23,7 +24,7 @@ SourceRoutingSwitchGenerator {
 
 	public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
 		
-		return new RemoteSourceRoutingSwitch(identifier, transportLayer, intermediaryGenerator.generate(identifier));
+		return new RemoteSourceRoutingSwitch(identifier, transportLayer, intermediaryGenerator.generate(identifier),configuration);
 
 
 	}

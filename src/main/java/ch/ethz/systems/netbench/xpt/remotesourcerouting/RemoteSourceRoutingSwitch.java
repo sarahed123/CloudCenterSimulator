@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
@@ -25,8 +26,8 @@ import edu.asu.emit.algorithm.graph.Vertex;
 
 public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	private Map<Long,OutputPort> forwardingTable;
-	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary) {
-		super(identifier, transportLayer, intermediary);
+	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary,NBProperties configuration) {
+		super(identifier, transportLayer, intermediary,configuration);
 		this.forwardingTable = new HashMap<Long,OutputPort>();
 	}
 

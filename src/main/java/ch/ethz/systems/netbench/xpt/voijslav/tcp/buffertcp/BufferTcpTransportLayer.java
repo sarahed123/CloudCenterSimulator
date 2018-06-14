@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.voijslav.tcp.buffertcp;
 
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
@@ -13,14 +14,14 @@ public class BufferTcpTransportLayer extends TransportLayer {
      *
      * @param identifier        Parent network device identifier
      */
-    public BufferTcpTransportLayer(int identifier, long seed) {
-        super(identifier);
+    public BufferTcpTransportLayer(int identifier, long seed,NBProperties configuration) {
+        super(identifier,configuration);
         this.seed = seed;
     }
 
     @Override
     protected Socket createSocket(long flowId, int destinationId, long flowSizeByte) {
-        return new BufferTcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte, seed);
+        return new BufferTcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte, seed,configuration);
     }
 
 }

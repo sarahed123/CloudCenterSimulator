@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.voijslav.ports;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
@@ -10,7 +11,8 @@ public class BoundedPriorityOutputPortGenerator extends OutputPortGenerator {
 
 	private long maxQueueSizeInBits;
 	
-    public BoundedPriorityOutputPortGenerator(long maxQueueSizeInBits) {
+    public BoundedPriorityOutputPortGenerator(long maxQueueSizeInBits,NBProperties configuration) {
+    	super(configuration);
     	this.maxQueueSizeInBits = maxQueueSizeInBits;
         SimulationLogger.logInfo("Port", "BOUNDED_PRIORITY_PORT(" + maxQueueSizeInBits + ")");
     }

@@ -34,8 +34,8 @@ public class TrafficPairPlanner extends TrafficPlanner {
      *
      * @param trafficPairsFileName  File name of the traffic pairs file
      */
-    public TrafficPairPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, String trafficPairsFileName, long flowSizeByte) {
-        super (idToTransportLayerMap);
+    public TrafficPairPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, String trafficPairsFileName, long flowSizeByte,NBProperties configuration) {
+        super (idToTransportLayerMap,configuration);
         this.fileName = trafficPairsFileName;
         this.useFile = true;
         SimulationLogger.logInfo("Flow planner", "TRAFFIC_PAIR_FILE");
@@ -47,8 +47,8 @@ public class TrafficPairPlanner extends TrafficPlanner {
      *
      * @param trafficPairs  Traffic pairs
      */
-    public TrafficPairPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, List<TrafficPair> trafficPairs, long flowSizeByte) {
-        super (idToTransportLayerMap);
+    public TrafficPairPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, List<TrafficPair> trafficPairs, long flowSizeByte,NBProperties configuration) {
+        super (idToTransportLayerMap,configuration);
         this.trafficPairs = trafficPairs;
         this.useFile = false;
         this.flowSizeByte = flowSizeByte;

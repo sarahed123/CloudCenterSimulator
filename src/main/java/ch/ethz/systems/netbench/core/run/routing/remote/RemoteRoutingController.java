@@ -22,6 +22,10 @@ import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.VariableGraph;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
+	public RemoteRoutingController(NBProperties configuration) {
+		super(configuration);
+	}
+
 	private static RemoteRoutingController mInstance = null;
 	protected HashMap<Long, Path> mPaths;
 	protected Graph mG;
@@ -44,13 +48,13 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		}
 		mInstance.setHeaderSize(headerSize);
 		try {
-			mInstance.reset_state();
+			mInstance.reset_state(configuration);
 		}catch(PropertyMissingException e) {
 			
 		}
 	}
 
-	protected abstract void reset_state();
+	protected abstract void reset_state(NBProperties configuration);
 
 	private void setHeaderSize(long headerSize) {
 		this.headerSize = headerSize;

@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.core.config;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.exceptions.ConfigurationReadFailException;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyMissingException;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyNotExistingException;
@@ -561,6 +562,11 @@ public class NBProperties extends Properties {
 			
 		}
 		
+	}
+
+	public boolean isExtendedTopology() {
+		// TODO Auto-generated method stub
+		return Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
 	}
 
 

@@ -22,7 +22,7 @@ public class FlowStartEventTest {
 	
     @Before
     public void setup() {
-    	BaseInitializer.extend(null, null, null, null);
+    	BaseInitializer.getInstance().extend(null, null, null, null, null);
     	baseInitializer = BaseInitializer.getInstance();
         Simulator.setup(0);
         

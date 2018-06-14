@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.sourcerouting;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.Packet;
@@ -33,8 +34,8 @@ public class EcmpThenSourceRoutingSwitch extends SourceRoutingSwitch implements 
      * @param intermediary   Flowlet intermediary instance (takes care of hash adaptation for flowlet support)
      * @param switchThresholdBytes      Number of bytes a flow needs to send out before it goes for source routing instead of ECMP
      */
-    EcmpThenSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary, long switchThresholdBytes) {
-        super(identifier, transportLayer, n, intermediary);
+    EcmpThenSourceRoutingSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary, long switchThresholdBytes,NBProperties configuration) {
+        super(identifier, transportLayer, n, intermediary,configuration);
         this.flowSizeSent = new HashMap<>();
         this.switchThresholdBytes = switchThresholdBytes;
         this.destinationToNextSwitch = new ArrayList<>();

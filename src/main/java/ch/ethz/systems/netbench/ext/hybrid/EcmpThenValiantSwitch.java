@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.hybrid;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.ext.valiant.RangeValiantSwitch;
 import ch.ethz.systems.netbench.ext.valiant.ValiantEncapsulation;
@@ -27,8 +28,8 @@ public class EcmpThenValiantSwitch extends RangeValiantSwitch {
      * @param highBoundValiantRangeIncl Higher bound (inclusive) of the range that determines which nodes can be valiant nodes
      * @param switchThresholdBytes      Number of bytes a flow needs to send out before it goes for valiant instead of ECMP
      */
-    public EcmpThenValiantSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary, int lowBoundValiantRangeIncl, int highBoundValiantRangeIncl, long switchThresholdBytes) {
-        super(identifier, transportLayer, n, intermediary, lowBoundValiantRangeIncl, highBoundValiantRangeIncl);
+    public EcmpThenValiantSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary, int lowBoundValiantRangeIncl, int highBoundValiantRangeIncl, long switchThresholdBytes,NBProperties configuration) {
+        super(identifier, transportLayer, n, intermediary, lowBoundValiantRangeIncl, highBoundValiantRangeIncl,configuration);
         this.flowSizeSent = new HashMap<>();
         this.switchThresholdBytes = switchThresholdBytes;
     }

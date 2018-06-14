@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.voijslav.tcp.lstftcp;
 
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
@@ -12,13 +13,13 @@ public class LstfTcpTransportLayer extends TransportLayer {
      *
      * @param identifier        Parent network device identifier
      */
-    public LstfTcpTransportLayer(int identifier) {
-        super(identifier);
+    public LstfTcpTransportLayer(int identifier,NBProperties configuration) {
+        super(identifier,configuration);
     }
 
     @Override
     protected Socket createSocket(long flowId, int destinationId, long flowSizeByte) {
-        return new LstfTcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte);
+        return new LstfTcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte,configuration);
     }
 
 }

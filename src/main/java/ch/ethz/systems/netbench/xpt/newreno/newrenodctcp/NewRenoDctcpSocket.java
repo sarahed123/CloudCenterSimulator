@@ -27,7 +27,7 @@ public class NewRenoDctcpSocket extends NewRenoTcpSocket {
      * @param flowSizeByte   Size of the flow in bytes
      */
     NewRenoDctcpSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte, NBProperties configuration) {
-        super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
+        super(transportLayer, flowId, sourceId, destinationId, flowSizeByte,configuration);
         this.DCTCP_WEIGHT_NEW_ESTIMATION = configuration.getDoublePropertyWithDefault("DCTCP_WEIGHT_NEW_ESTIMATION", 0.0625);
         this.DCTCP_WEIGHT_OLD_ESTIMATION = 1.0 - DCTCP_WEIGHT_NEW_ESTIMATION;
         this.alphaFraction = 0.0;

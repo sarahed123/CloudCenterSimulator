@@ -18,7 +18,8 @@ public class KShortestPathsSwitchRouting extends RoutingPopulator {
     private static final String PATHS_CACHE_DIRECTORY = "paths-cache";
     private final Map<Integer, NetworkDevice> idToNetworkDevice;
 
-    public KShortestPathsSwitchRouting(Map<Integer, NetworkDevice> idToNetworkDevice) {
+    public KShortestPathsSwitchRouting(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
+    	super(configuration);
         SimulationLogger.logInfo("Routing", "K_SHORTEST_PATHS");
         this.idToNetworkDevice = idToNetworkDevice;
     }
@@ -29,7 +30,7 @@ public class KShortestPathsSwitchRouting extends RoutingPopulator {
      * create that cache.
      */
     @Override
-    public void populateRoutingTables(NBProperties configuration) {
+    public void populateRoutingTables() {
         
         // Select all the nodes which are ToR
         GraphDetails details = configuration.getGraphDetails();
@@ -151,7 +152,7 @@ public class KShortestPathsSwitchRouting extends RoutingPopulator {
                     if (!i.equals(j)) {
 
                         // Find shortest paths as many wanted
-                        YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(graph, graph.getVertex(i), graph.getVertex(j));
+                        YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(graph, graph.getVertex(i), graph.getVertex(j),configuration.getProperty("graph_edge_weight_rule"));
                         int found = 0;
                         while (alg.hasNext()) {
 

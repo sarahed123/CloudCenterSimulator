@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.voijslav.ports;
 
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
@@ -9,7 +10,8 @@ import ch.ethz.systems.netbench.core.run.infrastructure.OutputPortGenerator;
 
 public class UnlimitedOutputPortGenerator  extends OutputPortGenerator {
 
-    public UnlimitedOutputPortGenerator() {
+    public UnlimitedOutputPortGenerator(NBProperties configuration) {
+    	super(configuration);
         SimulationLogger.logInfo("Port", "UNLIMITED_PORT");
     }
 

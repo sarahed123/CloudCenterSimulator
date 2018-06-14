@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.sourcerouting;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -11,7 +12,8 @@ public class SourceRoutingSwitchGenerator extends NetworkDeviceGenerator {
     protected final int numNodes;
     protected final IntermediaryGenerator intermediaryGenerator;
 
-    public SourceRoutingSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes) {
+    public SourceRoutingSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
+    	super(configuration);
         log();
 
         // Standard fields
@@ -31,7 +33,7 @@ public class SourceRoutingSwitchGenerator extends NetworkDeviceGenerator {
 
     @Override
     public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new SourceRoutingSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier));
+        return new SourceRoutingSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier),configuration);
     }
 
 }

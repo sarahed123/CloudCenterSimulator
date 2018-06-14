@@ -76,7 +76,7 @@ public class SourceRoutingSwitchExtendedTest {
     public void testWithinSameToR() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(4, 0));
 
         // Packet from 4->5
@@ -104,7 +104,7 @@ public class SourceRoutingSwitchExtendedTest {
     @Test
     public void testCrossToR() {
 
-        SourceRoutingSwitch deviceToR = new SourceRoutingSwitch(0, null, 12, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch deviceToR = new SourceRoutingSwitch(0, null, 12, new IdentityFlowletIntermediary(null), null);
         deviceToR.addConnection(topology.getPort(0, 1));
         deviceToR.addConnection(topology.getPort(0, 2));
         deviceToR.addConnection(topology.getPort(0, 4));
@@ -112,7 +112,7 @@ public class SourceRoutingSwitchExtendedTest {
         deviceToR.addPathToDestination(3, makePath(new Integer[]{0,1,3}));
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(4, 0));
 
         when(topology.getPort(4, 0).getTargetDevice()).thenReturn(deviceToR);

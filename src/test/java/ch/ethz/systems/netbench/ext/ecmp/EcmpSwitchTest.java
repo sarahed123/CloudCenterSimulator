@@ -56,7 +56,7 @@ public class EcmpSwitchTest {
         );
 
         // ECMP routing rules for device 0
-        device0 = new EcmpSwitch(0, layer0, 5, new IdentityFlowletIntermediary());
+        device0 = new EcmpSwitch(0, layer0, 5, new IdentityFlowletIntermediary(null), null);
         device0.addConnection(topology.getPort(0, 1));
         device0.addDestinationToNextSwitch(1, 1);
         device0.addDestinationToNextSwitch(2, 1);
@@ -64,7 +64,7 @@ public class EcmpSwitchTest {
         device0.addDestinationToNextSwitch(4, 1);
 
         // ECMP routing rules for device 1
-        device1 = new EcmpSwitch(1, layer1, 5, new IdentityFlowletIntermediary());
+        device1 = new EcmpSwitch(1, layer1, 5, new IdentityFlowletIntermediary(null), null);
         device1.addConnection(topology.getPort(1, 0));
         device1.addConnection(topology.getPort(1, 2));
         device1.addConnection(topology.getPort(1, 3));
@@ -75,7 +75,7 @@ public class EcmpSwitchTest {
         device1.addDestinationToNextSwitch(4, 3);
 
         // ECMP routing rules for device 2
-        device2 = new EcmpSwitch(2, layer2, 5, new IdentityFlowletIntermediary());
+        device2 = new EcmpSwitch(2, layer2, 5, new IdentityFlowletIntermediary(null), null);
         device2.addConnection(topology.getPort(2, 1));
         device2.addConnection(topology.getPort(2, 4));
         device2.addDestinationToNextSwitch(0, 1);
@@ -85,7 +85,7 @@ public class EcmpSwitchTest {
         device2.addDestinationToNextSwitch(4, 4);
 
         // ECMP routing rules for device 3
-        device3 = new EcmpSwitch(3, layer3, 5, new IdentityFlowletIntermediary());
+        device3 = new EcmpSwitch(3, layer3, 5, new IdentityFlowletIntermediary(null), null);
         device3.addConnection(topology.getPort(3, 1));
         device3.addConnection(topology.getPort(3, 4));
         device3.addDestinationToNextSwitch(0, 1);
@@ -95,7 +95,7 @@ public class EcmpSwitchTest {
         device3.addDestinationToNextSwitch(4, 4);
 
         // ECMP routing rules for device 4
-        device4 = new EcmpSwitch(4, layer4, 5, new IdentityFlowletIntermediary());
+        device4 = new EcmpSwitch(4, layer4, 5, new IdentityFlowletIntermediary(null), null);
         device4.addConnection(topology.getPort(4, 2));
         device4.addConnection(topology.getPort(4, 3));
         device4.addDestinationToNextSwitch(0, 2);
@@ -116,7 +116,7 @@ public class EcmpSwitchTest {
     public void testConstructionDuplicate() {
 
         // Create an ECMP switch with port 0 to 1...
-        device0 = new EcmpSwitch(0, null, 5, new IdentityFlowletIntermediary());
+        device0 = new EcmpSwitch(0, null, 5, new IdentityFlowletIntermediary(null), null);
         device0.addConnection(topology.getPort(0, 1));
         device0.addDestinationToNextSwitch(1, 1);
 
@@ -135,7 +135,7 @@ public class EcmpSwitchTest {
     public void testConstructionNonExisting() {
 
         // Create switch with 1->0, 1->2, and 1->3
-        device1 = new EcmpSwitch(1, null, 5, new IdentityFlowletIntermediary());
+        device1 = new EcmpSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
         device1.addConnection(topology.getPort(1, 0));
         device1.addConnection(topology.getPort(1, 2));
         device1.addConnection(topology.getPort(1, 3));

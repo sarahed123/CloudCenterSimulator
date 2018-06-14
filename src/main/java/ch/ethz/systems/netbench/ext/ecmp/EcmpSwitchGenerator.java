@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.ecmp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -11,8 +12,9 @@ public class EcmpSwitchGenerator extends NetworkDeviceGenerator {
     private final int numNodes;
     private final IntermediaryGenerator intermediaryGenerator;
 
-    public EcmpSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes) {
-        SimulationLogger.logInfo("Network device", "ECMP_SWITCH(numNodes=" + numNodes + ")");
+    public EcmpSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes,NBProperties configuration) {
+        super(configuration);
+    	SimulationLogger.logInfo("Network device", "ECMP_SWITCH(numNodes=" + numNodes + ")");
 
         // Standard fields
         this.numNodes = numNodes;
@@ -27,7 +29,7 @@ public class EcmpSwitchGenerator extends NetworkDeviceGenerator {
 
     @Override
     public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new EcmpSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier));
+        return new EcmpSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier),configuration);
     }
 
 }

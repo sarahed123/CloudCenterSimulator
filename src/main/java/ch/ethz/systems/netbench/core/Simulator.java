@@ -141,7 +141,7 @@ public class Simulator {
 			JSONObject json = SimulatorStateSaver.loadJson(folderName + "/" + "simulator_data.json");
 			now = (long) json.get("now");
 			eventQueue = (PriorityQueue<Event>) SimulatorStateSaver.readObjectFromFile(folderName + "/" + "simulator_queue.ser");
-			TransportLayer.restorState();
+			TransportLayer.restorState(configuration);
 			System.out.println("Done restoring simulator");
 		}
 		
@@ -275,7 +275,7 @@ public class Simulator {
 		case "start":
 			return false;
 		case "dump-state":
-			SimulatorStateSaver.save();
+			SimulatorStateSaver.save(configuration);
 			break;
 		}
 		return true;

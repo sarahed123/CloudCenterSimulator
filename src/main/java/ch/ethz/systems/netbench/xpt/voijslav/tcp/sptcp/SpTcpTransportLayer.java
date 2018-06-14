@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.voijslav.tcp.sptcp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
@@ -11,13 +12,13 @@ public class SpTcpTransportLayer extends TransportLayer {
      *
      * @param identifier        Parent network device identifier
      */
-    public SpTcpTransportLayer(int identifier) {
-        super(identifier);
+    public SpTcpTransportLayer(int identifier,NBProperties configuration) {
+        super(identifier,configuration);
     }
 
     @Override
     protected Socket createSocket(long flowId, int destinationId, long flowSizeByte) {
-        return new SpTcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte);
+        return new SpTcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte,configuration);
     }
 
 }

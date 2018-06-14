@@ -17,6 +17,7 @@ public class EcmpThenValiantSwitchGenerator extends NetworkDeviceGenerator {
     private final long switchThresholdBytes;
 
     public EcmpThenValiantSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
+    	super(configuration);
         SimulationLogger.logInfo("Network device", "ECMP_THEN_VALIANT_SWITCH(numNodes=" + numNodes + ")");
 
         // Standard fields
@@ -42,7 +43,7 @@ public class EcmpThenValiantSwitchGenerator extends NetworkDeviceGenerator {
 
     @Override
     public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new EcmpThenValiantSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier), nodeRangeLower, nodeRangeUpper, switchThresholdBytes);
+        return new EcmpThenValiantSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier), nodeRangeLower, nodeRangeUpper, switchThresholdBytes,configuration);
     }
 
 }

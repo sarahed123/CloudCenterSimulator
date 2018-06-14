@@ -30,13 +30,14 @@ public class RoutingSelector {
 
             case "single_forward": {
                 return new ForwarderSwitchRouting(
-                        idToNetworkDevice
+                        idToNetworkDevice, configuration
                 );
             }
 
             case "ecmp": {
                 return new EcmpSwitchRouting(
-                        idToNetworkDevice
+                        idToNetworkDevice,
+                        configuration
                 );
             }
 
@@ -48,19 +49,19 @@ public class RoutingSelector {
 
             case "k_shortest_paths": {
                 return new KShortestPathsSwitchRouting(
-                        idToNetworkDevice
+                        idToNetworkDevice, configuration
                 );
             }
 
             case "ecmp_then_k_shortest_paths": {
                 return new EcmpThenKspRouting(
-                        idToNetworkDevice
+                        idToNetworkDevice, configuration
                 );
             }
 
             case "ecmp_then_k_shortest_paths_without_shortest": {
                 return new EcmpThenKspNoShortestRouting(
-                        idToNetworkDevice
+                        idToNetworkDevice, configuration
                 );
             }
             

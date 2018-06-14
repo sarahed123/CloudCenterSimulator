@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.newreno.newrenodctcp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
@@ -11,13 +12,13 @@ public class NewRenoDctcpTransportLayer extends TransportLayer {
      *
      * @param identifier Parent network device identifier
      */
-    public NewRenoDctcpTransportLayer(int identifier) {
-        super(identifier);
+    public NewRenoDctcpTransportLayer(int identifier,NBProperties configuration) {
+        super(identifier,configuration);
     }
 
     @Override
     protected Socket createSocket(long flowId, int destinationId, long flowSizeByte) {
-        return new NewRenoDctcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte);
+        return new NewRenoDctcpSocket(this, flowId, this.identifier, destinationId, flowSizeByte,configuration);
     }
 
 }

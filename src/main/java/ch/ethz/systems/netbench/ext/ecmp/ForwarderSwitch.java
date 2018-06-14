@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.ecmp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
@@ -26,8 +27,8 @@ public class ForwarderSwitch extends NetworkDevice {
      * @param n                 Number of network devices in the entire network (for routing table size)
      * @param intermediary      Flowlet intermediary instance (takes care of hash adaptation for flowlet support)
      */
-    ForwarderSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary) {
-        super(identifier, transportLayer, intermediary);
+    ForwarderSwitch(int identifier, TransportLayer transportLayer, int n, Intermediary intermediary,NBProperties configuration) {
+        super(identifier, transportLayer, intermediary,configuration);
         this.destinationToNextSwitch = new int[n];
     }
 

@@ -72,7 +72,7 @@ public class SourceRoutingSwitchTest {
     public void testSingleForward() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
@@ -108,7 +108,7 @@ public class SourceRoutingSwitchTest {
         TransportLayer transportLayer = mock(TransportLayer.class);
 
         // Create device 4 with ports 4->2 and 4->3
-        SourceRoutingSwitch device = new SourceRoutingSwitch(4, transportLayer, 5, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch device = new SourceRoutingSwitch(4, transportLayer, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(4, 2));
         device.addConnection(topology.getPort(4, 3));
 
@@ -138,7 +138,7 @@ public class SourceRoutingSwitchTest {
     public void testAddPathToDestination() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
@@ -215,7 +215,7 @@ public class SourceRoutingSwitchTest {
     public void testAllowingDuplicatePaths() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
@@ -257,7 +257,7 @@ public class SourceRoutingSwitchTest {
     public void testToString() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary());
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));

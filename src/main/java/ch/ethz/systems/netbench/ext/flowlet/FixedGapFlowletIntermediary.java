@@ -9,7 +9,7 @@ public abstract class FixedGapFlowletIntermediary extends FlowletIntermediary {
     private final long FLOWLET_GAP_NS;
 
     public FixedGapFlowletIntermediary(NBProperties configuration) {
-        super();
+        super(configuration);
         this.FLOWLET_GAP_NS = configuration.getLongPropertyOrFail("FLOWLET_GAP_NS");
     }
 

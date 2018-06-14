@@ -35,7 +35,7 @@ public class DemoTest {
     @Test
     public void testSend() {
         Simulator.setup(0);
-        DemoTransportLayerGenerator generator = new DemoTransportLayerGenerator();
+        DemoTransportLayerGenerator generator = new DemoTransportLayerGenerator(null);
         DemoTransportLayer layer = (DemoTransportLayer) generator.generate(88);
         layer.setNetworkDevice(networkDevice);
         layer.send(packet);
@@ -55,8 +55,8 @@ public class DemoTest {
         ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
 
         // Create the layers and attach mocked network devices
-        DemoTransportLayer senderLayer = new DemoTransportLayer(88);
-        DemoTransportLayer receiverLayer = new DemoTransportLayer(77);
+        DemoTransportLayer senderLayer = new DemoTransportLayer(88, null);
+        DemoTransportLayer receiverLayer = new DemoTransportLayer(77, null);
         senderLayer.setNetworkDevice(networkDeviceSender);
         receiverLayer.setNetworkDevice(networkDeviceReceiver);
 

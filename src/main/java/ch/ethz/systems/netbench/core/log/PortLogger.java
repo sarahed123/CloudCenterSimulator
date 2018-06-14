@@ -27,12 +27,12 @@ public class PortLogger {
      *
      * @param port  Output port instance
      */
-    public PortLogger(OutputPort port, NBProperties configuration) {
+    public PortLogger(OutputPort port) {
         this.ownId = port.getOwnId();
         this.targetId = port.getTargetId();
         this.attachedToServer = port.getOwnDevice().isServer() || port.getTargetDevice().isServer();
         SimulationLogger.registerPortLogger(this);
-        this.logQueueStateEnabled = configuration.getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
+        this.logQueueStateEnabled = Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
     }
 
     /**

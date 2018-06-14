@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.ecmp;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -11,7 +12,8 @@ public class ForwarderSwitchGenerator extends NetworkDeviceGenerator {
     private final int numNodes;
     private final IntermediaryGenerator intermediaryGenerator;
 
-    public ForwarderSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes) {
+    public ForwarderSwitchGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes,NBProperties configuration) {
+    	super(configuration);
         SimulationLogger.logInfo("Network device", "FORWARDER_SWITCH(numNodes=" + numNodes + ")");
 
         // Standard fields
@@ -27,7 +29,7 @@ public class ForwarderSwitchGenerator extends NetworkDeviceGenerator {
 
     @Override
     public NetworkDevice generate(int identifier, TransportLayer transportLayer) {
-        return new ForwarderSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier));
+        return new ForwarderSwitch(identifier, transportLayer, numNodes, intermediaryGenerator.generate(identifier),configuration);
     }
 
 }

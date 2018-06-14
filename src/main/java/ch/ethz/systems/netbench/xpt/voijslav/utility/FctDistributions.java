@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map.Entry;
 
+import javax.security.auth.login.Configuration;
+
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 
@@ -107,9 +109,9 @@ public class FctDistributions {
 		}
 	}
 	
-	public static double sparkDistribution(double random){
+	public static double sparkDistribution(double random,NBProperties configuration){
 		if (priorities == null){
-			init();
+			init(configuration);
 		}
 		Entry<Double, Double> ent;
 		ent = priorities.ceilingEntry(random);
