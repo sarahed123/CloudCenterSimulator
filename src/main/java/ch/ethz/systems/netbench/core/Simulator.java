@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.random.RandomManager;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
@@ -366,7 +367,6 @@ public class Simulator {
 
 		// Reset configuration
 		configuration = null;
-
 		// No longer setup
 		isSetup = false;
 

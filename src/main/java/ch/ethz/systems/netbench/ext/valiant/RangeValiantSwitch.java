@@ -27,7 +27,6 @@ public class RangeValiantSwitch extends ValiantEcmpSwitch {
     // Size of the valiant range; size = upper - lower + 1
     private final int valiantRangeSize;
 
-    private final GraphDetails grapDetails;
     /**
      * Constructor for Random Valiant ECMP switch.
      *
@@ -43,7 +42,7 @@ public class RangeValiantSwitch extends ValiantEcmpSwitch {
         this.lowBoundValiantRangeIncl = lowBoundValiantRangeIncl;
         this.highBoundValiantRangeIncl = highBoundValiantRangeIncl;
         this.valiantRangeSize = this.highBoundValiantRangeIncl - this.lowBoundValiantRangeIncl + 1;
-        grapDetails = configuration.getGraphDetails();
+        
     }
 
     /**
@@ -64,8 +63,8 @@ public class RangeValiantSwitch extends ValiantEcmpSwitch {
         int sourceToR;
         int destinationToR;
         if (isWithinExtendedTopology) {
-            sourceToR = grapDetails.getTorIdOfServer(packet.getSourceId());
-            destinationToR = grapDetails.getTorIdOfServer(packet.getDestinationId());
+            sourceToR = configuration.getGraphDetails().getTorIdOfServer(packet.getSourceId());
+            destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
         } else {
             sourceToR =  packet.getSourceId();
             destinationToR = packet.getDestinationId();

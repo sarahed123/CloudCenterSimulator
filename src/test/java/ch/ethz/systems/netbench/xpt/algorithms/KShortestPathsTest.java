@@ -44,7 +44,7 @@ public class KShortestPathsTest {
     @Test
     public void testGetOnePath() {
 
-        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,1,1000);
+        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,1,1000,null);
         Paths ps = alg.getShortestPath(new MockedVertex(0),new MockedVertex(4));
         assert(ps.getPaths().size()==1);
 
@@ -53,7 +53,7 @@ public class KShortestPathsTest {
 
     @Test
     public void testGetTwoPath() {
-        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,2,1000);
+        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,2,1000,null);
         Paths ps = alg.getShortestPath(new MockedVertex(0),new MockedVertex(4));
         assert(ps.getPaths().size()==2);
 
@@ -61,7 +61,7 @@ public class KShortestPathsTest {
 
     @Test
     public void testCantGetThreePaths() {
-        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,5,1000);
+        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,5,1000,null);
         Paths ps = alg.getShortestPath(new MockedVertex(0),new MockedVertex(4));
         assert(ps.getPaths().size()==2);
 
@@ -69,7 +69,7 @@ public class KShortestPathsTest {
 
     @Test
     public void testCantPassWeight() {
-        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,2,2);
+        DijkstraKShortestPathAlg alg = new DijkstraKShortestPathAlg(g,2,2,null);
         Paths ps = alg.getShortestPath(new MockedVertex(0),new MockedVertex(4));
         assert(ps.getPaths().size()==0);
 

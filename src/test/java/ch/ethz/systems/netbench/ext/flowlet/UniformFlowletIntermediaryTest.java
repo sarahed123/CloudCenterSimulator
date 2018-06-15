@@ -21,12 +21,12 @@ public class UniformFlowletIntermediaryTest {
 
     @Mock
     private TcpPacket packet;
-
+    private NBProperties conf;
     @Before
     public void setup() {
-        NBProperties runConfiguration = new NBProperties(BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG, BaseAllowedProperties.EXTENSION);
-        runConfiguration.overrideProperty("FLOWLET_GAP_NS", "1000");
-        Simulator.setup(0, runConfiguration);
+        conf = new NBProperties(BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG, BaseAllowedProperties.EXTENSION);
+        conf.overrideProperty("FLOWLET_GAP_NS", "1000");
+        Simulator.setup(0, conf);
     }
 
     @After
@@ -45,7 +45,7 @@ public class UniformFlowletIntermediaryTest {
         when(packet.getFlowId()).thenReturn(100L);
 
         // Create intermediary
-        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary(null);
+        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary(conf);
 
         // Receive packets at three different
         // points in time
@@ -70,7 +70,7 @@ public class UniformFlowletIntermediaryTest {
 
     @Test
     public void testIdentityIncoming() {
-        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary(null);
+        UniformFlowletIntermediary intermediary = new UniformFlowletIntermediary(conf);
         assertEquals(packet, intermediary.adaptIncoming(packet));
         verifyZeroInteractions(packet);
     }

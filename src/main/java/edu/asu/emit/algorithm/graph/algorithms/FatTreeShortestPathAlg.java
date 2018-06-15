@@ -11,7 +11,7 @@ public class FatTreeShortestPathAlg extends DijkstraShortestPathAlg {
 	protected HashMap<Vertex,Vertex> sourcePredecessorIndex;
 	protected HashMap<Vertex,Vertex> destPredecessorIndex;
 	public FatTreeShortestPathAlg(BaseGraph graph, int degree,boolean isInExtendedTopology) {
-		super(graph, 6);
+		super(graph, 6,null);
 		ftDegree = degree;
 		this.isInExtendedTopology = isInExtendedTopology;
 		sourcePredecessorIndex = new HashMap<Vertex,Vertex>();

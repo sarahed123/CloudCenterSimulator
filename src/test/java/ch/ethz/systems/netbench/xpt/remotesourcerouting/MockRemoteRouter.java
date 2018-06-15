@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
 import java.util.Map;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
@@ -10,8 +11,8 @@ import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 
 public class MockRemoteRouter extends XpanderRouter {
 
-	public MockRemoteRouter(Map<Integer, NetworkDevice> idToNetworkDevice) {
-		super(idToNetworkDevice, null);
+	public MockRemoteRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
+		super(idToNetworkDevice, configuration);
 		// TODO Auto-generated constructor stub
 	}
 	

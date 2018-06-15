@@ -22,8 +22,8 @@ public class DijkstraKShortestPathAlg extends DijkstraShortestPathAlg {
 	private double minDistance;
 	EqualCostPaths endPaths;
 	double maxPathWeight;
-	public DijkstraKShortestPathAlg(BaseGraph graph,int k, double max_weigh) {
-		super(graph, max_weigh);
+	public DijkstraKShortestPathAlg(BaseGraph graph,int k, double max_weigh,String vertexShuffleKey) {
+		super(graph, max_weigh,vertexShuffleKey);
 		K = k;
 		maxPathWeight = max_weigh;
 		visitedNodes = new HashMap<Integer,EqualCostPaths>();

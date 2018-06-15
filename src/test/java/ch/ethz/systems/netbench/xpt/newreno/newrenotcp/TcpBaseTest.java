@@ -44,18 +44,19 @@ public class TcpBaseTest {
     @Test
     public void testFlawlessThreeWayHandshakeAndTinyFlow() {
 
-        // Set-up
-
-        Simulator.setup(0, new NBProperties(
+    	NBProperties conf = new NBProperties(
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
-        ));
+        );
+        // Set-up
+
+        Simulator.setup(0, conf);
         ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
 
         // Create the layers and attach mocked network devices
-        SimpleTcpTransportLayer senderLayer = new SimpleTcpTransportLayer(88, null);
-        SimpleTcpTransportLayer receiverLayer = new SimpleTcpTransportLayer(77, null);
+        SimpleTcpTransportLayer senderLayer = new SimpleTcpTransportLayer(88, conf);
+        SimpleTcpTransportLayer receiverLayer = new SimpleTcpTransportLayer(77, conf);
         senderLayer.setNetworkDevice(networkDeviceSender);
         receiverLayer.setNetworkDevice(networkDeviceReceiver);
 

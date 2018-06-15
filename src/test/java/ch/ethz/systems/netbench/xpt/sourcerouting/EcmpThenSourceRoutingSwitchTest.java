@@ -43,7 +43,7 @@ public class EcmpThenSourceRoutingSwitchTest {
     private TcpPacket packet;
 
     private File tempRunConfig;
-
+    NBProperties conf ;
     @Before
     public void setup() throws IOException {
 
@@ -52,13 +52,13 @@ public class EcmpThenSourceRoutingSwitchTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n5.topology");
         runConfigWriter.close();
-
-        Simulator.setup(0, new NBProperties(
+         conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
-        ));
+        );
+        Simulator.setup(0, conf);
         topology = new TestTopologyPortsConstruction(
                 "0-1,1-4,0-2,2-4,3-0,3-4"
         );
@@ -74,7 +74,7 @@ public class EcmpThenSourceRoutingSwitchTest {
     public void testSingleForward() {
 
         // Create device with ports
-        EcmpThenSourceRoutingSwitch device = new EcmpThenSourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), 5000, null);
+        EcmpThenSourceRoutingSwitch device = new EcmpThenSourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(conf), 5000, conf);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 4));
 

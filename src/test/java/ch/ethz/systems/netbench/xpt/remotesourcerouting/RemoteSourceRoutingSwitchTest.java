@@ -61,15 +61,16 @@ public class RemoteSourceRoutingSwitchTest {
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n5.topology\n");
         runConfigWriter.write("centered_routing_type=Xpander\n");
         runConfigWriter.write("network_device_routing=remote_routing_populator\n");
-        
         runConfigWriter.close();
-        Simulator.setup(0, new NBProperties(
+        NBProperties conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
-        ));
-        NetworkDeviceGenerator generator = new NetworkDeviceGenerator(null) {
+        );
+        
+        Simulator.setup(0,conf);
+        NetworkDeviceGenerator generator = new NetworkDeviceGenerator(conf) {
         	DemoIntermediaryGenerator inermediaryGenerator = new DemoIntermediaryGenerator(configuration);
 			@Override
 			public NetworkDevice generate(int identifier, TransportLayer server) {
@@ -83,11 +84,11 @@ public class RemoteSourceRoutingSwitchTest {
 				return generate(identifier,null);
 			}
 		};
-        BaseInitializer.getInstance().extend(null, new RemoteRoutingOutputPortGenerator(null), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(null), 5, null),
-                new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator(null));
+        BaseInitializer.getInstance().extend( new RemoteRoutingOutputPortGenerator(conf), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(conf), 5, conf),
+                new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator(conf));
         BaseInitializer b = BaseInitializer.getInstance() ;
 
-        b.createInfrastructure();
+        b.createInfrastructure(conf);
         realIdToNetworkDevice = b.getIdToNetworkDevice();
         
         mockIdToNetworkDevice = (Map<Integer, NetworkDevice>) mock(Map.class);
@@ -97,7 +98,7 @@ public class RemoteSourceRoutingSwitchTest {
         	when(mockIdToNetworkDevice.get(i)).thenReturn(device);
         }
         
-        RoutingSelector.selectPopulator(mockIdToNetworkDevice, null);
+        RoutingSelector.selectPopulator(mockIdToNetworkDevice, conf);
         this.remoteRouter = RemoteRoutingController.getInstance();
         topology = new TestTopologyPortsConstruction(
                 "0-1,1-2,2-4,4-3,3-1"

@@ -32,7 +32,6 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	private static long headerSize;
 	protected long totalDrops;
 	protected long flowCounter;
-	protected NBProperties configuration;
 	public static RemoteRoutingController getInstance() {
 		return mInstance;
 	}

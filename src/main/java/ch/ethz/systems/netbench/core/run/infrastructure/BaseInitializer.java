@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
 import javax.sql.rowset.spi.TransactionalWriter;
 
 /**
@@ -33,9 +34,8 @@ public class BaseInitializer {
 
 	private static BaseInitializer sInstance;
     // Mappings
-    private final Map<Integer, NetworkDevice> idToNetworkDevice;
-    private final Map<Integer, TransportLayer> idToTransportLayer;
-    private NBProperties configuration;
+    private Map<Integer, NetworkDevice> idToNetworkDevice;
+    private Map<Integer, TransportLayer> idToTransportLayer;
     private NetworkDevice[] idtoNetworkDeviceArray;
     // Generators
     private  OutputPortGenerator outputPortGenerator;
@@ -48,7 +48,7 @@ public class BaseInitializer {
     private boolean infrastructureAlreadyCreated;
     private List<Pair<Integer, Integer>> linkPairs;
 
-    public BaseInitializer(
+    private BaseInitializer(
             OutputPortGenerator outputPortGenerator,
             NetworkDeviceGenerator networkDeviceGenerator,
             LinkGenerator linkGenerator,
@@ -65,8 +65,12 @@ public class BaseInitializer {
         this.linkPairs = new ArrayList<>();
     }
 
-    public BaseInitializer(){
-        this.idToNetworkDevice = new HashMap<>();
+    private BaseInitializer(){
+       clear(); 
+    }
+    
+    private void clear() {
+    	this.idToNetworkDevice = new HashMap<>();
         this.idToTransportLayer = new HashMap<>();
         outputPortGenerator = null;
         networkDeviceGenerator = null;
@@ -75,23 +79,30 @@ public class BaseInitializer {
         this.linkPairs = new ArrayList<>();
         this.runningNodeId = 0;
         this.infrastructureAlreadyCreated = false;
-        this.configuration = null;
     }
 
     public static BaseInitializer init(){
         return new BaseInitializer();
     }
     
-    public void extend(NBProperties configuration, OutputPortGenerator outputPortGenerator,
+    public void extend(OutputPortGenerator outputPortGenerator,
+            NetworkDeviceGenerator networkDeviceGenerator,
+            LinkGenerator linkGenerator,
+            TransportLayerGenerator transportLayerGenerator) {
+    	extend(0,outputPortGenerator,networkDeviceGenerator,linkGenerator,transportLayerGenerator);
+    }
+    
+    public void extend(int networkNum, OutputPortGenerator outputPortGenerator,
                        NetworkDeviceGenerator networkDeviceGenerator,
                        LinkGenerator linkGenerator,
                        TransportLayerGenerator transportLayerGenerator) {
-        this.configuration = configuration;
+    	if(networkNum==0) {
+    		reset();
+    	}
         this.outputPortGenerator = outputPortGenerator;
         this.networkDeviceGenerator = networkDeviceGenerator;
         this.linkGenerator = linkGenerator;
         this.transportLayerGenerator = transportLayerGenerator;
-        createInfrastructure();
     }
 
     public void finalize(){
@@ -103,8 +114,9 @@ public class BaseInitializer {
 
     /**
      * Read the base network (servers, network devices, links) from the topology file.
+     * @return 
      */
-    public void createInfrastructure() {
+    public HashMap<Integer, NetworkDevice> createInfrastructure(NBProperties configuration) {
 
         // The infrastructure can only be created once
         if (infrastructureAlreadyCreated) {
@@ -113,13 +125,14 @@ public class BaseInitializer {
 
         // Fetch from configuration graph and its details
         Graph graph = configuration.getGraph();
-        setVertexTieBreaker();
+        setVertexTieBreaker(configuration);
         GraphDetails details = configuration.getGraphDetails();
         System.out.println("finished reading graph");
-
+        HashMap<Integer, NetworkDevice> partialMap = new HashMap<Integer,NetworkDevice>();
         // Create nodes
         for (int i = 0; i < details.getNumNodes(); i++) {
-            createNode(i, details.getServerNodeIds().contains(i));
+            NetworkDevice nd = createNode(i, details.getServerNodeIds().contains(i));
+            partialMap.put(i, nd);
         }
 
         // Create edges
@@ -150,6 +163,7 @@ public class BaseInitializer {
             }
 
         }
+        return partialMap;
 
     }
 
@@ -157,9 +171,12 @@ public class BaseInitializer {
      * Tie breaker is a routing mechanism that decides how to behave when
      * vertices have the same weight
      */
-    private void setVertexTieBreaker() {
-		String tieBreakRule = configuration.getPropertyWithDefault("vertex_tie_break_rule", "vertex_tie_break_by_index");
-		switch(tieBreakRule) {
+    private void setVertexTieBreaker(NBProperties configuration) {
+		String tieBreakRule = configuration.getProperty("vertex_tie_break_rule");
+		if(tieBreakRule!=null) {
+	    	throw new RuntimeException("unsupported function setVertexTieBreaker");
+		}
+		/*switch(tieBreakRule) {
 		case "vertex_tie_break_by_index":
 			Vertex.setTieBreaker(new IndexTieBreaker());
 			break;
@@ -168,7 +185,7 @@ public class BaseInitializer {
 			break;
 		default:
 			throw new RuntimeException("bad property value for vertex_tie_break_rule. Possible values are vertex_tie_break_by_index, vertex_tie_break_random");	
-		}
+		}*/
 		
 	}
 
@@ -177,8 +194,9 @@ public class BaseInitializer {
      *
      * @param id        Node identifier
      * @param isServer  True iff it is a server (a.k.a. will have a transport layer)
+	 * @return 
      */
-    private void createNode(int id, boolean isServer) {
+    private NetworkDevice createNode(int id, boolean isServer) {
 
         // Make sure that the node identifiers are in sequence
         if (id != runningNodeId) {
@@ -208,6 +226,7 @@ public class BaseInitializer {
         
         // Add to mappings
         idToNetworkDevice.put(id, networkDevice);
+        return networkDevice;
         //idtoNetworkDeviceArray[id] = networkDevice;
     }
 
@@ -267,8 +286,14 @@ public class BaseInitializer {
     }
 
 	public static BaseInitializer getInstance() {
-		// TODO Auto-generated method stub
+		if(sInstance==null) {
+			sInstance = init();
+		}
 		return sInstance;
+	}
+
+	public void reset() {
+		clear();
 	}
 
 }

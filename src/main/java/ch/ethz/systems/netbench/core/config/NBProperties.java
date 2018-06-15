@@ -569,6 +569,11 @@ public class NBProperties extends Properties {
 		return Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
 	}
 
+	public void markExtended() {
+		Simulator.getConfiguration().setProperty("scenario_topology_extend_with_servers", "regular");
+		
+	}
+
 
 
 }

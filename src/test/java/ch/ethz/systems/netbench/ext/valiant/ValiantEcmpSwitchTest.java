@@ -42,9 +42,9 @@ public class ValiantEcmpSwitchTest {
     @Before
     public void setup() throws IOException {
 
-
+    	NBProperties conf = new NBProperties(BaseAllowedProperties.LOG, BaseAllowedProperties.PROPERTIES_RUN);
         // Setup simulator
-        Simulator.setup(0, new NBProperties(BaseAllowedProperties.LOG, BaseAllowedProperties.PROPERTIES_RUN));
+        Simulator.setup(0, conf);
 
         // Set properties
         Simulator.getConfiguration().overrideProperty("scenario_topology_extend_with_servers", "true");
@@ -57,7 +57,7 @@ public class ValiantEcmpSwitchTest {
         );
 
         // Initialize ECMP routing scheme for device number 1 with identity flowlet intermediary
-        device0identity = new RangeValiantSwitch(0, layer1, 12, new IdentityFlowletIntermediary(null), 0, 3, null);
+        device0identity = new RangeValiantSwitch(0, layer1, 12, new IdentityFlowletIntermediary(conf), 0, 3, conf);
         device0identity.addConnection(topology.getPort(0, 1));
         device0identity.addConnection(topology.getPort(0, 2));
         device0identity.addConnection(topology.getPort(0, 4));

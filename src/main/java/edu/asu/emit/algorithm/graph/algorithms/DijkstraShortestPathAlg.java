@@ -58,19 +58,24 @@ public class DijkstraShortestPathAlg
 	private Map<Vertex, Double> startVertexDistanceIndex = new HashMap<Vertex, Double>();
 	protected Map<Vertex, Vertex> predecessorIndex = new HashMap<Vertex, Vertex>();
 	private double maxWeight;
+	private Random vertexShuffle;
 	/**
 	 * Default constructor.
 	 * @param graph
 	 * @param max_weigh
 	 */
-	public DijkstraShortestPathAlg(final BaseGraph graph, double max_weigh) {
+	public DijkstraShortestPathAlg(final BaseGraph graph, double max_weigh,String vertexShuffleKey) {
         this.maxWeight = max_weigh;
 		this.graph = graph;
+		vertexShuffle = null;
+		if(vertexShuffleKey!=null) {
+			vertexShuffle = Simulator.selectIndependentRandom(vertexShuffleKey);
+		}
+		
 	}
 
-	public DijkstraShortestPathAlg(final BaseGraph graph) {
-		this.maxWeight = Long.MAX_VALUE;
-		this.graph = graph;
+	public DijkstraShortestPathAlg(final BaseGraph graph,String vertexShuffleKey) {
+		this(graph,Long.MAX_VALUE,vertexShuffleKey);
 	}
 
 	/**
@@ -162,7 +167,9 @@ public class DijkstraShortestPathAlg
 	private void updateVertex(Vertex vertex, boolean isSource2sink)	{
 		// 1. get the neighboring vertices 
         List<Vertex> neighborVertexList = getVertexNeighbours(vertex, isSource2sink);
-		Collections.shuffle(neighborVertexList, Simulator.selectIndependentRandom("vertex_neighbours_shuffle"));
+        if(vertexShuffle!=null) {
+        	Collections.shuffle(neighborVertexList, vertexShuffle);	
+        }
 		// 2. update the distance passing on current vertex
 		for (Vertex curAdjacentVertex : neighborVertexList) {
 			if(graph.getEdgeCapacity(vertex,curAdjacentVertex)==0){
