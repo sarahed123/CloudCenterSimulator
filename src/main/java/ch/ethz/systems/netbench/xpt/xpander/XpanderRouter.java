@@ -80,7 +80,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		double max_weigh = configuration.getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
 		switch(pathAlgorithm) {
 		case "dijkstra":
-			dijkstraAlg = new DijkstraShortestPathAlg(mG,max_weigh);
+			String vertexShuffle = configuration.getBooleanPropertyWithDefault("dijkstra_vertex_shuffle", true) ? "dijkstra_vertex_shuffle" : null;
+			dijkstraAlg = new DijkstraShortestPathAlg(mG,max_weigh,vertexShuffle);
 			break;
 		case "fat_tree_dijkstra":
 			boolean isInExtendedTopology = configuration.getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
@@ -89,7 +90,7 @@ public class XpanderRouter extends RemoteRoutingController{
 			break;
 		case "k_shortest_paths":
 			int K = configuration.getIntegerPropertyOrFail("k_shortest_paths_num");
-			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K,max_weigh);
+			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K,max_weigh,null);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for path_algorithm " + pathAlgorithm);

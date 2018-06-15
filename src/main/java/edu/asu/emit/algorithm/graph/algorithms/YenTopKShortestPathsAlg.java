@@ -127,7 +127,7 @@ public class YenTopKShortestPathsAlg
 	 * @return
 	 */
 	public Path getShortestPath(Vertex sourceVertex, Vertex targetVertex)	{
-		DijkstraShortestPathAlg dijkstraAlg = new DijkstraShortestPathAlg(graph);
+		DijkstraShortestPathAlg dijkstraAlg = new DijkstraShortestPathAlg(graph,null);
 		return dijkstraAlg.getShortestPath(sourceVertex, targetVertex).getPaths().getFirst();
 	}
 	
@@ -191,7 +191,7 @@ public class YenTopKShortestPathsAlg
 		}
 		
 		//3.3 calculate the shortest tree rooted at target vertex in the graph
-		DijkstraShortestPathAlg reverseTree = new DijkstraShortestPathAlg(graph);
+		DijkstraShortestPathAlg reverseTree = new DijkstraShortestPathAlg(graph,null);
 		reverseTree.getShortestPathFlower(targetVertex);
 		
 		//3.4 recover the deleted vertices and update the cost and identify the new candidate results

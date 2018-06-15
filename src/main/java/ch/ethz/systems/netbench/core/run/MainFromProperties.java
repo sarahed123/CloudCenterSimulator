@@ -19,10 +19,13 @@ import ch.ethz.systems.netbench.core.utility.UnitConverter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.security.auth.login.Configuration;
 
 public class MainFromProperties {
 
@@ -48,21 +51,23 @@ public class MainFromProperties {
 
             // Setup simulator (it is now public known)
             Simulator.setup(seed, runConfigurations.get(0));
-
             for(int j = 0;j<runConfigurations.size();j++){
-
+            	SimulationLogger.copyRunConfiguration(runConfigurations.get(j));
+            	manageTopology(runConfigurations.get(j));
+            	HashMap<Integer, NetworkDevice> map = extendInfrastructure(runConfigurations.get(j),j);
+            	populateRoutingState(map,runConfigurations.get(j));
             }
+            BaseInitializer.getInstance().finalize();
             // Copy configuration files for reproducibility
-            SimulationLogger.copyRunConfiguration();
+            
 
             // Manage topology (e.g. extend with servers if said by configuration)
-            manageTopology();
+            
 
             // Initialization of the three components
-            BaseInitializer initializer = generateInfrastructure(runConfigurations.get(0));
-            populateRoutingState(initializer.getIdToNetworkDevice());
+            
             if(runConfigurations.get(0).getPropertyWithDefault("from_state",null)==null) {
-            	planTraffic(runtimeNs, initializer.getIdToTransportLayer());
+            	planTraffic(runtimeNs, BaseInitializer.getInstance().getIdToTransportLayer());
             }else {
             	
             }
@@ -193,25 +198,26 @@ public class MainFromProperties {
      *
      * @return  Initializer of the infrastructure
      * @param configuration
+     * @param networkNum 
      */
-    private static BaseInitializer generateInfrastructure(NBProperties configuration) {
+    private static HashMap<Integer, NetworkDevice> extendInfrastructure(NBProperties configuration, int networkNum) {
 
         // Start infrastructure
         System.out.println("\nINFRASTRUCTURE\n==================");
-        BaseInitializer initializer = BaseInitializer.init();
+        BaseInitializer initializer = BaseInitializer.getInstance();
         // 1.1) Generate nodes
         initializer.extend(
-                configuration,
+        		networkNum,
                 InfrastructureSelector.selectOutputPortGenerator(configuration),
                 InfrastructureSelector.selectNetworkDeviceGenerator(configuration),
                 InfrastructureSelector.selectLinkGenerator(configuration),
                 InfrastructureSelector.selectTransportLayerGenerator(configuration)
         );
-
+        
         // Finished infrastructure
         System.out.println("Finished creating infrastructure.\n");
 
-        return initializer;
+        return initializer.createInfrastructure(configuration);
 
     }
 
@@ -219,14 +225,15 @@ public class MainFromProperties {
      * Populate the routing state.
      *
      * @param idToNetworkDevice     Mapping of identifier to network device
+     * @param configuration 
      */
-    private static void populateRoutingState(Map<Integer, NetworkDevice> idToNetworkDevice) {
+    private static void populateRoutingState(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
 
         // Start routing
         System.out.println("ROUTING STATE\n==================");
 
         // 2.1) Populate the routing tables in the switches using the topology defined
-        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice);
+        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice, configuration);
         populator.populateRoutingTables();
 
         // Finish routing
@@ -247,7 +254,7 @@ public class MainFromProperties {
         
         
         // 3.1) Create flow plan for the simulator
-        TrafficPlanner planner = TrafficSelector.selectPlanner(idToTransportLayer);
+        TrafficPlanner planner = TrafficSelector.selectPlanner(idToTransportLayer,Simulator.getConfiguration());
         planner.createPlan(runtimeNs);
 
         // Finish traffic generation
@@ -272,6 +279,9 @@ public class MainFromProperties {
 
         // Topology extension
         if (configuration.isPropertyDefined("scenario_topology_extend_with_servers")) {
+        	if(configuration.isExtendedTopology()) {
+        		throw new RuntimeException("Topology cannot be extended twice");
+        	}
             if (configuration.getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("regular")) {
 
                 // Number of servers to add to each transport layer node
@@ -285,7 +295,7 @@ public class MainFromProperties {
 
                 // Log info about extension
                 SimulationLogger.logInfo("OVERRODE_TOPOLOGY_FILE_WITH_SERVER_EXTENSION", "servers/node=" + serversPerNodeToExtendWith);
-
+                configuration.markExtended();
             } else {
                 throw new PropertyValueInvalidException(configuration, "scenario_topology_extend_with_servers");
             }

@@ -65,8 +65,9 @@ public class EcmpSwitchRoutingTwoN6Test {
         );
         runConfigWriter.close();
 
+        NBProperties conf =  new NBProperties(tempRunConfig.getAbsolutePath(), BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG);
         // Setup simulator
-        Simulator.setup(1, new NBProperties(tempRunConfig.getAbsolutePath(), BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG));
+        Simulator.setup(1,conf);
 
         // Mock network devices
         Map<Integer, NetworkDevice> idToNetworkDevice  = new HashMap<>();
@@ -78,7 +79,7 @@ public class EcmpSwitchRoutingTwoN6Test {
         idToNetworkDevice.put(5, switch5);
 
         // Perform routing
-        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice, null);
+        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice, conf);
         populator.populateRoutingTables();
 
         // Switch 0

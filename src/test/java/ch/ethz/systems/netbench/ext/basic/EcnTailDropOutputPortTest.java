@@ -39,7 +39,7 @@ public class EcnTailDropOutputPortTest {
     public void setup() {
 
         Simulator.setup(0, new NBProperties(BaseAllowedProperties.LOG, BaseAllowedProperties.PROPERTIES_RUN));
-        BaseInitializer.getInstance().extend(null, null, null, null,null);
+        BaseInitializer.getInstance().extend(null, null, null,null);
         BaseInitializer.getInstance().getIdToNetworkDevice().put(10, sourceNetworkDevice);
         BaseInitializer.getInstance().getIdToNetworkDevice().put(67, targetNetworkDevice);
         // Two network devices

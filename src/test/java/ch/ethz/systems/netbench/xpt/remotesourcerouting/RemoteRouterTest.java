@@ -48,7 +48,7 @@ public class RemoteRouterTest {
 
     @Mock
     private TcpPacket packet;
-
+    NBProperties conf;
     private File tempRunConfig;
     private MockRemoteRouter remoteRouter;
     private Map<Integer, NetworkDevice> idToNetworkDevice;
@@ -60,22 +60,22 @@ public class RemoteRouterTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n5.topology\n");
         runConfigWriter.write("centered_routing_type=Xpander\n");
+        runConfigWriter.write("dijkstra_vertex_shuffle=false\n");
         runConfigWriter.write("network_device_routing=remote_routing_populator\n");
         
         runConfigWriter.close();
-
-        Simulator.setup(0, new NBProperties(
+        conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
-                BaseAllowedProperties.EXPERIMENTAL
-        ));
-        BaseInitializer.getInstance().extend(null, new RemoteRoutingOutputPortGenerator(null), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(null), 5, null),
-				new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator(null));
+                BaseAllowedProperties.EXPERIMENTAL);
+        Simulator.setup(0, conf);
+        BaseInitializer.getInstance().extend(new RemoteRoutingOutputPortGenerator(conf), new RemoteSourceRoutingSwitchGenerator( new DemoIntermediaryGenerator(conf), 5, conf),
+				new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator(conf));
         BaseInitializer b = BaseInitializer.getInstance() ;
-        b.createInfrastructure();
+        b.createInfrastructure(conf);
         idToNetworkDevice = b.getIdToNetworkDevice();
-        this.remoteRouter = spy(new MockRemoteRouter(idToNetworkDevice));
+        this.remoteRouter = spy(new MockRemoteRouter(idToNetworkDevice,conf));
     }
 
     @After
@@ -86,7 +86,7 @@ public class RemoteRouterTest {
 
     @Test
     public void testRemoteRoutingInitilization() {
-    	RoutingSelector.selectPopulator(idToNetworkDevice, null);
+    	RoutingSelector.selectPopulator(idToNetworkDevice, conf);
     	assertTrue(RemoteRoutingController.getInstance() != null);
     }
     

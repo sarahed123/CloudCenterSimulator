@@ -45,9 +45,9 @@ public class EcmpThenValiantSwitchTest {
 
     @Before
     public void setup() throws IOException {
-
+    	NBProperties conf = new NBProperties(BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG);
         // Setup simulator
-        Simulator.setup(0, new NBProperties(BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG));
+        Simulator.setup(0,conf);
 
         // Create port topology
         topology = new TestTopologyPortsConstruction(
@@ -55,7 +55,7 @@ public class EcmpThenValiantSwitchTest {
         );
 
         // Initialize ECMP routing scheme for device number 1 with identity flowlet intermediary
-        device2identity = new EcmpThenValiantSwitch(2, layer1, 5, new IdentityFlowletIntermediary(null), 0, 4, 100000, null);
+        device2identity = new EcmpThenValiantSwitch(2, layer1, 5, new IdentityFlowletIntermediary(conf), 0, 4, 100000, conf);
         device2identity.addConnection(topology.getPort(2, 1));
         device2identity.addConnection(topology.getPort(2, 4));
         device2identity.addDestinationToNextSwitch(0, 1);

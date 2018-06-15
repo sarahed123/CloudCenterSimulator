@@ -44,12 +44,12 @@ public class RangeValiantSwitchTest {
 
     @Before
     public void setup() {
-
-        Simulator.setup(0, new NBProperties(
+    	NBProperties conf = new NBProperties(
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXTENSION
-        ));
+        );
+        Simulator.setup(0, conf);
 
         // Set flowlet gap to 0 such that uniform intermediary continuously switches
         Simulator.getConfiguration().overrideProperty("FLOWLET_GAP_NS", "0");
@@ -60,7 +60,7 @@ public class RangeValiantSwitchTest {
         );
 
         // Initialize ECMP routing scheme for device number 4 with identity flowlet intermediary
-        device4identity = new RangeValiantSwitch(4, layer4, 5, new IdentityFlowletIntermediary(null), 0, 4, null);
+        device4identity = new RangeValiantSwitch(4, layer4, 5, new IdentityFlowletIntermediary(conf), 0, 4, conf);
         device4identity.addConnection(topology.getPort(4, 2));
         device4identity.addConnection(topology.getPort(4, 3));
         device4identity.addDestinationToNextSwitch(0, 2);

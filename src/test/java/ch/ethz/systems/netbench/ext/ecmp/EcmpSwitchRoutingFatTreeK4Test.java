@@ -54,9 +54,9 @@ public class EcmpSwitchRoutingFatTreeK4Test {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         runConfigWriter.write("network_device_routing=ecmp\nscenario_topology_file=example/topologies/fat_tree/fat_tree_k4.topology");
         runConfigWriter.close();
-
+        NBProperties conf = new NBProperties(tempRunConfig.getAbsolutePath(), BaseAllowedProperties.LOG, BaseAllowedProperties.PROPERTIES_RUN);
         // Setup simulator
-        Simulator.setup(1, new NBProperties(tempRunConfig.getAbsolutePath(), BaseAllowedProperties.LOG, BaseAllowedProperties.PROPERTIES_RUN));
+        Simulator.setup(1, conf);
 
         // Mock network devices
         Map<Integer, NetworkDevice> idToNetworkDevice  = new HashMap<>();
@@ -65,7 +65,7 @@ public class EcmpSwitchRoutingFatTreeK4Test {
         }
 
         // Perform routing
-        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice,null);
+        RoutingPopulator populator = RoutingSelector.selectPopulator(idToNetworkDevice,conf);
         populator.populateRoutingTables();
 
         // Every bottom node requires two possible next hops to its aggregation node to reach any other bottom node

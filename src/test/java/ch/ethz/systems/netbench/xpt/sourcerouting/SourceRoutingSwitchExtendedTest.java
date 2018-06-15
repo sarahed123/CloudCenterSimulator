@@ -41,7 +41,7 @@ public class SourceRoutingSwitchExtendedTest {
      * 4 and 5 are the "servers" of 0, 6 and 7 are the "servers" of 1 etc. etc.
      */
     private TestTopologyPortsConstruction topology;
-
+    NBProperties conf;
     @Mock
     private TcpPacket packet;
 
@@ -49,8 +49,8 @@ public class SourceRoutingSwitchExtendedTest {
 
     @Before
     public void setup() throws IOException {
-
-        Simulator.setup(0, new NBProperties(BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG));
+    	conf =  new NBProperties(BaseAllowedProperties.PROPERTIES_RUN, BaseAllowedProperties.LOG);
+        Simulator.setup(0,conf);
         tempTopologyFile = File.createTempFile("temp-topology", ".tmp");
 
         TopologyServerExtender extender = new TopologyServerExtender(
@@ -76,7 +76,7 @@ public class SourceRoutingSwitchExtendedTest {
     public void testWithinSameToR() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary(conf), conf);
         device.addConnection(topology.getPort(4, 0));
 
         // Packet from 4->5
@@ -104,7 +104,7 @@ public class SourceRoutingSwitchExtendedTest {
     @Test
     public void testCrossToR() {
 
-        SourceRoutingSwitch deviceToR = new SourceRoutingSwitch(0, null, 12, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch deviceToR = new SourceRoutingSwitch(0, null, 12, new IdentityFlowletIntermediary(conf), conf);
         deviceToR.addConnection(topology.getPort(0, 1));
         deviceToR.addConnection(topology.getPort(0, 2));
         deviceToR.addConnection(topology.getPort(0, 4));
@@ -112,7 +112,7 @@ public class SourceRoutingSwitchExtendedTest {
         deviceToR.addPathToDestination(3, makePath(new Integer[]{0,1,3}));
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch device = new SourceRoutingSwitch(4, null, 12, new IdentityFlowletIntermediary(conf), conf);
         device.addConnection(topology.getPort(4, 0));
 
         when(topology.getPort(4, 0).getTargetDevice()).thenReturn(deviceToR);

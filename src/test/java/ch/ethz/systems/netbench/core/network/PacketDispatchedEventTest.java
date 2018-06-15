@@ -21,7 +21,7 @@ public class PacketDispatchedEventTest {
     @Before
     public void setup() {
         Simulator.setup(0);
-        BaseInitializer.getInstance().extend(null, null, null, null, null);
+        BaseInitializer.getInstance().extend( null, null, null, null);
     }
 
     @After

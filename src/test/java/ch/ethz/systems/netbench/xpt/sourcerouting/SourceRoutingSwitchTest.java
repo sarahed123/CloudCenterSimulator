@@ -39,7 +39,7 @@ public class SourceRoutingSwitchTest {
 
     @Mock
     private TcpPacket packet;
-
+    NBProperties conf;
     private File tempRunConfig;
 
     @Before
@@ -50,13 +50,13 @@ public class SourceRoutingSwitchTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n5.topology");
         runConfigWriter.close();
-
-        Simulator.setup(0, new NBProperties(
+        conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL
-        ));
+        );
+        Simulator.setup(0, conf);
         topology = new TestTopologyPortsConstruction(
                 "0-1,1-2,2-4,4-3,3-1"
         );
@@ -72,7 +72,7 @@ public class SourceRoutingSwitchTest {
     public void testSingleForward() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(conf), conf);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
@@ -108,7 +108,7 @@ public class SourceRoutingSwitchTest {
         TransportLayer transportLayer = mock(TransportLayer.class);
 
         // Create device 4 with ports 4->2 and 4->3
-        SourceRoutingSwitch device = new SourceRoutingSwitch(4, transportLayer, 5, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch device = new SourceRoutingSwitch(4, transportLayer, 5, new IdentityFlowletIntermediary(conf), conf);
         device.addConnection(topology.getPort(4, 2));
         device.addConnection(topology.getPort(4, 3));
 
@@ -138,7 +138,7 @@ public class SourceRoutingSwitchTest {
     public void testAddPathToDestination() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(conf), conf);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
@@ -215,7 +215,7 @@ public class SourceRoutingSwitchTest {
     public void testAllowingDuplicatePaths() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(conf), conf);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
@@ -257,7 +257,7 @@ public class SourceRoutingSwitchTest {
     public void testToString() {
 
         // Create device with ports
-        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(null), null);
+        SourceRoutingSwitch device = new SourceRoutingSwitch(1, null, 5, new IdentityFlowletIntermediary(conf), conf);
         device.addConnection(topology.getPort(1, 0));
         device.addConnection(topology.getPort(1, 2));
         device.addConnection(topology.getPort(1, 3));
