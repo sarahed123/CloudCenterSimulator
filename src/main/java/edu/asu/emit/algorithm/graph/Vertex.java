@@ -100,7 +100,7 @@ public class Vertex implements Comparable<Vertex>, Serializable {
 		} else if (diff < 0) {
 			return -1;
 		} else {
-			return tieBreaker.breakTie(this, rVertex);
+			return tieBreaker==null ? 0 : tieBreaker.breakTie(this, rVertex);
 		}
 	}
 
