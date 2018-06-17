@@ -74,6 +74,7 @@ public class RemoteRouterTest {
 				new PerfectSimpleLinkGenerator(0,10), new RemoteRoutingTransportLayerGenerator(conf));
         BaseInitializer b = BaseInitializer.getInstance() ;
         b.createInfrastructure(conf);
+        b.finalize();
         idToNetworkDevice = b.getIdToNetworkDevice();
         this.remoteRouter = spy(new MockRemoteRouter(idToNetworkDevice,conf));
     }

@@ -89,6 +89,7 @@ public class RemoteSourceRoutingSwitchTest {
         BaseInitializer b = BaseInitializer.getInstance() ;
 
         b.createInfrastructure(conf);
+        b.finalize();
         realIdToNetworkDevice = b.getIdToNetworkDevice();
         
         mockIdToNetworkDevice = (Map<Integer, NetworkDevice>) mock(Map.class);
