@@ -160,7 +160,7 @@ public class GraphReader {
 
             // There must be at least two servers
             if (details.getNumServers() < 2) {
-                throw new IllegalArgumentException("There are less than two servers (namely " + details.getNumServers() + "): communication is not possible in such a topology.");
+                System.out.println("Server number is less then two for topology file " + fileName);
             }
 
             // Go over link lines one-by-one, skipping parameter lines

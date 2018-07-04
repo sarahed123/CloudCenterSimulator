@@ -1,6 +1,11 @@
 package ch.ethz.systems.netbench.core.network;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +34,8 @@ public abstract class NetworkDevice {
     protected final Map<Integer, OutputPort> targetIdToOutputPort;
     protected final Intermediary intermediary;
     protected final NBProperties configuration;
+    private NetworkDevice encapsulatingDevice;
+
     /**
      * Constructor of a network device.
      *
@@ -53,6 +60,10 @@ public abstract class NetworkDevice {
         this.intermediary = intermediary;
         this.intermediary.setNetworkDevice(this);
 
+    }
+
+    public void setEncapsulatingDevice(NetworkDevice device){
+        this.encapsulatingDevice = device;
     }
 
     /**
@@ -160,4 +171,27 @@ public abstract class NetworkDevice {
         return transportLayer;
     }
 
+    public void extend(NetworkDevice networkDevice, NBProperties network_type) {
+        throw new RuntimeException("Only devices such as MegaSwitch have extending capabilities");
+    }
+
+    protected void passToEncapsulatingDevice(Packet packet){
+        this.encapsulatingDevice.receive(packet);
+    }
+
+    public void initCircuit(IpPacket packet){
+        initCircuit(packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
+
+    }
+
+    public void initCircuit(int source, int dest,long flowId) {
+        try {
+            RemoteRoutingController.getInstance().initRoute(source,dest,flowId);
+        }catch(FlowPathExists e) {
+
+        }catch(NoPathException e) {
+            SimulationLogger.increaseStatisticCounter("num_path_failures");
+            return;
+        }
+    }
 }

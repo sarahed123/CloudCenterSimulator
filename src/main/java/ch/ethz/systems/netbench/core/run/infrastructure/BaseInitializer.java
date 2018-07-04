@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.utils.IndexTieBreaker;
@@ -45,7 +46,6 @@ public class BaseInitializer {
 
     // Validation variables
     private int runningNodeId;
-    private boolean infrastructureAlreadyCreated;
     private List<Pair<Integer, Integer>> linkPairs;
 
     private BaseInitializer(
@@ -61,7 +61,6 @@ public class BaseInitializer {
         this.linkGenerator = linkGenerator;
         this.transportLayerGenerator = transportLayerGenerator;
         this.runningNodeId = 0;
-        this.infrastructureAlreadyCreated = false;
         this.linkPairs = new ArrayList<>();
     }
 
@@ -78,7 +77,6 @@ public class BaseInitializer {
         transportLayerGenerator = null;
         this.linkPairs = new ArrayList<>();
         this.runningNodeId = 0;
-        this.infrastructureAlreadyCreated = false;
     }
 
     public static BaseInitializer init(){
@@ -106,7 +104,7 @@ public class BaseInitializer {
     }
 
     public void finalize(){
-        idtoNetworkDeviceArray = new NetworkDevice[runningNodeId];
+        idtoNetworkDeviceArray = new NetworkDevice[idToNetworkDevice.size()];
         for(int id:idToNetworkDevice.keySet()){
             idtoNetworkDeviceArray[id] = idToNetworkDevice.get(id);
         }
@@ -118,10 +116,6 @@ public class BaseInitializer {
      */
     public HashMap<Integer, NetworkDevice> createInfrastructure(NBProperties configuration) {
 
-        // The infrastructure can only be created once
-        if (infrastructureAlreadyCreated) {
-            throw new RuntimeException("Impossible to create infrastructure twice.");
-        }
 
         // Fetch from configuration graph and its details
         Graph graph = configuration.getGraph();
@@ -131,14 +125,14 @@ public class BaseInitializer {
         HashMap<Integer, NetworkDevice> partialMap = new HashMap<Integer,NetworkDevice>();
         // Create nodes
         for (int i = 0; i < details.getNumNodes(); i++) {
-            NetworkDevice nd = createNode(i, details.getServerNodeIds().contains(i));
+            NetworkDevice nd = createNode(i, details.getServerNodeIds().contains(i),configuration);
             partialMap.put(i, nd);
         }
 
         // Create edges
         for (Vertex v : graph.getVertexList()) {
             for (Vertex w : graph.getAdjacentVertices(v)) {
-                createEdge(v.getId(), + w.getId());
+                createEdge(v.getId(), + w.getId(),partialMap);
             }
         }
         System.out.println("finished creating nodes and edges");
@@ -194,16 +188,15 @@ public class BaseInitializer {
      *
      * @param id        Node identifier
      * @param isServer  True iff it is a server (a.k.a. will have a transport layer)
-	 * @return 
+	 * @param configuration
+     * @return
      */
-    private NetworkDevice createNode(int id, boolean isServer) {
+    private NetworkDevice createNode(int id, boolean isServer, NBProperties configuration) {
 
-        // Make sure that the node identifiers are in sequence
+        /*// Make sure that the node identifiers are in sequence
         if (id != runningNodeId) {
-            throw new IllegalArgumentException(
-                    "A node identifier has been skipped. " +
-                    "Expected " + runningNodeId + " but next was " + id + ". Please check input topology file.");
-        }
+            System.out.println("");
+        }*/
         runningNodeId++;
 
         // Create corresponding network device
@@ -221,26 +214,33 @@ public class BaseInitializer {
             transportLayer.setNetworkDevice(networkDevice);
 
         } else {
+
             networkDevice = networkDeviceGenerator.generate(id);
         }
         
         // Add to mappings
-        idToNetworkDevice.put(id, networkDevice);
+        NetworkDevice existing = idToNetworkDevice.get(id);
+        if(existing!=null){
+            existing.extend(networkDevice,configuration);
+        }else{
+            idToNetworkDevice.put(id, networkDevice);
+
+        }
         return networkDevice;
         //idtoNetworkDeviceArray[id] = networkDevice;
     }
 
     /**
      * Create the implementation of a directed edge in the network.
-     *
-     * @param startVertexId     Origin vertex identifier
+     *  @param startVertexId     Origin vertex identifier
      * @param endVertexId       Destination vertex identifier
+     * @param partialMap
      */
-    private void createEdge(int startVertexId, int endVertexId) {
+    private void createEdge(int startVertexId, int endVertexId, HashMap<Integer, NetworkDevice> partialMap) {
 
         // Select network devices
-        NetworkDevice devA = idToNetworkDevice.get(startVertexId);
-        NetworkDevice devB = idToNetworkDevice.get(endVertexId);
+        NetworkDevice devA = partialMap.get(startVertexId);
+        NetworkDevice devB = partialMap.get(endVertexId);
 
         // Add connection
         OutputPort portAtoB = outputPortGenerator.generate(
