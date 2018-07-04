@@ -12,8 +12,8 @@ public class RemoteSourceRoutingSwitchGenerator extends
 SourceRoutingSwitchGenerator {
 
 	public RemoteSourceRoutingSwitchGenerator(
-			IntermediaryGenerator intermediaryGenerator, int numNodes,NBProperties confifuration) {
-		super(intermediaryGenerator, numNodes,confifuration);
+			IntermediaryGenerator intermediaryGenerator, int numNodes,NBProperties configuration) {
+		super(intermediaryGenerator, numNodes,configuration);
 		// TODO Auto-generated constructor stub
 	}
 

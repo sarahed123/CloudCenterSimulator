@@ -1,0 +1,17 @@
+# Topology:
+# 0  1
+# |  |
+# 2  3
+#
+# All nodes are ToRs
+
+|V|=4
+|E|=4
+ToRs=set(0,1)
+Servers=set(2,3)
+Switches=set()
+
+2 0
+0 2
+3 1
+1 3
