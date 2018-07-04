@@ -10,8 +10,8 @@ import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 
 public class OpticElectronicHybrid extends MegaSwitch {
 
-    NetworkDevice electronic;
-    NetworkDevice optic;
+    protected NetworkDevice electronic;
+    protected NetworkDevice optic;
     public OpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
 
