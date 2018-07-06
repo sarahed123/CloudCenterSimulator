@@ -38,6 +38,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.Serializable;
 import java.util.*;
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;;
 /**
  * The class defines a directed graph.
@@ -245,17 +246,18 @@ public class Graph implements BaseGraph, Serializable {
 		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
 	}
 
-	public void resetCapcities(boolean isExtended) {
-		edgeCapacities.replaceAll((k, v) -> initCapcity(k,isExtended));
+	public void resetCapcities(boolean isExtended, Map<Integer, NetworkDevice> idToNetworkDevice) {
+		edgeCapacities.replaceAll((k, v) -> initCapcity(k,isExtended,idToNetworkDevice));
 
 		
 	}
 
-	private long initCapcity(Pair<Integer, Integer> linkDirPair,boolean isExended) {
-		BaseInitializer bi = BaseInitializer.getInstance();
-		boolean isServerRight = bi.getNetworkDeviceById(linkDirPair.getRight()).isServer();
-		boolean isServerLeft = bi.getNetworkDeviceById(linkDirPair.getLeft()).isServer();
+	private long initCapcity(Pair<Integer, Integer> linkDirPair,boolean isExended, Map<Integer, NetworkDevice> idToNetworkDevice) {
+		
+		
 		if(isExended) {
+			boolean isServerRight = idToNetworkDevice.get(linkDirPair.getRight()).isServer();
+			boolean isServerLeft = idToNetworkDevice.get(linkDirPair.getLeft()).isServer();
 			if(isServerLeft || isServerRight) {
 		       	 return Long.MAX_VALUE;
 		    }

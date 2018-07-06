@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.basic;
 
+import ch.ethz.systems.netbench.core.network.InputPort;
 import ch.ethz.systems.netbench.core.network.Link;
 
 public class PerfectSimpleLink extends Link {
@@ -12,8 +13,10 @@ public class PerfectSimpleLink extends Link {
      *
      * @param delayNs               Delay of each packet in nanoseconds
      * @param bandwidthBitPerNs     Bandwidth of the link (maximum line rate) in bits/ns
+     * @param inputPort 
      */
-    PerfectSimpleLink(long delayNs, long bandwidthBitPerNs) {
+    PerfectSimpleLink(long delayNs, long bandwidthBitPerNs, InputPort inputPort) {
+    	super(inputPort);
         this.delayNs = delayNs;
         this.bandwidthBitPerNs = bandwidthBitPerNs;
     }

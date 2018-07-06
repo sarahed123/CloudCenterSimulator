@@ -5,8 +5,12 @@ package ch.ethz.systems.netbench.core.network;
  * between two {@link NetworkDevice network devices}.
  */
 public abstract class Link {
+	private InputPort inputPort;
+    public Link(InputPort inputPort) {
+		this.inputPort = inputPort;
+	}
 
-    /**
+	/**
      * Get the time it takes in nanoseconds (ns) for a unit
      * of information to travel over the link.
      *
@@ -29,5 +33,6 @@ public abstract class Link {
      * @return True iff it is not delivered correctly (e.g. by modeling electromagnetic interference).
      */
     public abstract boolean doesNextTransmissionFail(long packetSizeBits);
+
 
 }

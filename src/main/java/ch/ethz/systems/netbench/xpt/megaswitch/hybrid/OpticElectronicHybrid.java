@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
@@ -50,5 +51,18 @@ public class OpticElectronicHybrid extends MegaSwitch {
         }
     }
 
-
+    @Override
+    public OutputPort getTargetOuputPort(int targetId, String technology) {
+		if(technology == null) {
+			 return this.getTargetOuputPort(targetId);
+		}
+    	switch (technology){
+    	case "optic":
+            return optic.getTargetOuputPort(targetId);
+        case "electronic":
+        	return electronic.getTargetOuputPort(targetId);
+        default:
+            throw new RuntimeException("bad technology " + technology);
+    	}
+	}
 }

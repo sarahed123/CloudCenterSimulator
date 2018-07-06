@@ -566,7 +566,7 @@ public class NBProperties extends Properties {
 
 	public boolean isExtendedTopology() {
 		// TODO Auto-generated method stub
-		return Simulator.getConfiguration().getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
+		return getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
 	}
 
 	public void markExtended() {

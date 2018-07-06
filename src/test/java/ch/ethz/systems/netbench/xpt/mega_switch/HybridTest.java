@@ -10,13 +10,19 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortG
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediary;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
+import ch.ethz.systems.netbench.ext.demo.DemoPacket;
+import ch.ethz.systems.netbench.ext.demo.DemoTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpTransportLayer;
+import static org.mockito.Mockito.*;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +33,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.PriorityQueue;
 
 import static org.mockito.Mockito.mock;
@@ -44,8 +51,7 @@ public class HybridTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
-        runConfigWriter.write("centered_routing_type=Xpander\n");
-        runConfigWriter.write("network_device_routing=remote_routing_populator\n");
+
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),
@@ -55,9 +61,8 @@ public class HybridTest {
                 BaseAllowedProperties.EXPERIMENTAL,
                 BaseAllowedProperties.BASE_DIR_VARIANTS
         );
-        RoutingSelector.selectPopulator(null, conf);
+        Simulator.setup(0, conf);
 
-        Simulator.setup(0,conf);
         BaseInitializer initializer = BaseInitializer.getInstance();
         OutputPortGenerator portGen = new OutputPortGenerator(conf) {
             @Override
@@ -74,7 +79,7 @@ public class HybridTest {
         NetworkDeviceGenerator ndg = new NetworkDeviceGenerator(conf) {
             @Override
             public NetworkDevice generate(int i) {
-                return new MockOpticalHybrid(i,null,null,configuration);
+                return new MockOpticalHybrid(i,null,ig.generate(i),configuration);
             }
 
             @Override
@@ -82,33 +87,8 @@ public class HybridTest {
                 return new MockSimpleServer(i,transportLayer,ig.generate(i),configuration);
             }
         };
-        LinkGenerator lg = new LinkGenerator() {
-            @Override
-            public Link generate(NetworkDevice networkDevice, NetworkDevice networkDevice1) {
-                return new Link() {
-                    @Override
-                    public long getDelayNs() {
-                        return 0;
-                    }
-
-                    @Override
-                    public long getBandwidthBitPerNs() {
-                        return 10;
-                    }
-
-                    @Override
-                    public boolean doesNextTransmissionFail(long l) {
-                        return false;
-                    }
-                };
-            }
-        };
-        TransportLayerGenerator tlg = new TransportLayerGenerator(conf) {
-            @Override
-            public TransportLayer generate(int i) {
-               return new SimpleTcpTransportLayer(i,conf);
-            }
-        };
+        LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 10);
+        TransportLayerGenerator tlg = new DemoTransportLayerGenerator(conf);
         initializer.extend(portGen,ndg,lg,tlg);
         initializer.createInfrastructure(conf);
 
@@ -118,6 +98,9 @@ public class HybridTest {
         BufferedWriter runConfigWriter2 = new BufferedWriter(new FileWriter(tempRunConfig2));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
+        runConfigWriter2.write("centered_routing_type=Xpander\n");
+        runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
+        runConfigWriter2.write("network_type=optic");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),
@@ -127,10 +110,13 @@ public class HybridTest {
                 BaseAllowedProperties.EXPERIMENTAL,
                 BaseAllowedProperties.BASE_DIR_VARIANTS
         );
+        
+
         initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
                 lg,new RemoteRoutingTransportLayerGenerator(conf2));
-        initializer.createInfrastructure(conf2);
-
+        HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
+        RoutingSelector.selectPopulator(hm, conf2);
+        initializer.finalize();
         tempRunConfig.delete();
         tempRunConfig2.delete();
     }
@@ -139,9 +125,15 @@ public class HybridTest {
     public void sendOnePacket(){
         NetworkDevice source = BaseInitializer.getInstance().getNetworkDeviceById(2);
         NetworkDevice dest = spy(BaseInitializer.getInstance().getNetworkDeviceById(3));
-        IpPacket p = mock(IpPacket.class);
-        when(p.getDestinationId()).thenReturn(3);
-        when(p.getFlowId()).thenReturn((long) 0);
+        MockDemoPacket p = new MockDemoPacket(0, 1000, 2, 3, 10, 0);
+
         source.receive(p);
+        Simulator.runNs(1000000000);
+        verify(dest,times(1)).receive(p);
+    }
+    
+    @After
+    public void clear() {
+    	Simulator.reset();
     }
 }

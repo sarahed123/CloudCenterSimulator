@@ -47,7 +47,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		super(configuration);
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG =  configuration.getGraph();
-		mG.resetCapcities(configuration.isExtendedTopology());
+		mG.resetCapcities(configuration.isExtendedTopology(),idToNetworkDevice);
 		mPaths = new HashMap<Long,Path>();
 		totalDrops = 0;
 		flowCounter = 0;
@@ -124,7 +124,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 	public void reset(){
-		mG.resetCapcities(Simulator.getConfiguration().isExtendedTopology());
+		mG.resetCapcities(Simulator.getConfiguration().isExtendedTopology(),mIdToNetworkDevice);
 		mPaths.clear();
 	}
 
