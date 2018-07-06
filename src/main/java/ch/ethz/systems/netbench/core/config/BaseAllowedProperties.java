@@ -143,6 +143,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+    		"network_type",
     		"dijkstra_vertex_shuffle",
             "fat_tree_degree",
             "no_queues_in_servers",

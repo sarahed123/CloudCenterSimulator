@@ -52,7 +52,6 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     
     protected void forwardToNextSwitch(IpPacket packet) {
 
-    	
     	forwardingTable.get(packet.getFlowId()).enqueue(packet);
 		
 	}

@@ -28,7 +28,6 @@ public abstract class OutputPort {
     protected final NetworkDevice targetNetworkDevice;    // Target network device
     protected final Link link;                            // Link type, defines latency and bandwidth of the medium
                                                         // that the output port uses
-
     // Logging utility
     private final PortLogger logger;
 
@@ -240,5 +239,10 @@ public abstract class OutputPort {
         bufferOccupiedBits -= deltaAmount;
         assert(bufferOccupiedBits >= 0);
     }
+
+	public String getTechnology() {
+		// TODO Auto-generated method stub
+		return ownNetworkDevice.getTechnology();
+	}
 
 }

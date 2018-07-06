@@ -6,6 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceException;
 
@@ -42,13 +43,14 @@ public class RemoteRoutingOutputPort extends OutputPort{
 	protected void dispatch(Packet packet) {
 		
 
-		RemoteRoutingPacket rrpacket = (RemoteRoutingPacket) packet;
+		IpPacket ipPacket = (IpPacket) packet;
 		
 
 
 		super.dispatch(packet);
 		try {
-			if(ownNetworkDevice.isServer() && rrpacket.getSourceId()==ownNetworkDevice.getIdentifier()){
+			if(ownNetworkDevice.isServer() && ipPacket.getSourceId()==ownNetworkDevice.getIdentifier()){
+				RemoteRoutingPacket rrpacket = (RemoteRoutingPacket) packet;
 				RemoteRoutingTransportLayer tl = (RemoteRoutingTransportLayer) ownNetworkDevice.getTransportLayer();
 
 				tl.continueFlow(rrpacket);

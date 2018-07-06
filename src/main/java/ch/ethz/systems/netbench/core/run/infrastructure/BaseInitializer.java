@@ -3,6 +3,8 @@ package ch.ethz.systems.netbench.core.run.infrastructure;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.GraphDetails;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.network.InputPort;
+import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -241,15 +243,14 @@ public class BaseInitializer {
         // Select network devices
         NetworkDevice devA = partialMap.get(startVertexId);
         NetworkDevice devB = partialMap.get(endVertexId);
-
+        Link link = linkGenerator.generate(devA, devB);
         // Add connection
         OutputPort portAtoB = outputPortGenerator.generate(
                 devA,
                 devB,
-                linkGenerator.generate(devA, devB)
+                link
         );
         devA.addConnection(portAtoB);
-
         // Duplicate link
         if (linkPairs.contains(new ImmutablePair<>(startVertexId, endVertexId))) {
             throw new IllegalArgumentException(

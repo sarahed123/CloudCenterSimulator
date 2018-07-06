@@ -15,7 +15,7 @@ public class PacketDispatchedEvent extends Event {
 	private final Packet packet;
     protected final int deviceId;
     private final int targetId;
-
+    private final String technology;
     /**
      * Packet dispatched event constructor.
      *
@@ -28,6 +28,7 @@ public class PacketDispatchedEvent extends Event {
         this.packet = packet;
         this.targetId = dispatchPort.getTargetId();
         this.deviceId = dispatchPort.getOwnId();
+        this.technology = dispatchPort.getTechnology();
     }
 
     @Override
@@ -42,7 +43,7 @@ public class PacketDispatchedEvent extends Event {
     }
     
     protected OutputPort getOutputPort(NetworkDevice nd){
-    	return nd.targetIdToOutputPort.get(targetId);
+    	return nd.getTargetOuputPort(targetId,technology);
     }
 
     @Override

@@ -35,6 +35,7 @@ public abstract class NetworkDevice {
     protected final Intermediary intermediary;
     protected final NBProperties configuration;
     private NetworkDevice encapsulatingDevice;
+	protected String techonology;
 
     /**
      * Constructor of a network device.
@@ -51,7 +52,7 @@ public abstract class NetworkDevice {
         // Initialize internal data structures
         this.connectedTo = new ArrayList<>();
         this.targetIdToOutputPort = new HashMap<>();
-
+        this.techonology  = configuration.getProperty("network_type");
         // Set the server and whether it exists
         this.transportLayer = transportLayer;
         this.hasTransportLayer = (transportLayer != null);
@@ -194,4 +195,24 @@ public abstract class NetworkDevice {
             return;
         }
     }
+    
+    @Override
+    public String toString() {
+		return "Device " + identifier + " with encapsulation" + this.encapsulatingDevice==null ? " none" : "";
+    	
+    }
+
+	public OutputPort getTargetOuputPort(int targetId, String technology) {
+		
+		return getTargetOuputPort(targetId);
+	}
+
+	public String getTechnology() {
+		return this.techonology;
+	}
+
+	public OutputPort getTargetOuputPort(int targetId) {
+		
+		return targetIdToOutputPort.get(targetId);
+	}
 }

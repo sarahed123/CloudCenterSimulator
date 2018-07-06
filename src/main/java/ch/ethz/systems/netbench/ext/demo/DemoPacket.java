@@ -7,7 +7,7 @@ public class DemoPacket extends IpPacket implements DemoPacketHeader {
     private final long dataSizeByte;
     private final long ackSizeByte;
 
-    DemoPacket(long flowId, long dataSizeByte, int sourceId, int destinationId, int TTL, long ackSizeByte) {
+    protected DemoPacket(long flowId, long dataSizeByte, int sourceId, int destinationId, int TTL, long ackSizeByte) {
         super(flowId, dataSizeByte * 8, sourceId, destinationId, TTL);
         this.dataSizeByte = dataSizeByte;
         this.ackSizeByte = ackSizeByte;
