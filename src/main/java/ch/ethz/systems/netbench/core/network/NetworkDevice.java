@@ -36,6 +36,7 @@ public abstract class NetworkDevice {
     protected final NBProperties configuration;
     private NetworkDevice encapsulatingDevice;
 	protected String techonology;
+    private Map<Integer, InputPort> sourceIdToInputPort;
 
     /**
      * Constructor of a network device.
@@ -52,7 +53,8 @@ public abstract class NetworkDevice {
         // Initialize internal data structures
         this.connectedTo = new ArrayList<>();
         this.targetIdToOutputPort = new HashMap<>();
-        this.techonology  = configuration.getProperty("network_type");
+        this.sourceIdToInputPort = new HashMap<>();
+        //this.techonology  = configuration.getProperty("network_type");
         // Set the server and whether it exists
         this.transportLayer = transportLayer;
         this.hasTransportLayer = (transportLayer != null);
@@ -215,4 +217,16 @@ public abstract class NetworkDevice {
 		
 		return targetIdToOutputPort.get(targetId);
 	}
+
+    public void addIncomingConnection(InputPort inputPort) {
+        sourceIdToInputPort.put(inputPort.getSourceNetworkDevice().identifier,inputPort);
+    }
+
+    public InputPort getSourceInputPort(int sourceNetworkDeviceId, String technology) {
+        return getSourceInputPort(sourceNetworkDeviceId);
+    }
+
+    public InputPort getSourceInputPort(int sourceNetworkDeviceId) {
+        return this.sourceIdToInputPort.get(sourceNetworkDeviceId);
+    }
 }

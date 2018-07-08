@@ -54,7 +54,7 @@ public class BareSocket extends Socket {
      * @param destinationId  Target network device identifier
      * @param flowSizeByte   Size of the flow in bytes
      */
-    BareSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
+    protected BareSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
         super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
         this.slowStartThreshold = 30000;
         this.congestionWindow = 3 * 1380;

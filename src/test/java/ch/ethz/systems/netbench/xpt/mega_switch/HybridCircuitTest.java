@@ -41,7 +41,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HybridTest {
+public class HybridCircuitTest {
 
 
     @Before
@@ -88,7 +88,18 @@ public class HybridTest {
             }
         };
         LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 10);
-        TransportLayerGenerator tlg = new DemoTransportLayerGenerator(conf);
+        TransportLayerGenerator tlg = new TransportLayerGenerator(conf) {
+            @Override
+            public TransportLayer generate(int i) {
+                return new TransportLayer(i,conf) {
+
+                    @Override
+                    protected Socket createSocket(long l, int i, long l1) {
+                        return new SimpleSocket(this,l,this.identifier,i,l1);
+                    }
+                };
+            }
+        };
         initializer.extend(portGen,ndg,lg,tlg);
         initializer.createInfrastructure(conf);
 
@@ -124,12 +135,12 @@ public class HybridTest {
     @Test
     public void sendOnePacket(){
         NetworkDevice source = BaseInitializer.getInstance().getNetworkDeviceById(2);
-        NetworkDevice dest = spy(BaseInitializer.getInstance().getNetworkDeviceById(3));
+        NetworkDevice dest = (BaseInitializer.getInstance().getNetworkDeviceById(3));
         MockDemoPacket p = new MockDemoPacket(0, 1000, 2, 3, 10, 0);
 
         source.receive(p);
         Simulator.runNs(1000000000);
-        verify(dest,times(1)).receive(p);
+        assert(p.received);
     }
     
     @After

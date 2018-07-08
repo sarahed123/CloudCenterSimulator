@@ -5,6 +5,11 @@ import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 /**
  * Event for the dispatch of a packet, i.e. when all of the bits
  * of the packet have been written to the link.
+ * Currently this does not support serialization:
+ * To change this you will need to get the output port,
+ * which for MegaSwitch means you will need to mark the packet
+ * with the appropriate network interface. Previously this was done
+ * with "technology" field, please see in network device.
  */
 public class PacketDispatchedEvent extends Event {
 
@@ -15,7 +20,7 @@ public class PacketDispatchedEvent extends Event {
 	private final Packet packet;
     protected final int deviceId;
     private final int targetId;
-    private final String technology;
+    private final OutputPort dispatchPort;
     /**
      * Packet dispatched event constructor.
      *
@@ -28,13 +33,14 @@ public class PacketDispatchedEvent extends Event {
         this.packet = packet;
         this.targetId = dispatchPort.getTargetId();
         this.deviceId = dispatchPort.getOwnId();
-        this.technology = dispatchPort.getTechnology();
+        this.dispatchPort = dispatchPort;
     }
 
     @Override
     public void trigger() {
-    	NetworkDevice nd = getOwnDevice();
-    	getOutputPort(nd).dispatch(packet);
+        dispatchPort.dispatch(packet);
+    	//NetworkDevice nd = getOwnDevice();
+    	//getOutputPort(nd).dispatch(packet);
 
     }
     
@@ -43,7 +49,7 @@ public class PacketDispatchedEvent extends Event {
     }
     
     protected OutputPort getOutputPort(NetworkDevice nd){
-    	return nd.getTargetOuputPort(targetId,technology);
+    	return nd.getTargetOuputPort(targetId);
     }
 
     @Override

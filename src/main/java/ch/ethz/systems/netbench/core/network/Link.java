@@ -5,10 +5,7 @@ package ch.ethz.systems.netbench.core.network;
  * between two {@link NetworkDevice network devices}.
  */
 public abstract class Link {
-	private InputPort inputPort;
-    public Link(InputPort inputPort) {
-		this.inputPort = inputPort;
-	}
+
 
 	/**
      * Get the time it takes in nanoseconds (ns) for a unit

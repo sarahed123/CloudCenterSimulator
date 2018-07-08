@@ -10,13 +10,10 @@ public class PerfectSimpleLink extends Link {
 
     /**
      * Perfect simple link that never drops a packet.
-     *
-     * @param delayNs               Delay of each packet in nanoseconds
+     *  @param delayNs               Delay of each packet in nanoseconds
      * @param bandwidthBitPerNs     Bandwidth of the link (maximum line rate) in bits/ns
-     * @param inputPort 
      */
-    PerfectSimpleLink(long delayNs, long bandwidthBitPerNs, InputPort inputPort) {
-    	super(inputPort);
+    PerfectSimpleLink(long delayNs, long bandwidthBitPerNs) {
         this.delayNs = delayNs;
         this.bandwidthBitPerNs = bandwidthBitPerNs;
     }
