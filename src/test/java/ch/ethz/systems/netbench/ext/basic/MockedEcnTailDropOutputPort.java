@@ -1,12 +1,7 @@
 package ch.ethz.systems.netbench.ext.basic;
 
 import ch.ethz.systems.netbench.core.Simulator;
-import ch.ethz.systems.netbench.core.network.Link;
-import ch.ethz.systems.netbench.core.network.MockedArivalEvent;
-import ch.ethz.systems.netbench.core.network.MockedDispatchEvent;
-import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.core.network.PacketArrivalEvent;
+import ch.ethz.systems.netbench.core.network.*;
 
 public class MockedEcnTailDropOutputPort extends EcnTailDropOutputPort {
 
@@ -31,7 +26,7 @@ public class MockedEcnTailDropOutputPort extends EcnTailDropOutputPort {
                 new MockedArivalEvent(
                         link.getDelayNs(),
                         packet,
-                        targetNetworkDevice
+                        new InputPort(targetNetworkDevice,ownNetworkDevice, link)
                 )
         );
 	}

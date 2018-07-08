@@ -1,11 +1,7 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.network.Intermediary;
-import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.network.OutputPort;
-import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 
@@ -20,6 +16,7 @@ public class OpticElectronicHybrid extends MegaSwitch {
     @Override
     public void receive(Packet genericPacket) {
         IpPacket packet = (IpPacket) genericPacket;
+
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
         if (destinationToR == this.identifier) {
             targetIdToOutputPort.get(packet.getDestinationId()).enqueue(packet);
@@ -65,4 +62,19 @@ public class OpticElectronicHybrid extends MegaSwitch {
             throw new RuntimeException("bad technology " + technology);
     	}
 	}
+
+	@Override
+    public InputPort getSourceInputPort(int sourceNetworkDeviceId, String technology){
+        if(technology == null) {
+            return this.getSourceInputPort(sourceNetworkDeviceId);
+        }
+        switch (technology){
+            case "optic":
+                return optic.getSourceInputPort(sourceNetworkDeviceId);
+            case "electronic":
+                return electronic.getSourceInputPort(sourceNetworkDeviceId);
+            default:
+                throw new RuntimeException("bad technology " + technology);
+        }
+    }
 }

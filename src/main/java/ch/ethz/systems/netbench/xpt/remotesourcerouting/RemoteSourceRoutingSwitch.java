@@ -51,7 +51,6 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     }
     
     protected void forwardToNextSwitch(IpPacket packet) {
-
     	forwardingTable.get(packet.getFlowId()).enqueue(packet);
 		
 	}
@@ -73,11 +72,14 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	@Override
 	public void receive(Packet genericPacket) {
 		IpPacket packet = (IpPacket) genericPacket;
+
+
 		if (packet.getDestinationId() == this.identifier) {
 			if(isServer()){
 				// Hand to the underlying server
 				this.passToIntermediary(packet); // Will throw null-pointer if this network device does not have a server attached to it
 			}else{
+
 				passToEncapsulatingDevice(packet);
 			}
 

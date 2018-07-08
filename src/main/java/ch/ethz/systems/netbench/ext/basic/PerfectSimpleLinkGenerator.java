@@ -19,7 +19,7 @@ public class PerfectSimpleLinkGenerator extends LinkGenerator {
 
     @Override
     public Link generate(NetworkDevice fromNetworkDevice, NetworkDevice toNetworkDevice) {
-        return new PerfectSimpleLink(delayNs, bandwidthBitPerNs,new InputPort(toNetworkDevice, fromNetworkDevice));
+        return new PerfectSimpleLink(delayNs, bandwidthBitPerNs);
     }
 
 }

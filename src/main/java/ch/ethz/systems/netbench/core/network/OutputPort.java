@@ -14,7 +14,7 @@ import java.util.Queue;
  * to drop packets depending on their own drop strategy to handle
  * congestion at the port (e.g. tail-drop, RED, ...).
  */
-public abstract class OutputPort {
+public abstract class OutputPort extends Port{
 
     // Internal state
     private boolean isSending;          // True iff the output port is using the medium to send a packet
@@ -23,13 +23,13 @@ public abstract class OutputPort {
 
     // Constants
     private final int ownId;                            // Own network device identifier
-    protected final NetworkDevice ownNetworkDevice;       // Network device this output port is attached to
     private final int targetId;                         // Target network device identifier
     protected final NetworkDevice targetNetworkDevice;    // Target network device
     protected final Link link;                            // Link type, defines latency and bandwidth of the medium
                                                         // that the output port uses
     // Logging utility
     private final PortLogger logger;
+    private InputPort inputPort;
 
     /**
      * Constructor.
@@ -104,13 +104,8 @@ public abstract class OutputPort {
     }
     
     protected void registerPacketArrivalEvent(Packet packet) {
-    	Simulator.registerEvent(
-                new PacketArrivalEvent(
-                        link.getDelayNs(),
-                        packet,
-                        targetNetworkDevice
-                )
-        );
+        inputPort.registerPacketArrivalEvent(packet);
+
     }
 
     /**
@@ -240,9 +235,8 @@ public abstract class OutputPort {
         assert(bufferOccupiedBits >= 0);
     }
 
-	public String getTechnology() {
-		// TODO Auto-generated method stub
-		return ownNetworkDevice.getTechnology();
-	}
 
+    public void setInputPort(InputPort inputPort) {
+        this.inputPort = inputPort;
+    }
 }
