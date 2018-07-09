@@ -109,5 +109,9 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 		return forwardingTable.get(flowId);
 	}
 
+	@Override
+	public void setEncapsulatingDevice(NetworkDevice device){
+		this.encapsulatingDevice = device;
+	}
 
 }

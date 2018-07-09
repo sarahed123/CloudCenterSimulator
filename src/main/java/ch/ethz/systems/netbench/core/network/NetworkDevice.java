@@ -34,7 +34,7 @@ public abstract class NetworkDevice {
     protected final Map<Integer, OutputPort> targetIdToOutputPort;
     protected final Intermediary intermediary;
     protected final NBProperties configuration;
-    private NetworkDevice encapsulatingDevice;
+    protected NetworkDevice encapsulatingDevice;
 	protected String techonology;
     private Map<Integer, InputPort> sourceIdToInputPort;
 
@@ -66,7 +66,7 @@ public abstract class NetworkDevice {
     }
 
     public void setEncapsulatingDevice(NetworkDevice device){
-        this.encapsulatingDevice = device;
+        throw new RuntimeException("this switch type does not support encapsulation.");
     }
 
     /**
@@ -229,4 +229,5 @@ public abstract class NetworkDevice {
     public InputPort getSourceInputPort(int sourceNetworkDeviceId) {
         return this.sourceIdToInputPort.get(sourceNetworkDeviceId);
     }
+
 }
