@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.ext.ecmp;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 
 import java.util.ArrayList;
@@ -30,18 +31,23 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
 
     @Override
     public void receive(Packet genericPacket) {
+        IpPacket ipPacket = (IpPacket) genericPacket;
 
-        // Convert to TCP packet
-        TcpHeader tcpHeader = (TcpHeader) genericPacket;
+
 
         // Check if it has arrived
-        if (tcpHeader.getDestinationId() == this.identifier) {
+        if (ipPacket.getDestinationId() == this.identifier) {
+            if(isServer()){
+                // Hand to the underlying server
+                this.passToIntermediary(genericPacket); // Will throw null-pointer if this network device does not have a server attached to it
+            }else {
 
-            // Hand to the underlying server
-            this.passToIntermediary(genericPacket); // Will throw null-pointer if this network device does not have a server attached to it
+                passToEncapsulatingDevice(genericPacket);
+            }
 
         } else {
-
+            // Convert to TCP packet
+            TcpHeader tcpHeader = (TcpHeader) genericPacket;
             // Forward to the next switch
             List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
             this.targetIdToOutputPort.get(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
@@ -102,4 +108,8 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
         return builder.toString();
     }
 
+    @Override
+    public void setEncapsulatingDevice(NetworkDevice device){
+        this.encapsulatingDevice = device;
+    }
 }

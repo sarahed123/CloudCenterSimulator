@@ -33,6 +33,7 @@ public class InputPort extends Port {
 
 
 	public void receive(Packet packet) {
+
 		ownNetworkDevice.receive(packet);
 	}
 }
