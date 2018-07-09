@@ -1,15 +1,20 @@
 package ch.ethz.systems.netbench.core.network;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 public class InputPort extends Port {
-
+	int encapsulatingDeviceId;
 	NetworkDevice sourceNetworkDevice;
 	Link link;
 	public InputPort(NetworkDevice ownNetworkDevice, NetworkDevice sourceNetworkDevice, Link link) {
 		this.ownNetworkDevice = ownNetworkDevice;
 		this.sourceNetworkDevice = sourceNetworkDevice;
 		this.link = link;
+		this.encapsulatingDeviceId = -1;
+		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
+			this.encapsulatingDeviceId = ownNetworkDevice.getEncapsulatingDevice().identifier;
+		}
 	}
 	
 	public NetworkDevice getOwnNetworkDevice() {
@@ -33,7 +38,10 @@ public class InputPort extends Port {
 
 
 	public void receive(Packet packet) {
-
+		if(((IpPacket)packet).getDestinationId()==encapsulatingDeviceId) {
+			ownNetworkDevice.passToEncapsulatingDevice(packet);
+			return;
+		}
 		ownNetworkDevice.receive(packet);
 	}
 }

@@ -68,6 +68,10 @@ public abstract class NetworkDevice {
     public void setEncapsulatingDevice(NetworkDevice device){
         throw new RuntimeException("this switch type does not support encapsulation.");
     }
+    
+    public NetworkDevice getEncapsulatingDevice() {
+    	return encapsulatingDevice;
+    }
 
     /**
      * Retrieve the automatically generated unique
