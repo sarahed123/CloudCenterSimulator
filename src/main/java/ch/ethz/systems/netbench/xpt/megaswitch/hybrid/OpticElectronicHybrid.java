@@ -6,23 +6,24 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 
+import java.util.HashMap;
+
 public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
+    protected long circuitThreshold;
     protected NetworkDevice electronic;
     protected NetworkDevice optic;
     public OpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
+        circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold");
 
     }
     @Override
     public void receive(Packet genericPacket) {
-        IpPacket packet = (IpPacket) genericPacket;
+        Encapsulatable packet = (Encapsulatable) genericPacket;
 
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
-        if (destinationToR == this.identifier) {
-            targetIdToOutputPort.get(packet.getDestinationId()).enqueue(packet);
-            return;
-        }
+
         this.optic.initCircuit(this.identifier,destinationToR,packet.getFlowId());
         this.optic.receive(genericPacket);
     }

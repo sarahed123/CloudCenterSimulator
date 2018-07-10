@@ -44,7 +44,7 @@ public class InputPort extends Port {
 				return;
 			}
 		}catch (ClassCastException e){
-
+			//maybe needed for tests, should be removed somehow
 		}
 
 		ownNetworkDevice.receive(packet);
