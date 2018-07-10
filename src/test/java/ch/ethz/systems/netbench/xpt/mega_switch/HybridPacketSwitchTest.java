@@ -134,7 +134,7 @@ public class HybridPacketSwitchTest {
         initializer.extend(1,portGen2,new EcmpSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
                 lg,tlg2);
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
-        RoutingSelector.selectPopulator(hm, conf2);
+        RoutingSelector.selectPopulator(hm, conf2).populateRoutingTables();
         initializer.finalize();
         tempRunConfig.delete();
         tempRunConfig2.delete();
@@ -142,13 +142,13 @@ public class HybridPacketSwitchTest {
 
     @Test
     public void sendOnePacket(){
-        NetworkDevice source = BaseInitializer.getInstance().getNetworkDeviceById(2);
-        NetworkDevice dest = (BaseInitializer.getInstance().getNetworkDeviceById(3));
+        MockSimpleServer source = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockSimpleServer dest =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
         MockDemoPacket p = new MockDemoPacket(0, 1000, 2, 3, 10, 0);
 
         source.receive(p);
         Simulator.runNs(1000000000);
-        assert(p.received);
+        assert(dest.received);
     }
 
     @After

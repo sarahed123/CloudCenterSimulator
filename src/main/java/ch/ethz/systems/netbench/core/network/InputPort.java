@@ -13,7 +13,7 @@ public class InputPort extends Port {
 		this.link = link;
 		this.encapsulatingDeviceId = -1;
 		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
-			this.encapsulatingDeviceId = ownNetworkDevice.getEncapsulatingDevice().identifier;
+			this.encapsulatingDeviceId = ownNetworkDevice.getEncapsulatingDevice().getAsNetworkDevice().identifier;
 		}
 	}
 	
@@ -38,10 +38,15 @@ public class InputPort extends Port {
 
 
 	public void receive(Packet packet) {
-		if(((IpPacket)packet).getDestinationId()==encapsulatingDeviceId) {
-			ownNetworkDevice.passToEncapsulatingDevice(packet);
-			return;
+		try{
+			if(((IpPacket)packet).getDestinationId()==encapsulatingDeviceId) {
+				ownNetworkDevice.passToEncapsulatingDevice(packet);
+				return;
+			}
+		}catch (ClassCastException e){
+
 		}
+
 		ownNetworkDevice.receive(packet);
 	}
 }

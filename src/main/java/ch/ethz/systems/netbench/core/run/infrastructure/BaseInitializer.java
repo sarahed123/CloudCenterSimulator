@@ -223,7 +223,12 @@ public class BaseInitializer {
         // Add to mappings
         NetworkDevice existing = idToNetworkDevice.get(id);
         if(existing!=null){
-            existing.extend(networkDevice,configuration);
+            try{
+                MegaSwitch megaSwitch = (MegaSwitch)existing;
+                megaSwitch.extend(networkDevice,configuration);
+            }catch (ClassCastException e){
+                throw new RuntimeException("illegal to use extend with this device " +networkDevice.toString());
+            }
         }else{
             idToNetworkDevice.put(id, networkDevice);
 

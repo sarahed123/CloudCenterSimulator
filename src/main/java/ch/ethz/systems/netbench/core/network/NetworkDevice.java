@@ -4,6 +4,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
@@ -34,7 +35,7 @@ public abstract class NetworkDevice {
     protected final Map<Integer, OutputPort> targetIdToOutputPort;
     protected final Intermediary intermediary;
     protected final NBProperties configuration;
-    protected NetworkDevice encapsulatingDevice;
+    protected MegaSwitch encapsulatingDevice;
 	protected String techonology;
     private Map<Integer, InputPort> sourceIdToInputPort;
 
@@ -65,11 +66,11 @@ public abstract class NetworkDevice {
 
     }
 
-    public void setEncapsulatingDevice(NetworkDevice device){
-        throw new RuntimeException("this switch type does not support encapsulation.");
+    public void setEncapsulatingDevice(MegaSwitch device){
+        this.encapsulatingDevice = device;
     }
     
-    public NetworkDevice getEncapsulatingDevice() {
+    public MegaSwitch getEncapsulatingDevice() {
     	return encapsulatingDevice;
     }
 
@@ -178,12 +179,9 @@ public abstract class NetworkDevice {
         return transportLayer;
     }
 
-    public void extend(NetworkDevice networkDevice, NBProperties network_type) {
-        throw new RuntimeException("Only devices such as MegaSwitch have extending capabilities");
-    }
 
     protected void passToEncapsulatingDevice(Packet packet){
-        this.encapsulatingDevice.receive(packet);
+        this.encapsulatingDevice.receiveFromEncapsulatedDevice(packet);
     }
 
     public void initCircuit(IpPacket packet){

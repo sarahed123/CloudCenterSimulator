@@ -108,8 +108,5 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
         return builder.toString();
     }
 
-    @Override
-    public void setEncapsulatingDevice(NetworkDevice device){
-        this.encapsulatingDevice = device;
-    }
+
 }
