@@ -8,6 +8,8 @@ import ch.ethz.systems.netbench.ext.demo.DemoPacket;
 import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
 
 public class MockSimpleServer extends SimpleServer {
+    boolean received = false;
+
     public MockSimpleServer(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary, configuration);
     }
@@ -16,8 +18,13 @@ public class MockSimpleServer extends SimpleServer {
     public void receive(Packet p){
         MockDemoPacket packet = (MockDemoPacket) p;
         if(packet.getDestinationId() == this.identifier){
-            packet.markReceived();
+
+            markPacketReceived();
         }
         super.receive(p);
+    }
+
+    private void markPacketReceived() {
+        received = true;
     }
 }

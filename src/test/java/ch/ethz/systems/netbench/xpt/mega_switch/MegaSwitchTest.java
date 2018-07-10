@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
+import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
 import org.junit.After;
 import org.junit.Before;
@@ -59,7 +60,7 @@ public class MegaSwitchTest {
                 new NetworkDeviceGenerator(conf) {
                     @Override
                     public NetworkDevice generate(int i) {
-                        return new MegaSwitch(i, null, new Intermediary() {
+                        return new OpticElectronicHybrid(i, null, new Intermediary() {
                             @Override
                             public Packet adaptOutgoing(Packet packet) {
                                 return null;
@@ -125,6 +126,8 @@ public class MegaSwitchTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig2));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
+        runConfigWriter.write("network_type=optic\n");
+
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),

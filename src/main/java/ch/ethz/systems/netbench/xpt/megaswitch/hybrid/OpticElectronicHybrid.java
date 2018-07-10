@@ -3,9 +3,10 @@ package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 
-public class OpticElectronicHybrid extends MegaSwitch {
+public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
     protected NetworkDevice electronic;
     protected NetworkDevice optic;
@@ -46,6 +47,20 @@ public class OpticElectronicHybrid extends MegaSwitch {
             default:
                 throw new RuntimeException("bad network type " + networkType);
         }
+    }
+
+    @Override
+    public void receiveFromEncapsulatedDevice(Packet packet) {
+        Encapsulatable ipPacket = (Encapsulatable) packet;
+        if (ipPacket.getDestinationId() == this.identifier) {
+            IpPacket deEncapse = ipPacket.deEncapsualte();
+            targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
+        }
+    }
+
+    @Override
+    public NetworkDevice getAsNetworkDevice() {
+        return this;
     }
 
     @Override

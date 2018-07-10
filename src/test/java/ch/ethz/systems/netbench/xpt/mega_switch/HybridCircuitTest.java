@@ -134,13 +134,13 @@ public class HybridCircuitTest {
 
     @Test
     public void sendOnePacket(){
-        NetworkDevice source = BaseInitializer.getInstance().getNetworkDeviceById(2);
-        NetworkDevice dest = (BaseInitializer.getInstance().getNetworkDeviceById(3));
+        MockSimpleServer source = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockSimpleServer dest =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
         MockDemoPacket p = new MockDemoPacket(0, 1000, 2, 3, 10, 0);
 
         source.receive(p);
         Simulator.runNs(1000000000);
-        assert(p.received);
+        assert(dest.received);
     }
     
     @After
