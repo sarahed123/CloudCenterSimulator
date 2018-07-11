@@ -13,6 +13,7 @@ public class FlowStartEvent extends Event {
 	protected final int targetId;
     protected final long flowSizeByte;
     protected int networkDeviceId; 
+    protected TransportLayer transportLayer;
     /**
      * Create event which will happen the given amount of nanoseconds later.
      *
@@ -25,7 +26,9 @@ public class FlowStartEvent extends Event {
         super(timeFromNowNs);
         this.targetId = targetId;
         this.flowSizeByte = flowSizeByte;
-        setNetworkDeviceId(transportLayer);
+        this.transportLayer = transportLayer;
+        //setNetworkDeviceId(transportLayer);
+        // take the above out of comments to re-enable state saving support.
     }
     
     protected void setNetworkDeviceId(TransportLayer tl) {
@@ -34,8 +37,8 @@ public class FlowStartEvent extends Event {
 
     @Override
     public void trigger() {
-    	TransportLayer tl = BaseInitializer.getInstance().getNetworkDeviceById(networkDeviceId).getTransportLayer();
-    	tl.startFlow(targetId, flowSizeByte);
+    	//TransportLayer tl = BaseInitializer.getInstance().getNetworkDeviceById(networkDeviceId).getTransportLayer();
+    	transportLayer.startFlow(targetId, flowSizeByte);
     }
 
 }
