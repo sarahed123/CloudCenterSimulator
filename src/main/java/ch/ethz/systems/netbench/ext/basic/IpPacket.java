@@ -43,7 +43,15 @@ public abstract class IpPacket extends Packet implements IpHeader {
         this.TTL = TTL;
     }
 
-    /**
+    public IpPacket(IpPacket ipPacket) {
+		super(ipPacket);
+		 this.sourceId = ipPacket.sourceId;
+		 this.destinationId = ipPacket.destinationId;
+	     this.ECN = ipPacket.ECN;
+	     this.TTL = ipPacket.TTL;
+	}
+
+	/**
      * Get packet source node identifier.
      *
      * @return  Source node identifier

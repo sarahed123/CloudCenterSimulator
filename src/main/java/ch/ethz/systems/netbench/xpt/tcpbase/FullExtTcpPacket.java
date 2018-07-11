@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.tcpbase;
 
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 
 import java.util.Collection;
 
@@ -16,7 +17,15 @@ public class FullExtTcpPacket extends TcpPacket implements SelectiveAckHeader, E
         this.priority = priority;
     }
 
-    @Override
+    public FullExtTcpPacket(FullExtTcpPacket fullExtTcpPacket) {
+		super(fullExtTcpPacket);
+		this.priority = fullExtTcpPacket.priority;
+		this.selectiveAck = fullExtTcpPacket.selectiveAck;
+		this.echoDepartureTime = fullExtTcpPacket.echoDepartureTime;
+		this.echoFlowletId = fullExtTcpPacket.echoFlowletId;
+	}
+
+	@Override
     public TcpPacket setEchoDepartureTime(long echoDepartureTime) {
         this.echoDepartureTime = echoDepartureTime;
         return this;
@@ -63,5 +72,32 @@ public class FullExtTcpPacket extends TcpPacket implements SelectiveAckHeader, E
     public void setPriority(long val) {
         priority = val;
     }
+
+    @Override
+	public Encapsulatable encapsulate(final int newDestination) {
+		// TODO Auto-generated method stub
+		return new FullExtTcpPacket(this) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public int getDestinationId() {
+				return newDestination;
+			}
+			
+		};
+	}
+    
+    @Override
+	public Encapsulatable deEncapsualte() {
+    	FullExtTcpPacket encapsFullExtTcpPacket = (FullExtTcpPacket) encapsulated;
+    	encapsFullExtTcpPacket.priority = this.priority;
+    	encapsFullExtTcpPacket.selectiveAck = this.selectiveAck;
+    	encapsFullExtTcpPacket.echoDepartureTime = this.echoDepartureTime;
+    	encapsFullExtTcpPacket.echoFlowletId = this.echoFlowletId;
+		return encapsFullExtTcpPacket;
+	}
 
 }

@@ -1,6 +1,8 @@
 package ch.ethz.systems.netbench.ext.basic;
 
-public abstract class TcpPacket extends IpPacket implements TcpHeader {
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
+
+public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulatable {
 
     // TCP header is [20, 60] bytes, assume maximum: 60 * 8
     private static final long TCP_HEADER_SIZE_BIT = 480L;
@@ -21,7 +23,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader {
     private final boolean FIN;
     private final double windowSize;
     private final long dataSizeByte;
-
+    protected Encapsulatable encapsulated;
     // Mechanisms fields
     private int nonSequentialHash = -1;
 
@@ -48,10 +50,31 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader {
         this.FIN = FIN;
         this.windowSize = windowSize;
         this.dataSizeByte = dataSizeByte;
+        encapsulated = this;
 
     }
 
-    @Override
+    public TcpPacket(TcpPacket tcpPacket) {
+		super(tcpPacket);
+		this.sourcePort = tcpPacket.sourcePort;
+        this.destinationPort = tcpPacket.destinationPort;
+        this.sequenceNumber = tcpPacket.sequenceNumber;
+        this.acknowledgementNumber = tcpPacket.acknowledgementNumber;
+        this.NS = tcpPacket.NS;
+        this.CWR = tcpPacket.CWR;
+        this.ECE = tcpPacket.ECE;
+        this.URG = tcpPacket.URG;
+        this.ACK = tcpPacket.ACK;
+        this.PSH = tcpPacket.PSH;
+        this.RST = tcpPacket.RST;
+        this.SYN = tcpPacket.SYN;
+        this.FIN = tcpPacket.FIN;
+        this.windowSize = tcpPacket.windowSize;
+        this.dataSizeByte = tcpPacket.dataSizeByte;
+        encapsulated = tcpPacket;
+	}
+
+	@Override
     public long getDataSizeByte() {
         return dataSizeByte;
     }
@@ -140,5 +163,11 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader {
     public String toString() {
         return "TCPPacket[" + getSourceId() + " -> " + getDestinationId() + ", DATA=" + this.getDataSizeByte() + "b, ACK=" + ACK + " (exp. ack.: " + (this.getSequenceNumber() + this.getDataSizeByte()) + "), createdAt=" + this.getDepartureTime() + ", seq: " + getSequenceNumber() + ", carryingAck: " + this.getAcknowledgementNumber() + ", SYN=" + this.isSYN() + "]";
     }
+    
+	@Override
+	public Encapsulatable deEncapsualte() {
+		// TODO Auto-generated method stub
+		return this.encapsulated;
+	}
 
 }

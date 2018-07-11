@@ -54,7 +54,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     public void receiveFromEncapsulatedDevice(Packet packet) {
         Encapsulatable ipPacket = (Encapsulatable) packet;
         if (ipPacket.getDestinationId() == this.identifier) {
-            IpPacket deEncapse = ipPacket.deEncapsualte();
+            IpPacket deEncapse = (IpPacket) ipPacket.deEncapsualte();
             targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
         }
     }
