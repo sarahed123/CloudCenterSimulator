@@ -56,6 +56,12 @@ class BarePacket extends TcpPacket {
 		};
 	}
 
+	@Override
+	public Encapsulatable deEncapsualte() {
+		// TODO Auto-generated method stub
+		return new BarePacket(this);
+	}
+
 
 
 }
