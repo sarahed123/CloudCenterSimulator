@@ -41,7 +41,6 @@ class BarePacket extends TcpPacket {
 
 	@Override
 	public Encapsulatable encapsulate(final int newDestination) {
-		System.out.println("encapsulating");
 		return new BarePacket(this) {
 
 			/**
@@ -50,6 +49,7 @@ class BarePacket extends TcpPacket {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public int getDestinationId() {
+
 				return newDestination;
 			}
 			

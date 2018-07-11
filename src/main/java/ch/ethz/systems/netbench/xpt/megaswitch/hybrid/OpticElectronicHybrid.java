@@ -1,10 +1,15 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
 import java.util.HashMap;
 
@@ -23,12 +28,33 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         Encapsulatable packet = (Encapsulatable) genericPacket;
 
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
-
-        this.optic.initCircuit(this.identifier,destinationToR,packet.getFlowId());
-        this.optic.receive(genericPacket);
+        TcpPacket encapsulated = (TcpPacket) packet.encapsulate(destinationToR);
+        if(encapsulated.getSequenceNumber()>=circuitThreshold) {
+        	try {
+        		routeThroughCircuit(encapsulated);
+        		return;
+        	}catch(NoPathException e) {
+                //SimulationLogger.increaseStatisticCounter("num_path_failures");
+            }
+        }
+        routeThroughtPacketSwitch(encapsulated);
     }
 
-    @Override
+    protected void routeThroughtPacketSwitch(TcpPacket packet) {
+		this.electronic.receive(packet);
+		
+	}
+    
+	protected void routeThroughCircuit(IpPacket packet) {
+		try {
+	    	RemoteRoutingController.getInstance().initRoute(this.identifier,packet.getDestinationId(),packet.getFlowId());
+		}catch(FlowPathExists e) {
+
+        }
+        this.optic.receive(packet);
+		
+	}
+	@Override
     protected void receiveFromIntermediary(Packet genericPacket) {
         throw new RuntimeException("Hybrid switch is not a server");
     }
@@ -53,6 +79,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     @Override
     public void receiveFromEncapsulatedDevice(Packet packet) {
         Encapsulatable ipPacket = (Encapsulatable) packet;
+
         if (ipPacket.getDestinationId() == this.identifier) {
             IpPacket deEncapse = (IpPacket) ipPacket.deEncapsualte();
             targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);

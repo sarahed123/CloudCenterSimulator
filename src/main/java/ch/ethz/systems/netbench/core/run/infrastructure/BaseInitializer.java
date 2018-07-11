@@ -63,7 +63,6 @@ public class BaseInitializer {
         this.linkGenerator = linkGenerator;
         this.transportLayerGenerator = transportLayerGenerator;
         this.runningNodeId = 0;
-        this.linkPairs = new ArrayList<>();
     }
 
     private BaseInitializer(){
@@ -103,6 +102,8 @@ public class BaseInitializer {
         this.networkDeviceGenerator = networkDeviceGenerator;
         this.linkGenerator = linkGenerator;
         this.transportLayerGenerator = transportLayerGenerator;
+        this.linkPairs = new ArrayList<>();
+
     }
 
     public void finalize(){

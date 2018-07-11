@@ -4,6 +4,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.demo.DemoPacket;
 import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
 
@@ -16,7 +17,7 @@ public class MockSimpleServer extends SimpleServer {
 
     @Override
     public void receive(Packet p){
-        MockDemoPacket packet = (MockDemoPacket) p;
+        IpPacket packet = (IpPacket) p;
         if(packet.getDestinationId() == this.identifier){
 
             markPacketReceived();
