@@ -16,6 +16,7 @@ public class MockDemoPacket extends TcpPacket implements Encapsulatable {
 
 	public MockDemoPacket(MockDemoPacket mockDemoPacket) {
 		super(mockDemoPacket);
+		this.received = mockDemoPacket.received;
 	}
 
 	public void markReceived(){
@@ -37,5 +38,11 @@ public class MockDemoPacket extends TcpPacket implements Encapsulatable {
 			}
 			
 		};
+	}
+
+	@Override
+	public Encapsulatable deEncapsualte() {
+		System.out.println("dencapsulating");
+		return new MockDemoPacket(this);
 	}
 }

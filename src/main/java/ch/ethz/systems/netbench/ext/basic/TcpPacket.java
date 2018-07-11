@@ -23,7 +23,6 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
     private final boolean FIN;
     private final double windowSize;
     private final long dataSizeByte;
-    protected Encapsulatable encapsulated;
     // Mechanisms fields
     private int nonSequentialHash = -1;
 
@@ -50,7 +49,6 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.FIN = FIN;
         this.windowSize = windowSize;
         this.dataSizeByte = dataSizeByte;
-        encapsulated = this;
 
     }
 
@@ -71,7 +69,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.FIN = tcpPacket.FIN;
         this.windowSize = tcpPacket.windowSize;
         this.dataSizeByte = tcpPacket.dataSizeByte;
-        encapsulated = tcpPacket;
+        this.nonSequentialHash = tcpPacket.nonSequentialHash;
 	}
 
 	@Override
@@ -164,10 +162,6 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         return "TCPPacket[" + getSourceId() + " -> " + getDestinationId() + ", DATA=" + this.getDataSizeByte() + "b, ACK=" + ACK + " (exp. ack.: " + (this.getSequenceNumber() + this.getDataSizeByte()) + "), createdAt=" + this.getDepartureTime() + ", seq: " + getSequenceNumber() + ", carryingAck: " + this.getAcknowledgementNumber() + ", SYN=" + this.isSYN() + "]";
     }
     
-	@Override
-	public Encapsulatable deEncapsualte() {
-		// TODO Auto-generated method stub
-		return this.encapsulated;
-	}
+
 
 }

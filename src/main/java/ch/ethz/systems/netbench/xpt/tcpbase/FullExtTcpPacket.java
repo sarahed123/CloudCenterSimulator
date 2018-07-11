@@ -92,12 +92,7 @@ public class FullExtTcpPacket extends TcpPacket implements SelectiveAckHeader, E
     
     @Override
 	public Encapsulatable deEncapsualte() {
-    	FullExtTcpPacket encapsFullExtTcpPacket = (FullExtTcpPacket) encapsulated;
-    	encapsFullExtTcpPacket.priority = this.priority;
-    	encapsFullExtTcpPacket.selectiveAck = this.selectiveAck;
-    	encapsFullExtTcpPacket.echoDepartureTime = this.echoDepartureTime;
-    	encapsFullExtTcpPacket.echoFlowletId = this.echoFlowletId;
-		return encapsFullExtTcpPacket;
+    	return new FullExtTcpPacket(this);
 	}
 
 }
