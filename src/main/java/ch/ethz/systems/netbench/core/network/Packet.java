@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.core.network;
 import java.io.Serializable;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 /**
  * The packet is the unit of transfer through the network.
@@ -36,7 +37,14 @@ public abstract class Packet implements PacketHeader,Serializable {
         
     }
 
-    /**
+    public Packet(Packet packet) {
+    	this.flowletId = packet.flowletId;
+        this.flowId = packet.flowId;
+        this.sizeBit = packet.sizeBit;
+        this.departureTime = packet.departureTime;
+    }
+
+	/**
      * Retrieve immutable flow identifier.
      *
      * @return  Flow identifier

@@ -23,14 +23,14 @@ public class RemoteRoutingPacket extends IpPacket implements Encapsulatable {
 	}
 
 	@Override
-	public IpPacket encapsulate(int newDestionation) {
+	public Encapsulatable encapsulate(int newDestionation) {
 		RemoteRoutingPacket p =  new RemoteRoutingPacket(getFlowId(), getSizeBit(), getSourceId(), newDestionation, getTTL(), flowRemainder);
     	p.encapsulatedDestination = getDestinationId();
 		return p;
     }
 
 	@Override
-	public IpPacket deEncapsualte() {
+	public Encapsulatable deEncapsualte() {
 		// TODO Auto-generated method stub
 		return new RemoteRoutingPacket(getFlowId(), getSizeBit(), getSourceId(), encapsulatedDestination, getTTL(), flowRemainder);
 	}
