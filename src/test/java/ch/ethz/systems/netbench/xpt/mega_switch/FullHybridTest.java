@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -36,6 +38,7 @@ import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FullHybridTest {
@@ -62,7 +65,7 @@ public class FullHybridTest {
         OutputPortGenerator portGen = new OutputPortGenerator(conf) {
             @Override
             public OutputPort generate(NetworkDevice own, NetworkDevice target, Link link) {
-                return new OutputPort(own,target,link,new PriorityQueue<Packet>()) {
+                return new OutputPort(own,target,link,new LinkedList<Packet>()) {
                     @Override
                     public void enqueue(Packet packet) {
                         guaranteedEnqueue(packet);
@@ -83,18 +86,7 @@ public class FullHybridTest {
             }
         };
         LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 10);
-        TransportLayerGenerator tlg = new TransportLayerGenerator(conf) {
-            @Override
-            public TransportLayer generate(int i) {
-                return new TransportLayer(i,conf) {
-
-                    @Override
-                    protected Socket createSocket(long l, int i, long l1) {
-                        return new SimpleSocket(this,l,this.identifier,i,l1);
-                    }
-                };
-            }
-        };
+        TransportLayerGenerator tlg = new SimpleDctcpTransportLayerGenerator(conf);
         initializer.extend(portGen,ndg,lg,tlg);
         initializer.createInfrastructure(conf);
 
@@ -178,7 +170,7 @@ public class FullHybridTest {
     }
 	
 	@Test
-    public void sendOnePacket(){
+    public void testSingleFlow(){
         MockSimpleServer source = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
         MockSimpleServer dest =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
         FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
