@@ -194,7 +194,8 @@ public class SimpleTcpSocket extends Socket {
                 0, // Ack number
                 false, // ACK
                 true,  // SYN
-                false  // ECE
+                false,  // ECE
+                false
         ));
 
         // System.out.println("3-WAY HANDSHAKE: 0. Sender sent SYN.");
@@ -256,7 +257,8 @@ public class SimpleTcpSocket extends Socket {
                             receiveNextNumber, // Ack number
                             true, // ACK
                             true, // SYN
-                            false // ECE
+                            false, // ECE
+                            false
                     ));
 
                     // System.out.println("3-WAY HANDSHAKE: 1. Receiver received SYN, sent back ACK+SYN.");
@@ -305,7 +307,8 @@ public class SimpleTcpSocket extends Socket {
                             receiveNextNumber, // Ack number
                             true,  // ACK
                             false, // SYN
-                            false // ECE
+                            false, // ECE
+                            false
                     ));
 
                     // Start sending
@@ -401,7 +404,8 @@ public class SimpleTcpSocket extends Socket {
                             (packet.getSequenceNumber() + packet.getDataSizeByte() + (packet.isSYN() ? 1 : 0)), // Ack number
                             true, // ACK
                             false, // SYN
-                            packet.getECN() // ECE
+                            packet.getECN(), // ECE
+                            false
                     ).setEchoFlowletId(packet.getFlowletId()))
                      .setEchoDepartureTime(packet.getDepartureTime())
             );
@@ -423,7 +427,7 @@ public class SimpleTcpSocket extends Socket {
         } else if (seqNumber > receiveNextNumber) {
             selectiveAckSet.add(seqNumber, ackNumber);
         }
-
+        
         // Send out the acknowledgment
         sendWithoutResend(
                 ((FullExtTcpPacket) ((FullExtTcpPacket) (createPacket(
@@ -432,7 +436,8 @@ public class SimpleTcpSocket extends Socket {
                         receiveNextNumber, // Ack number
                         true, // ACK
                         false, // SYN
-                        packet.getECN() // ECE
+                        packet.getECN(), // ECE
+                        packet.isFIN()
                 ).setEchoFlowletId(packet.getFlowletId())))
                  .setSelectiveAck(selectiveAckSet.createSelectiveAckData()))
                  .setEchoDepartureTime(packet.getDepartureTime())
@@ -646,7 +651,8 @@ public class SimpleTcpSocket extends Socket {
                 0, // Ack number
                 false, // ACK
                 false, // SYN
-                false  // ECE
+                false,  // ECE
+                this.sendNextNumber > this.flowSizeByte // this is the test to see if we are finished with the flow
         ));
 
     }
@@ -712,7 +718,8 @@ public class SimpleTcpSocket extends Socket {
                 tcpPacket.getAcknowledgementNumber(),
                 tcpPacket.isACK(),
                 tcpPacket.isSYN(),
-                tcpPacket.isECE()
+                tcpPacket.isECE(),
+                tcpPacket.isFIN()
         );
 
         // Log statistic
@@ -754,7 +761,8 @@ public class SimpleTcpSocket extends Socket {
             long ackNumber,
             boolean ACK,
             boolean SYN,
-            boolean ECE
+            boolean ECE,
+            boolean FIN
     ) {
         return new FullExtTcpPacket(
                 flowId, dataSizeByte, sourceId, destinationId,
@@ -762,7 +770,7 @@ public class SimpleTcpSocket extends Socket {
                 sequenceNumber, ackNumber, // Seq number, Ack number
                 false, false, ECE, // NS, CWR, ECE
                 false, ACK, false, // URG, ACK, PSH
-                false, SYN, false, // RST, SYN, FIN
+                false, SYN, FIN, // RST, SYN, FIN
                 congestionWindow, 0 // Window size, Priority
         );
     }
