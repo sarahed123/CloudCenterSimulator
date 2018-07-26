@@ -25,7 +25,8 @@ import static org.mockito.Mockito.doAnswer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleTcpSequenceTest {
-
+	
+	boolean FIN_ACK;
     @Mock
     private NetworkDevice networkDeviceSender;
 
@@ -58,7 +59,7 @@ public class SimpleTcpSequenceTest {
 
     public void testPacketSequences(int maxWindowSize, int maxSegmentSize, int initialWindowSize, long flowSizeByte) throws IOException {
 
-
+    	FIN_ACK = false;
         // 1TB
         long totalSeqNumber = 1000000000000L;
 
@@ -162,7 +163,7 @@ public class SimpleTcpSequenceTest {
                     0
             );
         }
-
+        assert(FIN_ACK);
         // Clean-up
         Simulator.reset();
 
@@ -179,12 +180,16 @@ public class SimpleTcpSequenceTest {
      * @param isSyn         Whether it is expected to be a synchronization packet
      * @param dataSizeByte  Expected packet carried data size in bytes
      */
-    public static void testPacket(Packet genPacket, long seqNumber, long ackNumber, boolean isAck, boolean isSyn, long dataSizeByte) {
+    public void testPacket(Packet genPacket, long seqNumber, long ackNumber, boolean isAck, boolean isSyn, long dataSizeByte) {
         TcpPacket packet = (TcpPacket) genPacket;
         assertEquals(seqNumber, packet.getSequenceNumber());
         if (packet.isACK()) {
             assertEquals(ackNumber, packet.getAcknowledgementNumber());
+            if(packet.isFIN()) {
+            	FIN_ACK = true;
+            }
         }
+        
         assertEquals(isAck, packet.isACK());
         assertEquals(isSyn, packet.isSYN());
         assertEquals(dataSizeByte, packet.getDataSizeByte());
