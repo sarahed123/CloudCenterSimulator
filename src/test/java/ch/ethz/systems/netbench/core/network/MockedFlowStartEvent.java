@@ -17,8 +17,8 @@ public class MockedFlowStartEvent extends FlowStartEvent {
 	
 	@Override
     public void trigger() {
-    	TransportLayer tl = BaseInitializer.getInstance().getIdToNetworkDevice().get(networkDeviceId).getTransportLayer();
-    	tl.startFlow(targetId, flowSizeByte);
+
+		transportLayer.startFlow(targetId, flowSizeByte);
     }
 
 }

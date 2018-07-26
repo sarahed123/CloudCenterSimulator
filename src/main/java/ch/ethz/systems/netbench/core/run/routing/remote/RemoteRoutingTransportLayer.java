@@ -23,8 +23,8 @@ public class RemoteRoutingTransportLayer extends TransportLayer {
         return new RemoteRoutingSocket(this, flowId, identifier, destinationId, flowSizeByte);
     }
 
-	public void releasePath(int destinationId, long flowId) {
-		((RemoteSourceRoutingSwitch) networkDevice).releasePath(flowId);
+	public void releasePath(int sourceId,int destinationId, long flowId) {
+		((RemoteSourceRoutingSwitch) networkDevice).releasePath(sourceId,destinationId);
 		
 		/*Flow f = flowsQueue.poll();
 		if(f!=null) {

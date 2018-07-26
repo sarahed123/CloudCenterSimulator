@@ -9,13 +9,19 @@ public class RemoteRoutingPacket extends IpPacket implements Encapsulatable {
 	 * 
 	 */
 	private static final long serialVersionUID = 520197092371233676L;
-	private int encapsulatedDestination;
+
 	public long flowRemainder;
 	public RemoteRoutingPacket(long flowId, long payloadSizeBit, int sourceId, int destinationId, int TTL, long remainder) {
 		super(flowId, payloadSizeBit, sourceId, destinationId, TTL,RemoteRoutingController.getHeaderSize());
 		flowRemainder = remainder;
-		encapsulatedDestination = -1;
 		
+	}
+
+	public RemoteRoutingPacket(RemoteRoutingPacket p) {
+		super(p);
+		flowRemainder = p.flowRemainder;
+
+
 	}
 
 	public boolean isLast(){
@@ -23,16 +29,31 @@ public class RemoteRoutingPacket extends IpPacket implements Encapsulatable {
 	}
 
 	@Override
-	public Encapsulatable encapsulate(int newDestionation) {
-		RemoteRoutingPacket p =  new RemoteRoutingPacket(getFlowId(), getSizeBit(), getSourceId(), newDestionation, getTTL(), flowRemainder);
-    	p.encapsulatedDestination = getDestinationId();
-		return p;
+	public Encapsulatable encapsulate(int newSource,int newDestination) {
+		// TODO Auto-generated method stub
+		return new RemoteRoutingPacket(this) {
+			/**
+			 *
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public int getDestinationId() {
+				return newDestination;
+			}
+
+			@Override
+			public int getSourceId() {
+				return newSource;
+			}
+
+		};
     }
 
 	@Override
 	public Encapsulatable deEncapsualte() {
 		// TODO Auto-generated method stub
-		return new RemoteRoutingPacket(getFlowId(), getSizeBit(), getSourceId(), encapsulatedDestination, getTTL(), flowRemainder);
+		return new RemoteRoutingPacket(this);
 	}
 
 }

@@ -40,7 +40,7 @@ class BarePacket extends TcpPacket {
 	}
 
 	@Override
-	public Encapsulatable encapsulate(final int newDestination) {
+	public Encapsulatable encapsulate(final int newSource,final int newDestination) {
 		return new BarePacket(this) {
 
 			/**
@@ -51,6 +51,11 @@ class BarePacket extends TcpPacket {
 			public int getDestinationId() {
 
 				return newDestination;
+			}
+			@Override
+			public int getSourceId() {
+
+				return newSource;
 			}
 			
 		};

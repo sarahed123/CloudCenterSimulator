@@ -754,7 +754,8 @@ public class SimpleTcpSocket extends Socket {
             long ackNumber,
             boolean ACK,
             boolean SYN,
-            boolean ECE
+            boolean ECE,
+            boolean FIN
     ) {
         return new FullExtTcpPacket(
                 flowId, dataSizeByte, sourceId, destinationId,

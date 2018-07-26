@@ -22,7 +22,7 @@ public class MockOpticalHybrid extends OpticElectronicHybrid {
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
         
 
-        IpPacket p = (IpPacket)packet.encapsulate(destinationToR);
+        IpPacket p = (IpPacket)packet.encapsulate(this.identifier,destinationToR);
         this.optic.initCircuit(this.identifier,destinationToR,packet.getFlowId());
         this.optic.receive(p);
     }

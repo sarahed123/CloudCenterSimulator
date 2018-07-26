@@ -8,6 +8,7 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class MockRemoteRouter extends XpanderRouter {
 
@@ -27,8 +28,8 @@ public class MockRemoteRouter extends XpanderRouter {
 		return super.generatePathFromGraph(source, dest);
 	}
 	
-	protected Path getPath(long flowId) {
-		return  mPaths.get(flowId);
+	protected Path getPath(int src,int dst) {
+		return  mPaths.get(new ImmutablePair<>(src,dst));
 	}
 	
 	
