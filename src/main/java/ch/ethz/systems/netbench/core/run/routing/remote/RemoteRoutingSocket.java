@@ -8,6 +8,7 @@ import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.demo.DemoPacket;
 import ch.ethz.systems.netbench.ext.demo.DemoSocket;
 import com.google.common.base.Joiner;
@@ -41,7 +42,7 @@ public class RemoteRoutingSocket extends Socket{
 	public void handle(Packet genericPacket) {
 		if(isReceiver()){
 			if(((RemoteRoutingPacket) genericPacket).isLast()){
-				((RemoteRoutingTransportLayer) transportLayer).releasePath(destinationId,flowId);
+				((RemoteRoutingTransportLayer) transportLayer).releasePath(((IpPacket) genericPacket).getSourceId(),((IpPacket) genericPacket).getDestinationId(),flowId);
 				onAllFlowConfirmed();
 			}
 		}

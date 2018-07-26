@@ -30,6 +30,7 @@ import edu.asu.emit.algorithm.graph.paths_filter.MostLoadedPathFilter;
 import edu.asu.emit.algorithm.graph.paths_filter.PathsFilter;
 import edu.asu.emit.algorithm.graph.paths_filter.PathsFilterFirst;
 import edu.asu.emit.algorithm.graph.paths_filter.RandomPathsFilter;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class XpanderRouter extends RemoteRoutingController{
 	private int flowFailuresSample;
@@ -48,7 +49,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG =  configuration.getGraph();
 		mG.resetCapcities(configuration.isExtendedTopology(),idToNetworkDevice);
-		mPaths = new HashMap<Long,Path>();
+		mPaths = new HashMap<Pair<Integer,Integer>,Path>();
 		totalDrops = 0;
 		flowCounter = 0;
 		flowFailuresSample = 0;
@@ -100,14 +101,14 @@ public class XpanderRouter extends RemoteRoutingController{
 	@Override
 	public void initRoute(int source,int dest,long flowId){ 
 		
-		if(mPaths.containsKey(flowId)) {
+		if(mPaths.containsKey(new ImmutablePair<>(source,dest))) {
 			throw new FlowPathExists(flowId);
 		}
 		Path p = generatePathFromGraph(source, dest);
 		
 		updateForwardingTables(source,dest,p,flowId);
 		removePathFromGraph(p);
-		mPaths.put(flowId, p);
+		mPaths.put(new ImmutablePair<>(source,dest), p);
 		flowCounter++;
 		logRoute(p,source,dest,flowId,Simulator.getCurrentTime(),true);
 
@@ -129,8 +130,9 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 	@Override
-	public void recoverPath(long flowId){
-		Path p = mPaths.get(flowId);
+	public void recoverPath(int src,int dst){
+		Pair pair = new ImmutablePair<>(src,dst);
+		Path p = mPaths.get(pair);
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);
@@ -140,9 +142,9 @@ public class XpanderRouter extends RemoteRoutingController{
 
 
 		}
-		logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
-				,flowId,Simulator.getCurrentTime(),false);
-		mPaths.remove(flowId);
+		//logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
+		//		,flowId,Simulator.getCurrentTime(),false);
+		mPaths.remove(pair);
 	}
 
 	protected void removePathFromGraph(Path p) {
@@ -163,7 +165,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 		updateForwardingTables(src,dst,newPath,flowId);
 		removePathFromGraph(newPath);
-		mPaths.put(flowId,newPath);
+		mPaths.put(new ImmutablePair<>(src,dst),newPath);
 	}
 
 	/**
@@ -186,7 +188,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 			RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(curr);
 			curr = pathAsList.get(i).getId();
-			rsrs.updateForwardingTable(flowId,curr);
+			rsrs.updateForwardingTable(source,dest,curr);
 		}
 
 	}
@@ -238,9 +240,11 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	@Override
 	protected void reset_state(NBProperties configuration) {
-		String dumpFolder = configuration.getPropertyOrFail("from_state");
+		// needs to be fixed inorder to reallow state saving
+
+		/*String dumpFolder = configuration.getPropertyOrFail("from_state");
 		mG = (VariableGraph) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_graph.ser");
-		mPaths = (HashMap<Long, Path>) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_paths.ser");
+		mPaths = (HashMap<Pair<Integer,Integer>, Path>) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_paths.ser");
 		for(Long flow : mPaths.keySet()) {
 			int source = mPaths.get(flow).getVertexList().get(0).getId();
 			int dest = mPaths.get(flow).getVertexList().get(mPaths.get(flow).getVertexList().size()-1).getId();
@@ -248,6 +252,6 @@ public class XpanderRouter extends RemoteRoutingController{
 			//System.out.println("path " + mPaths.get(flow));
 			updateForwardingTables(source, dest, mPaths.get(flow), flow);
 		}
-		
+		*/
 	}
 }

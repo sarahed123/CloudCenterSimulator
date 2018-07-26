@@ -11,6 +11,7 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.testutility.TestTopologyPortsConstruction;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Path;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
@@ -97,52 +98,44 @@ public class RemoteRouterTest {
     public void testAddRemovePaths() {
     	RemoteSourceRoutingSwitch device =(RemoteSourceRoutingSwitch) idToNetworkDevice.get(1);
     	remoteRouter.initRoute(1, 4,0);
-    	remoteRouter.initRoute(1, 4,1);
-    	assert(device.getNextHop(0) != null);
-    	assert(device.getNextHop(1) != null);
-    	
     	boolean thrown = false;
     	try{
-    		remoteRouter.initRoute(1, 4,2);
-    		
-    	}catch(NoPathException e){
-    		thrown = true;
-    	}
-    	assert(thrown);
+			remoteRouter.initRoute(1, 4,1);
+		}catch(FlowPathExists e){
+			thrown = true;
+		}
+
+    	assert(device.getNextHop(1,4) != null);
+		assert(thrown);
+
+
     	System.out.println("recovering path one");
-    	remoteRouter.recoverPath(0);
+    	remoteRouter.recoverPath(1,4);
     	remoteRouter.initRoute(1, 4,3);
     	thrown = false;
     	try{
-    		remoteRouter.initRoute(1, 4,4);
+    		remoteRouter.initRoute(1, 3,4);
     		
     	}catch(NoPathException e){
     		thrown = true;
     	}
     	assert(thrown);
-    	thrown = false;
-    	try{
-    		remoteRouter.initRoute(1, 4,3);
-    		
-    	}catch(IllegalArgumentException e){
-    		thrown = true;
-    	}
-    	assert(thrown);
+
     	System.out.println("reseting all paths");
     	remoteRouter.reset();
     	remoteRouter.initRoute(1, 4,0);
-    	remoteRouter.initRoute(1, 4,1);
-    	assert(device.getNextHop(0) != null);
-    	assert(device.getNextHop(1) != null);
+    	remoteRouter.initRoute(1, 2,1);
+		assert(device.getNextHop(1,4) != null);
+		assert(device.getNextHop(1,2) != null);
     	
     }
     
     @Test
     public void testSwitchPath() {
     	remoteRouter.initRoute(1, 4,0);
-    	Path oldP = remoteRouter.getPath(0);
+    	Path oldP = remoteRouter.getPath(1,4);
     	remoteRouter.switchPath(1, 4, remoteRouter.generatePathFromGraph(1, 4), 0);
-    	Path newP = remoteRouter.getPath(0);
+    	Path newP = remoteRouter.getPath(1,4);
     	assert(!oldP.equals(newP));
     	assert(newP.getVertexList().get(0).getId()==1);
     	assert(newP.getVertexList().get(newP.getVertexList().size()-1).getId()==4);

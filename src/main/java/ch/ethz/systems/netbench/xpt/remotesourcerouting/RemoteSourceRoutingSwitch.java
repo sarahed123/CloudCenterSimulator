@@ -25,10 +25,10 @@ import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Vertex;
 
 public class RemoteSourceRoutingSwitch extends NetworkDevice {
-	private Map<Long,OutputPort> forwardingTable;
+	private Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
 	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary,NBProperties configuration) {
 		super(identifier, transportLayer, intermediary,configuration);
-		this.forwardingTable = new HashMap<Long,OutputPort>();
+		this.forwardingTable = new HashMap<Pair<Integer,Integer>,OutputPort>();
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     }
     
     protected void forwardToNextSwitch(IpPacket packet) {
-    	forwardingTable.get(packet.getFlowId()).enqueue(packet);
+    	forwardingTable.get(new ImmutablePair<>(packet.getSourceId(),packet.getDestinationId())).enqueue(packet);
 		
 	}
     
@@ -94,19 +94,19 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 		
 	}
 
-	public void releasePath(long flowId) {
-		RemoteRoutingController.getInstance().recoverPath(flowId);
+	public void releasePath(int src,int dst) {
+		RemoteRoutingController.getInstance().recoverPath(src,dst);
 		
 	}
 
-	public void updateForwardingTable(long flowId, int nextHop) {
-		forwardingTable.put(flowId, targetIdToOutputPort.get(nextHop));
+	public void updateForwardingTable(int src, int dest, int nextHop) {
+		forwardingTable.put(new ImmutablePair<Integer,Integer>(src,dest), targetIdToOutputPort.get(nextHop));
 		
 	}
 
-	public Object getNextHop(long flowId) {
+	public Object getNextHop(int src, int dest) {
 		// TODO Auto-generated method stub
-		return forwardingTable.get(flowId);
+		return forwardingTable.get(new ImmutablePair<Integer,Integer>(src,dest));
 	}
 
 

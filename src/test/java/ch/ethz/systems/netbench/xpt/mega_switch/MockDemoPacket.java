@@ -19,7 +19,7 @@ public class MockDemoPacket extends TcpPacket implements Encapsulatable {
 
 
 	@Override
-	public Encapsulatable encapsulate(final int newDestination) {
+	public Encapsulatable encapsulate(final int newSource,final int newDestination) {
 		return new MockDemoPacket(this) {
 
 			/**
@@ -29,6 +29,11 @@ public class MockDemoPacket extends TcpPacket implements Encapsulatable {
 			@Override
 			public int getDestinationId() {
 				return newDestination;
+			}
+
+			@Override
+			public int getSourceId() {
+				return newSource;
 			}
 			
 		};

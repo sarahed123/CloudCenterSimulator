@@ -74,7 +74,7 @@ public class FullExtTcpPacket extends TcpPacket implements SelectiveAckHeader, E
     }
 
     @Override
-	public Encapsulatable encapsulate(final int newDestination) {
+	public Encapsulatable encapsulate(final int newSource,final int newDestination) {
 		// TODO Auto-generated method stub
 		return new FullExtTcpPacket(this) {
 			/**
@@ -86,6 +86,11 @@ public class FullExtTcpPacket extends TcpPacket implements SelectiveAckHeader, E
 			public int getDestinationId() {
 				return newDestination;
 			}
+
+            @Override
+            public int getSourceId() {
+			    return newSource;
+            }
 			
 		};
 	}

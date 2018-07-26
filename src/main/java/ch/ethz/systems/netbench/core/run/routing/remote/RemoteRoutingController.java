@@ -20,6 +20,7 @@ import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.VariableGraph;
+import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
 	public RemoteRoutingController(NBProperties configuration) {
@@ -27,7 +28,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	}
 
 	private static RemoteRoutingController mInstance = null;
-	protected HashMap<Long, Path> mPaths;
+	protected HashMap<Pair<Integer,Integer>, Path> mPaths;
 	protected Graph mG;
 	private static long headerSize;
 	protected long totalDrops;
@@ -128,7 +129,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	/**
 	 * recover a path, returning all its edges to the graph
 	 */
-	public abstract void recoverPath(long flowId);
+	public abstract void recoverPath(int src,int dst);
 	
 	/**
 	 * public for testing but should be a private method to handle path switching

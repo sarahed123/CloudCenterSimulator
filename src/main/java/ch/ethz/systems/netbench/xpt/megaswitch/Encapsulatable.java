@@ -6,6 +6,6 @@ import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 
 public interface Encapsulatable extends IpHeader {
 
-	public Encapsulatable encapsulate(int newDestination);
+	public Encapsulatable encapsulate(int newSource,int newDestination);
 	public Encapsulatable deEncapsualte();
 }

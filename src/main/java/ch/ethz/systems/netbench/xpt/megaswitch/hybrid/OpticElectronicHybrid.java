@@ -28,7 +28,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         Encapsulatable packet = (Encapsulatable) genericPacket;
 
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
-        TcpPacket encapsulated = (TcpPacket) packet.encapsulate(destinationToR);
+        TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
         if(encapsulated.getSequenceNumber()>=circuitThreshold) {
         	try {
         		routeThroughCircuit(encapsulated);
