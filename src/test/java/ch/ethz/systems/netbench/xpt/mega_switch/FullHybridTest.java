@@ -31,17 +31,20 @@ import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.NetworkDeviceGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.OutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.TransportLayerGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FullHybridTest {
+	MockRemoteRouter router;
 	@Before
     public void setup() throws IOException {
         // main network
@@ -113,8 +116,9 @@ public class FullHybridTest {
         initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
                 lg,new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
-        RoutingSelector.selectPopulator(hm, conf2);
-        
+        //RoutingSelector.selectPopulator(hm, conf2);
+        router = new MockRemoteRouter(hm, conf2);
+        MockFullHybrid.setRemoteRouter(router);
       //creating network 3, packet switching:
         File tempRunConfig3 = File.createTempFile("temp-run-config2", ".tmp");
         BufferedWriter runConfigWriter3 = new BufferedWriter(new FileWriter(tempRunConfig3));
@@ -174,12 +178,28 @@ public class FullHybridTest {
         MockSimpleServer source = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
         MockSimpleServer dest =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
         FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
-        MockDemoPacket p = new MockDemoPacket(0, 1000, 2, 3, 10, 0);
         MockFullHybrid tor1 = (MockFullHybrid) (BaseInitializer.getInstance().getNetworkDeviceById(0));
         Simulator.registerEvent(fse);
         Simulator.runNs(1000000000);
         assert(tor1.routedThroughCircuit);
         assert(tor1.routedThroughPacketSwitch);
+        assert(tor1.recoveredPath);
+        assert(router.routed(0,1));
+        assert(router.recovered(0,1));
+        tor1.reset();
+    }
+	
+	@Test
+    public void testSingleToRFlow(){
+        MockSimpleServer source = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockSimpleServer dest =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(4));
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
+        MockFullHybrid tor1 = (MockFullHybrid) (BaseInitializer.getInstance().getNetworkDeviceById(0));
+        Simulator.registerEvent(fse);
+        Simulator.runNs(1000000000);
+        assert(tor1.routedThroughPacketSwitch);
+
+        tor1.reset();
     }
     
     @After
