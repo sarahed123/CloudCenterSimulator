@@ -131,14 +131,14 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	@Override
 	public void recoverPath(int src,int dst){
-		Pair pair = new ImmutablePair<>(src,dst);
+		Pair<Integer, Integer> pair = new ImmutablePair<>(src,dst);
 		Path p = mPaths.get(pair);
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);
 			mG.increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
 			// recover the opisite edge
-			mG.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
+			//mG.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
 
 
 		}
@@ -154,7 +154,7 @@ public class XpanderRouter extends RemoteRoutingController{
 			int next = pathAsList.get(i).getId();
 			mG.decreaseCapacity(new ImmutablePair<Integer, Integer>(curr, next));
 			// delete the opisite edge
-			mG.decreaseCapacity(new ImmutablePair<Integer, Integer>(next, curr));
+			//mG.decreaseCapacity(new ImmutablePair<Integer, Integer>(next, curr));
 			curr = next;
 		}
 		

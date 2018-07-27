@@ -115,7 +115,7 @@ public class RemoteRouterTest {
     	thrown = false;
     	try{
     		remoteRouter.initRoute(1, 3,4);
-    		
+    		remoteRouter.initRoute(1, 2,4);
     	}catch(NoPathException e){
     		thrown = true;
     	}
