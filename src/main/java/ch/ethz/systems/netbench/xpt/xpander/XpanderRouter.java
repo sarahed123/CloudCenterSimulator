@@ -133,6 +133,9 @@ public class XpanderRouter extends RemoteRoutingController{
 	public void recoverPath(int src,int dst){
 		Pair<Integer, Integer> pair = new ImmutablePair<>(src,dst);
 		Path p = mPaths.get(pair);
+		if(p==null) {
+			throw new NoPathException();
+		}
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);

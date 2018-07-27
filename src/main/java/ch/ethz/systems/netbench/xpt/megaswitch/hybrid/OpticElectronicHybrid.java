@@ -36,7 +36,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
         JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
-        if(jumboFlow.getSize()>=circuitThreshold) {
+        if(jumboFlow.getSize()>=circuitThreshold && !jumboFlow.isTrivial()) {
         	try {
         		routeThroughCircuit(encapsulated);
         		return;
@@ -48,7 +48,11 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected JumboFlow getJumboFlow(int source, int dest){
-        JumboFlow jumboFlow = mJumboFlowMap.getOrDefault(new ImmutablePair<>(source,dest), new JumboFlow());
+        JumboFlow jumboFlow = mJumboFlowMap.get(new ImmutablePair<>(source,dest));
+        if(jumboFlow==null) {
+        	jumboFlow = new JumboFlow(source,dest);
+        	mJumboFlowMap.put(new ImmutablePair<>(source,dest),jumboFlow);
+        }
         return jumboFlow;
     }
 
@@ -59,7 +63,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     
 	protected void routeThroughCircuit(IpPacket packet) {
 		try {
-	    	RemoteRoutingController.getInstance().initRoute(this.identifier,packet.getDestinationId(),packet.getFlowId());
+	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),packet.getFlowId());
 		}catch(FlowPathExists e) {
 
         }
@@ -95,17 +99,32 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         if (ipPacket.getDestinationId() == this.identifier) {
             TcpPacket deEncapse = (TcpPacket) ipPacket.deEncapsualte();
             if(deEncapse.isACK() && deEncapse.isFIN()){
-                JumboFlow jumboFlow = getJumboFlow(this.identifier,ipPacket.getSourceId());
-                jumboFlow.onFlowFinished(deEncapse.getFlowId());
-                if(jumboFlow.getNumFlows()==0){
-                    RemoteRoutingController.getInstance().recoverPath(this.identifier,ipPacket.getSourceId());
-                }
+            	onFlowFinished(this.identifier,ipPacket.getSourceId(),deEncapse.getFlowId());
             }
             targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
         }
     }
 
-    @Override
+    protected void onFlowFinished(int source, int dest, long flowId) {
+
+        JumboFlow jumboFlow = getJumboFlow(source,dest);
+        jumboFlow.onFlowFinished(flowId);
+        if(jumboFlow.getNumFlows()==0){
+        	recoverPath(source,dest); 
+        	mJumboFlowMap.remove(new ImmutablePair<>(source, dest));
+        }
+		
+	}
+    
+	protected void recoverPath(int source, int dest) {
+		try {
+			getRemoteRouter().recoverPath(source,dest);	
+		}catch(NoPathException e) {
+			
+		}
+	}
+	
+	@Override
     public NetworkDevice getAsNetworkDevice() {
         return this;
     }
@@ -139,4 +158,8 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
                 throw new RuntimeException("bad technology " + technology);
         }
     }
+	
+	protected RemoteRoutingController getRemoteRouter() {
+		return RemoteRoutingController.getInstance();
+	}
 }

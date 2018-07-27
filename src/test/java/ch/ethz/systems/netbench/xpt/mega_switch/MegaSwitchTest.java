@@ -50,7 +50,7 @@ public class MegaSwitchTest {
                 new OutputPortGenerator(conf) {
                     @Override
                     public OutputPort generate(NetworkDevice networkDevice, NetworkDevice networkDevice1, Link link) {
-                        return new OutputPort(networkDevice,networkDevice , link, null) {
+                        return new OutputPort(networkDevice,networkDevice1 , link, null) {
                             @Override
                             public void enqueue(Packet packet) {
 
