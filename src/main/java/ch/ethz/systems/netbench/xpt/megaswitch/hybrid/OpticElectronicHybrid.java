@@ -53,7 +53,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
-		this.electronic.receive(packet);
+		this.electronic.receiveFromEncapsulating(packet);
 		
 	}
     
@@ -63,7 +63,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		}catch(FlowPathExists e) {
 
         }
-        this.optic.receive(packet);
+        this.optic.receiveFromEncapsulating(packet);
 		
 	}
 	@Override

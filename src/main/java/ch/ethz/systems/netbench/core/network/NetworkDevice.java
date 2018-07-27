@@ -232,4 +232,12 @@ public abstract class NetworkDevice {
         return this.sourceIdToInputPort.get(sourceNetworkDeviceId);
     }
 
+	public void receiveFromEncapsulating(Packet packet) {
+		if(((IpPacket)packet).getDestinationId()==this.identifier) {
+			passToEncapsulatingDevice(packet);
+			return;
+		}
+		receive(packet);
+	}
+
 }

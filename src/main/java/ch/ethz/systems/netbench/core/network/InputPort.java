@@ -38,13 +38,9 @@ public class InputPort extends Port {
 
 
 	public void receive(Packet packet) {
-		try{
-			if(((IpPacket)packet).getDestinationId()==encapsulatingDeviceId) {
-				ownNetworkDevice.passToEncapsulatingDevice(packet);
-				return;
-			}
-		}catch (ClassCastException e){
-			//maybe needed for tests, should be removed somehow
+		if(encapsulatingDeviceId!=-1) {
+			ownNetworkDevice.receiveFromEncapsulating(packet);
+			return;
 		}
 
 		ownNetworkDevice.receive(packet);
