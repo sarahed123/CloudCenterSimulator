@@ -245,7 +245,6 @@ public class BaseInitializer {
      * @param partialMap
      */
     private void createEdge(int startVertexId, int endVertexId, HashMap<Integer, NetworkDevice> partialMap) {
-    	
         // Select network devices
         NetworkDevice devA = partialMap.get(startVertexId);
         NetworkDevice devB = partialMap.get(endVertexId);

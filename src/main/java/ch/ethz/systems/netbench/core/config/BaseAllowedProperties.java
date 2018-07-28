@@ -143,6 +143,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+    		"max_dynamic_switch_degree",
             "hybrid_circuit_threshold",
     		"network_type",
     		"dijkstra_vertex_shuffle",

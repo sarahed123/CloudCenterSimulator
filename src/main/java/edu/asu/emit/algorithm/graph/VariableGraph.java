@@ -135,9 +135,9 @@ public class VariableGraph extends Graph {
 		remVertexIdSet.remove(vertexId);
 	}
 	
-	public void addEdge(Pair<Integer,Integer> edge) {
-		super.getAdjacentVertices(new Vertex(edge.getLeft())).add(new Vertex(edge.getRight()));
-		super.getPrecedentVertices(new Vertex(edge.getRight())).add(new Vertex(edge.getLeft()));
+	public void addEdge(int startVertexId, int endVertexId, long weight) {
+		super.addEdge(startVertexId, endVertexId, weight);
+		
 	}
 
     /**

@@ -137,7 +137,7 @@ public class Graph implements BaseGraph, Serializable {
 	 * @param endVertexId       End vertex identifier of the edge
 	 * @param weight            Edge weight
 	 */
-	private void addEdge(int startVertexId, int endVertexId, long weight) {
+	protected void addEdge(int startVertexId, int endVertexId, long weight) {
 
         // Check that the vertex identifiers exist
         if (!idVertexIndex.containsKey(startVertexId) || !idVertexIndex.containsKey(endVertexId) || startVertexId == endVertexId) {

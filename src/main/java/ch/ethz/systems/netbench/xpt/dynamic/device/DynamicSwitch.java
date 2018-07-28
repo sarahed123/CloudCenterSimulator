@@ -7,23 +7,21 @@ import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.OutputPortGenerator;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicDevice;
 
 public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 
-	long mMaxQueueSizeBytes;
-	long mEcnThresholdKBytes;
-	long mDelayNs;
-	long mBandwidthBitPerNs;
+
+	LinkGenerator mLinkGenerator;
+	OutputPortGenerator mOutputPortGenerator;
 	protected DynamicSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary,
 			NBProperties configuration) {
 		super(identifier, transportLayer, intermediary, configuration);
-		 mDelayNs = configuration.getLongPropertyOrFail("link_delay_ns");
-		 mBandwidthBitPerNs = configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns");
-		 mEcnThresholdKBytes = configuration.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes");
-		 mMaxQueueSizeBytes = configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes");
+		mLinkGenerator = new DynamicLinkGenerator(configuration);
+		mOutputPortGenerator = new DynamicOutputPortGenerator(configuration);
 	}
 
 	@Override
@@ -34,8 +32,8 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 
 	@Override
 	public void addConnection(NetworkDevice source,NetworkDevice dest) {
-		Link link = new DynamicLink(mDelayNs, mBandwidthBitPerNs);
-		targetIdToOutputPort.put(dest.getIdentifier(), new DynamicOutuptPort(this, dest,link , mMaxQueueSizeBytes, mEcnThresholdKBytes));
+		Link link = mLinkGenerator.generate(this, dest);
+		targetIdToOutputPort.put(dest.getIdentifier(), mOutputPortGenerator.generate(this, dest, link));
 		((DynamicSwitch)dest).setInputPort(new InputPort(dest, this,link));
 	}
 
@@ -43,27 +41,27 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 	public void removeConnection(NetworkDevice source,NetworkDevice dest) {
 		targetIdToOutputPort.remove(dest.getIdentifier());
 		((DynamicSwitch)dest).removeInputPort(this.identifier);
-		
+
 	}
 
 
 	private void removeInputPort(int identifier) {
 		this.sourceIdToInputPort.remove(identifier);
-		
+
 	}
 
 	@Override
 	protected void receiveFromIntermediary(Packet genericPacket) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	private void setInputPort(InputPort inputPort) {
 		this.sourceIdToInputPort.put(inputPort.getSourceNetworkDevice().getIdentifier(), inputPort);
 	}
 
 
-	
-	
+
+
 
 }
