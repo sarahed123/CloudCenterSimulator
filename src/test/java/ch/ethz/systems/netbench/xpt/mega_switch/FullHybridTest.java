@@ -201,6 +201,27 @@ public class FullHybridTest {
 
         tor1.reset();
     }
+	
+	@Test
+    public void testDoubleFlow(){
+        MockSimpleServer source1 = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockSimpleServer dest1 =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
+        MockSimpleServer source2 = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(4);
+        MockSimpleServer dest2 =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(5));
+        FlowStartEvent fse = new FlowStartEvent(0, source1.getTransportLayer(), dest1.getIdentifier(), 800);
+        FlowStartEvent fse2 = new FlowStartEvent(0, source2.getTransportLayer(), dest2.getIdentifier(), 800);
+
+        MockFullHybrid tor1 = (MockFullHybrid) (BaseInitializer.getInstance().getNetworkDeviceById(0));
+        Simulator.registerEvent(fse);
+        Simulator.registerEvent(fse2);
+        Simulator.runNs(1000000000);
+        assert(tor1.routedThroughCircuit);
+        assert(tor1.routedThroughPacketSwitch);
+        assert(tor1.recoveredPath);
+        assert(router.routed(0,1));
+        assert(router.recovered(0,1));
+        tor1.reset();
+    }
     
     @After
     public void clear() {
