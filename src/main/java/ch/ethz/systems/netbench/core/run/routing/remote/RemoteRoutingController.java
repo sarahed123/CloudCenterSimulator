@@ -14,6 +14,7 @@ import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidExcep
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
+import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
@@ -42,6 +43,9 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		switch(type) {
 		case "Xpander":
 			mInstance = new XpanderRouter(idToNetworkDevice , configuration);
+			break;
+		case "dynamic":
+			mInstance = new DynamicController(idToNetworkDevice, configuration);
 			break;
 		default:
 			throw new PropertyValueInvalidException(configuration,"centered_routing_type");
