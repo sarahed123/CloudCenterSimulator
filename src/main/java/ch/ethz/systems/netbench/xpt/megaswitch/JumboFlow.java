@@ -16,20 +16,20 @@ public class JumboFlow {
         mDest = dest;
     }
 
-    public long getSize(){
+    public long getSizeByte(){
         return mSizeByte;
     }
 
     public void onPacketDispatch(TcpPacket packet) {
         long flowSize = mFlowIdToSize.getOrDefault(packet.getFlowId(),0l);
-
-        if(flowSize>=packet.getSequenceNumber()){
+        long seq = packet.getSequenceNumber() + packet.getDataSizeByte();
+        if(flowSize >= seq){
             return;
         }
-        long difference = packet.getSequenceNumber() - flowSize;
+        long difference = seq - flowSize;
         mSizeByte = mSizeByte + difference;
-        mFlowIdToSize.put(packet.getFlowId(),packet.getSequenceNumber());
-        ;
+        mFlowIdToSize.put(packet.getFlowId(),seq);
+
     }
 
     public void onFlowFinished(long flowId){

@@ -36,7 +36,8 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
         JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
-        if(jumboFlow.getSize()>=circuitThreshold && !jumboFlow.isTrivial()) {
+      
+        if(jumboFlow.getSizeByte()>=circuitThreshold && !jumboFlow.isTrivial()) {
         	try {
         		routeThroughCircuit(encapsulated);
         		return;
