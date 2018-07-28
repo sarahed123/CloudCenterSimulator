@@ -13,7 +13,7 @@ public class PerfectSimpleLink extends Link {
      *  @param delayNs               Delay of each packet in nanoseconds
      * @param bandwidthBitPerNs     Bandwidth of the link (maximum line rate) in bits/ns
      */
-    PerfectSimpleLink(long delayNs, long bandwidthBitPerNs) {
+    protected PerfectSimpleLink(long delayNs, long bandwidthBitPerNs) {
         this.delayNs = delayNs;
         this.bandwidthBitPerNs = bandwidthBitPerNs;
     }

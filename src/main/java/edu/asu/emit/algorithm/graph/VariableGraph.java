@@ -134,6 +134,11 @@ public class VariableGraph extends Graph {
 	public void recoverDeletedVertex(Integer vertexId) {
 		remVertexIdSet.remove(vertexId);
 	}
+	
+	public void addEdge(Pair<Integer,Integer> edge) {
+		super.getAdjacentVertices(new Vertex(edge.getLeft())).add(new Vertex(edge.getRight()));
+		super.getPrecedentVertices(new Vertex(edge.getRight())).add(new Vertex(edge.getLeft()));
+	}
 
     /**
      * Retrieve the weight of directed edge (src, dst).
@@ -282,6 +287,13 @@ public class VariableGraph extends Graph {
 		} else {
 			return super.getVertex(id);
 		}
+	}
+	
+	public void clear() {
+		recoverDeletedEdges();
+		recoverDeletedVertices();
+		this.inEdges.clear();
+		this.outEdges.clear();
 	}
 
 }
