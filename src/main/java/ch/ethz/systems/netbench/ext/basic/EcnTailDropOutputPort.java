@@ -13,7 +13,7 @@ public class EcnTailDropOutputPort extends OutputPort {
     private final long ecnThresholdKBits;
     private final long maxQueueSizeBits;
 
-    EcnTailDropOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
+    protected EcnTailDropOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
         super(ownNetworkDevice, targetNetworkDevice, link, new LinkedBlockingQueue<Packet>());
         this.maxQueueSizeBits = maxQueueSizeBytes * 8L;
         this.ecnThresholdKBits = ecnThresholdKBytes * 8L;

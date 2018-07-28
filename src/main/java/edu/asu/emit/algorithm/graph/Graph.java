@@ -55,10 +55,10 @@ public class Graph implements BaseGraph, Serializable {
 	protected Map<Pair<Integer, Integer>,Long> edgeCapacities= new HashMap<Pair<Integer, Integer>,Long>();
 
     // Maps a vertex identifier to all vertices a directed edges exists from itself to them
-    private final Map<Integer, List<Vertex>> outEdges;
+	protected final Map<Integer, List<Vertex>> outEdges;
 
     // Maps a vertex identifier to all vertices a directed edges exists to itself from them
-    private final Map<Integer, List<Vertex>> inEdges;
+	protected final Map<Integer, List<Vertex>> inEdges;
 
     // Maps a pair of vertex identifiers (an edge) to its weight
     private final Map<Pair<Integer, Integer>, Long> edgeWeights;
@@ -137,7 +137,7 @@ public class Graph implements BaseGraph, Serializable {
 	 * @param endVertexId       End vertex identifier of the edge
 	 * @param weight            Edge weight
 	 */
-	private void addEdge(int startVertexId, int endVertexId, long weight) {
+	protected void addEdge(int startVertexId, int endVertexId, long weight) {
 
         // Check that the vertex identifiers exist
         if (!idVertexIndex.containsKey(startVertexId) || !idVertexIndex.containsKey(endVertexId) || startVertexId == endVertexId) {

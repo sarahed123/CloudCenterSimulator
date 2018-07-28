@@ -37,7 +37,7 @@ public abstract class NetworkDevice {
     protected final NBProperties configuration;
     protected MegaSwitch encapsulatingDevice;
 	protected String techonology;
-    private Map<Integer, InputPort> sourceIdToInputPort;
+	protected Map<Integer, InputPort> sourceIdToInputPort;
 
     /**
      * Constructor of a network device.
