@@ -242,12 +242,12 @@ public class Simulator {
 				System.out.println("Elapsed " + (double)PROGRESS_SHOW_INTERVAL_NS/(double)1000000000 + "s simulation in " + ((realTimeNow - realTime) / 1000.0) + "s real (total progress: " + ((((double) now) / ((double) runtimeNanoseconds)) * 100) + "%).");
 				realTime = realTimeNow;
 
-				if(RemoteRoutingController.getInstance()!=null) {
+				/*if(RemoteRoutingController.getInstance()!=null) {
 					XpanderRouter xpander = (XpanderRouter) RemoteRoutingController.getInstance();
 					xpander.logCurrentState();
 					System.out.println(xpander.getCurrentState());
 					xpander.resetCurrentState();
-				}
+				}*/
 			}
 
 

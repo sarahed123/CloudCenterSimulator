@@ -245,7 +245,6 @@ public class BaseInitializer {
      * @param partialMap
      */
     private void createEdge(int startVertexId, int endVertexId, HashMap<Integer, NetworkDevice> partialMap) {
-    	
         // Select network devices
         NetworkDevice devA = partialMap.get(startVertexId);
         NetworkDevice devB = partialMap.get(endVertexId);
@@ -260,7 +259,6 @@ public class BaseInitializer {
         devA.addConnection(portAtoB);
         InputPort portBtoA = new InputPort(devB,devA,link);
         devB.addIncomingConnection(portBtoA);
-        portAtoB.setInputPort(portBtoA);
         // Duplicate link
         if (linkPairs.contains(new ImmutablePair<>(startVertexId, endVertexId))) {
             throw new IllegalArgumentException(
