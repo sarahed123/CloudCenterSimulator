@@ -32,9 +32,9 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 
 	@Override
 	public void addConnection(NetworkDevice source,NetworkDevice dest) {
-		Link link = mLinkGenerator.generate(this, dest);
-		targetIdToOutputPort.put(dest.getIdentifier(), mOutputPortGenerator.generate(this, dest, link));
-		((DynamicSwitch)dest).setInputPort(new InputPort(dest, this,link));
+		Link link = mLinkGenerator.generate(getSelf(), dest);
+		targetIdToOutputPort.put(dest.getIdentifier(), mOutputPortGenerator.generate(getSelf(), dest, link));
+		((DynamicSwitch)dest).setInputPort(new InputPort(dest, getSelf(),link));
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 	}
 
 
-
-
-
+	protected NetworkDevice getSelf() {
+		return this;
+	}
 }
