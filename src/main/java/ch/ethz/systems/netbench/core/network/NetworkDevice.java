@@ -32,7 +32,7 @@ public abstract class NetworkDevice {
     private final boolean hasTransportLayer;
     protected final int identifier;
     protected final List<Integer> connectedTo;
-    protected final Map<Integer, OutputPort> targetIdToOutputPort;
+    protected Map<Integer, OutputPort> targetIdToOutputPort;
     protected final Intermediary intermediary;
     protected final NBProperties configuration;
     protected MegaSwitch encapsulatingDevice;

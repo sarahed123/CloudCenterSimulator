@@ -19,8 +19,8 @@ import edu.asu.emit.algorithm.graph.VariableGraph;
 import edu.asu.emit.algorithm.graph.Vertex;
 
 public class DynamicController extends RemoteRoutingController {
-	Map<Integer, NetworkDevice> mIdToNetworkDevice;
-	int max_degree;
+	protected Map<Integer, NetworkDevice> mIdToNetworkDevice;
+	protected int max_degree;
 	public DynamicController(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
 		super(configuration);
 		mPaths = new HashMap<>();
