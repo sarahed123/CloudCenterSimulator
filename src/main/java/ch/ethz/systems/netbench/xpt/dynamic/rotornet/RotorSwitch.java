@@ -46,9 +46,5 @@ public class RotorSwitch extends DynamicSwitch {
         targetIdToOutputPort = map;
     }
 
-    @Override
-    protected NetworkDevice getSelf(){
-        return null;
-    }
 
 }

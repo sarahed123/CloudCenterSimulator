@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class RotorNetController extends DynamicController {
     int mNumCycles;
+    int mCurrCycle;
     public RotorNetController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
         if(max_degree >= idToNetworkDevice.size()-1){
@@ -20,6 +21,7 @@ public class RotorNetController extends DynamicController {
         }
         mNumCycles = mIdToNetworkDevice.size()/max_degree;
         setInitialConnections();
+        mCurrCycle = 0;
     }
 
     private void setInitialConnections() {
@@ -35,16 +37,30 @@ public class RotorNetController extends DynamicController {
 
     @Override
     public void initRoute(int source, int dest, long flowId) {
-        NetworkDevice[] devices = (NetworkDevice[]) mIdToNetworkDevice.keySet().toArray();
-        for(int i=0 ; i<devices.length; i+=1){
-            RotorSwitch device = (RotorSwitch) devices[i];
-            Map<Integer, OutputPort> outputMap = device.getOutputportMap();
-            Map<Integer, InputPort> inputMap = device.getInputPortmap();
-            RotorSwitch nextDevice = (RotorSwitch) devices[(i+1) % devices.length];
+    	
+    	RotorSwitch[] devices = (RotorSwitch[]) mIdToNetworkDevice.values().toArray();
+    	mCurrCycle++;
+    	if(mCurrCycle==mNumCycles) {
+    		resetAllMaps(devices);
+    		mCurrCycle = 0;
+    		return;
+    	}
+        Map<Integer, OutputPort> tempMap = devices[0].getOutputportMap();
+        for(int i=0 ; i<devices.length-1; i+=1){
+            RotorSwitch device = devices[i];
+            RotorSwitch nextDevice = devices[(i+1)];
             device.setOutputportMap(nextDevice.getOutputportMap());
-            RotorSwitch prevDevice = (RotorSwitch) devices[(i-1)%devices.length];
-            device.setInputPortMap(prevDevice.getInputPortmap());
-
         }
+        devices[devices.length-1].setOutputportMap(tempMap);
+        
     }
+
+	private void resetAllMaps(RotorSwitch[] devices) {
+		for(int i=0 ; i<devices.length-1; i+=1){
+            RotorSwitch device = devices[i];
+            Map<Integer, OutputPort> map = device.getOutputportMap();
+            RotorOutputPort first = (RotorOutputPort) map.values().toArray()[0];
+            first.getOriginalDevice().setOutputportMap(map);
+		}
+	}
 }

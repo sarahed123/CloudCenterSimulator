@@ -104,8 +104,12 @@ public abstract class OutputPort extends Port{
     }
     
     protected void registerPacketArrivalEvent(Packet packet) {
-    	targetNetworkDevice.getSourceInputPort(this.getOwnId()).registerPacketArrivalEvent(packet);
+    	getTargetInputPort().registerPacketArrivalEvent(packet);
 
+    }
+    
+    protected InputPort getTargetInputPort() {
+    	return targetNetworkDevice.getSourceInputPort(this.getOwnId());
     }
 
     /**
