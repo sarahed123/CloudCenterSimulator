@@ -17,7 +17,7 @@ import java.util.Queue;
 public abstract class OutputPort extends Port{
 
     // Internal state
-    private boolean isSending;          // True iff the output port is using the medium to send a packet
+    protected boolean isSending;          // True iff the output port is using the medium to send a packet
     private final Queue<Packet> queue;  // Current queue of packets to send
     private long bufferOccupiedBits;    // Amount of bits currently occupied of the buffer
 
@@ -60,10 +60,14 @@ public abstract class OutputPort extends Port{
     
     protected void registerPacketDispatchedEvent(Packet packet) {
     	Simulator.registerEvent(new PacketDispatchedEvent(
-                packet.getSizeBit() / link.getBandwidthBitPerNs(),
+                getDispatchTime(packet),
                 packet,
                 this
         ));
+    }
+
+    protected long getDispatchTime(Packet packet){
+        return packet.getSizeBit() / link.getBandwidthBitPerNs();
     }
 
     /**

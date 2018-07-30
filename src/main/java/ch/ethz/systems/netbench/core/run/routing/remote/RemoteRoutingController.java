@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorNetController;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
@@ -46,6 +47,9 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 			break;
 		case "dynamic":
 			mInstance = new DynamicController(idToNetworkDevice, configuration);
+			break;
+			case "rotor_net":
+			mInstance = new RotorNetController(idToNetworkDevice,configuration);
 			break;
 		default:
 			throw new PropertyValueInvalidException(configuration,"centered_routing_type");

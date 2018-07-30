@@ -9,7 +9,7 @@ import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 
 public class DynamicSwitchGenerator extends NetworkDeviceGenerator {
 
-	IntermediaryGenerator intermediaryGenerator;
+	protected IntermediaryGenerator intermediaryGenerator;
 	public DynamicSwitchGenerator(NBProperties configuration) {
 		super(configuration);
 		intermediaryGenerator = new DemoIntermediaryGenerator(configuration);
