@@ -17,7 +17,6 @@ public class PacketArrivalEvent extends Event {
 	 */
 	private static final long serialVersionUID = -3494066931483272486L;
 	private final int arrivalNetworkDeviceId;
-	private final int sourceNetworkDeviceId;
     private final Packet packet;
     private final InputPort inputPort;
     /**
@@ -27,11 +26,10 @@ public class PacketArrivalEvent extends Event {
      * @param packet                    Packet instance which will arrive
      * @param inputPort                 The input port the package is arriving to
      */
-    PacketArrivalEvent(long timeFromNowNs, Packet packet, InputPort inputPort) {
+    protected PacketArrivalEvent(long timeFromNowNs, Packet packet, InputPort inputPort) {
         super(timeFromNowNs);
         this.packet = packet;
         this.arrivalNetworkDeviceId = inputPort.getOwnNetworkDevice().getIdentifier();
-        this.sourceNetworkDeviceId = inputPort.getSourceNetworkDevice().getIdentifier();
         this.inputPort = inputPort;
     }
 

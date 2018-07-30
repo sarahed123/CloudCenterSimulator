@@ -6,7 +6,7 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 public class InputPort extends Port {
 	int encapsulatingDeviceId;
 	NetworkDevice sourceNetworkDevice;
-	Link link;
+	protected Link link;
 	public InputPort(NetworkDevice ownNetworkDevice, NetworkDevice sourceNetworkDevice, Link link) {
 		this.ownNetworkDevice = ownNetworkDevice;
 		this.sourceNetworkDevice = sourceNetworkDevice;
