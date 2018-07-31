@@ -1,11 +1,7 @@
 package ch.ethz.systems.netbench.xpt.dynamic.rotornet;
 
-import ch.ethz.systems.netbench.core.Simulator;
-import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
-import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLink;
-import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import java.lang.Integer;
 import java.util.*;
@@ -13,7 +9,8 @@ import java.util.*;
 public class RotorMap extends LinkedList<Integer> {
     LinkGenerator mLinkGeneraor;
     RotorSwitch  mCurrentDevice;
-    RotorOutputPortGenerator mOutputPortGenerator;
+    static int sNumOfNodes;
+    protected RotorOutputPortGenerator mOutputPortGenerator;
     HashMap<Integer, RotorOutputPort> mOutputPortMap;
     RotorSwitch mOriginalDevice;
     static Random mRnd;
@@ -39,13 +36,23 @@ public class RotorMap extends LinkedList<Integer> {
         }
         RotorOutputPort port = mOutputPortMap.get(dest);
         if(port == null) {
-            RotorNetController controller = (RotorNetController) RemoteRoutingController.getInstance();
+            RotorNetController controller = (RotorNetController) getController();
             RotorSwitch rs = controller.getDevice(dest);
             port = (RotorOutputPort) mOutputPortGenerator.generate(mCurrentDevice, rs, mLinkGeneraor.generate(mCurrentDevice, rs));
             port.setRotorMap(this);
             mOutputPortMap.put(dest,port);
         }
         return port;
+    }
+
+    @Override
+    public boolean contains(Object var1) {
+        int dest = (Integer) var1;
+        if(super.contains(mCurrentDevice.getIdentifier())){
+
+            return dest == ((mCurrentDevice.getIdentifier()+1) % sNumOfNodes);
+        }
+        return super.contains(var1);
     }
 
     public RotorOutputPort getRandomOutputPort(){
@@ -64,5 +71,9 @@ public class RotorMap extends LinkedList<Integer> {
 
     public void clearOutputPorts() {
         mOutputPortMap.clear();
+    }
+
+    protected RemoteRoutingController getController(){
+        return RemoteRoutingController.getInstance();
     }
 }

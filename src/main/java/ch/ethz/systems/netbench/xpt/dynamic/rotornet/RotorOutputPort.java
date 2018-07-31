@@ -1,16 +1,12 @@
 package ch.ethz.systems.netbench.xpt.dynamic.rotornet;
 
-import java.util.Queue;
-
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.InputPort;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicOutuptPort;
-import com.sun.org.apache.bcel.internal.generic.NOP;
 
 public class RotorOutputPort extends DynamicOutuptPort {
 	RotorSwitch mOriginalDevice;
@@ -21,7 +17,7 @@ public class RotorOutputPort extends DynamicOutuptPort {
 			long maxQueueSizeBytes, long ecnThresholdKBytes) {
 		super(ownNetworkDevice, targetNetworkDevice, link, maxQueueSizeBytes, ecnThresholdKBytes);
 		mOriginalDevice = (RotorSwitch) ownNetworkDevice;
-		this.ownNetworkDevice = null;
+		this.ownNetworkDevice = ownNetworkDevice;
 	}
 
 	public RotorSwitch getOriginalDevice(){
@@ -45,16 +41,23 @@ public class RotorOutputPort extends DynamicOutuptPort {
 		if(isSending){
 			time += (mDispatchTime - Simulator.getCurrentTime()); // mDispatchTime already includes current time
 		}
+
 		if(Simulator.getCurrentTime() + time > RotorNetController.sNextReconfigurationTime){
-			throw new BufferOverflowException();
+			onConfigurationTimeExceeded();
 		}
+
 		super.enqueue(packet);
+	}
+
+	protected void onConfigurationTimeExceeded() {
+		throw new ReconfigurationDeadlineException();
 	}
 
 	@Override
 	protected long getDispatchTime(Packet packet){
 		long time = packet.getSizeBit() / link.getBandwidthBitPerNs();
 		mDispatchTime = Simulator.getTimeFromNow(time);
+
 		return time;
 	}
 
