@@ -36,8 +36,8 @@ public class RotorReconfigurationEvent extends Event {
         @Override
         public void trigger() {
             RotorNetController rnc = (RotorNetController) getController();
-            rnc.startTransmmisions();
             rnc.registerReconfigurationEvent();
+            rnc.startTransmmisions();
         }
     }
 }

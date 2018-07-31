@@ -2,16 +2,14 @@ package ch.ethz.systems.netbench.xpt.dynamic.rotornet;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.network.InputPort;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class RotorNetController extends DynamicController {
-    public static long sNextReconfigurationTime;
+    public static long sNextReconfigurationTime = 0;
     protected final long mReconfigurationInterval;
     protected final long mReconfigurationTime;
     int mNumCycles;
@@ -28,9 +26,10 @@ public class RotorNetController extends DynamicController {
         }
         mReconfigurationTime = configuration.getLongPropertyOrFail("rotor_net_reconfiguration_time");
         mReconfigurationInterval = configuration.getLongPropertyOrFail("rotor_net_reconfiguration_interval");
-        RotorSwitch.setMaxBufferSize(configuration.getLongPropertyOrFail("max_rotor_buffer_size"));
+        RotorSwitch.setMaxBufferSizeByte(configuration.getLongPropertyOrFail("max_rotor_buffer_size_byte"));
         RotorMap.setRandom(Simulator.selectIndependentRandom("random_rotor_port"));
         mNumCycles = mIdToNetworkDevice.size()/max_degree;
+        RotorMap.sNumOfNodes = idToNetworkDevice.size();
         mRotorMaps = new ArrayList<>();
         mCurrCycle = 0;
         mRotorsArray = (RotorSwitch[]) mIdToNetworkDevice.values().toArray(new RotorSwitch[mIdToNetworkDevice.size()]);
@@ -100,5 +99,7 @@ public class RotorNetController extends DynamicController {
 
     protected void registerReconfigurationEvent() {
         Simulator.registerEvent(new RotorReconfigurationEvent(mReconfigurationInterval,mReconfigurationTime));
+        sNextReconfigurationTime = Simulator.getCurrentTime() + mReconfigurationInterval;
+
     }
 }

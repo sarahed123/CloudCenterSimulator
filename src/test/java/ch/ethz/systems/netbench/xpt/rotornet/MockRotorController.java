@@ -16,5 +16,7 @@ public class MockRotorController extends RotorNetController {
 
     protected void registerReconfigurationEvent() {
         Simulator.registerEvent(new MockReconfigurationEvent(mReconfigurationInterval,mReconfigurationTime));
+        sNextReconfigurationTime = Simulator.getCurrentTime() + mReconfigurationInterval;
+
     }
 }

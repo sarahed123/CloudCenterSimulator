@@ -143,7 +143,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
-            "max_rotor_buffer_size",
+            "max_rotor_buffer_size_byte",
             "rotor_net_reconfiguration_interval",
             "rotor_net_reconfiguration_time",
     		"max_dynamic_switch_degree",

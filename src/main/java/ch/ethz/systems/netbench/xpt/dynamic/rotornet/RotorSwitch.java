@@ -1,23 +1,19 @@
 package ch.ethz.systems.netbench.xpt.dynamic.rotornet;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
-import ch.ethz.systems.netbench.core.random.RandomManager;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Map;
 
 public class RotorSwitch extends DynamicSwitch {
-    RotorMap mRotorMap;
-    private long mCurrentBufferSize;
-    private static long sMaxBufferSize;
+    protected RotorMap mRotorMap;
+    protected long mCurrentBufferSize;
+    private static long sMaxBufferSizeBit;
     private LinkedList<Packet> mBuffer;
     /**
      * Constructor of a network device.
@@ -43,16 +39,15 @@ public class RotorSwitch extends DynamicSwitch {
             try{
                 forwardToNextSwitch(ipPacket,ipPacket.getDestinationId());
                 return;
-            }catch (BufferOverflowException e){
-
-            }catch(NoPathException e){
+            }catch (ReconfigurationDeadlineException |  NoPathException e){
                 sendToRandomDestination(ipPacket);
+                return;
             }
         }else {
             try {
                 forwardToNextSwitch(ipPacket, ipPacket.getDestinationId());
                 return;
-            } catch (BufferOverflowException e) {
+            } catch (ReconfigurationDeadlineException e) {
 
             } catch (NoPathException e) {
 
@@ -70,13 +65,13 @@ public class RotorSwitch extends DynamicSwitch {
 
     void sendPendingData(){
         for(int i = 0; i<mBuffer.size(); i++){
+            IpPacket p = null;
             try{
-                IpPacket p = (IpPacket) mBuffer.get(i);
+                p = (IpPacket) mBuffer.pop();
+
                 forwardToNextSwitch(p,p.getDestinationId());
-            }catch (BufferOverflowException e){
-
-            }catch(NoPathException e){
-
+            }catch (ReconfigurationDeadlineException | NoPathException e){
+                mBuffer.addLast(p);
             }
         }
     }
@@ -89,7 +84,7 @@ public class RotorSwitch extends DynamicSwitch {
                 try{
                     forwardToNextSwitch(ipPacket,target.getIdentifier());
                     return;
-                }catch (BufferOverflowException e){
+                }catch (ReconfigurationDeadlineException e){
 
                 }
             }
@@ -97,15 +92,15 @@ public class RotorSwitch extends DynamicSwitch {
     }
 
     private boolean hasResources(Packet genericPacket) {
-        return mCurrentBufferSize + genericPacket.getSizeBit() <= sMaxBufferSize;
+        return mCurrentBufferSize + genericPacket.getSizeBit() <= sMaxBufferSizeBit;
     }
 
-    static void setMaxBufferSize(long size){
-        sMaxBufferSize = size;
+    static void setMaxBufferSizeByte(long sizeByte){
+        sMaxBufferSizeBit = sizeByte*8;
     }
 
     private void forwardToNextSwitch(IpPacket ipPacket,int destination) {
-        if(mRotorMap.contains(ipPacket.getDestinationId())){
+        if(mRotorMap.contains(destination)){
             RotorOutputPort port = mRotorMap.getOutpurPort(destination);
             port.enqueue(ipPacket);
             return;
@@ -120,7 +115,7 @@ public class RotorSwitch extends DynamicSwitch {
 
 
 
-    void addConnection(int dest) {
+    protected void addConnection(int dest) {
         mRotorMap.put(dest);
     }
 
@@ -131,5 +126,6 @@ public class RotorSwitch extends DynamicSwitch {
     public void setRotortMap(RotorMap rotortMap) {
         rotortMap.clearOutputPorts();
         this.mRotorMap = rotortMap;
+        mRotorMap.setCurrentDevice(this);
     }
 }

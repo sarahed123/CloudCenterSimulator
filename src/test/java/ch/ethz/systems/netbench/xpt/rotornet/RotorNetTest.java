@@ -3,16 +3,19 @@ package ch.ethz.systems.netbench.xpt.rotornet;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.network.Packet;
+import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+import ch.ethz.systems.netbench.core.run.infrastructure.NetworkDeviceGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
+import ch.ethz.systems.netbench.ext.demo.DemoIntermediary;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
-import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorNetController;
-import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorOutputPortGenerator;
-import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.dynamic.rotornet.*;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import com.sun.org.apache.regexp.internal.RE;
 import org.junit.After;
@@ -46,12 +49,12 @@ public class RotorNetTest {
         runConfigWriter2.write("network_type=optic\n");
         runConfigWriter2.write("link_delay_ns=0\n");
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=50000\n");
-        runConfigWriter2.write("output_port_max_queue_size_bytes=50000\n");
+        runConfigWriter2.write("output_port_max_queue_size_bytes=500000\n");
         runConfigWriter2.write("max_dynamic_switch_degree=4\n");
         runConfigWriter2.write("link_bandwidth_bit_per_ns=10\n");
-        runConfigWriter2.write("rotor_net_reconfiguration_time=20\n");
-        runConfigWriter2.write("rotor_net_reconfiguration_interval=180\n");
-        runConfigWriter2.write("max_rotor_buffer_size=50000\n");
+        runConfigWriter2.write("rotor_net_reconfiguration_time=20000\n");
+        runConfigWriter2.write("rotor_net_reconfiguration_interval=180000\n");
+        runConfigWriter2.write("max_rotor_buffer_size_byte=50000\n");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),
@@ -62,11 +65,32 @@ public class RotorNetTest {
                 BaseAllowedProperties.BASE_DIR_VARIANTS
         );
 
-        Simulator.setup(0, conf2);
-        BaseInitializer.getInstance().extend(0,null,new RotorSwitchGenerator(conf2),
-                null,null);
+        Simulator.setup(1, conf2);
+        BaseInitializer.getInstance().extend(0, null, new NetworkDeviceGenerator(conf2) {
+                    @Override
+                    public NetworkDevice generate(int i) {
+                        return new MockRotorSwitch(i,null,new Intermediary(){
+                            @Override
+                            public Packet adaptOutgoing(Packet packet) {
+                                return packet;
+                            }
+
+                            @Override
+                            public Packet adaptIncoming(Packet packet) {
+                                return packet;
+                            }
+                        },conf2);
+                    }
+
+                    @Override
+                    public NetworkDevice generate(int i, TransportLayer transportLayer) {
+                        return null;
+                    }
+                },
+                null, null);
         HashMap<Integer,NetworkDevice> hm = BaseInitializer.getInstance().createInfrastructure(conf2);
         controller = new MockRotorController(hm,conf2);
+        MockRotorMap.setRouter(controller);
         MockReconfigurationEvent.setController(controller);
         BaseInitializer.getInstance().finalize();
         tempRunConfig2.delete();
@@ -131,13 +155,73 @@ public class RotorNetTest {
 
     @Test
     public void testSinglePacket(){
+        MockRotorPacket packet = new MockRotorPacket(0,1000,0,1);
+        MockRotorSwitch r1 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(0);
+        r1.receive(packet);
+        Simulator.runNs(1000);
+        assert(packet.path.toString().equals("[0, 1]"));
+
+    }
+
+    @Test
+    public void testDoubleForward(){
+        MockRotorPacket packet = new MockRotorPacket(0,1000,0,19);
+        MockRotorSwitch r1 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(0);
+        r1.receive(packet);
+        Simulator.runNs(2000000);
+        MockRotorSwitch r6 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(6);
+
+        assert(packet.path.toString().equals("[0, 6, 19]"));
 
     }
 
     @Test
     public void testReconfigurationEvents(){
-        Simulator.runNs(1000);
+        MockReconfigurationEvent.reconfigurationEventCount = 0;
+        Simulator.runNs(1000000);
         assert(MockReconfigurationEvent.reconfigurationEventCount==5);
+    }
+
+    @Test
+    public void testCantSendReconfiguration(){
+        MockRotorPacket packet = new MockRotorPacket(0,10000,0,1);
+        MockRotorPacket packet2 = new MockRotorPacket(0,1790000/8,0,1);
+
+        MockRotorSwitch r1 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(0);
+        MockRotorOutputPort rop = (MockRotorOutputPort) r1.getRotorMap().getOutpurPort(1);
+
+        r1.receive(packet2);
+        r1.receive(packet);
+
+
+        Simulator.runNs(10000);
+        assert(rop.timeExceptionThrown);
+
+    }
+
+    @Test
+    public void testCantSendAllOverloaded(){
+        MockRotorPacket packet = new MockRotorPacket(0,10000,0,19);
+
+        MockRotorSwitch r0 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(0);
+        MockRotorSwitch r1 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(1);
+        MockRotorSwitch r6 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(6);
+        MockRotorSwitch r11 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(11);
+        MockRotorSwitch r16 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(16);
+        r1.setBufferSize(1000000000);
+        r6.setBufferSize(1000000000);
+        r16.setBufferSize(1000000000);
+        r11.setBufferSize(1000000000);
+
+
+
+        r0.receive(packet);
+
+
+        Simulator.runNs(10000);
+        System.out.println(packet.path);
+        assert(packet.path.toString().equals("[0]"));
+
     }
 
     @After
