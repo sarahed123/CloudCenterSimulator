@@ -1,6 +1,5 @@
 package ch.ethz.systems.netbench.core.run;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.run.infrastructure.IntermediaryGenerator;
@@ -22,6 +21,8 @@ import ch.ethz.systems.netbench.ext.flowlet.UniformFlowletIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.hybrid.EcmpThenValiantSwitchGenerator;
 import ch.ethz.systems.netbench.ext.valiant.RangeValiantSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.asaf.routing.priority.PriorityFlowletIntermediaryGenerator;
+import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenodctcp.NewRenoDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
@@ -119,6 +120,12 @@ class InfrastructureSelector {
 
             case "ecmp_then_source_routing_switch":
                 return new EcmpThenSourceRoutingSwitchGenerator(intermediaryGenerator, configuration.getGraphDetails().getNumNodes(), configuration);
+
+            case "hybrid_optic_electronic":
+                return new ElectronicOpticHybridGenerator(intermediaryGenerator,configuration);
+
+            case "rotor_switch":
+                return new RotorSwitchGenerator(intermediaryGenerator,configuration);
 
             default:
                 throw new PropertyValueInvalidException(
@@ -262,6 +269,9 @@ class InfrastructureSelector {
                 
             case "remote":
                 return new RemoteRoutingTransportLayerGenerator(configuration);
+
+            case "null":
+                return new NullTrasportLayer(configuration);
 
             default:
                 throw new PropertyValueInvalidException(

@@ -51,9 +51,10 @@ public class MainFromProperties {
 
             // Setup simulator (it is now public known)
             Simulator.setup(seed, runConfigurations.get(0));
+            manageTopology(runConfigurations.get(0));
+
             for(int j = 0;j<runConfigurations.size();j++){
             	SimulationLogger.copyRunConfiguration(runConfigurations.get(j));
-            	manageTopology(runConfigurations.get(j));
             	HashMap<Integer, NetworkDevice> map = extendInfrastructure(runConfigurations.get(j),j);
             	populateRoutingState(map,runConfigurations.get(j));
             }
@@ -143,7 +144,7 @@ public class MainFromProperties {
         for (int i = 1; i < args.length; i++) {
             try{
                 int index = args[i].indexOf('=');
-                if(index!=-1){
+                if(index==-1){
                     throw new InvalidPropertiesFormatException("arg " + i + " is not a valid property format");
                 }
                 String param = args[i].substring(0, index);
@@ -151,7 +152,8 @@ public class MainFromProperties {
                 runConfiguration.overrideProperty(param, value);
             } catch (InvalidPropertiesFormatException e) {
                 runConfiguration = new NBProperties(
-                        args[0],
+                        args[i],
+                        BaseAllowedProperties.LOG,
                         BaseAllowedProperties.PROPERTIES_RUN,
                         BaseAllowedProperties.EXTENSION,
                         BaseAllowedProperties.EXPERIMENTAL,
@@ -215,7 +217,7 @@ public class MainFromProperties {
         );
         
         // Finished infrastructure
-        System.out.println("Finished creating infrastructure.\n");
+        System.out.println("Finished creating infrastructure for network num " + networkNum +"\n");
 
         return initializer.createInfrastructure(configuration);
 
@@ -279,9 +281,6 @@ public class MainFromProperties {
 
         // Topology extension
         if (configuration.isPropertyDefined("scenario_topology_extend_with_servers")) {
-        	if(configuration.isExtendedTopology()) {
-        		throw new RuntimeException("Topology cannot be extended twice");
-        	}
             if (configuration.getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("regular")) {
 
                 // Number of servers to add to each transport layer node

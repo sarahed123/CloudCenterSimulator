@@ -35,7 +35,7 @@ public class HybridPacketSwitchTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
-        runConfigWriter.write("hybrid_circuit_threshold=0");
+        runConfigWriter.write("hybrid_circuit_threshold_byte=0");
 
         runConfigWriter.close();
         NBProperties conf = new NBProperties(

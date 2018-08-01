@@ -24,7 +24,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
     public OpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
-        circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold");
+        circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
         mJumboFlowMap = new HashMap<>();
 
     }
@@ -69,6 +69,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
         }
         this.optic.receiveFromEncapsulating(packet);
+		SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
 		
 	}
 	@Override
@@ -80,11 +81,11 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     public void extend(NetworkDevice networkDevice, NBProperties networkConf){
         String networkType = networkConf.getPropertyOrFail("network_type");
         switch (networkType){
-            case "optic":
+            case "circuit_switch":
                 this.optic = networkDevice;
                 this.optic.setEncapsulatingDevice(this);
                 break;
-            case "electronic":
+            case "packet_switch":
                 this.electronic = networkDevice;
                 this.electronic.setEncapsulatingDevice(this);
                 break;

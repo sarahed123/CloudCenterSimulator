@@ -37,11 +37,11 @@ public class PacketArrivalEvent extends Event {
     public void trigger() {
         inputPort.receive(packet);
     }
-    
-    protected NetworkDevice getNetworkDevice() {
+
+    /*protected NetworkDevice getNetworkDevice() {
 		return BaseInitializer.getInstance().getNetworkDeviceById(arrivalNetworkDeviceId);
-    	
-    }
+
+    }*/
 
     @Override
     public String toString() {
