@@ -130,6 +130,29 @@ public class Graph implements BaseGraph, Serializable {
 
 	}
 
+	protected void verifyNewEdge(int startVertexId, int endVertexId, long weight){
+        // Check that the vertex identifiers exist
+        if (!idVertexIndex.containsKey(startVertexId) || !idVertexIndex.containsKey(endVertexId) || startVertexId == endVertexId) {
+            throw new IllegalArgumentException("Graph: addEdge: the edge (" + startVertexId + ", " + endVertexId + ") does not exist in the graph.");
+        }
+
+        // Check that the edge does not already exist
+        if (edgeWeights.containsKey(new ImmutablePair<>(startVertexId, endVertexId))) {
+
+            throw new DuplicateEdgeException("Graph: addEdge: the edge (" + startVertexId + ", " + endVertexId + ") already exists.");
+        }
+    }
+
+    protected void addVerifiedEdge(int startVertexId, int endVertexId, long weight){
+        // Add to inward and outward edge list
+        outEdges.get(startVertexId).add(idVertexIndex.get(endVertexId));
+        inEdges.get(endVertexId).add(idVertexIndex.get(startVertexId));
+
+        // Store into edge weight map
+        edgeWeights.put(new ImmutablePair<>(startVertexId, endVertexId), weight);
+
+    }
+
 	/**
 	 * Add edge (start, end): weight to the graph.
 	 *
@@ -139,22 +162,8 @@ public class Graph implements BaseGraph, Serializable {
 	 */
 	protected void addEdge(int startVertexId, int endVertexId, long weight) {
 
-        // Check that the vertex identifiers exist
-        if (!idVertexIndex.containsKey(startVertexId) || !idVertexIndex.containsKey(endVertexId) || startVertexId == endVertexId) {
-            throw new IllegalArgumentException("Graph: addEdge: the edge (" + startVertexId + ", " + endVertexId + ") does not exist in the graph.");
-        }
-
-        // Check that the edge does not already exist
-        if (edgeWeights.containsKey(new ImmutablePair<>(startVertexId, endVertexId))) {
-            throw new IllegalArgumentException("Graph: addEdge: the edge (" + startVertexId + ", " + endVertexId + ") already exists.");
-        }
-
-        // Add to inward and outward edge list
-        outEdges.get(startVertexId).add(idVertexIndex.get(endVertexId));
-        inEdges.get(endVertexId).add(idVertexIndex.get(startVertexId));
-
-        // Store into edge weight map
-        edgeWeights.put(new ImmutablePair<>(startVertexId, endVertexId), weight);
+        verifyNewEdge(startVertexId,endVertexId,weight);
+        addVerifiedEdge(startVertexId,endVertexId,weight);
 
     }
 

@@ -30,13 +30,14 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
     @Override
     public void receive(Packet genericPacket) {
+
         Encapsulatable packet = (Encapsulatable) genericPacket;
 
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
         TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
         JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
-      
+
         if(jumboFlow.getSizeByte()>=circuitThreshold && !jumboFlow.isTrivial()) {
         	try {
         		routeThroughCircuit(encapsulated);
@@ -120,6 +121,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     
 	protected void recoverPath(int source, int dest) {
 		try {
+
 			getRemoteRouter().recoverPath(source,dest);	
 		}catch(NoPathException e) {
 			
