@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.dynamic.rotornet;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
@@ -35,11 +36,19 @@ public class RotorSwitch extends DynamicSwitch {
     @Override
     public void receive(Packet genericPacket) {
         IpPacket ipPacket = (IpPacket) genericPacket;
+        boolean deadline = false;
+        boolean nopath = false;
         if(ipPacket.getSourceId()==this.getIdentifier()){
             try{
                 forwardToNextSwitch(ipPacket,ipPacket.getDestinationId());
+                SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_DIRECT_FORWARD");
                 return;
-            }catch (ReconfigurationDeadlineException |  NoPathException e){
+            }catch (NoPathException e){
+                nopath = true;
+                sendToRandomDestination(ipPacket);
+                return;
+            }catch (ReconfigurationDeadlineException e){
+                deadline = true;
                 sendToRandomDestination(ipPacket);
                 return;
             }
@@ -48,19 +57,33 @@ public class RotorSwitch extends DynamicSwitch {
                 forwardToNextSwitch(ipPacket, ipPacket.getDestinationId());
                 return;
             } catch (ReconfigurationDeadlineException e) {
-
+                deadline = true;
             } catch (NoPathException e) {
-
-
+                nopath = true;
             }
         }
         if(hasResources(genericPacket)){
-            mBuffer.add(genericPacket);
-            mCurrentBufferSize+= genericPacket.getSizeBit();
+            String counter_name = "ROTOR_PACKET_BUFFERED";
+            if(nopath) counter_name = "ROTOR_PACKET_BUFFERED_NO_PATH";
+            if(deadline) counter_name = "ROTOR_PACKET_BUFFERED_DEADLINE";
+            SimulationLogger.increaseStatisticCounter(counter_name);
+            addToBuffer(genericPacket);
+
         }
 
 
 
+    }
+
+    private void addToBuffer(Packet genericPacket) {
+        mBuffer.addLast(genericPacket);
+        mCurrentBufferSize+= genericPacket.getSizeBit();
+    }
+
+    private Packet popFromBuffer(){
+        Packet p = mBuffer.pop();
+        mCurrentBufferSize -= p.getSizeBit();
+        return p;
     }
 
     void sendPendingData(){
@@ -68,11 +91,11 @@ public class RotorSwitch extends DynamicSwitch {
         for(int i = 0; i<size; i++){
             IpPacket p = null;
             try{
-                p = (IpPacket) mBuffer.pop();
+                p = (IpPacket) popFromBuffer();
 
                 forwardToNextSwitch(p,p.getDestinationId());
             }catch (ReconfigurationDeadlineException | NoPathException e){
-                mBuffer.addLast(p);
+                addToBuffer(p);
             }
         }
     }
@@ -84,6 +107,8 @@ public class RotorSwitch extends DynamicSwitch {
             if(target.hasResources(ipPacket)){
                 try{
                     forwardToNextSwitch(ipPacket,target.getIdentifier());
+                    SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_RANDOM_FORWARD");
+
                     return;
                 }catch (ReconfigurationDeadlineException e){
 

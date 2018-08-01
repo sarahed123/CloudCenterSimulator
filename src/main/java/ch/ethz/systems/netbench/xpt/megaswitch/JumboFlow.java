@@ -26,6 +26,7 @@ public class JumboFlow {
         if(flowSize >= seq){
             return;
         }
+
         long difference = seq - flowSize;
         mSizeByte = mSizeByte + difference;
         mFlowIdToSize.put(packet.getFlowId(),seq);
@@ -33,6 +34,9 @@ public class JumboFlow {
     }
 
     public void onFlowFinished(long flowId){
+        if(!mFlowIdToSize.containsKey(flowId)){
+            return;
+        }
         long flowSize = mFlowIdToSize.remove(flowId);
         this.mSizeByte -= flowSize;
     }

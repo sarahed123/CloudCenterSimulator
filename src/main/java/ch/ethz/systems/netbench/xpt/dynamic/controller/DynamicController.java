@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -38,12 +39,14 @@ public class DynamicController extends RemoteRoutingController {
 	@Override
 	public void initRoute(int source, int dest, long flowId) {
 		Pair<Integer, Integer> pair = new ImmutablePair<>(source,dest);
+
 		Vertex sourceVertex = new Vertex(source);
 		Vertex destVertex = new Vertex(dest);
 		if(mPaths.containsKey(pair)) {
 			throw new FlowPathExists(flowId);
 		}
 		if(mG.getAdjacentVertices(sourceVertex).size() >= max_degree || mG.getPrecedentVertices(destVertex).size() >= max_degree) {
+			SimulationLogger.increaseStatisticCounter("DYNAMIC_CONTROLLER_NO_PATH");
 			throw new NoPathException();
 		}
 		((VariableGraph)mG).addEdge(source,dest,1);
@@ -63,8 +66,10 @@ public class DynamicController extends RemoteRoutingController {
 
 	@Override
 	public void recoverPath(int src, int dst) {
+		if(!((VariableGraph)mG).hasEdge(src,dst)){
+			return;
+		}
 		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(src, dst);
-
 		((VariableGraph)mG).deleteEdge(pair);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
 		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));

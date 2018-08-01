@@ -126,7 +126,8 @@ public class VariableGraph extends Graph {
 		remVertexIdSet.clear();
 	}
 
-    /**
+
+	/**
      * Recover ('un-delete') a specific vertex.
      *
      * @param vertexId  Vertex identifier
@@ -136,7 +137,14 @@ public class VariableGraph extends Graph {
 	}
 	
 	public void addEdge(int startVertexId, int endVertexId, long weight) {
-		super.addEdge(startVertexId, endVertexId, weight);
+		try{
+			super.verifyNewEdge(startVertexId, endVertexId, weight);
+		}catch(DuplicateEdgeException e ){
+			remEdgeSet.remove(new ImmutablePair<>(startVertexId,endVertexId));
+			return;
+		}
+		super.addVerifiedEdge(startVertexId,endVertexId,weight);
+
 		
 	}
 
@@ -156,7 +164,8 @@ public class VariableGraph extends Graph {
 		int sourceId = source.getId();
 		int sinkId = target.getId();
 		if (remVertexIdSet.contains(sourceId) || remVertexIdSet.contains(sinkId) || remEdgeSet.contains(new ImmutablePair<>(sourceId, sinkId))) {
-            throw new RuntimeException("VariableGraph: getEdgeWeight: cannot access removed vertices or edges.");
+
+			throw new RuntimeException("VariableGraph: getEdgeWeight: cannot access removed vertices or edges.");
 		}
 
 		switch(weightRule) {
@@ -255,6 +264,10 @@ public class VariableGraph extends Graph {
 		}
 
 		return retSet;
+	}
+
+	public boolean hasEdge(int source,int dest){
+    	return remEdgeSet.contains(new ImmutablePair<>(source,dest));
 	}
 
     /**

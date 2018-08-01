@@ -21,6 +21,7 @@ import ch.ethz.systems.netbench.ext.flowlet.UniformFlowletIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.hybrid.EcmpThenValiantSwitchGenerator;
 import ch.ethz.systems.netbench.ext.valiant.RangeValiantSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.asaf.routing.priority.PriorityFlowletIntermediaryGenerator;
+import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenodctcp.NewRenoDctcpTransportLayerGenerator;
@@ -126,6 +127,8 @@ class InfrastructureSelector {
 
             case "rotor_switch":
                 return new RotorSwitchGenerator(intermediaryGenerator,configuration);
+            case "dynamic_switch":
+                return new DynamicSwitchGenerator(intermediaryGenerator,configuration);
 
             default:
                 throw new PropertyValueInvalidException(
