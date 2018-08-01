@@ -24,8 +24,8 @@ public class RotorNetController extends DynamicController {
         if(idToNetworkDevice.size()%max_degree!=0){
             throw new RuntimeException("max degree must be devisable by network size");
         }
-        mReconfigurationTime = configuration.getLongPropertyOrFail("rotor_net_reconfiguration_time");
-        mReconfigurationInterval = configuration.getLongPropertyOrFail("rotor_net_reconfiguration_interval");
+        mReconfigurationTime = configuration.getLongPropertyOrFail("rotor_net_reconfiguration_time_ns");
+        mReconfigurationInterval = configuration.getLongPropertyOrFail("rotor_net_reconfiguration_interval_ns");
         RotorSwitch.setMaxBufferSizeByte(configuration.getLongPropertyOrFail("max_rotor_buffer_size_byte"));
         RotorMap.setRandom(Simulator.selectIndependentRandom("random_rotor_port"));
         mNumCycles = mIdToNetworkDevice.size()/max_degree;
@@ -52,13 +52,18 @@ public class RotorNetController extends DynamicController {
     @Override
     public void initRoute(int source, int dest, long flowId) {
     	
-    	RotorSwitch[] devices = mRotorsArray;
-    	mCurrCycle++;
-    	if(mCurrCycle==mNumCycles) {
-    		resetAllMaps();
-    		mCurrCycle = 0;
-    		return;
-    	}
+
+        
+    }
+
+    public void reconfigureRotorSwitches(){
+        RotorSwitch[] devices = mRotorsArray;
+        mCurrCycle++;
+        if(mCurrCycle==mNumCycles) {
+            resetAllMaps();
+            mCurrCycle = 0;
+            return;
+        }
         RotorMap tempMap = devices[0].getRotorMap();
         for(int i=0 ; i<devices.length-1; i+=1){
             RotorSwitch device = devices[i];
@@ -66,7 +71,6 @@ public class RotorNetController extends DynamicController {
             device.setRotortMap(nextDevice.getRotorMap());
         }
         devices[devices.length-1].setRotortMap(tempMap);
-        
     }
 
 	private void resetAllMaps() {

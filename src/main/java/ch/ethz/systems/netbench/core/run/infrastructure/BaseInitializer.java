@@ -214,7 +214,10 @@ public class BaseInitializer {
             idToTransportLayer.put(id, transportLayer);
 
             // Link transport layer to network device
-            transportLayer.setNetworkDevice(networkDevice);
+            if(networkDevice.isServer()){
+                transportLayer.setNetworkDevice(networkDevice);
+            }
+
 
         } else {
 
@@ -224,11 +227,13 @@ public class BaseInitializer {
         // Add to mappings
         NetworkDevice existing = idToNetworkDevice.get(id);
         if(existing!=null){
+            if(existing.isServer()) return networkDevice;
+
             try{
                 MegaSwitch megaSwitch = (MegaSwitch)existing;
                 megaSwitch.extend(networkDevice,configuration);
             }catch (ClassCastException e){
-                throw new RuntimeException("illegal to use extend with this device " +networkDevice.toString());
+                throw new RuntimeException("illegal to use extend with this device " +existing);
             }
         }else{
             idToNetworkDevice.put(id, networkDevice);

@@ -54,4 +54,9 @@ public class SimpleServer extends NetworkDevice {
         receive(genericPacket);
 
     }
+
+    @Override
+    public String toString(){
+        return "SimpleServer " + this.getIdentifier();
+    }
 }

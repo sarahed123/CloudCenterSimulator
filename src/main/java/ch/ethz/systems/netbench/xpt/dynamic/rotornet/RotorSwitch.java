@@ -64,7 +64,8 @@ public class RotorSwitch extends DynamicSwitch {
     }
 
     void sendPendingData(){
-        for(int i = 0; i<mBuffer.size(); i++){
+        int size = mBuffer.size();
+        for(int i = 0; i<size; i++){
             IpPacket p = null;
             try{
                 p = (IpPacket) mBuffer.pop();

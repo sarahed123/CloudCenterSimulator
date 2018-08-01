@@ -73,6 +73,9 @@ public class RoutingSelector {
                 return RemoteRoutingController.getInstance();
             }
 
+            case "empty_routing_populator":
+                return new EmptyRoutingPopulator(configuration);
+
             default:
                 throw new PropertyValueInvalidException(
                         configuration,

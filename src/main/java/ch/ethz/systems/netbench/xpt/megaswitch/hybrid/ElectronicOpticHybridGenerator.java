@@ -9,14 +9,14 @@ import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
 
 public class ElectronicOpticHybridGenerator extends NetworkDeviceGenerator{
     IntermediaryGenerator intermediaryGenerator;
-    public ElectronicOpticHybridGenerator(IntermediaryGenerator intermediaryGenerator, int numNodes, NBProperties configuration) {
+    public ElectronicOpticHybridGenerator(IntermediaryGenerator intermediaryGenerator, NBProperties configuration) {
         super(configuration);
         this.intermediaryGenerator = intermediaryGenerator;
     }
 
     @Override
     public NetworkDevice generate(int identifier) {
-        return new OpticElectronicHybrid(identifier,null,null,configuration);
+        return new OpticElectronicHybrid(identifier,null,intermediaryGenerator.generate(identifier),configuration);
     }
 
     @Override

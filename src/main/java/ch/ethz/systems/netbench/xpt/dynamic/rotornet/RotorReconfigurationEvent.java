@@ -19,8 +19,8 @@ public class RotorReconfigurationEvent extends Event {
 
     @Override
     public void trigger() {
-
-        getController().initRoute(-1,-1,-1);
+        RotorNetController controller = (RotorNetController) getController();
+        controller.reconfigureRotorSwitches();
         Simulator.registerEvent(new ReconfigurationEndEvent(mReconfigurationTime));
     }
 
