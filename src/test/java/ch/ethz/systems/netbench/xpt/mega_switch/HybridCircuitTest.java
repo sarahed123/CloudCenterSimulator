@@ -112,7 +112,7 @@ public class HybridCircuitTest {
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter2.write("centered_routing_type=Xpander\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
-        runConfigWriter2.write("network_type=optic");
+        runConfigWriter2.write("network_type=circuit_switch");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),

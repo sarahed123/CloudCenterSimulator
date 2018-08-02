@@ -52,8 +52,8 @@ public class RotorNetTest {
         runConfigWriter2.write("output_port_max_queue_size_bytes=500000\n");
         runConfigWriter2.write("max_dynamic_switch_degree=4\n");
         runConfigWriter2.write("link_bandwidth_bit_per_ns=10\n");
-        runConfigWriter2.write("rotor_net_reconfiguration_time=20000\n");
-        runConfigWriter2.write("rotor_net_reconfiguration_interval=180000\n");
+        runConfigWriter2.write("rotor_net_reconfiguration_time_ns=20000\n");
+        runConfigWriter2.write("rotor_net_reconfiguration_interval_ns=180000\n");
         runConfigWriter2.write("max_rotor_buffer_size_byte=50000\n");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
@@ -122,7 +122,7 @@ public class RotorNetTest {
             "19 [0, 5, 10, 15]\n";
 
         assert(initialConfiguration.equals(controller.toString()));
-        controller.initRoute(0,0,0);
+        controller.reconfigureRotorSwitches();
 
         String firstStep =
                 "0 [2, 7, 12, 17]\n" +
@@ -146,10 +146,10 @@ public class RotorNetTest {
                 "18 [0, 5, 10, 15]\n" +
                 "19 [1, 6, 11, 16]\n";
         assert(firstStep.equals(controller.toString()));
-        controller.initRoute(0,0,0);
-        controller.initRoute(0,0,0);
-        controller.initRoute(0,0,0);
-        controller.initRoute(0,0,0);
+        controller.reconfigureRotorSwitches();
+        controller.reconfigureRotorSwitches();
+        controller.reconfigureRotorSwitches();
+        controller.reconfigureRotorSwitches();
         assert(initialConfiguration.equals(controller.toString()));
     }
 

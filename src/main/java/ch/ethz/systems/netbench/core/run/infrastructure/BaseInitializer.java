@@ -119,7 +119,7 @@ public class BaseInitializer {
      */
     public HashMap<Integer, NetworkDevice> createInfrastructure(NBProperties configuration) {
 
-
+        boolean verifyLinks = configuration.getBooleanPropertyWithDefault("verify_links_on_creation",false);
         // Fetch from configuration graph and its details
         Graph graph = configuration.getGraph();
         setVertexTieBreaker(configuration);
@@ -131,35 +131,39 @@ public class BaseInitializer {
             NetworkDevice nd = createNode(i, details.getServerNodeIds().contains(i),configuration);
             partialMap.put(i, nd);
         }
+        System.out.println("finished creating nodes");
 
         // Create edges
         for (Vertex v : graph.getVertexList()) {
             for (Vertex w : graph.getAdjacentVertices(v)) {
-                createEdge(v.getId(), + w.getId(),partialMap);
+                createEdge(v.getId(), + w.getId(),partialMap,verifyLinks);
             }
         }
         System.out.println("finished creating nodes and edges");
-        // Check the links for bi-directionality
-        for (int i = 0; i < linkPairs.size(); i++) {
+        if(verifyLinks){
+            for (int i = 0; i < linkPairs.size(); i++) {
 
-            // Attempt to find the reverse
-            boolean found = false;
-            for (int j = 0; j < linkPairs.size(); j++) {
-                if (i != j && linkPairs.get(j).equals(new ImmutablePair<>(linkPairs.get(i).getRight(), linkPairs.get(i).getLeft()))) {
-                    found = true;
-                    break;
+                // Attempt to find the reverse
+                boolean found = false;
+                for (int j = 0; j < linkPairs.size(); j++) {
+                    if (i != j && linkPairs.get(j).equals(new ImmutablePair<>(linkPairs.get(i).getRight(), linkPairs.get(i).getLeft()))) {
+                        found = true;
+                        break;
+                    }
                 }
-            }
 
-            // If reverse not found, it is not bi-directional
-            if (!found) {
-                throw new IllegalArgumentException(
-                        "Link was added which is not bi-directional: " +
-                        linkPairs.get(i).getLeft() + " -> " + linkPairs.get(i).getRight()
-                );
-            }
+                // If reverse not found, it is not bi-directional
+                if (!found) {
+                    throw new IllegalArgumentException(
+                            "Link was added which is not bi-directional: " +
+                                    linkPairs.get(i).getLeft() + " -> " + linkPairs.get(i).getRight()
+                    );
+                }
 
+            }
         }
+        // Check the links for bi-directionality
+
         return partialMap;
 
     }
@@ -245,11 +249,12 @@ public class BaseInitializer {
 
     /**
      * Create the implementation of a directed edge in the network.
-     *  @param startVertexId     Origin vertex identifier
+     * @param startVertexId     Origin vertex identifier
      * @param endVertexId       Destination vertex identifier
      * @param partialMap
+     * @param verifyLinks
      */
-    private void createEdge(int startVertexId, int endVertexId, HashMap<Integer, NetworkDevice> partialMap) {
+    private void createEdge(int startVertexId, int endVertexId, HashMap<Integer, NetworkDevice> partialMap, boolean verifyLinks) {
         // Select network devices
         NetworkDevice devA = partialMap.get(startVertexId);
         NetworkDevice devB = partialMap.get(endVertexId);
@@ -264,16 +269,17 @@ public class BaseInitializer {
         devA.addConnection(portAtoB);
         InputPort portBtoA = new InputPort(devB,devA,link);
         devB.addIncomingConnection(portBtoA);
-        // Duplicate link
-        if (linkPairs.contains(new ImmutablePair<>(startVertexId, endVertexId))) {
-            throw new IllegalArgumentException(
-                    "Duplicate link (" + startVertexId + " -> + " + endVertexId +
-                    ") defined - Please check input topology file."
-            );
-        } else {
-            linkPairs.add(new ImmutablePair<>(startVertexId, endVertexId));
+        if(verifyLinks){
+            // Duplicate link
+            if (linkPairs.contains(new ImmutablePair<>(startVertexId, endVertexId))) {
+                throw new IllegalArgumentException(
+                        "Duplicate link (" + startVertexId + " -> + " + endVertexId +
+                                ") defined - Please check input topology file."
+                );
+            }
         }
 
+        linkPairs.add(new ImmutablePair<>(startVertexId, endVertexId));
     }
 
     /**
