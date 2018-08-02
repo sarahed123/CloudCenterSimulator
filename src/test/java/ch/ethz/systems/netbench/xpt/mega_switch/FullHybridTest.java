@@ -101,7 +101,7 @@ public class FullHybridTest {
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter2.write("centered_routing_type=Xpander\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
-        runConfigWriter2.write("network_type=optic");
+        runConfigWriter2.write("network_type=circuit_switch");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),
@@ -125,7 +125,7 @@ public class FullHybridTest {
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter3.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter3.write("network_device_routing=ecmp\n");
-        runConfigWriter3.write("network_type=electronic");
+        runConfigWriter3.write("network_type=packet_switch");
         runConfigWriter3.close();
         NBProperties conf3 = new NBProperties(
         		tempRunConfig3.getAbsolutePath(),

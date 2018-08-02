@@ -127,7 +127,7 @@ public class MegaSwitchTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig2));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
-        runConfigWriter.write("network_type=optic\n");
+        runConfigWriter.write("network_type=circuit_switch\n");
 
         runConfigWriter.close();
         NBProperties conf = new NBProperties(

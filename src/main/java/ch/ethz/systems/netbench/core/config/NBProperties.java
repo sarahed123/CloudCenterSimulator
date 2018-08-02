@@ -546,19 +546,25 @@ public class NBProperties extends Properties {
 		
 	}
 
-	public void constructBaseDir() {
+	public static void constructBaseDir(NBProperties mainProperties, List<NBProperties> propertiesList) {
 		
-		if(getProperty("base_dir_variants")!=null) {
-			if(getProperty("run_folder_base_dir")==null) {
-				throw new RuntimeException("base_dir_variants propery requires run_folder_base_dir property");
+		if(mainProperties.getProperty("base_dir_variants")!=null) {
+			if(mainProperties.getProperty("run_folder_base_dir")==null) {
+				throw new RuntimeException("base_dir_variants property requires run_folder_base_dir property");
 			}
-			String[] dirs = getProperty("base_dir_variants").split(",");
-			String baseDir = getProperty("run_folder_base_dir");
+			String[] dirs = mainProperties.getProperty("base_dir_variants").split(",");
+			String baseDir = mainProperties.getProperty("run_folder_base_dir");
 			for(String dir : dirs) {
-				
-				baseDir += "/" + dir + "/" +getPropertyOrFail(dir);
+				for (NBProperties properties: propertiesList) {
+					String property = properties.getProperty(dir);
+					if(property!=null){
+						baseDir += "/" + dir + "/" +property;
+						break;
+					}
+				}
+
 			}
-			setProperty("run_folder_base_dir" , baseDir);
+			mainProperties.setProperty("run_folder_base_dir" , baseDir);
 			
 		}
 		

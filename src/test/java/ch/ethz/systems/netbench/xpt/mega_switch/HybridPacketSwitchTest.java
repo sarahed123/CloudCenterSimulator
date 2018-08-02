@@ -95,7 +95,7 @@ public class HybridPacketSwitchTest {
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter2.write("network_device_routing=ecmp\n");
-        runConfigWriter2.write("network_type=electronic");
+        runConfigWriter2.write("network_type=packet_switch");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),

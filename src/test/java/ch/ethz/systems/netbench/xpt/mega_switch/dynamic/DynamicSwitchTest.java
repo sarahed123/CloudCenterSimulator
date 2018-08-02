@@ -111,7 +111,7 @@ public class DynamicSwitchTest {
 		runConfigWriter2.write("output_port_ecn_threshold_k_bytes=50000\n");
 		runConfigWriter2.write("output_port_max_queue_size_bytes=50000\n");
 		runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
-		runConfigWriter2.write("network_type=optic");
+		runConfigWriter2.write("network_type=circuit_switch");
 		runConfigWriter2.close();
 		NBProperties conf2 = new NBProperties(
 				tempRunConfig2.getAbsolutePath(),
@@ -123,7 +123,7 @@ public class DynamicSwitchTest {
 				);
 
 
-		initializer.extend(1,null,new DynamicSwitchGenerator(conf2),
+		initializer.extend(1,null,new DynamicSwitchGenerator(new DemoIntermediaryGenerator(conf2),conf2),
 				null,null);
 		HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
 		RoutingSelector.selectPopulator(hm, conf2);

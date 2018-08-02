@@ -165,7 +165,7 @@ public class MainFromProperties {
         }
         
         propertiesList.get(0).loadSubConfigurtations();
-        propertiesList.get(0).constructBaseDir();
+        NBProperties.constructBaseDir(propertiesList.get(0),propertiesList);
         return propertiesList;
 
     }
