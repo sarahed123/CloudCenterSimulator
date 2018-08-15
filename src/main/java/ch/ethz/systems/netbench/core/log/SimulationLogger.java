@@ -376,11 +376,11 @@ public class SimulationLogger {
 	 * @param absEndTimeNs      Interval end in nanoseconds
 	 */
 	static void logFlowThroughput(long flowId, int sourceId, int targetId, long amountBytes, long absStartTimeNs, long absEndTimeNs) {
-		try {
+		/*try {
 			writerFlowThroughputFile.write(flowId + "," + sourceId + "," + targetId + "," + amountBytes + "," + absStartTimeNs + "," + absEndTimeNs + "\n");
 		} catch (IOException e) {
 			throw new LogFailureException(e);
-		}
+		}*/
 	}
 
 	public static void logRemoteRoute(Path p, int source, int dest, long flowId, long time,boolean adding) throws IOException {

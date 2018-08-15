@@ -8,12 +8,14 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
 public class MockFullHybrid extends OpticElectronicHybrid {
 
 	public boolean routedThroughCircuit;
 	public boolean routedThroughPacketSwitch;
 	public boolean recoveredPath;
+	public boolean noPathExceptionThrown;
 	static MockRemoteRouter router;
 	public MockFullHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary,
 			NBProperties configuration) {
@@ -22,9 +24,15 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 	}
 	
 	@Override
-	protected void routeThroughCircuit(IpPacket packet) {
+	protected void routeThroughCircuit(IpPacket packet, long id) {
 		routedThroughCircuit = true;
-		super.routeThroughCircuit(packet);
+		try{
+			super.routeThroughCircuit(packet, id);
+		}catch (NoPathException e){
+			noPathExceptionThrown = true;
+			throw e;
+		}
+
 	}
 	
 	@Override
@@ -35,9 +43,9 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 	}
 	
 	@Override
-	protected void recoverPath(int source, int dest) {
+	protected void recoverPath(int source, int dest, long id) {
 		recoveredPath = true;
-		super.recoverPath(source, dest);
+		super.recoverPath(source, dest, id);
 	}
 	
 	@Override

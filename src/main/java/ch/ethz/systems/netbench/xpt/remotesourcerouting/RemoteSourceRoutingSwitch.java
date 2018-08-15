@@ -1,16 +1,12 @@
 package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
-import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.OutputPort;
@@ -18,11 +14,6 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
-import ch.ethz.systems.netbench.ext.basic.TcpPacket;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
-import edu.asu.emit.algorithm.graph.Path;
-import edu.asu.emit.algorithm.graph.Vertex;
 
 public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	private Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
@@ -94,8 +85,8 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 		
 	}
 
-	public void releasePath(int src,int dst) {
-		RemoteRoutingController.getInstance().recoverPath(src,dst);
+	public void releasePath(int src,int dst, long flowId) {
+		RemoteRoutingController.getInstance().recoverPath(src,dst, flowId);
 		
 	}
 

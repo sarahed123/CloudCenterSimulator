@@ -82,15 +82,15 @@ def analyze_flow_completion():
             'general_flow_size_bytes_std': np.std(total_size_bytes)
         }
 
-        range_low =                     [-1,            -1,            -1,              100000,     2434900,            1000000,    10000000]
-        range_high =                    [-1,            100000,        2434900,         -1,         -1,                 -1,         -1]
-        range_name =                    ["all",         "less_100KB",  "less_2.4349MB", "geq_100KB", "geq_2.4349MB",    "geq_1MB",  "geq_10MB"]
-        range_completed_duration =      [[],            [],            [],              [],         [],                 [],         []]
-        range_completed_throughput =    [[],            [],            [],              [],         [],                 [],         []]
-        range_num_finished_flows =      [0,             0,             0,               0,          0,                  0,          0]
-        range_num_unfinished_flows =    [0,             0,             0,               0,          0,                  0,          0]
-        range_low_eq =                  [0,             0,             0,               1,          1,                  1,          1,]
-        range_high_eq =                 [0,             0,             0,               1,          1,                  1,          1,]
+        range_low =                     [-1,            -1,            -1,      -1,          100000,    1000000,      2434900,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              -1,    -1]
+        range_high =                    [-1,            100000,        2434900,  1000000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  5000000,  10000000]
+        range_name =                    ["all",         "less_100KB",  "less_2.4349MB", "leq_100KB", "geq_100KB","geq_1MB", "geq_2.4349MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "leq_5MB", "leq_10MB"]
+        range_completed_duration =      [[],            [],            [],              [],  [],         [],           [],              [],            [],         [],          [],[],              [],            [],         [],          []]
+        range_completed_throughput =    [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
+        range_num_finished_flows =      [0,             0,             0,               0,    0,       0,            0,                0,             0,        0,         0, 0,                0,             0,        0,         0]
+        range_num_unfinished_flows =    [0,             0,             0,               0,    0,       0,            0,                0,             0,         0,          0,0,                0,             0,         0,          0]
+        range_low_eq =                  [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1,1,                1,             1,         1,         1]
+        range_high_eq =                 [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1, 1,                1,             1,         1,         1]
 
 
         # Go over all flows
@@ -134,6 +134,7 @@ def analyze_flow_completion():
                 statistics[range_name[j] + '_throughput_99.9th_Gbps'] = np.percentile(range_completed_throughput[j], 99.9)
                 statistics[range_name[j] + '_throughput_1th_Gbps'] = np.percentile(range_completed_throughput[j], 1)
                 statistics[range_name[j] + '_throughput_0.1th_Gbps'] = np.percentile(range_completed_throughput[j], 0.1)
+                statistics[range_name[j] + '_throughput_5th_Gbps'] = np.percentile(range_completed_throughput[j], 5)
             else:
                 statistics[range_name[j] + '_flows_completed_fraction'] = 0
 

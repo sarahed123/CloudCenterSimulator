@@ -5,6 +5,8 @@ import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import java.util.HashMap;
 
 public class JumboFlow {
+    private static long sIdCounter = 0;
+    long mId;
     long mSizeByte;
     HashMap<Long,Long> mFlowIdToSize;
     int mSource;
@@ -14,6 +16,7 @@ public class JumboFlow {
         mFlowIdToSize = new HashMap<>();
         mSource = source;
         mDest = dest;
+        mId = ++sIdCounter;
     }
 
     public long getSizeByte(){
@@ -49,4 +52,8 @@ public class JumboFlow {
 		// TODO Auto-generated method stub
 		return mSource==mDest;
 	}
+
+	public long getId(){
+        return mId;
+    }
 }

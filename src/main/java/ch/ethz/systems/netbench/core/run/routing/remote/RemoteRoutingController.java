@@ -2,26 +2,20 @@ package ch.ethz.systems.netbench.core.run.routing.remote;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorNetController;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyMissingException;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
-import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
-import edu.asu.emit.algorithm.graph.VariableGraph;
 import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
@@ -137,7 +131,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	/**
 	 * recover a path, returning all its edges to the graph
 	 */
-	public abstract void recoverPath(int src,int dst);
+	public abstract void recoverPath(int src, int dst, long jumboFlowId);
 	
 	/**
 	 * public for testing but should be a private method to handle path switching

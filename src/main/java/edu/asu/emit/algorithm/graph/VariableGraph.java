@@ -267,7 +267,9 @@ public class VariableGraph extends Graph {
 	}
 
 	public boolean hasEdge(int source,int dest){
-    	return remEdgeSet.contains(new ImmutablePair<>(source,dest));
+		return !remEdgeSet.contains(new ImmutablePair<>(source,dest))&&
+		outEdges.get(source).contains(new Vertex(dest))&&
+		inEdges.get(dest).contains(new Vertex(source));
 	}
 
     /**
