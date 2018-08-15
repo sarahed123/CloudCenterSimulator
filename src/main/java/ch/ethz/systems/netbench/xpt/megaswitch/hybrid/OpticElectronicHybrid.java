@@ -40,7 +40,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
         if(jumboFlow.getSizeByte()>=circuitThreshold && !jumboFlow.isTrivial()) {
         	try {
-        		routeThroughCircuit(encapsulated);
+        		routeThroughCircuit(encapsulated,jumboFlow.getId());
         		return;
         	}catch(NoPathException e) {
                 //SimulationLogger.increaseStatisticCounter("num_path_failures");
@@ -63,9 +63,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		
 	}
     
-	protected void routeThroughCircuit(IpPacket packet) {
+	protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId) {
 		try {
-	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),packet.getFlowId());
+	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),jumboFlowiId);
 		}catch(FlowPathExists e) {
 
         }
@@ -113,16 +113,16 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         JumboFlow jumboFlow = getJumboFlow(source,dest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
-        	recoverPath(source,dest); 
+        	recoverPath(source,dest,jumboFlow.getId());
         	mJumboFlowMap.remove(new ImmutablePair<>(source, dest));
         }
 		
 	}
     
-	protected void recoverPath(int source, int dest) {
+	protected void recoverPath(int source, int dest, long jumboFlowId) {
 		try {
 
-			getRemoteRouter().recoverPath(source,dest);	
+			getRemoteRouter().recoverPath(source,dest,jumboFlowId);
 		}catch(NoPathException e) {
 			
 		}

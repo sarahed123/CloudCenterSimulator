@@ -9,10 +9,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
-import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicDevice;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
-import edu.asu.emit.algorithm.graph.VariableGraph;
-import edu.asu.emit.algorithm.graph.Vertex;
 
 public class MockDynamicController extends DynamicController {
 	HashMap<Pair<Integer,Integer>,Boolean> routed;
@@ -31,8 +27,8 @@ public class MockDynamicController extends DynamicController {
 	}
 	
 	@Override
-	public void recoverPath(int src, int dst) {
-		super.recoverPath(src, dst);
+	public void recoverPath(int src, int dst, long jumboFlowId) {
+		super.recoverPath(src, dst, jumboFlowId);
 		recovered.put(new ImmutablePair<Integer, Integer>(src, dst), true);
 
 	}

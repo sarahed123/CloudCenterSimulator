@@ -3,13 +3,10 @@ package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 import java.util.HashMap;
 import java.util.Map;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
-import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -32,8 +29,8 @@ public class MockRemoteRouter extends XpanderRouter {
 	}
 	
 	@Override
-	public void recoverPath(int src,int dst){
-		super.recoverPath(src, dst);
+	public void recoverPath(int src, int dst, long jumboFlowId){
+		super.recoverPath(src, dst, jumboFlowId);
 		recovered.put(new ImmutablePair<Integer, Integer>(src, dst), true);
 	}
 	

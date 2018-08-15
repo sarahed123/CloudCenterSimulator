@@ -37,9 +37,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.*;
-import ch.ethz.systems.netbench.core.Simulator;
+
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;;
+;
 /**
  * The class defines a directed graph.
  * 
@@ -255,13 +255,13 @@ public class Graph implements BaseGraph, Serializable {
 		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
 	}
 
-	public void resetCapcities(boolean isExtended, Map<Integer, NetworkDevice> idToNetworkDevice) {
-		edgeCapacities.replaceAll((k, v) -> initCapcity(k,isExtended,idToNetworkDevice));
+	public void resetCapcities(boolean isExtended, Map<Integer, NetworkDevice> idToNetworkDevice, int edge_capacity) {
+		edgeCapacities.replaceAll((k, v) -> initCapcity(k,isExtended,idToNetworkDevice,edge_capacity));
 
 		
 	}
 
-	private long initCapcity(Pair<Integer, Integer> linkDirPair,boolean isExended, Map<Integer, NetworkDevice> idToNetworkDevice) {
+	private long initCapcity(Pair<Integer, Integer> linkDirPair, boolean isExended, Map<Integer, NetworkDevice> idToNetworkDevice, int edge_capacity) {
 		
 		
 		if(isExended) {
@@ -272,7 +272,7 @@ public class Graph implements BaseGraph, Serializable {
 		    }
 		}
         
-		return 1;
+		return edge_capacity;
 	}
 
 	public void increaseCapacity(ImmutablePair<Integer, Integer> immutablePair) {

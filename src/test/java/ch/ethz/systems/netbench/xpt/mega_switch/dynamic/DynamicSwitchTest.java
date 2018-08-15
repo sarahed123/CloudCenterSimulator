@@ -167,6 +167,19 @@ public class DynamicSwitchTest {
 
 	}
 
+	@Test
+	public void testFlowFinish(){
+		MockSimpleServer source = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(3);
+		MockSimpleServer dest =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(5));
+		FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
+		Simulator.registerEvent(fse);
+
+		boolean thrown = false;
+		Simulator.runNs(1000000000);
+
+
+	}
+
 	@After
 	public void clear() {
 		Simulator.reset();

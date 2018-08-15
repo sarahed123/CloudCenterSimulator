@@ -89,6 +89,7 @@ public class HybridCircuitTest {
             }
         };
         LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 10);
+        LinkGenerator lg2 = new PerfectSimpleLinkGenerator(0, 20);
         TransportLayerGenerator tlg = new TransportLayerGenerator(conf) {
             @Override
             public TransportLayer generate(int i) {
@@ -125,7 +126,7 @@ public class HybridCircuitTest {
         
 
         initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
-                lg,new RemoteRoutingTransportLayerGenerator(conf2));
+                lg2,new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         RoutingSelector.selectPopulator(hm, conf2);
         initializer.finalize();

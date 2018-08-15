@@ -1,11 +1,11 @@
 package ch.ethz.systems.netbench.xpt.dynamic.controller;
 
-import java.awt.List;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -55,7 +55,9 @@ public class DynamicController extends RemoteRoutingController {
 		LinkedList<Vertex> path = new LinkedList<Vertex>();
 		path.add(sourceVertex);
 		path.add(destVertex);
-		mPaths.put(pair, new Path(path, mG.getEdgeWeight(sourceVertex, destVertex)));
+		Path finalPath = new Path(path, mG.getEdgeWeight(sourceVertex, destVertex));
+		mPaths.put(pair, finalPath);
+		logRoute(finalPath,source,dest,flowId, Simulator.getCurrentTime(),true);
 	}
 
 	@Override
@@ -65,7 +67,7 @@ public class DynamicController extends RemoteRoutingController {
 	}
 
 	@Override
-	public void recoverPath(int src, int dst) {
+	public void recoverPath(int src, int dst, long jumboFlowId) {
 		if(!((VariableGraph)mG).hasEdge(src,dst)){
 			return;
 		}
@@ -73,8 +75,8 @@ public class DynamicController extends RemoteRoutingController {
 		((VariableGraph)mG).deleteEdge(pair);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
 		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));
+		logRoute(mPaths.get(pair),src,dst,jumboFlowId, Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
-		
 
 	}
 

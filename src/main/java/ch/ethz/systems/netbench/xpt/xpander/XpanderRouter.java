@@ -8,18 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
-import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
-import edu.asu.emit.algorithm.graph.VariableGraph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraKShortestPathAlg;
 import edu.asu.emit.algorithm.graph.algorithms.DijkstraShortestPathAlg;
@@ -48,7 +47,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		super(configuration);
 		mIdToNetworkDevice = idToNetworkDevice;
 		mG =  configuration.getGraph();
-		mG.resetCapcities(configuration.isExtendedTopology(),idToNetworkDevice);
+		mG.resetCapcities(configuration.isExtendedTopology(),idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
 		mPaths = new HashMap<Pair<Integer,Integer>,Path>();
 		totalDrops = 0;
 		flowCounter = 0;
@@ -125,12 +124,12 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 	public void reset(){
-		mG.resetCapcities(Simulator.getConfiguration().isExtendedTopology(),mIdToNetworkDevice);
+		mG.resetCapcities(Simulator.getConfiguration().isExtendedTopology(),mIdToNetworkDevice, configuration.getIntegerPropertyWithDefault("edge_capacity", 1));
 		mPaths.clear();
 	}
 
 	@Override
-	public void recoverPath(int src,int dst){
+	public void recoverPath(int src, int dst, long jumboFlowId){
 		Pair<Integer, Integer> pair = new ImmutablePair<>(src,dst);
 		Path p = mPaths.get(pair);
 		if(p==null) {
@@ -145,8 +144,8 @@ public class XpanderRouter extends RemoteRoutingController{
 
 
 		}
-		//logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
-		//		,flowId,Simulator.getCurrentTime(),false);
+		logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
+				,jumboFlowId,Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
 	}
 
@@ -183,7 +182,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		if(pathAsList.size()==0){
 			flowFailuresSample++;
 			totalDrops++;
-			logDrop(flowId, source, dest, mPaths.size());
+			SimulationLogger.increaseStatisticCounter("XPANDER_CONTROLLER_NO_PATH");
+			//logDrop(flowId, source, dest, mPaths.size());
 			throw new NoPathException(source,dest);	
 		}
 		int curr = pathAsList.get(0).getId();
