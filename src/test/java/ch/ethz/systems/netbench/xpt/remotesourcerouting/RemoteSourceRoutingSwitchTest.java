@@ -61,6 +61,8 @@ public class RemoteSourceRoutingSwitchTest {
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n5.topology\n");
         runConfigWriter.write("centered_routing_type=Xpander\n");
         runConfigWriter.write("network_device_routing=remote_routing_populator\n");
+        runConfigWriter.write("circuit_wave_length_num=1\n");
+
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),

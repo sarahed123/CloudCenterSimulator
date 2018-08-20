@@ -255,16 +255,16 @@ public class Graph implements BaseGraph, Serializable {
 		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
 	}
 
-	public void resetCapcities(boolean isExtended, Map<Integer, NetworkDevice> idToNetworkDevice, int edge_capacity) {
-		edgeCapacities.replaceAll((k, v) -> initCapcity(k,isExtended,idToNetworkDevice,edge_capacity));
+	public void resetCapcities(boolean serversInfintedCapacity, Map<Integer, NetworkDevice> idToNetworkDevice, int edge_capacity) {
+		edgeCapacities.replaceAll((k, v) -> initCapcity(k,serversInfintedCapacity,idToNetworkDevice,edge_capacity));
 
 		
 	}
 
-	private long initCapcity(Pair<Integer, Integer> linkDirPair, boolean isExended, Map<Integer, NetworkDevice> idToNetworkDevice, int edge_capacity) {
+	private long initCapcity(Pair<Integer, Integer> linkDirPair, boolean serversInfintedCapacity, Map<Integer, NetworkDevice> idToNetworkDevice, int edge_capacity) {
 		
 		
-		if(isExended) {
+		if(serversInfintedCapacity) {
 			boolean isServerRight = idToNetworkDevice.get(linkDirPair.getRight()).isServer();
 			boolean isServerLeft = idToNetworkDevice.get(linkDirPair.getLeft()).isServer();
 			if(isServerLeft || isServerRight) {

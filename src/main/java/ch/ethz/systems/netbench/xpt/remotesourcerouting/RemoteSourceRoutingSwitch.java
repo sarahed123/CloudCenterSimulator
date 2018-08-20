@@ -17,7 +17,7 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	private Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
-	RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary,NBProperties configuration) {
+	protected RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
 		super(identifier, transportLayer, intermediary,configuration);
 		this.forwardingTable = new HashMap<Pair<Integer,Integer>,OutputPort>();
 	}
@@ -95,7 +95,7 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 		
 	}
 
-	public Object getNextHop(int src, int dest) {
+	public OutputPort getNextHop(int src, int dest) {
 		// TODO Auto-generated method stub
 		return forwardingTable.get(new ImmutablePair<Integer,Integer>(src,dest));
 	}

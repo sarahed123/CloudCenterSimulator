@@ -13,6 +13,7 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
+import ch.ethz.systems.netbench.xpt.xpander.SemiXpander;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
@@ -25,7 +26,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 
 	private static RemoteRoutingController mInstance = null;
 	protected HashMap<Pair<Integer,Integer>, Path> mPaths;
-	protected Graph mG;
+	protected Graph mMainGraph;
 	private static long headerSize;
 	protected long totalDrops;
 	protected long flowCounter;
@@ -37,14 +38,17 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		
 		switch(type) {
 		case "Xpander":
-			mInstance = new XpanderRouter(idToNetworkDevice , configuration);
-			break;
+				mInstance = new XpanderRouter(idToNetworkDevice , configuration);
+				break;
 		case "dynamic":
-			mInstance = new DynamicController(idToNetworkDevice, configuration);
-			break;
+				mInstance = new DynamicController(idToNetworkDevice, configuration);
+				break;
 			case "rotor_net":
-			mInstance = new RotorNetController(idToNetworkDevice,configuration);
-			break;
+				mInstance = new RotorNetController(idToNetworkDevice,configuration);
+				break;
+			case "semi_Xpander":
+				mInstance = new SemiXpander(idToNetworkDevice,configuration);
+				break;
 		default:
 			throw new PropertyValueInvalidException(configuration,"centered_routing_type");
 		}

@@ -581,5 +581,7 @@ public class NBProperties extends Properties {
 	}
 
 
-
+    public Graph getGraphCopy() {
+        return GraphReader.read(this.getPropertyOrFail("scenario_topology_file")).getLeft();
+    }
 }

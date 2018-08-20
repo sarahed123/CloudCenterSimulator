@@ -27,6 +27,7 @@ import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGener
 import ch.ethz.systems.netbench.xpt.newreno.newrenodctcp.NewRenoDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.EcmpThenSourceRoutingSwitchGenerator;
@@ -129,6 +130,8 @@ class InfrastructureSelector {
                 return new RotorSwitchGenerator(intermediaryGenerator,configuration);
             case "dynamic_switch":
                 return new DynamicSwitchGenerator(intermediaryGenerator,configuration);
+            case "semi_remote_routing_switch":
+                return new SemiRemoteRoutingSwitchGenerator(intermediaryGenerator,configuration);
 
             default:
                 throw new PropertyValueInvalidException(

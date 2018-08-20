@@ -52,7 +52,8 @@ public class FullHybridTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
-        runConfigWriter.write("hybrid_circuit_threshold_byte=1000");
+        runConfigWriter.write("hybrid_circuit_threshold_byte=1000\n");
+
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),
@@ -101,6 +102,7 @@ public class FullHybridTest {
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter2.write("centered_routing_type=Xpander\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
+        runConfigWriter2.write("circuit_wave_length_num=1\n");
         runConfigWriter2.write("network_type=circuit_switch");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(

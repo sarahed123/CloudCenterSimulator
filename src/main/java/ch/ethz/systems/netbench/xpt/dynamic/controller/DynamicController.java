@@ -26,7 +26,7 @@ public class DynamicController extends RemoteRoutingController {
 		super(configuration);
 		mPaths = new HashMap<>();
 		mIdToNetworkDevice = idToNetworkDevice;
-		this.mG = new VariableGraph(configuration.getGraph(), "graph_weight");
+		this.mMainGraph = new VariableGraph(configuration.getGraph(), "graph_weight");
 		max_degree = configuration.getIntegerPropertyOrFail("max_dynamic_switch_degree");
 	}
 
@@ -45,34 +45,34 @@ public class DynamicController extends RemoteRoutingController {
 		if(mPaths.containsKey(pair)) {
 			throw new FlowPathExists(flowId);
 		}
-		if(mG.getAdjacentVertices(sourceVertex).size() >= max_degree || mG.getPrecedentVertices(destVertex).size() >= max_degree) {
+		if(mMainGraph.getAdjacentVertices(sourceVertex).size() >= max_degree || mMainGraph.getPrecedentVertices(destVertex).size() >= max_degree) {
 			SimulationLogger.increaseStatisticCounter("DYNAMIC_CONTROLLER_NO_PATH");
 			throw new NoPathException();
 		}
-		((VariableGraph)mG).addEdge(source,dest,1);
+		((VariableGraph) mMainGraph).addEdge(source,dest,1);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(source);
 		sourceDevice.addConnection(mIdToNetworkDevice.get(source),mIdToNetworkDevice.get(dest));
 		LinkedList<Vertex> path = new LinkedList<Vertex>();
 		path.add(sourceVertex);
 		path.add(destVertex);
-		Path finalPath = new Path(path, mG.getEdgeWeight(sourceVertex, destVertex));
+		Path finalPath = new Path(path, mMainGraph.getEdgeWeight(sourceVertex, destVertex));
 		mPaths.put(pair, finalPath);
 		logRoute(finalPath,source,dest,flowId, Simulator.getCurrentTime(),true);
 	}
 
 	@Override
 	public void reset() {
-		((VariableGraph)mG).clear();
+		((VariableGraph) mMainGraph).clear();
 
 	}
 
 	@Override
 	public void recoverPath(int src, int dst, long jumboFlowId) {
-		if(!((VariableGraph)mG).hasEdge(src,dst)){
+		if(!((VariableGraph) mMainGraph).hasEdge(src,dst)){
 			return;
 		}
 		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(src, dst);
-		((VariableGraph)mG).deleteEdge(pair);
+		((VariableGraph) mMainGraph).deleteEdge(pair);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
 		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));
 		logRoute(mPaths.get(pair),src,dst,jumboFlowId, Simulator.getCurrentTime(),false);
