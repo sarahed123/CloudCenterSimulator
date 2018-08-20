@@ -143,6 +143,9 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+            "circuit_wave_length_num",
+            "servers_inifinite_capcacity",
+            "semi_remote_routing_path_dir",
             "edge_capacity",
             "verify_links_on_creation",
             "max_rotor_buffer_size_byte",

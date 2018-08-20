@@ -9,6 +9,7 @@ import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
+import edu.asu.emit.algorithm.graph.Graph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.Simulator;
@@ -32,6 +33,7 @@ import edu.asu.emit.algorithm.graph.paths_filter.RandomPathsFilter;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class XpanderRouter extends RemoteRoutingController{
+	private final double dijkstra_max_weigh;
 	private int flowFailuresSample;
 
 
@@ -42,12 +44,23 @@ public class XpanderRouter extends RemoteRoutingController{
 	DijkstraShortestPathAlg dijkstraAlg;
 	PathsFilter pathsFilter;
 	PathAlgorithm pathAlg;
+	protected Graph[] mGraphs;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
 		super(configuration);
+
+		//experimental!
+		mGraphs = new Graph[configuration.getIntegerPropertyOrFail("circuit_wave_length_num")];
+		for(int i = 0; i < mGraphs.length; i++){
+			mGraphs[i] = configuration.getGraphCopy();
+			mGraphs[i].resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
+					,idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
+		}
+
 		mIdToNetworkDevice = idToNetworkDevice;
-		mG =  configuration.getGraph();
-		mG.resetCapcities(configuration.isExtendedTopology(),idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
+		mMainGraph =  configuration.getGraph();
+		mMainGraph.resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
+				,idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
 		mPaths = new HashMap<Pair<Integer,Integer>,Path>();
 		totalDrops = 0;
 		flowCounter = 0;
@@ -55,19 +68,19 @@ public class XpanderRouter extends RemoteRoutingController{
 		String pathsFilterKey = configuration.getPropertyWithDefault("paths_filter","filter_first");
 		switch(pathsFilterKey) {
 		case "filter_first":
-			pathsFilter = new PathsFilterFirst(mG);
+			pathsFilter = new PathsFilterFirst(mMainGraph);
 			break;
 		case "by_lower_index":
-			pathsFilter = new LowestIndexFilter(mG);
+			pathsFilter = new LowestIndexFilter(mMainGraph);
 			break;
 		case "least_loaded_path":
-			pathsFilter = new LeastLoadedPath(mG);
+			pathsFilter = new LeastLoadedPath(mMainGraph);
 			break;
 		case "random_path" :
-			pathsFilter = new RandomPathsFilter(mG);
+			pathsFilter = new RandomPathsFilter(mMainGraph);
 			break;
 		case "most_loaded_path":
-			pathsFilter = new MostLoadedPathFilter(mG);
+			pathsFilter = new MostLoadedPathFilter(mMainGraph);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for paths_filter " + pathsFilterKey);
@@ -77,20 +90,20 @@ public class XpanderRouter extends RemoteRoutingController{
 		if(pathAlgorithm==null) {
 			pathAlgorithm = "dijkstra";
 		}
-		double max_weigh = configuration.getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
+		dijkstra_max_weigh = configuration.getDoublePropertyWithDefault("maximum_path_weight", Double.MAX_VALUE);
 		switch(pathAlgorithm) {
 		case "dijkstra":
 			String vertexShuffle = configuration.getBooleanPropertyWithDefault("dijkstra_vertex_shuffle", true) ? "dijkstra_vertex_shuffle" : null;
-			dijkstraAlg = new DijkstraShortestPathAlg(mG,max_weigh,vertexShuffle);
+			dijkstraAlg = new DijkstraShortestPathAlg(mMainGraph,dijkstra_max_weigh,vertexShuffle);
 			break;
 		case "fat_tree_dijkstra":
 			boolean isInExtendedTopology = configuration.getPropertyWithDefault("scenario_topology_extend_with_servers","none").equals("regular");
 			int ftDegree = configuration.getIntegerPropertyOrFail("fat_tree_degree");
-			dijkstraAlg = new FatTreeShortestPathAlg(mG,ftDegree,isInExtendedTopology);
+			dijkstraAlg = new FatTreeShortestPathAlg(mMainGraph,ftDegree,isInExtendedTopology);
 			break;
 		case "k_shortest_paths":
 			int K = configuration.getIntegerPropertyOrFail("k_shortest_paths_num");
-			dijkstraAlg = new DijkstraKShortestPathAlg(mG, K,max_weigh,null);
+			dijkstraAlg = new DijkstraKShortestPathAlg(mMainGraph, K,dijkstra_max_weigh,null);
 			break;
 		default:
 			throw new RuntimeException("Illegal argument for path_algorithm " + pathAlgorithm);
@@ -116,15 +129,32 @@ public class XpanderRouter extends RemoteRoutingController{
 	
 
 	protected Path generatePathFromGraph(int source,int dest) {
-		Paths ps  = dijkstraAlg.getShortestPath(mG.getVertex(source), mG.getVertex(dest));
+		Paths ps;
+		Path p = null;
+		for(int i = 0; i<this.mGraphs.length; i++){
+			DijkstraShortestPathAlg dijkstra = new DijkstraShortestPathAlg(mGraphs[i],dijkstra_max_weigh,null);
+			ps = dijkstra.getShortestPath(mGraphs[i].getVertex(source), mGraphs[i].getVertex(dest));
+			p = pathsFilter.filterPaths(ps);
+			p.fromGraphIndex(i);
+			if(p.getVertexList().size()>0){
+				break;
+			}
+
+		}
+		//Paths ps  = dijkstraAlg.getShortestPath(mMainGraph.getVertex(source), mMainGraph.getVertex(dest));
 		//System.out.println(ps);
-		Path p = pathsFilter.filterPaths(ps);
+		//Path p = pathsFilter.filterPaths(ps);
 		//System.out.println(p);
 		return p;
 	}
 
 	public void reset(){
-		mG.resetCapcities(Simulator.getConfiguration().isExtendedTopology(),mIdToNetworkDevice, configuration.getIntegerPropertyWithDefault("edge_capacity", 1));
+		for(int i = 0; i<mGraphs.length; i++) {
+			mGraphs[i].resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
+					, mIdToNetworkDevice, configuration.getIntegerPropertyWithDefault("edge_capacity", 1));
+		}
+		mMainGraph.resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
+				,mIdToNetworkDevice, configuration.getIntegerPropertyWithDefault("edge_capacity", 1));
 		mPaths.clear();
 	}
 
@@ -138,9 +168,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);
-			mG.increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
+			mGraphs[p.fromGraph()].increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
 			// recover the opisite edge
-			//mG.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
+			//mMainGraph.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
 
 
 		}
@@ -154,9 +184,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){
 			int next = pathAsList.get(i).getId();
-			mG.decreaseCapacity(new ImmutablePair<Integer, Integer>(curr, next));
+			mGraphs[p.fromGraph()].decreaseCapacity(new ImmutablePair<Integer, Integer>(curr, next));
 			// delete the opisite edge
-			//mG.decreaseCapacity(new ImmutablePair<Integer, Integer>(next, curr));
+			//mMainGraph.decreaseCapacity(new ImmutablePair<Integer, Integer>(next, curr));
 			curr = next;
 		}
 		
@@ -164,7 +194,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	@Override
 	protected void switchPath(int src,int dst, Path newPath,long flowId) {
-
+		//not tested!!!
 		updateForwardingTables(src,dst,newPath,flowId);
 		removePathFromGraph(newPath);
 		mPaths.put(new ImmutablePair<>(src,dst),newPath);
@@ -232,7 +262,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	public void dumpState(String dumpFolderName) throws IOException {
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dumpFolderName + "/" + "central_router_graph.ser")); 
 		
-		oos.writeObject(mG);
+		oos.writeObject(mMainGraph);
 		System.out.println("Done writing graph");
 		oos = new ObjectOutputStream(new FileOutputStream(dumpFolderName + "/" + "central_router_paths.ser")); 
 		
@@ -246,7 +276,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		// needs to be fixed inorder to reallow state saving
 
 		/*String dumpFolder = configuration.getPropertyOrFail("from_state");
-		mG = (VariableGraph) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_graph.ser");
+		mMainGraph = (VariableGraph) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_graph.ser");
 		mPaths = (HashMap<Pair<Integer,Integer>, Path>) SimulatorStateSaver.readObjectFromFile(dumpFolder + "/" + "central_router_paths.ser");
 		for(Long flow : mPaths.keySet()) {
 			int source = mPaths.get(flow).getVertexList().get(0).getId();

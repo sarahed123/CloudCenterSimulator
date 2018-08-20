@@ -49,7 +49,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 
     // Total path weight
 	private double weight;
-
+	private int mGraphIndex;
     /**
      * Create a path which should have a pre-determined weight.
      *
@@ -62,7 +62,13 @@ public class Path implements BaseElementWithWeight, Serializable {
 	public Path(double cost) {
         this.vertexList = new Vector<>();
         this.weight = cost;
+        this.mGraphIndex = -1;
     }
+
+	public Path(double cost,int graphIndex) {
+		this(cost);
+		this.mGraphIndex = graphIndex;
+	}
 
     /**
      * Create a path with a pre-determined vertex list and weight.
@@ -74,6 +80,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 		this.vertexList = new Vector<>();
 		this.vertexList.addAll(vertexList);
 		this.weight = weight2;
+		this.mGraphIndex = -1;
 	}
 
     /**
@@ -158,4 +165,11 @@ public class Path implements BaseElementWithWeight, Serializable {
 		return vertexList.get(0);
 	}
 
+	public void fromGraphIndex(int i) {
+		this.mGraphIndex = i;
+	}
+
+	public int fromGraph() {
+		return mGraphIndex;
+	}
 }
