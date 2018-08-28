@@ -70,6 +70,8 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
         }
         this.optic.receiveFromEncapsulating(packet);
+		JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
+        jumbo.onCircuitEntrance();
 		SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
 		
 	}

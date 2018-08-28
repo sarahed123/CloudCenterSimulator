@@ -69,7 +69,11 @@ public abstract class NetworkDevice {
     public void setEncapsulatingDevice(MegaSwitch device){
         this.encapsulatingDevice = device;
     }
-    
+
+    public NBProperties getConfiguration() {
+        return configuration;
+    }
+
     public MegaSwitch getEncapsulatingDevice() {
     	return encapsulatingDevice;
     }
