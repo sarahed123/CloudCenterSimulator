@@ -31,7 +31,7 @@ public class SimulationLogger {
 	private static BufferedWriter writerPortUtilizationFile;
 	private static BufferedWriter writerPortUtilizationCsvFile;
 	private static BufferedWriter writerRemoteRouterPathLog;
-
+	private static BufferedWriter writerFlowOnCircuit;
 	private static BufferedWriter writerRemoteRouterStateLogCSV;
 	private static BufferedWriter writerRemoteRouterDropStatisticsCSV;
 
@@ -44,7 +44,7 @@ public class SimulationLogger {
 	private static List<PortLogger> portLoggers = new ArrayList<>();
 	private static List<FlowLogger> flowLoggers = new ArrayList<>();
 	private static List<LoggerCallback> callbacks = new ArrayList<>();
-
+	private static Set<Long> flowsOnCircuit = new HashSet<>();
 	// Statistic counters
 	private static Map<String, Long> statisticCounters = new HashMap<>();
 
@@ -114,7 +114,6 @@ public class SimulationLogger {
 	 * @param tempRunConfiguration  Temporary run configuration (not yet centrally loaded)
 	 */
 	public static void open(NBProperties tempRunConfiguration) {
-
 		// Settings
 		String specificRunFolderName = null;
 		String specificRunFolderBaseDirectory = null;
@@ -162,6 +161,7 @@ public class SimulationLogger {
 			// Info
 			writerRunInfoFile = openWriter("initialization.info");
 
+			writerFlowOnCircuit = openWriter("flows_on_circuit.log");
 			// Port log writers
 			writerPortQueueStateFile = openWriter("port_queue_length.csv.log");
 			writerPortUtilizationCsvFile = openWriter("port_utilization.csv.log");
@@ -300,6 +300,7 @@ public class SimulationLogger {
 		// Most important logs
 		logFlowSummary();
 		logPortUtilization();
+		logCircuitFlows();
 
 		try {
 
@@ -324,6 +325,7 @@ public class SimulationLogger {
 			writerRemoteRouterPathLog.close();
 			writerRemoteRouterStateLogCSV.close();
 			writerRemoteRouterDropStatisticsCSV.close();
+			writerFlowOnCircuit.close();
 
 			// Also added ones are closed automatically at the end
 			for (BufferedWriter writer : writersAdded.values()) {
@@ -344,6 +346,18 @@ public class SimulationLogger {
 
 		} catch (IOException e) {
 			throw new LogFailureException(e);
+		}
+
+	}
+
+	private static void logCircuitFlows() {
+		try {
+			for (long id : flowsOnCircuit) {
+
+				writerFlowOnCircuit.write(Long.toString(id) + "\n");
+			}
+		}catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -651,4 +665,7 @@ public class SimulationLogger {
 
 	}
 
+	public static void registerFlowOnCircuit(long flowId) {
+		flowsOnCircuit.add(flowId);
+	}
 }

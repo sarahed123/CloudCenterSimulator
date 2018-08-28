@@ -5,8 +5,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.EcnTailDropOutputPort;
+import ch.ethz.systems.netbench.ext.basic.IpHeader;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.DeviceNotSourceException;
@@ -27,6 +29,11 @@ public class RemoteRoutingOutputPort extends EcnTailDropOutputPort{
 			super.registerPacketDispatchedEvent(packet);
 		}
 
+	}
+
+	protected void onPacketDropped(IpHeader ipHeader) {
+		super.onPacketDropped(ipHeader);
+		SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_ON_CIRCUIT");
 	}
 
 	@Override

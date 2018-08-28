@@ -1,8 +1,11 @@
 package ch.ethz.systems.netbench.xpt.megaswitch;
 
+import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 
 import java.util.HashMap;
+import java.util.Set;
 
 public class JumboFlow {
     private static long sIdCounter = 0;
@@ -55,5 +58,12 @@ public class JumboFlow {
 
 	public long getId(){
         return mId;
+    }
+
+    public void onCircuitEntrance() {
+	    Set<Long> flowIds = mFlowIdToSize.keySet();
+	    for(long id : flowIds){
+            SimulationLogger.registerFlowOnCircuit(id);
+        }
     }
 }

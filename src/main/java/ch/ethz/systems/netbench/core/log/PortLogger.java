@@ -33,7 +33,12 @@ public class PortLogger {
         this.attachedToServer = port.getOwnDevice().isServer() || port.getTargetDevice().isServer();
         this.registerSelf();
 
-        this.logQueueStateEnabled = Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
+        if(port.getOwnDevice().getConfiguration()!= null){
+            this.logQueueStateEnabled = port.getOwnDevice().getConfiguration().getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
+
+        }else{
+            this.logQueueStateEnabled = false;
+        }
     }
 
     protected void registerSelf() {

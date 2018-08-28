@@ -37,9 +37,15 @@ if not os.path.exists(analysis_folder_path):
 # Analyze flow completion
 #
 def analyze_flow_completion():
-    with open(run_folder_path + '/flow_completion.csv.log') as file:
+    flows_on_circuit = {}
+    with open(run_folder_path + '/flows_on_circuit.log') as file:
         reader = csv.reader(file)
 
+        for row in reader:
+           flows_on_circuit[float(row[0])] = True
+
+    with open(run_folder_path + '/flow_completion.csv.log') as file:
+        reader = csv.reader(file)
         # To enable preliminary read to determine size:
         # data = list(reader)
         # row_count = len(data)
@@ -54,6 +60,7 @@ def analyze_flow_completion():
         end_time = []
         duration = []
         completed = []
+        on_circuit = []
 
         print("Reading in flow completion log file...")
 
@@ -68,14 +75,15 @@ def analyze_flow_completion():
             end_time.append(float(row[6]))
             duration.append(float(row[7]))
             completed.append(row[8] == 'TRUE')
+            on_circuit.append(float(row[0]) in flows_on_circuit)
             if len(row) != 9:
                 print("Invalid row: ", row)
                 exit()
-
         print("Calculating statistics...")
 
         statistics = {
             'general_num_flows': len(flow_ids),
+            'general_num_flows_on_circuit' : len(flows_on_circuit),
             'general_num_unique_sources': len(set(source_ids)),
             'general_num_unique_targets': len(set(target_ids)),
             'general_flow_size_bytes_mean': np.mean(total_size_bytes),
@@ -92,51 +100,61 @@ def analyze_flow_completion():
         range_low_eq =                  [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1,1,                1,             1,         1,         1]
         range_high_eq =                 [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1, 1,                1,             1,         1,         1]
 
-
+        for flow_on_circuit in [True,False,'both']:
         # Go over all flows
-        for i in range(0, len(flow_ids)):
+            for i in range(0, len(flow_ids)):
 
-            # Range-specific
+                # Range-specific
+                for j in range(0, len(range_name)):
+                    if (
+                            (range_low[j] == -1 or (range_low_eq[j] == 0 and total_size_bytes[i] > range_low[j]) or (range_low_eq[j] == 1 and total_size_bytes[i] >= range_low[j])) and
+                            (range_high[j] == -1 or (range_high_eq[j] == 0 and total_size_bytes[i] < range_high[j]) or (range_high_eq[j] == 1 and total_size_bytes[i] <= range_high[j]))
+                    ):
+                        if(on_circuit[i]==flow_on_circuit or flow_on_circuit=='both'):
+                            if completed[i]:
+                                range_num_finished_flows[j] += 1
+                                range_completed_duration[j].append(duration[i])
+                                range_completed_throughput[j].append(total_size_bytes[i] * 8 / duration[i])
+
+                            else:
+                                range_num_unfinished_flows[j] += 1
+
+            # Ranges statistics
             for j in range(0, len(range_name)):
-                if (
-                        (range_low[j] == -1 or (range_low_eq[j] == 0 and total_size_bytes[i] > range_low[j]) or (range_low_eq[j] == 1 and total_size_bytes[i] >= range_low[j])) and
-                        (range_high[j] == -1 or (range_high_eq[j] == 0 and total_size_bytes[i] < range_high[j]) or (range_high_eq[j] == 1 and total_size_bytes[i] <= range_high[j]))
-                ):
-                    if completed[i]:
-                        range_num_finished_flows[j] += 1
-                        range_completed_duration[j].append(duration[i])
-                        range_completed_throughput[j].append(total_size_bytes[i] * 8 / duration[i])
-
+                if flow_on_circuit=='both':
+                    stat_name = range_name[j]
+                else:
+                    extra = ""
+                    if flow_on_circuit:
+                        extra = "on_circuit"
                     else:
-                        range_num_unfinished_flows[j] += 1
+                        extra = "off_circuit"
+                    stat_name = range_name[j] + "_" + extra
 
-        # Ranges statistics
-        for j in range(0, len(range_name)):
-
-            # Number of finished flows
-            statistics[range_name[j] + '_num_flows'] = range_num_finished_flows[j] + range_num_unfinished_flows[j]
-            statistics[range_name[j] + '_num_finished_flows'] = range_num_finished_flows[j]
-            statistics[range_name[j] + '_num_unfinished_flows'] = range_num_unfinished_flows[j]
-            total = (range_num_finished_flows[j] + range_num_unfinished_flows[j])
-            if range_num_finished_flows[j] != 0:
-                statistics[range_name[j] + '_flows_completed_fraction'] = float(range_num_finished_flows[j]) / float(total)
-                statistics[range_name[j] + '_mean_fct_ns'] = np.mean(range_completed_duration[j])
-                statistics[range_name[j] + '_median_fct_ns'] = np.median(range_completed_duration[j])
-                statistics[range_name[j] + '_99th_fct_ns'] = np.percentile(range_completed_duration[j], 99)
-                statistics[range_name[j] + '_99.9th_fct_ns'] = np.percentile(range_completed_duration[j], 99.9)
-                statistics[range_name[j] + '_mean_fct_ms'] = statistics[range_name[j] + '_mean_fct_ns'] / 1000000
-                statistics[range_name[j] + '_median_fct_ms'] = statistics[range_name[j] + '_median_fct_ns'] / 1000000
-                statistics[range_name[j] + '_99th_fct_ms'] = statistics[range_name[j] + '_99th_fct_ns'] / 1000000
-                statistics[range_name[j] + '_99.9th_fct_ms'] = statistics[range_name[j] + '_99.9th_fct_ns'] / 1000000
-                statistics[range_name[j] + '_throughput_mean_Gbps'] = np.mean(range_completed_throughput[j])
-                statistics[range_name[j] + '_throughput_median_Gbps'] = np.median(range_completed_throughput[j])
-                statistics[range_name[j] + '_throughput_99th_Gbps'] = np.percentile(range_completed_throughput[j], 99)
-                statistics[range_name[j] + '_throughput_99.9th_Gbps'] = np.percentile(range_completed_throughput[j], 99.9)
-                statistics[range_name[j] + '_throughput_1th_Gbps'] = np.percentile(range_completed_throughput[j], 1)
-                statistics[range_name[j] + '_throughput_0.1th_Gbps'] = np.percentile(range_completed_throughput[j], 0.1)
-                statistics[range_name[j] + '_throughput_5th_Gbps'] = np.percentile(range_completed_throughput[j], 5)
-            else:
-                statistics[range_name[j] + '_flows_completed_fraction'] = 0
+                # Number of finished flows
+                statistics[stat_name + '_num_flows'] = range_num_finished_flows[j] + range_num_unfinished_flows[j]
+                statistics[stat_name + '_num_finished_flows'] = range_num_finished_flows[j]
+                statistics[stat_name + '_num_unfinished_flows'] = range_num_unfinished_flows[j]
+                total = (range_num_finished_flows[j] + range_num_unfinished_flows[j])
+                if range_num_finished_flows[j] != 0:
+                    statistics[stat_name + '_flows_completed_fraction'] = float(range_num_finished_flows[j]) / float(total)
+                    statistics[stat_name + '_mean_fct_ns'] = np.mean(range_completed_duration[j])
+                    statistics[stat_name + '_median_fct_ns'] = np.median(range_completed_duration[j])
+                    statistics[stat_name + '_99th_fct_ns'] = np.percentile(range_completed_duration[j], 99)
+                    statistics[stat_name + '_99.9th_fct_ns'] = np.percentile(range_completed_duration[j], 99.9)
+                    statistics[stat_name + '_mean_fct_ms'] = statistics[stat_name + '_mean_fct_ns'] / 1000000
+                    statistics[stat_name + '_median_fct_ms'] = statistics[stat_name + '_median_fct_ns'] / 1000000
+                    statistics[stat_name + '_99th_fct_ms'] = statistics[stat_name + '_99th_fct_ns'] / 1000000
+                    statistics[stat_name + '_99.9th_fct_ms'] = statistics[stat_name + '_99.9th_fct_ns'] / 1000000
+                    statistics[stat_name + '_throughput_mean_Gbps'] = np.mean(range_completed_throughput[j])
+                    statistics[stat_name + '_throughput_median_Gbps'] = np.median(range_completed_throughput[j])
+                    statistics[stat_name + '_throughput_99th_Gbps'] = np.percentile(range_completed_throughput[j], 99)
+                    statistics[stat_name + '_throughput_99.9th_Gbps'] = np.percentile(range_completed_throughput[j], 99.9)
+                    statistics[stat_name + '_throughput_1th_Gbps'] = np.percentile(range_completed_throughput[j], 1)
+                    statistics[stat_name + '_throughput_0.1th_Gbps'] = np.percentile(range_completed_throughput[j], 0.1)
+                    statistics[stat_name + '_throughput_5th_Gbps'] = np.percentile(range_completed_throughput[j], 5)
+                else:
+                    statistics[stat_name + '_flows_completed_fraction'] = 0
 
         # Print raw results
         print('Writing to result file flow_completion.statistics...')
@@ -149,6 +167,8 @@ def analyze_flow_completion():
 # Analyze port utilization
 #
 def analyze_port_utilization():
+
+
     with open(run_folder_path + '/port_utilization.csv.log') as file:
         reader = csv.reader(file)
 

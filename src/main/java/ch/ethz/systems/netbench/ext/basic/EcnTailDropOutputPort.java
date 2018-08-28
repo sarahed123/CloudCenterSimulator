@@ -40,12 +40,17 @@ public class EcnTailDropOutputPort extends OutputPort {
         if (getBufferOccupiedBits() + ipHeader.getSizeBit() <= maxQueueSizeBits) {
             guaranteedEnqueue(packet);
         } else {
-            SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED");
-            if (ipHeader.getSourceId() == this.getOwnId()) {
-                SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_AT_SOURCE");
-            }
+            onPacketDropped(ipHeader);
+
         }
 
+    }
+
+    protected void onPacketDropped(IpHeader ipHeader) {
+        SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED");
+        if (ipHeader.getSourceId() == this.getOwnId()) {
+            SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_AT_SOURCE");
+        }
     }
 
 }
