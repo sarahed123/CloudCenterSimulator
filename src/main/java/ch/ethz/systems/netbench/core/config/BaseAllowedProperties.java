@@ -12,7 +12,8 @@ public class BaseAllowedProperties {
             "enable_generate_human_readable_flow_completion_log",
             "log_remote_paths",
             "log_remote_router_state",
-            "log_remote_router_drops"
+            "log_remote_router_drops",
+            "log_port_utilization"
     };
 
     public static final String[] PROPERTIES_RUN = new String[] {

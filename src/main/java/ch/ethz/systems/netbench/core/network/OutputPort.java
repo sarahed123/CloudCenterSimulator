@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.core.network;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.log.EmptyPortLogger;
 import ch.ethz.systems.netbench.core.log.PortLogger;
 
 import java.util.Queue;
@@ -52,12 +53,17 @@ public abstract class OutputPort extends Port{
         this.ownId = this.ownNetworkDevice.getIdentifier();
         this.targetNetworkDevice = targetNetworkDevice;
         this.targetId = this.targetNetworkDevice.getIdentifier();
+        if(ownNetworkDevice.configuration!=null && ownNetworkDevice.configuration.getBooleanPropertyWithDefault("log_port_utilization",true)){
+            // Logging
+            this.logger = new PortLogger(this);
+        }
+        else{
+            this.logger = new EmptyPortLogger(this);
+        }
 
-        // Logging
-        this.logger = new PortLogger(this);
 
     }
-    
+
     protected void registerPacketDispatchedEvent(Packet packet) {
     	Simulator.registerEvent(new PacketDispatchedEvent(
                 getDispatchTime(packet),

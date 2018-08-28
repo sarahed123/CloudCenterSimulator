@@ -1,4 +1,4 @@
-package ch.ethz.systems.netbench.xpt.mega_switch;
+package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
@@ -8,20 +8,13 @@ import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
-import ch.ethz.systems.netbench.ext.demo.DemoIntermediary;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
-import ch.ethz.systems.netbench.ext.demo.DemoPacket;
-import ch.ethz.systems.netbench.ext.demo.DemoTransportLayerGenerator;
-import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
-import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
-import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
-import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpTransportLayer;
-import static org.mockito.Mockito.*;
-
+import ch.ethz.systems.netbench.xpt.mega_switch.MockOpticalHybrid;
+import ch.ethz.systems.netbench.xpt.mega_switch.MockSimpleServer;
+import ch.ethz.systems.netbench.xpt.mega_switch.SimpleSocket;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,23 +27,27 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.PriorityQueue;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HybridCircuitTest {
-
-
+public class RemoteOutputPortTest {
+    @Mock
+    private TcpPacket packet;
+    NBProperties conf;
+    private File tempRunConfig;
+    private MockRemoteRouter remoteRouter;
+    private Map<Integer, NetworkDevice> idToNetworkDevice;
     @Before
     public void setup() throws IOException {
+
         // main network
         File tempRunConfig = File.createTempFile("temp-run-config", ".tmp");
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
-        runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
+        runConfigWriter.write("scenario_topology_file=example/topologies/chain/chain_2_servers.topology\n");
         runConfigWriter.write("hybrid_circuit_threshold_byte=0\n");
         runConfigWriter.write("circuit_wave_length_num=1\n");
 
@@ -105,14 +102,14 @@ public class HybridCircuitTest {
             }
         };
         initializer.extend(portGen,ndg,lg,tlg);
-        initializer.createInfrastructure(conf);
+        idToNetworkDevice = initializer.createInfrastructure(conf);
 
 
         //creating network 2:
         File tempRunConfig2 = File.createTempFile("temp-run-config2", ".tmp");
         BufferedWriter runConfigWriter2 = new BufferedWriter(new FileWriter(tempRunConfig2));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
-        runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
+        runConfigWriter2.write("scenario_topology_file=example/topologies/chain/chain_10_ToRs.topology\n");
         runConfigWriter2.write("centered_routing_type=Xpander\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
         runConfigWriter2.write("circuit_wave_length_num=1\n");
@@ -128,7 +125,6 @@ public class HybridCircuitTest {
                 BaseAllowedProperties.EXPERIMENTAL,
                 BaseAllowedProperties.BASE_DIR_VARIANTS
         );
-        
 
         initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
                 lg2,new RemoteRoutingTransportLayerGenerator(conf2));
@@ -140,18 +136,14 @@ public class HybridCircuitTest {
     }
 
     @Test
-    public void sendOnePacket(){
-        MockSimpleServer source = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
-        MockSimpleServer dest =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
-        MockDemoPacket p = new MockDemoPacket(0, 1000, 2, 3, 10, 0);
-
-        source.receive(p);
-        Simulator.runNs(1000000000);
-        assert(dest.received);
+    public void testNoQueues(){
+        Event event = new FlowStartEvent(0,idToNetworkDevice.get(11).getTransportLayer(),10,1000);
+        Simulator.registerEvent(event);
+        Simulator.runNs(100000000);
     }
-    
+
     @After
     public void clear() {
-    	Simulator.reset();
+        Simulator.reset();
     }
 }

@@ -17,6 +17,7 @@ import ch.ethz.systems.netbench.ext.demo.DemoIntermediary;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.*;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import com.sun.org.apache.regexp.internal.RE;
 import org.junit.After;
 import org.junit.Before;
@@ -55,6 +56,8 @@ public class RotorNetTest {
         runConfigWriter2.write("rotor_net_reconfiguration_time_ns=20000\n");
         runConfigWriter2.write("rotor_net_reconfiguration_interval_ns=180000\n");
         runConfigWriter2.write("max_rotor_buffer_size_byte=50000\n");
+        runConfigWriter2.write("log_port_utilization=false\n");
+
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),
@@ -215,11 +218,20 @@ public class RotorNetTest {
 
 
 
-        r0.receive(packet);
+        try{
+            r0.receive(packet);
+        }catch (NoPathException e){
+
+        }
 
 
-        Simulator.runNs(10000);
-        System.out.println(packet.path);
+
+
+        try{
+            Simulator.runNs(10000);
+        }catch (NoPathException e){
+
+        }
         assert(packet.path.toString().equals("[0]"));
 
     }
