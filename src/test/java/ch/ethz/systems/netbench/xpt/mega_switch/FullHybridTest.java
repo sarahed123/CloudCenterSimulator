@@ -103,7 +103,9 @@ public class FullHybridTest {
         runConfigWriter2.write("centered_routing_type=Xpander\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
         runConfigWriter2.write("circuit_wave_length_num=1\n");
-        runConfigWriter2.write("network_type=circuit_switch");
+        runConfigWriter2.write("network_type=circuit_switch\n");
+        runConfigWriter2.write("output_port_max_queue_size_bytes=150000\n");
+        runConfigWriter2.write("output_port_ecn_threshold_k_bytes=30000\n");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),

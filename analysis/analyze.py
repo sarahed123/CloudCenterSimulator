@@ -83,7 +83,7 @@ def analyze_flow_completion():
         }
 
         range_low =                     [-1,            -1,            -1,      -1,          100000,    1000000,      2434900,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              -1,    -1]
-        range_high =                    [-1,            100000,        2434900,  1000000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  5000000,  10000000]
+        range_high =                    [-1,            100000,        2434900,  100000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  5000000,  10000000]
         range_name =                    ["all",         "less_100KB",  "less_2.4349MB", "leq_100KB", "geq_100KB","geq_1MB", "geq_2.4349MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "leq_5MB", "leq_10MB"]
         range_completed_duration =      [[],            [],            [],              [],  [],         [],           [],              [],            [],         [],          [],[],              [],            [],         [],          []]
         range_completed_throughput =    [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
@@ -227,4 +227,4 @@ def analyze_port_utilization():
 
 # Call analysis functions
 analyze_flow_completion()
-analyze_port_utilization()
+#analyze_port_utilization()

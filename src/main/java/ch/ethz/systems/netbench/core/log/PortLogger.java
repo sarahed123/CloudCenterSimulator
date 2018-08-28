@@ -31,8 +31,13 @@ public class PortLogger {
         this.ownId = port.getOwnId();
         this.targetId = port.getTargetId();
         this.attachedToServer = port.getOwnDevice().isServer() || port.getTargetDevice().isServer();
-        SimulationLogger.registerPortLogger(this);
+        this.registerSelf();
+
         this.logQueueStateEnabled = Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
+    }
+
+    protected void registerSelf() {
+        SimulationLogger.registerPortLogger(this);
     }
 
     /**

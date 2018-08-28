@@ -23,7 +23,8 @@ public class RemoteRoutingOutputPortGenerator extends OutputPortGenerator{
 	public OutputPort generate(NetworkDevice ownNetworkDevice, NetworkDevice towardsNetworkDevice, Link link) {
 		
 		boolean isExtended = configuration.isExtendedTopology();
-		return new RemoteRoutingOutputPort(ownNetworkDevice, towardsNetworkDevice, link, new LinkedBlockingQueue<Packet>(),isExtended);
+		return new RemoteRoutingOutputPort(ownNetworkDevice, towardsNetworkDevice, link,  configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes"),
+				configuration.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes"),isExtended);
 	}
 
 }

@@ -62,10 +62,13 @@ public class RemoteSourceRoutingSwitchTest {
         runConfigWriter.write("centered_routing_type=Xpander\n");
         runConfigWriter.write("network_device_routing=remote_routing_populator\n");
         runConfigWriter.write("circuit_wave_length_num=1\n");
+        runConfigWriter.write("output_port_max_queue_size_bytes=150000\n");
+        runConfigWriter.write("output_port_ecn_threshold_k_bytes=30000\n");
 
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
                 tempRunConfig.getAbsolutePath(),
+                BaseAllowedProperties.EXTENSION,
                 BaseAllowedProperties.LOG,
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXPERIMENTAL

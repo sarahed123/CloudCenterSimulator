@@ -115,6 +115,7 @@ public class RotorSwitch extends DynamicSwitch {
                 }
             }
         }
+        throw new NoPathException();
     }
 
     private boolean hasResources(Packet genericPacket) {
@@ -122,7 +123,7 @@ public class RotorSwitch extends DynamicSwitch {
     }
 
     static void setMaxBufferSizeByte(long sizeByte){
-        sMaxBufferSizeBit = sizeByte*8;
+        sMaxBufferSizeBit = sizeByte*8L;
     }
 
     private void forwardToNextSwitch(IpPacket ipPacket,int destination) {
