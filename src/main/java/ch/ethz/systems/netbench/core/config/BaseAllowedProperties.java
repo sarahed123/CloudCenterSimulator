@@ -144,6 +144,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+            "max_num_flows_on_circuit",
             "circuit_wave_length_num",
             "servers_inifinite_capcacity",
             "semi_remote_routing_path_dir",

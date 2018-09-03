@@ -14,12 +14,14 @@ public class JumboFlow {
     HashMap<Long,Long> mFlowIdToSize;
     int mSource;
     int mDest;
+    boolean onCircuit;
     public JumboFlow(int source,int dest){
         mSizeByte = 0;
         mFlowIdToSize = new HashMap<>();
         mSource = source;
         mDest = dest;
         mId = ++sIdCounter;
+        onCircuit = false;
     }
 
     public long getSizeByte(){
@@ -61,9 +63,17 @@ public class JumboFlow {
     }
 
     public void onCircuitEntrance() {
+	    if(!onCircuit){
+	        onCircuit = true;
+
+        }
 	    Set<Long> flowIds = mFlowIdToSize.keySet();
 	    for(long id : flowIds){
             SimulationLogger.registerFlowOnCircuit(id);
         }
+    }
+
+    public boolean isOnCircuit() {
+        return onCircuit;
     }
 }

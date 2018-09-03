@@ -22,6 +22,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     protected NetworkDevice electronic;
     protected NetworkDevice optic;
     HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
+
     public OpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
         circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
@@ -64,13 +65,15 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 	}
     
 	protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId) {
+        JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
+
 		try {
 	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),jumboFlowiId);
 		}catch(FlowPathExists e) {
 
         }
         this.optic.receiveFromEncapsulating(packet);
-		JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
+
         jumbo.onCircuitEntrance();
 		SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
 		
