@@ -35,7 +35,9 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XpanderRouter extends RemoteRoutingController{
 	private final double dijkstra_max_weigh;
 	private int flowFailuresSample;
-
+	protected Map<Integer,Integer> mTransmittingSources;
+	protected Map<Integer,Integer> mRecievingDestinations;
+	private final int mMaxNumJFlowsOncircuit;
 
     enum PathAlgorithm{
 		DIJKSTRA,
@@ -48,7 +50,8 @@ public class XpanderRouter extends RemoteRoutingController{
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
 		super(configuration);
-
+		mTransmittingSources = new HashMap<>();
+		mRecievingDestinations = new HashMap<>();
 		//experimental!
 		mGraphs = new Graph[configuration.getIntegerPropertyOrFail("circuit_wave_length_num")];
 		for(int i = 0; i < mGraphs.length; i++){
@@ -56,6 +59,7 @@ public class XpanderRouter extends RemoteRoutingController{
 			mGraphs[i].resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
 					,idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
 		}
+		mMaxNumJFlowsOncircuit = configuration.getIntegerPropertyOrFail("max_num_flows_on_circuit");
 
 		mIdToNetworkDevice = idToNetworkDevice;
 		mMainGraph =  configuration.getGraph();
@@ -116,10 +120,22 @@ public class XpanderRouter extends RemoteRoutingController{
 		if(mPaths.containsKey(new ImmutablePair<>(source,dest))) {
 			throw new FlowPathExists(flowId);
 		}
+		if(mTransmittingSources.getOrDefault(source,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(dest,0)>=mMaxNumJFlowsOncircuit){
+			SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_XPANDER_TOR");
+			throw new NoPathException(source,dest);
+		}
 		Path p = generatePathFromGraph(source, dest);
 		
 		updateForwardingTables(source,dest,p,flowId);
 		removePathFromGraph(p);
+
+		int transmittingCounter = mTransmittingSources.getOrDefault(source,0);
+		int receivingCounter = mRecievingDestinations.getOrDefault(dest,0);
+		transmittingCounter++;
+		receivingCounter++;
+		mTransmittingSources.put(source,transmittingCounter);
+		mRecievingDestinations.put(dest,receivingCounter);
+
 		mPaths.put(new ImmutablePair<>(source,dest), p);
 		flowCounter++;
 		logRoute(p,source,dest,flowId,Simulator.getCurrentTime(),true);
@@ -177,6 +193,13 @@ public class XpanderRouter extends RemoteRoutingController{
 		logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
 				,jumboFlowId,Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
+
+		int transmittingCounter = mTransmittingSources.get(src);
+		int receivingCounter = mRecievingDestinations.get(dst);
+		transmittingCounter--;
+		receivingCounter--;
+		mTransmittingSources.put(src,transmittingCounter);
+		mRecievingDestinations.put(dst,receivingCounter);
 	}
 
 	protected void removePathFromGraph(Path p) {

@@ -28,6 +28,7 @@ public class DynamicController extends RemoteRoutingController {
 		mIdToNetworkDevice = idToNetworkDevice;
 		this.mMainGraph = new VariableGraph(configuration.getGraph(), "graph_weight");
 		max_degree = configuration.getIntegerPropertyOrFail("max_dynamic_switch_degree");
+		System.out.println("Setting max dynamic degree to " + max_degree);
 	}
 
 	@Override

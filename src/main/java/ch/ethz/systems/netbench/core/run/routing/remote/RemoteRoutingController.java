@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.core.run.routing.remote;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
@@ -26,6 +27,8 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 
 	private static RemoteRoutingController mInstance = null;
 	protected HashMap<Pair<Integer,Integer>, Path> mPaths;
+
+
 	protected Graph mMainGraph;
 	private static long headerSize;
 	protected long totalDrops;
