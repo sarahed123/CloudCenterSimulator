@@ -59,7 +59,11 @@ public class XpanderRouter extends RemoteRoutingController{
 			mGraphs[i].resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
 					,idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
 		}
-		mMaxNumJFlowsOncircuit = configuration.getIntegerPropertyOrFail("max_num_flows_on_circuit");
+
+		mMaxNumJFlowsOncircuit = configuration.getIntegerPropertyWithDefault("max_num_flows_on_circuit",Integer.MAX_VALUE);
+		if(mMaxNumJFlowsOncircuit==Integer.MAX_VALUE){
+			System.out.println("WARNING: property max_num_flows_on_circuit is set to infinity. Is that what you want?");
+		}
 
 		mIdToNetworkDevice = idToNetworkDevice;
 		mMainGraph =  configuration.getGraph();
