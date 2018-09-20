@@ -26,9 +26,17 @@ public class RemoteRoutingOutputPort extends EcnTailDropOutputPort{
 		if(ipPacket.getSourceId()==this.getOwnDevice().getIdentifier()){
 			super.enqueue(packet);
 		}else{
-			super.registerPacketDispatchedEvent(packet);
+			registerPacketDispatchedEventNoDelay(packet);
 		}
 
+	}
+
+	protected void registerPacketDispatchedEventNoDelay(Packet packet) {
+		Simulator.registerEvent(new PacketDispatchedEvent(
+				0,
+				packet,
+				this
+		));
 	}
 
 	protected void onPacketDropped(IpHeader ipHeader) {
