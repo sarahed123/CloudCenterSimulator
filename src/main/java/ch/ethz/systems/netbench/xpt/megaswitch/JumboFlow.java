@@ -29,6 +29,9 @@ public class JumboFlow {
     }
 
     public void onPacketDispatch(TcpPacket packet) {
+        if(packet.isACK()){
+            return;
+        }
         long flowSize = mFlowIdToSize.getOrDefault(packet.getFlowId(),0l);
         long seq = packet.getSequenceNumber() + packet.getDataSizeByte();
         if(flowSize >= seq){
@@ -75,5 +78,9 @@ public class JumboFlow {
 
     public boolean isOnCircuit() {
         return onCircuit;
+    }
+
+    public boolean hasFlow(long flowId) {
+	    return mFlowIdToSize.containsKey(flowId);
     }
 }

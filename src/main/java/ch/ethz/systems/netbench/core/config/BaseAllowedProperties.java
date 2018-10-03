@@ -199,6 +199,7 @@ public class BaseAllowedProperties {
     };
     
     public static final String[] BASE_DIR_VARIANTS = new String[] {
+            "base_lambda_flow_starts_per_s",
     		"variant_graph_name"
     };
 

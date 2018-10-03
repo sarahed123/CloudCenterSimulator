@@ -22,11 +22,15 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     protected NetworkDevice electronic;
     protected NetworkDevice optic;
     HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
+    private long mNumAllocatedFlows;
+    private long mNumDeAllocatedFlows;
 
     public OpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
         circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
         mJumboFlowMap = new HashMap<>();
+        mNumAllocatedFlows = 0;
+        mNumDeAllocatedFlows = 0;
 
     }
     @Override
@@ -114,7 +118,6 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected void onFlowFinished(int source, int dest, long flowId) {
-
         JumboFlow jumboFlow = getJumboFlow(source,dest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
@@ -171,4 +174,13 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 	protected RemoteRoutingController getRemoteRouter() {
 		return RemoteRoutingController.getInstance();
 	}
+
+    public String getState() {
+//        JumboFlow j = getJumboFlow(this.identifier,53);
+//        String state = "Node " + this.identifier + " Allocated: " + this.mNumAllocatedFlows + ", deAllocated: " + this.mNumDeAllocatedFlows + ", total size: " +
+//                j.getSizeByte() + ", on circuit " + j.isOnCircuit() + "\n";
+//        mNumDeAllocatedFlows = 0;
+//        mNumAllocatedFlows = 0;
+        return "";
+    }
 }
