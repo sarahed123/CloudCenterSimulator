@@ -9,6 +9,7 @@ import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
+import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import edu.asu.emit.algorithm.graph.Graph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -38,7 +39,8 @@ public class XpanderRouter extends RemoteRoutingController{
 	protected Map<Integer,Integer> mTransmittingSources;
 	protected Map<Integer,Integer> mRecievingDestinations;
 	private final int mMaxNumJFlowsOncircuit;
-
+	private int mAllocateddPathsNum;
+	private int mDeAllocatedPathsNum;
     enum PathAlgorithm{
 		DIJKSTRA,
 		STRICT_UP_DOWN_DIJKSTRA
@@ -52,6 +54,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		super(configuration);
 		mTransmittingSources = new HashMap<>();
 		mRecievingDestinations = new HashMap<>();
+		mAllocateddPathsNum = 0;
+		mDeAllocatedPathsNum = 0;
 		//experimental!
 		mGraphs = new Graph[configuration.getIntegerPropertyOrFail("circuit_wave_length_num")];
 		for(int i = 0; i < mGraphs.length; i++){
@@ -139,7 +143,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		receivingCounter++;
 		mTransmittingSources.put(source,transmittingCounter);
 		mRecievingDestinations.put(dest,receivingCounter);
-
+		mAllocateddPathsNum++;
 		mPaths.put(new ImmutablePair<>(source,dest), p);
 		flowCounter++;
 		logRoute(p,source,dest,flowId,Simulator.getCurrentTime(),true);
@@ -204,6 +208,7 @@ public class XpanderRouter extends RemoteRoutingController{
 		receivingCounter--;
 		mTransmittingSources.put(src,transmittingCounter);
 		mRecievingDestinations.put(dst,receivingCounter);
+		mDeAllocatedPathsNum++;
 	}
 
 	protected void removePathFromGraph(Path p) {
@@ -255,20 +260,26 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	public String getCurrentState() {
 		// TODO Auto-generated method stub
-		int numEdges = 0;
-		HashMap<Integer,Integer> loadMap = new HashMap<Integer,Integer>();
-		for(Path p : mPaths.values()){
-			numEdges += p.getVertexList().size();
-			int load = loadMap.getOrDefault(p.getVertexList().size(),0);
-			loadMap.put(p.getVertexList().size(),load+1);
-		}
+//		int numEdges = 0;
+//		HashMap<Integer,Integer> loadMap = new HashMap<Integer,Integer>();
+//		for(Path p : mPaths.values()){
+//			numEdges += p.getVertexList().size();
+//			int load = loadMap.getOrDefault(p.getVertexList().size(),0);
+//			loadMap.put(p.getVertexList().size(),load+1);
+//		}
+//
+//		String state = "Allocated paths " + mPaths.size() + ". Flow dropps " + flowFailuresSample + ". Flow count " + flowCounter + "\n";
+//		state+= "num edges " + numEdges + "\n";
+//		for(int pathLen : loadMap.keySet()){
+//			state +=  "paths of len " + pathLen + " have count " + loadMap.get(pathLen) + "\n";
+//		}
 
-		String state = "Allocated paths " + mPaths.size() + ". Flow dropps " + flowFailuresSample + ". Flow count " + flowCounter + "\n";
-		state+= "num edges " + numEdges + "\n";
-		for(int pathLen : loadMap.keySet()){
-			state +=  "paths of len " + pathLen + " have count " + loadMap.get(pathLen) + "\n";
-		}
-
+		String state = "";
+		int avg = 0;
+		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
+		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
+		mDeAllocatedPathsNum = 0;
+		mAllocateddPathsNum = 0;
 		return state;
 	}
 

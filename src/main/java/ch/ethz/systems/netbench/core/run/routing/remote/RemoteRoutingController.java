@@ -151,4 +151,8 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 
 	public abstract void dumpState(String dumpFolderName) throws IOException;
 
+	public String getCurrentState(){
+		return "";
+	}
+
 }
