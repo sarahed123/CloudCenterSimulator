@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.simple.simpledctcp;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpSocket;

@@ -472,6 +472,7 @@ public class SimpleTcpSocket extends Socket {
             return;
         }
 
+//        System.out.println(this.congestionWindow);
         // Log current congestion window
         tcpLogger.logCongestionWindow(this.congestionWindow);
 

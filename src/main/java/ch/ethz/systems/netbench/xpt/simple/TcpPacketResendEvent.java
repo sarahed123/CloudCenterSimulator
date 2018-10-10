@@ -15,6 +15,7 @@ public class TcpPacketResendEvent extends Event {
         this.tcpPacket = tcpPacket;
         this.tcpSocket = tcpSocket;
         this.active = true;
+
     }
 
     @Override

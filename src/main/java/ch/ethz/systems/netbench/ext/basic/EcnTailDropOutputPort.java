@@ -27,12 +27,12 @@ public class EcnTailDropOutputPort extends OutputPort {
      */
     @Override
     public void enqueue(Packet packet) {
-
         // Convert to IP packet
         IpHeader ipHeader = (IpHeader) packet;
 
         // Mark congestion flag if size of the queue is too big
         if (getBufferOccupiedBits() >= ecnThresholdKBits) {
+            SimulationLogger.increaseStatisticCounter("MARK_CONGESTION_ECN_THRESHOLD");
             ipHeader.markCongestionEncountered();
         }
 

@@ -38,7 +38,7 @@ public class DynamicController extends RemoteRoutingController {
 	}
 
 	@Override
-	public void initRoute(int source, int dest, long flowId) {
+	public void initRoute(int source, int dest, int serverSource, int serverDest, long flowId) {
 		Pair<Integer, Integer> pair = new ImmutablePair<>(source,dest);
 
 		Vertex sourceVertex = new Vertex(source);
@@ -61,6 +61,7 @@ public class DynamicController extends RemoteRoutingController {
 		logRoute(finalPath,source,dest,flowId, Simulator.getCurrentTime(),true);
 	}
 
+
 	@Override
 	public void reset() {
 		((VariableGraph) mMainGraph).clear();
@@ -78,6 +79,11 @@ public class DynamicController extends RemoteRoutingController {
 		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));
 		logRoute(mPaths.get(pair),src,dst,jumboFlowId, Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
+
+	}
+
+	@Override
+	public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest, long flowId) {
 
 	}
 

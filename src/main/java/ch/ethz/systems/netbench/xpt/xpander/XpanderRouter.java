@@ -9,6 +9,7 @@ import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import edu.asu.emit.algorithm.graph.Graph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -122,34 +123,35 @@ public class XpanderRouter extends RemoteRoutingController{
 		}
 	}
 
-	@Override
-	public void initRoute(int source,int dest,long flowId){ 
-		
-		if(mPaths.containsKey(new ImmutablePair<>(source,dest))) {
+
+
+
+	public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
+		if(mPaths.containsKey(new ImmutablePair<>(sourceServer,destServer))) {
 			throw new FlowPathExists(flowId);
 		}
-		if(mTransmittingSources.getOrDefault(source,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(dest,0)>=mMaxNumJFlowsOncircuit){
+		if(mTransmittingSources.getOrDefault(sourceToR,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(destToR,0)>=mMaxNumJFlowsOncircuit){
 			SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_XPANDER_TOR");
-			throw new NoPathException(source,dest);
+			throw new NoPathException(sourceToR,destToR);
 		}
-		Path p = generatePathFromGraph(source, dest);
-		
-		updateForwardingTables(source,dest,p,flowId);
-		removePathFromGraph(p);
 
-		int transmittingCounter = mTransmittingSources.getOrDefault(source,0);
-		int receivingCounter = mRecievingDestinations.getOrDefault(dest,0);
+		Path p = generatePathFromGraph(sourceToR, destToR);
+
+		updateForwardingTables(sourceServer,destServer,p,flowId);
+		removePathFromGraph(p);
+		int transmittingCounter = mTransmittingSources.getOrDefault(sourceToR,0);
+		int receivingCounter = mRecievingDestinations.getOrDefault(destToR,0);
 		transmittingCounter++;
 		receivingCounter++;
-		mTransmittingSources.put(source,transmittingCounter);
-		mRecievingDestinations.put(dest,receivingCounter);
+		mTransmittingSources.put(sourceToR,transmittingCounter);
+		mRecievingDestinations.put(destToR,receivingCounter);
 		mAllocateddPathsNum++;
-		mPaths.put(new ImmutablePair<>(source,dest), p);
+		mPaths.put(new ImmutablePair<>(sourceServer,destServer), p);
+
 		flowCounter++;
-		logRoute(p,source,dest,flowId,Simulator.getCurrentTime(),true);
+		logRoute(p,sourceToR,destToR,flowId,Simulator.getCurrentTime(),true);
 
 	}
-	
 	
 
 	protected Path generatePathFromGraph(int source,int dest) {
@@ -182,10 +184,10 @@ public class XpanderRouter extends RemoteRoutingController{
 		mPaths.clear();
 	}
 
-	@Override
-	public void recoverPath(int src, int dst, long jumboFlowId){
-		Pair<Integer, Integer> pair = new ImmutablePair<>(src,dst);
+	public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
+		Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
 		Path p = mPaths.get(pair);
+
 		if(p==null) {
 			throw new NoPathException();
 		}
@@ -199,15 +201,15 @@ public class XpanderRouter extends RemoteRoutingController{
 
 		}
 		logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
-				,jumboFlowId,Simulator.getCurrentTime(),false);
+				,flowId,Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
 
-		int transmittingCounter = mTransmittingSources.get(src);
-		int receivingCounter = mRecievingDestinations.get(dst);
+		int transmittingCounter = mTransmittingSources.get(sourceToR);
+		int receivingCounter = mRecievingDestinations.get(destToR);
 		transmittingCounter--;
 		receivingCounter--;
-		mTransmittingSources.put(src,transmittingCounter);
-		mRecievingDestinations.put(dst,receivingCounter);
+		mTransmittingSources.put(sourceToR,transmittingCounter);
+		mRecievingDestinations.put(destToR,receivingCounter);
 		mDeAllocatedPathsNum++;
 	}
 
@@ -276,7 +278,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 		String state = "";
 		int avg = 0;
-		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
+//		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
 		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
 		mDeAllocatedPathsNum = 0;
 		mAllocateddPathsNum = 0;

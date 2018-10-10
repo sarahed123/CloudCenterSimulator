@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorNetController;
 
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyMissingException;
@@ -128,8 +129,12 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * @param dest
 	 * @param flowId the flow id
 	 */
-	public abstract void initRoute(int source,int dest, long flowId);
-	
+	public void initRoute(int source,int dest, long flowId){
+		this.initRoute(source,dest,source,dest,flowId);
+	}
+
+
+	public abstract void initRoute(int sourceToR,int destToR, int sourceServer,int destServer,long flowId);
 	/**
 	 * resets the graph to its original state
 	 */
@@ -138,8 +143,11 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	/**
 	 * recover a path, returning all its edges to the graph
 	 */
-	public abstract void recoverPath(int src, int dst, long jumboFlowId);
-	
+	public void recoverPath(int src, int dst, long jumboFlowId){
+		this.recoverPath(src,dst,src,dst,jumboFlowId);
+	}
+
+	public abstract void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId);
 	/**
 	 * public for testing but should be a private method to handle path switching
 	 * @param src the id of the switch that will get the new path

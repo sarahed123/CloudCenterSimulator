@@ -20,6 +20,7 @@ public class SemiXpander extends XpanderRouter {
     protected Path generatePathFromGraph(int source, int dest) {
         SemiRemoteRoutingSwitch sourceSwitch = (SemiRemoteRoutingSwitch) mIdToNetworkDevice.get(source);
         List<List<Integer>> paths = sourceSwitch.getPathsTo(dest);
+
         Path ret;
         for(List<Integer> p : paths){
             try{
