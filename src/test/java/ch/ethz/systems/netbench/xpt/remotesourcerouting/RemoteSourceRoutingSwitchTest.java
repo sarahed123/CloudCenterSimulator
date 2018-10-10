@@ -131,7 +131,8 @@ public class RemoteSourceRoutingSwitchTest {
         // Initialize packet for that destination
         when(packet.getDestinationId()).thenReturn(4);
         when(packet.getFlowId()).thenReturn((long) 0);
-        
+        when(packet.deEncapsualte()).thenReturn(packet);
+
         // Give device the packet
         source.receiveFromTransportLayer(packet);
         verify(source,times(1)).receive(packet);

@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 import java.util.HashMap;
 import java.util.Map;
 
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -42,7 +43,8 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     }
     
     protected void forwardToNextSwitch(IpPacket packet) {
-    	forwardingTable.get(new ImmutablePair<>(packet.getSourceId(),packet.getDestinationId())).enqueue(packet);
+    	IpPacket deEncapse = (IpPacket) (((Encapsulatable) packet).deEncapsualte());
+    	forwardingTable.get(new ImmutablePair<>(deEncapse.getSourceId(),deEncapse.getDestinationId())).enqueue(packet);
 		
 	}
     

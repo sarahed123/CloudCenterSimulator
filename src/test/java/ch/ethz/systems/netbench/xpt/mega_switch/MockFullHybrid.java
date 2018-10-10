@@ -24,10 +24,10 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 	}
 	
 	@Override
-	protected void routeThroughCircuit(IpPacket packet, long id) {
+	protected void routeThroughCircuit(IpPacket packet, long id,int sourceServer,int destServer) {
 		routedThroughCircuit = true;
 		try{
-			super.routeThroughCircuit(packet, id);
+			super.routeThroughCircuit(packet, id,sourceServer,destServer);
 		}catch (NoPathException e){
 			noPathExceptionThrown = true;
 			throw e;
@@ -43,9 +43,9 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 	}
 	
 	@Override
-	protected void recoverPath(int source, int dest, long id) {
+	protected void recoverPath(int source, int dest,int sourceServer, int destServer, long id) {
 		recoveredPath = true;
-		super.recoverPath(source, dest, id);
+		super.recoverPath(source, dest, sourceServer, destServer, id);
 	}
 	
 	@Override

@@ -159,7 +159,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
 
     @Override
     public String toString() {
-        return "TCPPacket[" + getSourceId() + " -> " + getDestinationId() + ", DATA=" + this.getDataSizeByte() + "b, ACK=" + ACK + " (exp. ack.: " + (this.getSequenceNumber() + this.getDataSizeByte()) + "), createdAt=" + this.getDepartureTime() + ", seq: " + getSequenceNumber() + ", carryingAck: " + this.getAcknowledgementNumber() + ", SYN=" + this.isSYN() + "]";
+        return "TCPPacket[" + getSourceId() + " -> " + getDestinationId() + ", DATA=" + this.getDataSizeByte() + "b, ACK=" + ACK + " (exp. ack.: " + (this.getSequenceNumber() + this.getDataSizeByte()) + "), createdAt=" + this.getDepartureTime() + ", seq: " + getSequenceNumber() + ", carryingAck: " + this.getAcknowledgementNumber() + ", SYN=" + this.isSYN() + ", FIN=" + this.isFIN() + "]";
     }
 
 

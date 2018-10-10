@@ -29,9 +29,9 @@ public class MockRemoteRouter extends XpanderRouter {
 	}
 	
 	@Override
-	public void recoverPath(int src, int dst, long jumboFlowId){
-		super.recoverPath(src, dst, jumboFlowId);
-		recovered.put(new ImmutablePair<Integer, Integer>(src, dst), true);
+	public void recoverPath(int src, int dst,int serverSource,int destServer, long jumboFlowId){
+		super.recoverPath(src, dst, serverSource, destServer, jumboFlowId);
+		recovered.put(new ImmutablePair<Integer, Integer>(serverSource, destServer), true);
 	}
 	
 	@Override

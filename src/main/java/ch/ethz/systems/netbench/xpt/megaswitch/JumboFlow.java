@@ -83,4 +83,13 @@ public class JumboFlow {
     public boolean hasFlow(long flowId) {
 	    return mFlowIdToSize.containsKey(flowId);
     }
+
+    public long getSizeByte(long flowId) {
+	    if(!mFlowIdToSize.containsKey(flowId)) return 0;
+	    return mFlowIdToSize.get(flowId);
+    }
+
+    public void onCircuitEntrance(long flowId) {
+	    SimulationLogger.registerFlowOnCircuit(flowId);
+    }
 }

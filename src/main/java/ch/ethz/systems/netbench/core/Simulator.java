@@ -227,6 +227,7 @@ public class Simulator {
 			
 			// Go to next event
 			Event event = eventQueue.peek();
+//			System.out.println(event.toString());
 			now = event.getTime();
 			if (now <= runtimeNanoseconds) {
 				eventQueue.poll();
@@ -255,7 +256,6 @@ public class Simulator {
 			}
 
 		}
-
 		// Make sure run ends at the final time if it ended because there were no
 		// more events or the runtime was exceeded
 		if (!endedDueToFlowThreshold) {

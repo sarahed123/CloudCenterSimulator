@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
@@ -22,6 +23,8 @@ import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpTransportLayer;
 import static org.mockito.Mockito.*;
 
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
+import com.sun.org.apache.bcel.internal.generic.NOP;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +55,6 @@ public class HybridCircuitTest {
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
         runConfigWriter.write("hybrid_circuit_threshold_byte=0\n");
-        runConfigWriter.write("circuit_wave_length_num=1\n");
 
 
         runConfigWriter.close();
@@ -115,7 +117,8 @@ public class HybridCircuitTest {
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter2.write("centered_routing_type=Xpander\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
-        runConfigWriter2.write("circuit_wave_length_num=1\n");
+        runConfigWriter2.write("circuit_wave_length_num=2\n");
+        runConfigWriter2.write("max_num_flows_on_circuit=1\n");
         runConfigWriter2.write("network_type=circuit_switch\n");
         runConfigWriter2.write("output_port_max_queue_size_bytes=150000\n");
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=30000\n");
@@ -148,6 +151,19 @@ public class HybridCircuitTest {
         source.receive(p);
         Simulator.runNs(1000000000);
         assert(dest.received);
+    }
+
+    @Test
+    public void sendTwoFlows(){
+
+        RemoteRoutingController.getInstance().initRoute(0,1,2,5,0);
+        boolean thrown = false;
+        try{
+            RemoteRoutingController.getInstance().initRoute(0,1,4,3,0);
+        }catch(NoPathException e){
+            thrown = true;
+        }
+        assert(thrown);
     }
     
     @After
