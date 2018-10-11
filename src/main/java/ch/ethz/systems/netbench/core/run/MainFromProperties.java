@@ -16,9 +16,7 @@ import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.core.run.traffic.TrafficPlanner;
 import ch.ethz.systems.netbench.core.utility.UnitConverter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.LinkedList;
@@ -166,6 +164,15 @@ public class MainFromProperties {
         
         propertiesList.get(0).loadSubConfigurtations();
         NBProperties.constructBaseDir(propertiesList.get(0),propertiesList);
+        try {
+            new File(propertiesList.get(0).getPropertyOrFail("common_base_dir")).mkdirs();
+            BufferedWriter bw = new BufferedWriter(new FileWriter(propertiesList.get(0).getPropertyOrFail("common_base_dir") + "/" +
+                    propertiesList.get(0).getPropertyOrFail("common_run_name")));
+            bw.write(propertiesList.get(0).getPropertyOrFail("run_folder_base_dir") + "\n");
+            bw.close();
+        } catch (IOException e) {
+            throw new RuntimeException("coulding open common base folder");
+        }
         return propertiesList;
 
     }

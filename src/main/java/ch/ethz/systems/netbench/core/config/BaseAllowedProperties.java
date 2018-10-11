@@ -52,63 +52,17 @@ public class BaseAllowedProperties {
 
     };
 
-    public static final String[] SECONDARY_PROPERTIES = new String[]{
-            "scenario_topology_file",
-            "scenario_topology_extend_with_servers",
-            "scenario_topology_extend_servers_per_tl_node",
-            "transport_layer",
-            "network_device",
-            "network_device_intermediary",
-            "output_port",
-            "link",
-            "network_device_routing",
-            // Basic
-            "output_port_max_queue_size_bytes",
-            "output_port_ecn_threshold_k_bytes",
-            "link_delay_ns",
-            "link_bandwidth_bit_per_ns",
-            // VLB
-            "routing_random_valiant_node_range_lower_incl",
-            "routing_random_valiant_node_range_upper_incl",
-            "routing_ecmp_then_valiant_switch_threshold_bytes",
-            "fat_tree_degree",
-            "no_queues_in_servers",
-            "base_dir_variants",
-            "k_shortest_paths",
-            "maximum_path_weight",
-            "k_shortest_paths_num",
-            "vertex_tie_break_rule",
-            "paths_filter",
+
+    public static final String[] RUN_CONFIGURATION_ONLY = new String[]{
+            "run_folder_name",
+            "run_folder_base_dir",
+            "analysis_command",
+            "finish_when_first_flows_finish",
+            "from_state",
             "sub_configurations_folder",
             "common_base_dir",
-            "path_algorithm",
-            "graph_edge_weight_rule",
-            // TCP
-            "TCP_ROUND_TRIP_TIMEOUT_NS",
-            "TCP_MAX_SEGMENT_SIZE",
-            "TCP_MAX_WINDOW_SIZE",
-            "TCP_LOSS_WINDOW_SIZE",
-            "TCP_INITIAL_SLOW_START_THRESHOLD",
-            "TCP_INITIAL_WINDOW_SIZE",
-            "TCP_MINIMUM_SSTHRESH",
-            "TCP_MINIMUM_ROUND_TRIP_TIMEOUT",
-            "DCTCP_WEIGHT_NEW_ESTIMATION",
-            "enable_log_congestion_window",
-            "enable_log_packet_burst_gap",
-            "centered_routing_type",
-            "remote_routing_header_size",
-            // K-shortest-paths
-            "k_for_k_shortest_paths",
-
-            // K-paths
-            // "k_paths_k_threshold",
-            // "k_paths_file",
-            "allow_source_routing_skip_duplicate_paths",
-            "allow_source_routing_add_duplicate_paths",
-
-
-            "spark_error_distribution",
-            "routing_ecmp_then_source_routing_switch_threshold_bytes"
+            "common_run_name",
+            "semi_remote_routing_path_dir"
     };
 
     public static final String[] EXTENSION = new String[]{
@@ -167,6 +121,7 @@ public class BaseAllowedProperties {
     		"paths_filter",
     		"sub_configurations_folder",
     		"common_base_dir",
+            "common_run_name",
     		"path_algorithm",
     		"graph_edge_weight_rule",
             // TCP
@@ -202,5 +157,7 @@ public class BaseAllowedProperties {
             "base_lambda_flow_starts_per_s",
     		"variant_graph_name"
     };
+
+
 
 }

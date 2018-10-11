@@ -7,11 +7,13 @@ import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidExcep
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import sun.awt.image.ImageWatched;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -258,6 +260,52 @@ public class NBPropertiesTest {
         // Clean-up
         assertTrue(tempConfig.delete());
 
+    }
+
+    @Test
+    public void testBaseDirConstruction() throws IOException {
+        File tempRunConfig = File.createTempFile("temp-run-config", ".tmp");
+        BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
+        //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
+        runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
+        runConfigWriter.write("hybrid_circuit_threshold_byte=0\n");
+        runConfigWriter.write("run_folder_base_dir=test\n");
+        runConfigWriter.write("sub_configurations_folder=test\n");
+
+        runConfigWriter.close();
+        NBProperties conf = new NBProperties(
+                tempRunConfig.getAbsolutePath(),
+                BaseAllowedProperties.LOG,
+                BaseAllowedProperties.PROPERTIES_RUN,
+                BaseAllowedProperties.EXTENSION,
+                BaseAllowedProperties.EXPERIMENTAL,
+                BaseAllowedProperties.BASE_DIR_VARIANTS
+        );
+
+        File tempRunConfig2 = File.createTempFile("temp-run-config2", ".tmp");
+        BufferedWriter runConfigWriter2 = new BufferedWriter(new FileWriter(tempRunConfig2));
+        //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
+        runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
+        runConfigWriter2.write("network_device_routing=ecmp\n");
+        runConfigWriter2.write("network_type=packet_switch\n");
+        runConfigWriter2.close();
+        NBProperties conf2 = new NBProperties(
+                tempRunConfig2.getAbsolutePath(),
+                BaseAllowedProperties.LOG,
+                BaseAllowedProperties.PROPERTIES_RUN,
+                BaseAllowedProperties.EXTENSION,
+                BaseAllowedProperties.EXPERIMENTAL,
+                BaseAllowedProperties.BASE_DIR_VARIANTS
+        );
+        LinkedList<NBProperties> properties = new LinkedList<>();
+        properties.add(conf);
+        properties.add(conf2);
+        NBProperties.constructBaseDir(conf,properties);
+        assert(conf.getPropertyOrFail("run_folder_base_dir").
+                equals("test/network_type/main_network/scenario_topology_file/simple_n2x2_v1/hybrid_circuit_threshold_byte/0/network_type/packet_switch/scenario_topology_file/simple_n2_v2/network_device_routing/ecmp"));
+
+        tempRunConfig.delete();
+        tempRunConfig2.delete();
     }
 
 }
