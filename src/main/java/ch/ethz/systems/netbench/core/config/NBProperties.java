@@ -5,17 +5,11 @@ import ch.ethz.systems.netbench.core.config.exceptions.ConfigurationReadFailExce
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyMissingException;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyNotExistingException;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import edu.asu.emit.algorithm.graph.Graph;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -547,28 +541,34 @@ public class NBProperties extends Properties {
 	}
 
 	public static void constructBaseDir(NBProperties mainProperties, List<NBProperties> propertiesList) {
-		
-		if(mainProperties.getProperty("base_dir_variants")!=null) {
-			if(mainProperties.getProperty("run_folder_base_dir")==null) {
-				throw new RuntimeException("base_dir_variants property requires run_folder_base_dir property");
-			}
-			String[] dirs = mainProperties.getProperty("base_dir_variants").split(",");
-			String baseDir = mainProperties.getProperty("run_folder_base_dir");
-			for(String dir : dirs) {
-				for (NBProperties properties: propertiesList) {
-					String property = properties.getProperty(dir);
-					if(property!=null){
-						baseDir += "/" + dir + "/" +property;
-						break;
-					}
-				}
 
+
+//			String[] dirs = mainProperties.getProperty("base_dir_variants").split(",");
+		String baseDir = mainProperties.getPropertyOrFail("run_folder_base_dir");
+		for(NBProperties propertyFile : propertiesList) {
+			baseDir += "/" + "network_type" + "/" + propertyFile.getPropertyWithDefault("network_type","main_network");
+			for (Object key: propertyFile.keySet()) {
+				String value = propertyFile.getProperty((String) key);
+				if(!Arrays.stream(BaseAllowedProperties.RUN_CONFIGURATION_ONLY).anyMatch(key::equals)
+						&& !Arrays.stream(BaseAllowedProperties.LOG).anyMatch(key::equals)
+						&& !key.equals("network_type")){
+					if(key.equals("scenario_topology_file")){
+						String[] path = value.split("/");
+						baseDir += "/" + key + "/" + path[path.length - 1].split("[.]")[0];
+						continue;
+					}
+					baseDir += "/" + key + "/" + value;
+
+				}
 			}
-			mainProperties.setProperty("run_folder_base_dir" , baseDir);
-			
+
 		}
-		
+
+		mainProperties.setProperty("run_folder_base_dir" , baseDir);
+
 	}
+		
+
 
 	public boolean isExtendedTopology() {
 		// TODO Auto-generated method stub

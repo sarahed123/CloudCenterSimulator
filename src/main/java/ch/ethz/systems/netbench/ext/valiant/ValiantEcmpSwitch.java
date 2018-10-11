@@ -4,6 +4,7 @@ import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitch;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
@@ -73,4 +74,14 @@ abstract class ValiantEcmpSwitch extends EcmpSwitch {
 
     }
 
+    @Override
+    public void receiveFromEncapsulating(Packet packet) {
+        if(((IpPacket)packet).getDestinationId()==this.identifier) {
+            super.receiveFromEncapsulating(packet);
+            return;
+        }
+
+        this.receiveFromIntermediary(packet);
+
+    }
 }
