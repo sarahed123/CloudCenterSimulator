@@ -1,11 +1,13 @@
 package ch.ethz.systems.netbench.ext.valiant;
 
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingPacket;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 
-public class ValiantEncapsulation extends IpPacket implements ValiantEncapsulationHeader {
+public class ValiantEncapsulation extends IpPacket implements ValiantEncapsulationHeader, Encapsulatable {
 
-    private final TcpPacket packet;
+    private TcpPacket packet;
     private final int valiantDestination;
     private boolean passedValiant;
 
@@ -15,6 +17,7 @@ public class ValiantEncapsulation extends IpPacket implements ValiantEncapsulati
         this.valiantDestination = valiantDestination;
         this.passedValiant = false;
     }
+
 
     @Override
     public TcpPacket getPacket() {
@@ -41,4 +44,14 @@ public class ValiantEncapsulation extends IpPacket implements ValiantEncapsulati
         this.packet.markCongestionEncountered();
     }
 
+    @Override
+    public Encapsulatable encapsulate(int newSource,int newDestination) {
+        return null; //not sure if you ever use this
+    }
+
+    @Override
+    public Encapsulatable deEncapsualte() {
+
+        return packet.deEncapsualte();
+    }
 }

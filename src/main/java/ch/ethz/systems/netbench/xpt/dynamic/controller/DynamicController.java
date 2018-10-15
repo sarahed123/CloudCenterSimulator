@@ -22,6 +22,8 @@ import edu.asu.emit.algorithm.graph.Vertex;
 public class DynamicController extends RemoteRoutingController {
 	protected Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	protected int max_degree;
+	protected int mAllocated;
+	protected int mDeAllocated;
 	public DynamicController(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
 		super(configuration);
 		mPaths = new HashMap<>();
@@ -29,6 +31,8 @@ public class DynamicController extends RemoteRoutingController {
 		this.mMainGraph = new VariableGraph(configuration.getGraph(), "graph_weight");
 		max_degree = configuration.getIntegerPropertyOrFail("max_dynamic_switch_degree");
 		System.out.println("Setting max dynamic degree to " + max_degree);
+		mAllocated = 0;
+		mDeAllocated = 0;
 	}
 
 	@Override
@@ -59,6 +63,7 @@ public class DynamicController extends RemoteRoutingController {
 		Path finalPath = new Path(path, mMainGraph.getEdgeWeight(sourceVertex, destVertex));
 		mPaths.put(pair, finalPath);
 		logRoute(finalPath,source,dest,flowId, Simulator.getCurrentTime(),true);
+		mAllocated++;
 	}
 
 
@@ -79,6 +84,7 @@ public class DynamicController extends RemoteRoutingController {
 		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));
 		logRoute(mPaths.get(pair),src,dst,jumboFlowId, Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
+		mDeAllocated--;
 
 	}
 
@@ -93,4 +99,12 @@ public class DynamicController extends RemoteRoutingController {
 
 	}
 
+
+	public String getCurrentState()
+	{
+		String state =  "allocated " + mAllocated + " deallocated " + mDeAllocated + "\n";
+		mAllocated = 0;
+		mDeAllocated = 0;
+		return state;
+	}
 }
