@@ -22,8 +22,7 @@ import edu.asu.emit.algorithm.graph.Vertex;
 public class DynamicController extends RemoteRoutingController {
 	protected Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	protected int max_degree;
-	protected int mAllocated;
-	protected int mDeAllocated;
+
 	public DynamicController(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration) {
 		super(configuration);
 		mPaths = new HashMap<>();
@@ -31,8 +30,7 @@ public class DynamicController extends RemoteRoutingController {
 		this.mMainGraph = new VariableGraph(configuration.getGraph(), "graph_weight");
 		max_degree = configuration.getIntegerPropertyOrFail("max_dynamic_switch_degree");
 		System.out.println("Setting max dynamic degree to " + max_degree);
-		mAllocated = 0;
-		mDeAllocated = 0;
+
 	}
 
 	@Override
@@ -50,11 +48,11 @@ public class DynamicController extends RemoteRoutingController {
 		if(mPaths.containsKey(pair)) {
 			throw new FlowPathExists(flowId);
 		}
-		if(mMainGraph.getAdjacentVertices(sourceVertex).size() >= max_degree || mMainGraph.getPrecedentVertices(destVertex).size() >= max_degree) {
+		if(mTransmittingSources.getOrDefault(source,0) >= max_degree || mRecievingDestinations.getOrDefault(dest,0)>=max_degree){
 			SimulationLogger.increaseStatisticCounter("DYNAMIC_CONTROLLER_NO_PATH");
-			throw new NoPathException();
+			throw new NoPathException(source,dest);
 		}
-		((VariableGraph) mMainGraph).addEdge(source,dest,1);
+//		((VariableGraph) mMainGraph).addEdge(source,dest,1);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(source);
 		sourceDevice.addConnection(mIdToNetworkDevice.get(source),mIdToNetworkDevice.get(dest));
 		LinkedList<Vertex> path = new LinkedList<Vertex>();
@@ -63,7 +61,8 @@ public class DynamicController extends RemoteRoutingController {
 		Path finalPath = new Path(path, mMainGraph.getEdgeWeight(sourceVertex, destVertex));
 		mPaths.put(pair, finalPath);
 		logRoute(finalPath,source,dest,flowId, Simulator.getCurrentTime(),true);
-		mAllocated++;
+		onPathAllocation(source,dest);
+		mAllocateddPathsNum++;
 	}
 
 
@@ -75,16 +74,17 @@ public class DynamicController extends RemoteRoutingController {
 
 	@Override
 	public void recoverPath(int src, int dst, long jumboFlowId) {
-		if(!((VariableGraph) mMainGraph).hasEdge(src,dst)){
-			return;
-		}
+//		if(!((VariableGraph) mMainGraph).hasEdge(src,dst)){
+//			return;
+//		}
 		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(src, dst);
-		((VariableGraph) mMainGraph).deleteEdge(pair);
+//		((VariableGraph) mMainGraph).deleteEdge(pair);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
 		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));
 		logRoute(mPaths.get(pair),src,dst,jumboFlowId, Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
-		mDeAllocated--;
+		onPathDeAllocation(src,dst);
+		mDeAllocatedPathsNum--;
 
 	}
 
@@ -100,11 +100,4 @@ public class DynamicController extends RemoteRoutingController {
 	}
 
 
-	public String getCurrentState()
-	{
-		String state =  "allocated " + mAllocated + " deallocated " + mDeAllocated + "\n";
-		mAllocated = 0;
-		mDeAllocated = 0;
-		return state;
-	}
 }
