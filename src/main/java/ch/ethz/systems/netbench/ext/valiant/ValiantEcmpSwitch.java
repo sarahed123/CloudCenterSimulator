@@ -80,8 +80,12 @@ abstract class ValiantEcmpSwitch extends EcmpSwitch {
             super.receiveFromEncapsulating(packet);
             return;
         }
+        if(((IpPacket)packet).getSourceId()==this.identifier){
+            this.receiveFromIntermediary(packet);
+            return;
+        }
+        receive(packet);
 
-        this.receiveFromIntermediary(packet);
 
     }
 }

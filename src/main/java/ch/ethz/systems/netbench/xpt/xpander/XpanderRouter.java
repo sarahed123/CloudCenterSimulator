@@ -277,8 +277,17 @@ public class XpanderRouter extends RemoteRoutingController{
 //		}
 
 		String state = "";
-		int avg = 0;
+		int sum = 0;
+		int transmitting = 0;
+		for(int source: mTransmittingSources.keySet()){
+			int t = mTransmittingSources.get(source);
+
+			if(t!=0) transmitting++;
+			sum+=t;
+		}
+		double avg = (double) sum/ (double) transmitting;
 //		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
+		state += "Sum transmissions " + sum + ", Avg transmissions per node " + avg + ", Transmitting " + transmitting + "\n";
 		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
 		mDeAllocatedPathsNum = 0;
 		mAllocateddPathsNum = 0;
