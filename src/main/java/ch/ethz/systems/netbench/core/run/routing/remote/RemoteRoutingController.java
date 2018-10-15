@@ -24,11 +24,17 @@ import org.apache.commons.lang3.tuple.Pair;
 public abstract class RemoteRoutingController extends RoutingPopulator{
 	public RemoteRoutingController(NBProperties configuration) {
 		super(configuration);
+		mTransmittingSources = new HashMap<>();
+		mRecievingDestinations = new HashMap<>();
+		mAllocateddPathsNum = 0;
+		mDeAllocatedPathsNum = 0;
 	}
-
+	protected Map<Integer,Integer> mTransmittingSources;
+	protected Map<Integer,Integer> mRecievingDestinations;
 	private static RemoteRoutingController mInstance = null;
 	protected HashMap<Pair<Integer,Integer>, Path> mPaths;
-
+	protected int mAllocateddPathsNum;
+	protected int mDeAllocatedPathsNum;
 
 	protected Graph mMainGraph;
 	private static long headerSize;
@@ -159,8 +165,56 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 
 	public abstract void dumpState(String dumpFolderName) throws IOException;
 
-	public String getCurrentState(){
-		return "";
+	public String getCurrentState() {
+		// TODO Auto-generated method stub
+//		int numEdges = 0;
+//		HashMap<Integer,Integer> loadMap = new HashMap<Integer,Integer>();
+//		for(Path p : mPaths.values()){
+//			numEdges += p.getVertexList().size();
+//			int load = loadMap.getOrDefault(p.getVertexList().size(),0);
+//			loadMap.put(p.getVertexList().size(),load+1);
+//		}
+//
+//		String state = "Allocated paths " + mPaths.size() + ". Flow dropps " + flowFailuresSample + ". Flow count " + flowCounter + "\n";
+//		state+= "num edges " + numEdges + "\n";
+//		for(int pathLen : loadMap.keySet()){
+//			state +=  "paths of len " + pathLen + " have count " + loadMap.get(pathLen) + "\n";
+//		}
+
+		String state = "";
+		int sum = 0;
+		int transmitting = 0;
+		for(int source: mTransmittingSources.keySet()){
+			int t = mTransmittingSources.get(source);
+
+			if(t!=0) transmitting++;
+			sum+=t;
+		}
+		double avg = (double) sum/ (double) transmitting;
+//		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
+		state += "Sum transmissions " + sum + ", Avg transmissions per node " + avg + ", Transmitting " + transmitting + "\n";
+		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
+		mDeAllocatedPathsNum = 0;
+		mAllocateddPathsNum = 0;
+		return state;
+	}
+
+	protected void onPathAllocation(int sourceToR, int destToR){
+		int transmittingCounter = mTransmittingSources.getOrDefault(sourceToR,0);
+		int receivingCounter = mRecievingDestinations.getOrDefault(destToR,0);
+		transmittingCounter++;
+		receivingCounter++;
+		mTransmittingSources.put(sourceToR,transmittingCounter);
+		mRecievingDestinations.put(destToR,receivingCounter);
+	}
+
+	protected void onPathDeAllocation(int sourceToR, int destToR){
+		int transmittingCounter = mTransmittingSources.get(sourceToR);
+		int receivingCounter = mRecievingDestinations.get(destToR);
+		transmittingCounter--;
+		receivingCounter--;
+		mTransmittingSources.put(sourceToR,transmittingCounter);
+		mRecievingDestinations.put(destToR,receivingCounter);
 	}
 
 }

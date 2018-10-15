@@ -37,11 +37,9 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XpanderRouter extends RemoteRoutingController{
 	private final double dijkstra_max_weigh;
 	private int flowFailuresSample;
-	protected Map<Integer,Integer> mTransmittingSources;
-	protected Map<Integer,Integer> mRecievingDestinations;
+
 	private final int mMaxNumJFlowsOncircuit;
-	private int mAllocateddPathsNum;
-	private int mDeAllocatedPathsNum;
+
     enum PathAlgorithm{
 		DIJKSTRA,
 		STRICT_UP_DOWN_DIJKSTRA
@@ -53,10 +51,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
 		super(configuration);
-		mTransmittingSources = new HashMap<>();
-		mRecievingDestinations = new HashMap<>();
-		mAllocateddPathsNum = 0;
-		mDeAllocatedPathsNum = 0;
+
 		//experimental!
 		mGraphs = new Graph[configuration.getIntegerPropertyOrFail("circuit_wave_length_num")];
 		for(int i = 0; i < mGraphs.length; i++){
@@ -139,12 +134,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 		updateForwardingTables(sourceServer,destServer,p,flowId);
 		removePathFromGraph(p);
-		int transmittingCounter = mTransmittingSources.getOrDefault(sourceToR,0);
-		int receivingCounter = mRecievingDestinations.getOrDefault(destToR,0);
-		transmittingCounter++;
-		receivingCounter++;
-		mTransmittingSources.put(sourceToR,transmittingCounter);
-		mRecievingDestinations.put(destToR,receivingCounter);
+		onPathAllocation(sourceToR,destToR);
 		mAllocateddPathsNum++;
 		mPaths.put(new ImmutablePair<>(sourceServer,destServer), p);
 
@@ -204,12 +194,7 @@ public class XpanderRouter extends RemoteRoutingController{
 				,flowId,Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
 
-		int transmittingCounter = mTransmittingSources.get(sourceToR);
-		int receivingCounter = mRecievingDestinations.get(destToR);
-		transmittingCounter--;
-		receivingCounter--;
-		mTransmittingSources.put(sourceToR,transmittingCounter);
-		mRecievingDestinations.put(destToR,receivingCounter);
+		onPathDeAllocation(sourceToR,destToR);
 		mDeAllocatedPathsNum++;
 	}
 
@@ -260,39 +245,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 	}
 
-	public String getCurrentState() {
-		// TODO Auto-generated method stub
-//		int numEdges = 0;
-//		HashMap<Integer,Integer> loadMap = new HashMap<Integer,Integer>();
-//		for(Path p : mPaths.values()){
-//			numEdges += p.getVertexList().size();
-//			int load = loadMap.getOrDefault(p.getVertexList().size(),0);
-//			loadMap.put(p.getVertexList().size(),load+1);
-//		}
-//
-//		String state = "Allocated paths " + mPaths.size() + ". Flow dropps " + flowFailuresSample + ". Flow count " + flowCounter + "\n";
-//		state+= "num edges " + numEdges + "\n";
-//		for(int pathLen : loadMap.keySet()){
-//			state +=  "paths of len " + pathLen + " have count " + loadMap.get(pathLen) + "\n";
-//		}
 
-		String state = "";
-		int sum = 0;
-		int transmitting = 0;
-		for(int source: mTransmittingSources.keySet()){
-			int t = mTransmittingSources.get(source);
-
-			if(t!=0) transmitting++;
-			sum+=t;
-		}
-		double avg = (double) sum/ (double) transmitting;
-//		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
-		state += "Sum transmissions " + sum + ", Avg transmissions per node " + avg + ", Transmitting " + transmitting + "\n";
-		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
-		mDeAllocatedPathsNum = 0;
-		mAllocateddPathsNum = 0;
-		return state;
-	}
 
 	public void logCurrentState() {
 		logCurrentState(mPaths.size(),flowFailuresSample,flowCounter);
