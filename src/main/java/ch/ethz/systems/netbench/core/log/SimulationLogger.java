@@ -668,4 +668,9 @@ public class SimulationLogger {
 	public static void registerFlowOnCircuit(long flowId) {
 		flowsOnCircuit.add(flowId);
 	}
+
+    public static long getStatistic(String key) {
+
+		return statisticCounters.get(key);
+    }
 }

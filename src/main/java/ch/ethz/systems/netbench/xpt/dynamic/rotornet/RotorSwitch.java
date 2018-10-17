@@ -55,6 +55,7 @@ public class RotorSwitch extends DynamicSwitch {
         }else {
             try {
                 forwardToNextSwitch(ipPacket, ipPacket.getDestinationId());
+                SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_INDIRECT_FORWARD");
                 return;
             } catch (ReconfigurationDeadlineException e) {
                 deadline = true;

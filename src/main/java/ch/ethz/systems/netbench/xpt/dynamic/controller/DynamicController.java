@@ -58,7 +58,7 @@ public class DynamicController extends RemoteRoutingController {
 		LinkedList<Vertex> path = new LinkedList<Vertex>();
 		path.add(sourceVertex);
 		path.add(destVertex);
-		Path finalPath = new Path(path, mMainGraph.getEdgeWeight(sourceVertex, destVertex));
+		Path finalPath = new Path(path, 1);
 		mPaths.put(pair, finalPath);
 		logRoute(finalPath,source,dest,flowId, Simulator.getCurrentTime(),true);
 		onPathAllocation(source,dest);
@@ -73,11 +73,17 @@ public class DynamicController extends RemoteRoutingController {
 	}
 
 	@Override
-	public void recoverPath(int src, int dst, long jumboFlowId) {
+	public void recoverPath(int src, int dst,int serverSource, int serverDest, long jumboFlowId) {
 //		if(!((VariableGraph) mMainGraph).hasEdge(src,dst)){
 //			return;
 //		}
+
 		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(src, dst);
+		Path p = mPaths.get(pair);
+
+		if(p==null) {
+			throw new NoPathException();
+		}
 //		((VariableGraph) mMainGraph).deleteEdge(pair);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
 		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));
@@ -88,10 +94,6 @@ public class DynamicController extends RemoteRoutingController {
 
 	}
 
-	@Override
-	public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest, long flowId) {
-
-	}
 
 	@Override
 	public void dumpState(String dumpFolderName) throws IOException {
