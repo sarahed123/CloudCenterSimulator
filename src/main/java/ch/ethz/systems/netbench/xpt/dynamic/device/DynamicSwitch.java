@@ -17,11 +17,14 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 
 	LinkGenerator mLinkGenerator;
 	OutputPortGenerator mOutputPortGenerator;
+	private InputPort inputPort;
+
 	protected DynamicSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary,
 			NBProperties configuration) {
 		super(identifier, transportLayer, intermediary, configuration);
 		mLinkGenerator = new DynamicLinkGenerator(configuration);
 		mOutputPortGenerator = new DynamicOutputPortGenerator(configuration);
+		inputPort = new InputPort(this,null,mLinkGenerator.generate(null,null));
 	}
 
 	@Override
@@ -34,18 +37,19 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 	public void addConnection(NetworkDevice source,NetworkDevice dest) {
 		Link link = mLinkGenerator.generate(this, dest);
 		targetIdToOutputPort.put(dest.getIdentifier(), mOutputPortGenerator.generate(this, dest, link));
-		((DynamicSwitch)dest).setInputPort(new InputPort(dest,this,link));
+//		((DynamicSwitch)dest).setInputPort(new InputPort(dest,this,link));
 	}
 
 	@Override
 	public void removeConnection(NetworkDevice source,NetworkDevice dest) {
 		targetIdToOutputPort.remove(dest.getIdentifier());
-		((DynamicSwitch)dest).removeInputPort(this.identifier);
+//		((DynamicSwitch)dest).removeInputPort(this.identifier);
 
 	}
 
 
 	private void removeInputPort(int identifier) {
+		// the dynamic switch has only one input port to receive all traffic.
 		this.sourceIdToInputPort.remove(identifier);
 
 	}
@@ -54,6 +58,10 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 	protected void receiveFromIntermediary(Packet genericPacket) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public InputPort getSourceInputPort(int sourceNetworkDeviceId) {
+		return inputPort;
 	}
 
 	private void setInputPort(InputPort inputPort) {

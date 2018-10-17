@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.dynamic.rotornet;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
 
@@ -14,6 +15,7 @@ public class RotorNetController extends DynamicController {
     protected final long mReconfigurationTime;
     int mNumCycles;
     int mCurrCycle;
+    long indirectHops, directHops;
     ArrayList<RotorMap> mRotorMaps;
     RotorSwitch[] mRotorsArray;
     public RotorNetController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
@@ -35,6 +37,8 @@ public class RotorNetController extends DynamicController {
         mRotorsArray = (RotorSwitch[]) mIdToNetworkDevice.values().toArray(new RotorSwitch[mIdToNetworkDevice.size()]);
         setInitialConnections();
         registerReconfigurationEvent();
+        indirectHops = 0;
+        directHops = 0;
 
     }
 
@@ -50,10 +54,17 @@ public class RotorNetController extends DynamicController {
     }
 
     @Override
-    public void initRoute(int source, int dest, long flowId) {
+    public void initRoute(int source, int dest, int sourceServer, int destServer, long flowId) {
     	
 
         
+    }
+
+    @Override
+    public void recoverPath(int source, int dest, int sourceServer, int destServer, long flowId) {
+
+
+
     }
 
     public void reconfigureRotorSwitches(){
@@ -99,6 +110,14 @@ public class RotorNetController extends DynamicController {
         for(int i = 0; i< mRotorsArray.length;i++){
             mRotorsArray[i].sendPendingData();
         }
+    }
+
+    public String getCurrentState() {
+        long indirect = SimulationLogger.getStatistic("ROTOR_PACKET_INDIRECT_FORWARD") - indirectHops;
+        long direct = SimulationLogger.getStatistic("ROTOR_PACKET_DIRECT_FORWARD") - directHops;
+        indirectHops = SimulationLogger.getStatistic("ROTOR_PACKET_INDIRECT_FORWARD");
+        directHops = SimulationLogger.getStatistic("ROTOR_PACKET_DIRECT_FORWARD");
+        return "second hops " + indirect + " direct hops " + direct;
     }
 
     protected void registerReconfigurationEvent() {

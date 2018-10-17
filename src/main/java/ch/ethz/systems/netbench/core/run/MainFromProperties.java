@@ -171,7 +171,9 @@ public class MainFromProperties {
             bw.write(propertiesList.get(0).getPropertyOrFail("run_folder_base_dir") + "\n");
             bw.close();
         } catch (IOException e) {
-            throw new RuntimeException("coulding open common base folder");
+            throw new RuntimeException("couldnt open common base folder");
+        }catch (PropertyMissingException e){
+            System.out.println("no common run dir was given...");
         }
         return propertiesList;
 

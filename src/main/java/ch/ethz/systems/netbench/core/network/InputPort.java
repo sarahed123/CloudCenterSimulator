@@ -11,10 +11,10 @@ public class InputPort extends Port {
 		this.ownNetworkDevice = ownNetworkDevice;
 		this.sourceNetworkDevice = sourceNetworkDevice;
 		this.link = link;
-		this.encapsulatingDeviceId = -1;
-		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
-			this.encapsulatingDeviceId = ownNetworkDevice.getEncapsulatingDevice().getAsNetworkDevice().identifier;
-		}
+//		this.encapsulatingDeviceId = -1;
+//		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
+//			this.encapsulatingDeviceId = ownNetworkDevice.getEncapsulatingDevice().getAsNetworkDevice().identifier;
+//		}
 	}
 	
 	public NetworkDevice getOwnNetworkDevice() {
@@ -38,7 +38,7 @@ public class InputPort extends Port {
 
 
 	public void receive(Packet packet) {
-		if(encapsulatingDeviceId!=-1) {
+		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
 			ownNetworkDevice.receiveFromEncapsulating(packet);
 			return;
 		}
