@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitch;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
@@ -81,8 +82,13 @@ abstract class ValiantEcmpSwitch extends EcmpSwitch {
             return;
         }
         if(((IpPacket)packet).getSourceId()==this.identifier){
-            this.receiveFromIntermediary(packet);
-            return;
+            try{
+                this.receiveFromIntermediary(packet);
+                return;
+            }catch (ClassCastException e){
+
+            }
+
         }
         receive(packet);
 

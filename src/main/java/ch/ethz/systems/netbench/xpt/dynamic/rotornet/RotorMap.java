@@ -50,7 +50,7 @@ public class RotorMap extends LinkedList<Integer> {
         int dest = (Integer) var1;
         if(super.contains(mCurrentDevice.getIdentifier())){
 
-            return dest == ((mCurrentDevice.getIdentifier()+1) % sNumOfNodes);
+            if(dest == ((mCurrentDevice.getIdentifier()+1) % sNumOfNodes)) return true;
         }
         return super.contains(var1);
     }

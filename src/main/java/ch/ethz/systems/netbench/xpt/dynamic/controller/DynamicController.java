@@ -40,28 +40,28 @@ public class DynamicController extends RemoteRoutingController {
 	}
 
 	@Override
-	public void initRoute(int source, int dest, int serverSource, int serverDest, long flowId) {
-		Pair<Integer, Integer> pair = new ImmutablePair<>(source,dest);
+	public void initRoute(int sourceToR, int destToR, int serverSource, int serverDest, long flowId) {
+		Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
 
-		Vertex sourceVertex = new Vertex(source);
-		Vertex destVertex = new Vertex(dest);
+		Vertex sourceVertex = new Vertex(sourceToR);
+		Vertex destVertex = new Vertex(destToR);
 		if(mPaths.containsKey(pair)) {
 			throw new FlowPathExists(flowId);
 		}
-		if(mTransmittingSources.getOrDefault(source,0) >= max_degree || mRecievingDestinations.getOrDefault(dest,0)>=max_degree){
+		if(mTransmittingSources.getOrDefault(sourceToR,0) >= max_degree || mRecievingDestinations.getOrDefault(destToR,0)>=max_degree){
 			SimulationLogger.increaseStatisticCounter("DYNAMIC_CONTROLLER_NO_PATH");
-			throw new NoPathException(source,dest);
+			throw new NoPathException(sourceToR,destToR);
 		}
 //		((VariableGraph) mMainGraph).addEdge(source,dest,1);
-		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(source);
-		sourceDevice.addConnection(mIdToNetworkDevice.get(source),mIdToNetworkDevice.get(dest));
+		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(sourceToR);
+		sourceDevice.addConnection(mIdToNetworkDevice.get(sourceToR),mIdToNetworkDevice.get(destToR),serverSource,serverDest);
 		LinkedList<Vertex> path = new LinkedList<Vertex>();
 		path.add(sourceVertex);
 		path.add(destVertex);
 		Path finalPath = new Path(path, 1);
 		mPaths.put(pair, finalPath);
-		logRoute(finalPath,source,dest,flowId, Simulator.getCurrentTime(),true);
-		onPathAllocation(source,dest);
+		logRoute(finalPath,sourceToR,destToR,flowId, Simulator.getCurrentTime(),true);
+		onPathAllocation(sourceToR,destToR);
 		mAllocateddPathsNum++;
 	}
 
@@ -78,7 +78,7 @@ public class DynamicController extends RemoteRoutingController {
 //			return;
 //		}
 
-		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(src, dst);
+		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(serverSource, serverDest);
 		Path p = mPaths.get(pair);
 
 		if(p==null) {
@@ -86,7 +86,7 @@ public class DynamicController extends RemoteRoutingController {
 		}
 //		((VariableGraph) mMainGraph).deleteEdge(pair);
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
-		sourceDevice.removeConnection(mIdToNetworkDevice.get(src),mIdToNetworkDevice.get(dst));
+		sourceDevice.removeConnection(serverSource,serverDest);
 		logRoute(mPaths.get(pair),src,dst,jumboFlowId, Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
 		onPathDeAllocation(src,dst);

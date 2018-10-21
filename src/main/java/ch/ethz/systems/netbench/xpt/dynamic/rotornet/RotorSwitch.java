@@ -101,7 +101,7 @@ public class RotorSwitch extends DynamicSwitch {
         }
     }
 
-    private void sendToRandomDestination(IpPacket ipPacket) {
+    protected void sendToRandomDestination(IpPacket ipPacket) {
         Collections.shuffle(mRotorMap,mRotorMap.mRnd);
         for(int i = 0;i<mRotorMap.size();i++){
             RotorSwitch target = (RotorSwitch) mRotorMap.getOutpurPort(mRotorMap.get(i)).getTargetDevice();
@@ -119,7 +119,7 @@ public class RotorSwitch extends DynamicSwitch {
         throw new NoPathException();
     }
 
-    private boolean hasResources(Packet genericPacket) {
+    protected boolean hasResources(Packet genericPacket) {
         return mCurrentBufferSize + genericPacket.getSizeBit() <= sMaxBufferSizeBit;
     }
 
@@ -131,6 +131,8 @@ public class RotorSwitch extends DynamicSwitch {
         if(mRotorMap.contains(destination)){
             RotorOutputPort port = mRotorMap.getOutpurPort(destination);
             port.enqueue(ipPacket);
+//            System.out.println(ipPacket.toString());
+//            System.out.println(this.identifier + " " + destination);
             return;
         }
         throw new NoPathException();
@@ -138,6 +140,7 @@ public class RotorSwitch extends DynamicSwitch {
 
     @Override
     protected void receiveFromIntermediary(Packet genericPacket) {
+        this.receive(genericPacket);
 
     }
 
