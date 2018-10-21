@@ -79,6 +79,7 @@ public class RotorNetController extends DynamicController {
         for(int i=0 ; i<devices.length-1; i+=1){
             RotorSwitch device = devices[i];
             RotorSwitch nextDevice = devices[(i+1)];
+//          System.out.println(device.getIdentifier() + " from " + device.getRotorMap() + " to " + nextDevice.getRotorMap());
             device.setRotortMap(nextDevice.getRotorMap());
         }
         devices[devices.length-1].setRotortMap(tempMap);

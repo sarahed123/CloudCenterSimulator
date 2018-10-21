@@ -22,15 +22,15 @@ public class RemoteRoutingOutputPort extends EcnTailDropOutputPort{
 
 	@Override
 	public void enqueue(Packet packet) {
-		IpPacket ipPacket = (IpPacket) packet;
-		if(ipPacket.getSourceId()==this.getOwnDevice().getIdentifier()){
-//			super.enqueue(packet);
-			super.registerPacketDispatchedEvent(packet);
-
-		}else{
-			this.registerPacketDispatchedEventNoDelay(packet);
-		}
-
+//		IpPacket ipPacket = (IpPacket) packet;
+//		if(ipPacket.getSourceId()==this.getOwnDevice().getIdentifier()){
+////			super.enqueue(packet);
+//			super.registerPacketDispatchedEvent(packet);
+//
+//		}else{
+//			this.registerPacketDispatchedEventNoDelay(packet);
+//		}
+		this.registerPacketDispatchedEventNoDelay(packet);
 	}
 
 	protected void registerPacketDispatchedEventNoDelay(Packet packet) {

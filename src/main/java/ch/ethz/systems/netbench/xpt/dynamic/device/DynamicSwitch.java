@@ -1,16 +1,17 @@
 package ch.ethz.systems.netbench.xpt.dynamic.device;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.network.InputPort;
-import ch.ethz.systems.netbench.core.network.Intermediary;
-import ch.ethz.systems.netbench.core.network.Link;
-import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.OutputPortGenerator;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicDevice;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 
@@ -18,6 +19,7 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 	LinkGenerator mLinkGenerator;
 	OutputPortGenerator mOutputPortGenerator;
 	private InputPort inputPort;
+	private Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
 
 	protected DynamicSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary,
 			NBProperties configuration) {
@@ -25,24 +27,29 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 		mLinkGenerator = new DynamicLinkGenerator(configuration);
 		mOutputPortGenerator = new DynamicOutputPortGenerator(configuration);
 		inputPort = new InputPort(this,null,mLinkGenerator.generate(null,null));
+		this.forwardingTable = new HashMap<Pair<Integer,Integer>,OutputPort>();
+
 	}
 
 	@Override
 	public void receive(Packet genericPacket) {
-		targetIdToOutputPort.get(((IpPacket)genericPacket).getDestinationId()).enqueue(genericPacket);
+
+		IpPacket deEncapse = (IpPacket) (((Encapsulatable) genericPacket).deEncapsualte());
+		forwardingTable.get(new ImmutablePair<>(deEncapse.getSourceId(),deEncapse.getDestinationId())).enqueue(genericPacket);
 
 	}
 
 	@Override
-	public void addConnection(NetworkDevice source,NetworkDevice dest) {
+	public void addConnection(NetworkDevice source,NetworkDevice dest, int serverSource, int serverDest) {
 		Link link = mLinkGenerator.generate(this, dest);
-		targetIdToOutputPort.put(dest.getIdentifier(), mOutputPortGenerator.generate(this, dest, link));
+		forwardingTable.put(new ImmutablePair<>(serverSource,serverDest), mOutputPortGenerator.generate(this, dest, link));
 //		((DynamicSwitch)dest).setInputPort(new InputPort(dest,this,link));
 	}
 
 	@Override
-	public void removeConnection(NetworkDevice source,NetworkDevice dest) {
-		targetIdToOutputPort.remove(dest.getIdentifier());
+	public void removeConnection(int serverSource, int serverDest) {
+		forwardingTable.remove(new ImmutablePair<>(serverSource,serverDest));
+//		targetIdToOutputPort.remove(dest.getIdentifier());
 //		((DynamicSwitch)dest).removeInputPort(this.identifier);
 
 	}

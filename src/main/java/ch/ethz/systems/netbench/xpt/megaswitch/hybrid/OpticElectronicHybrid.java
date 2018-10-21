@@ -26,12 +26,13 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
     private long mNumAllocatedFlows;
     private long mNumDeAllocatedFlows;
-
+    ConversionUnit conversionUnit;
     public OpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
         circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
         mJumboFlowMap = new HashMap<>();
         mNumAllocatedFlows = 0;
+
         mNumDeAllocatedFlows = 0;
 
     }
@@ -79,7 +80,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		}catch(FlowPathExists e) {
 
         }
-        this.optic.receiveFromEncapsulating(packet);
+        this.conversionUnit.enqueue(sourceServer,destServer,packet);
 
         jumbo.onCircuitEntrance(packet.getFlowId());
 		SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
@@ -97,6 +98,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
             case "circuit_switch":
                 this.optic = networkDevice;
                 this.optic.setEncapsulatingDevice(this);
+                conversionUnit = new ConversionUnit(configuration,this,optic);
                 break;
             case "packet_switch":
                 this.electronic = networkDevice;
@@ -121,14 +123,15 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         }
     }
 
-    protected void onFlowFinished(int source, int dest, IpPacket packet) {
-        JumboFlow jumboFlow = getJumboFlow(source,dest);
+    protected void onFlowFinished(int sourceToR, int destToR, IpPacket packet) {
+        JumboFlow jumboFlow = getJumboFlow(sourceToR,destToR);
         jumboFlow.onFlowFinished(packet.getFlowId());
         if(jumboFlow.getNumFlows()==0){
 //        	recoverPath(source,dest,packet);
-        	mJumboFlowMap.remove(new ImmutablePair<>(source, dest));
+        	mJumboFlowMap.remove(new ImmutablePair<>(sourceToR, destToR));
         }
-        recoverPath(source,dest,packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
+        conversionUnit.onFlowFinish(packet.getDestinationId(),packet.getSourceId(),packet.getFlowId());
+        recoverPath(sourceToR,destToR,packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
 	}
     
 	protected void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId) {

@@ -4,5 +4,5 @@
 |V|=20
 |E|=0
 ToRs=incl_range(0,19)
-Servers=set()
+Servers=incl_range(0,19)
 Switches=set()
