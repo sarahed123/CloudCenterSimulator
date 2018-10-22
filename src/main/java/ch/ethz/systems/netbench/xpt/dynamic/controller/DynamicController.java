@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.dynamic.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ public class DynamicController extends RemoteRoutingController {
 		Vertex sourceVertex = new Vertex(sourceToR);
 		Vertex destVertex = new Vertex(destToR);
 		if(mPaths.containsKey(pair)) {
+			mFlowIdsOnCircuit.get(pair).add(flowId);
 			throw new FlowPathExists(flowId);
 		}
 		if(mTransmittingSources.getOrDefault(sourceToR,0) >= max_degree || mRecievingDestinations.getOrDefault(destToR,0)>=max_degree){
@@ -60,6 +62,9 @@ public class DynamicController extends RemoteRoutingController {
 		path.add(destVertex);
 		Path finalPath = new Path(path, 1);
 		mPaths.put(pair, finalPath);
+		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
+		hs.add(flowId);
+		mFlowIdsOnCircuit.put(pair,hs);
 		logRoute(finalPath,sourceToR,destToR,flowId, Simulator.getCurrentTime(),true);
 		onPathAllocation(sourceToR,destToR);
 		mAllocateddPathsNum++;
@@ -73,7 +78,7 @@ public class DynamicController extends RemoteRoutingController {
 	}
 
 	@Override
-	public void recoverPath(int src, int dst,int serverSource, int serverDest, long jumboFlowId) {
+	public void recoverPath(int src, int dst,int serverSource, int serverDest, long flowId) {
 //		if(!((VariableGraph) mMainGraph).hasEdge(src,dst)){
 //			return;
 //		}
@@ -85,12 +90,16 @@ public class DynamicController extends RemoteRoutingController {
 			throw new NoPathException();
 		}
 //		((VariableGraph) mMainGraph).deleteEdge(pair);
-		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
-		sourceDevice.removeConnection(serverSource,serverDest);
-		logRoute(mPaths.get(pair),src,dst,jumboFlowId, Simulator.getCurrentTime(),false);
-		mPaths.remove(pair);
-		onPathDeAllocation(src,dst);
-		mDeAllocatedPathsNum--;
+		mFlowIdsOnCircuit.get(pair).remove(flowId);
+		if(mFlowIdsOnCircuit.get(pair).isEmpty()){
+			DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
+			sourceDevice.removeConnection(serverSource,serverDest);
+			logRoute(mPaths.get(pair),src,dst,flowId, Simulator.getCurrentTime(),false);
+			mPaths.remove(pair);
+			onPathDeAllocation(src,dst);
+			mDeAllocatedPathsNum--;
+		}
+
 
 	}
 

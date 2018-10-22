@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +123,9 @@ public class XpanderRouter extends RemoteRoutingController{
 
 
 	public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
-		if(mPaths.containsKey(new ImmutablePair<>(sourceServer,destServer))) {
+		ImmutablePair pair = new ImmutablePair<>(sourceServer,destServer);
+		if(mPaths.containsKey(pair)) {
+			mFlowIdsOnCircuit.get(pair).add(flowId);
 			throw new FlowPathExists(flowId);
 		}
 		if(mTransmittingSources.getOrDefault(sourceToR,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(destToR,0)>=mMaxNumJFlowsOncircuit){
@@ -137,7 +140,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		onPathAllocation(sourceToR,destToR);
 		mAllocateddPathsNum++;
 		mPaths.put(new ImmutablePair<>(sourceServer,destServer), p);
-
+		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
+		hs.add(flowId);
+		mFlowIdsOnCircuit.put(pair,hs);
 		flowCounter++;
 		logRoute(p,sourceToR,destToR,flowId,Simulator.getCurrentTime(),true);
 
@@ -181,6 +186,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		if(p==null) {
 			throw new NoPathException();
 		}
+		mFlowIdsOnCircuit.get(pair).remove(flowId);
+		if(!mFlowIdsOnCircuit.get(pair).isEmpty()) return;
+
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);

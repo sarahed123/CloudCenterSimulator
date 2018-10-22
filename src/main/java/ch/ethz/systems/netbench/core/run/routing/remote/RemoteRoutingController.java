@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
@@ -24,6 +25,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public abstract class RemoteRoutingController extends RoutingPopulator{
 	public RemoteRoutingController(NBProperties configuration) {
 		super(configuration);
+		mFlowIdsOnCircuit = new HashMap<>();
 		mTransmittingSources = new HashMap<>();
 		mRecievingDestinations = new HashMap<>();
 		mAllocateddPathsNum = 0;
@@ -33,6 +35,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	protected Map<Integer,Integer> mRecievingDestinations;
 	private static RemoteRoutingController mInstance = null;
 	protected HashMap<Pair<Integer,Integer>, Path> mPaths;
+	protected HashMap<Pair<Integer,Integer>, Set<Long>> mFlowIdsOnCircuit;
 	protected int mAllocateddPathsNum;
 	protected int mDeAllocatedPathsNum;
 
