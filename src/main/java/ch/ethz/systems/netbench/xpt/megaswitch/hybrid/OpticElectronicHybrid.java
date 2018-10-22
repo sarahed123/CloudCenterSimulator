@@ -76,7 +76,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
 
 		try {
-	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),sourceServer,destServer,jumboFlowiId);
+	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),sourceServer,destServer,packet.getFlowId());
 		}catch(FlowPathExists e) {
 
         }
