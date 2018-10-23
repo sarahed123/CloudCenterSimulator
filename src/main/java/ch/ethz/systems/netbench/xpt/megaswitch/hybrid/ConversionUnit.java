@@ -25,8 +25,8 @@ public class ConversionUnit {
         mOptic = opticDevice;
         mPortMap = new HashMap<>();
         mLinkBandwidth = opticDevice.getConfiguration().getLongPropertyOrFail("link_bandwidth_bit_per_ns");
-        mEcnThreshold = mConf.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes");
-        mMaxQueueSize = mConf.getLongPropertyOrFail("output_port_max_queue_size_bytes");
+        mEcnThreshold = opticDevice.getConfiguration().getLongPropertyOrFail("output_port_ecn_threshold_k_bytes");
+        mMaxQueueSize = opticDevice.getConfiguration().getLongPropertyOrFail("output_port_max_queue_size_bytes");
 
     }
 

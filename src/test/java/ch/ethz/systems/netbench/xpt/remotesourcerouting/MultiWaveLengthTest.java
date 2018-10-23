@@ -81,6 +81,8 @@ public class MultiWaveLengthTest {
 
         System.out.println("recovering path one");
         remoteRouter.recoverPath(1,3, 0);
+        remoteRouter.recoverPath(1,3, 1);
+
         remoteRouter.initRoute(1, 3,3);
         remoteRouter.initRoute(2, 3,4);
         thrown = false;

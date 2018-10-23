@@ -106,6 +106,8 @@ public class FullHybridTest {
         runConfigWriter2.write("network_type=circuit_switch\n");
         runConfigWriter2.write("output_port_max_queue_size_bytes=150000\n");
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=30000\n");
+        runConfigWriter2.write("link_bandwidth_bit_per_ns=50\n");
+        runConfigWriter2.write("link_delay_ns=10\n");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),

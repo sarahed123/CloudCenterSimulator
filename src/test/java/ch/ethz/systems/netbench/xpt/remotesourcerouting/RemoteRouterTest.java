@@ -115,6 +115,7 @@ public class RemoteRouterTest {
 
     	System.out.println("recovering path one");
     	remoteRouter.recoverPath(1,4, 0);
+        remoteRouter.recoverPath(1,4, 1);
     	remoteRouter.initRoute(1, 4,3);
     	thrown = false;
     	try{

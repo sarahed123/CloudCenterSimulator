@@ -44,7 +44,7 @@ public class RotorNetTest {
         File tempRunConfig2 = File.createTempFile("temp-run-config2", ".tmp");
         BufferedWriter runConfigWriter2 = new BufferedWriter(new FileWriter(tempRunConfig2));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
-        runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n20_e0.topology\n");
+        runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n20_e0_no_servers.topology\n");
         runConfigWriter2.write("centered_routing_type=rotor_net\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
         runConfigWriter2.write("network_type=optic\n");
@@ -173,8 +173,7 @@ public class RotorNetTest {
         r1.receive(packet);
         Simulator.runNs(2000000);
         MockRotorSwitch r6 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(6);
-
-        assert(packet.path.toString().equals("[0, 6, 19]"));
+        assert(packet.path.toString().equals("[0, 6, 6, 6, 19]"));
 
     }
 
