@@ -4,9 +4,11 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -244,4 +246,15 @@ public abstract class NetworkDevice {
 		receive(packet);
 	}
 
+    public ImmutablePair getSourceDestinationEncapsulated(IpPacket packet) {
+        if(configuration.getBooleanPropertyWithDefault("enable_jumbo_flows", false)){
+            return new ImmutablePair(packet.getSourceId(),packet.getDestinationId());
+        }
+        try{
+            IpPacket deEncapse = (IpPacket) (((Encapsulatable) packet).deEncapsualte());
+            return new ImmutablePair(deEncapse.getSourceId(),deEncapse.getDestinationId());
+        }catch(ClassCastException e){
+            return new ImmutablePair(packet.getSourceId(),packet.getDestinationId());
+        }
+    }
 }

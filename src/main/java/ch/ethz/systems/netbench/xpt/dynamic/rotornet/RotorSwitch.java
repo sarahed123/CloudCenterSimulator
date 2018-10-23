@@ -45,12 +45,16 @@ public class RotorSwitch extends DynamicSwitch {
                 return;
             }catch (NoPathException e){
                 nopath = true;
-                sendToRandomDestination(ipPacket);
-                return;
+//                sendToRandomDestination(ipPacket);
             }catch (ReconfigurationDeadlineException e){
                 deadline = true;
+//                sendToRandomDestination(ipPacket);
+            }
+            try{
                 sendToRandomDestination(ipPacket);
                 return;
+            }catch(NoPathException e){
+
             }
         }else {
             try {
@@ -94,7 +98,8 @@ public class RotorSwitch extends DynamicSwitch {
             try{
                 p = (IpPacket) popFromBuffer();
 
-                forwardToNextSwitch(p,p.getDestinationId());
+//                forwardToNextSwitch(p,p.getDestinationId());
+                receive(p);
             }catch (ReconfigurationDeadlineException | NoPathException e){
                 addToBuffer(p);
             }

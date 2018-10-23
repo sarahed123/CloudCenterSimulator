@@ -43,8 +43,8 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     }
     
     protected void forwardToNextSwitch(IpPacket packet) {
-    	IpPacket deEncapse = (IpPacket) (((Encapsulatable) packet).deEncapsualte());
-    	forwardingTable.get(new ImmutablePair<>(deEncapse.getSourceId(),deEncapse.getDestinationId())).enqueue(packet);
+    	ImmutablePair pair = super.getSourceDestinationEncapsulated(packet);
+    	forwardingTable.get(pair).enqueue(packet);
 		
 	}
     
