@@ -34,8 +34,8 @@ public class DynamicSwitch extends NetworkDevice implements DynamicDevice {
 	@Override
 	public void receive(Packet genericPacket) {
 
-		IpPacket deEncapse = (IpPacket) (((Encapsulatable) genericPacket).deEncapsualte());
-		forwardingTable.get(new ImmutablePair<>(deEncapse.getSourceId(),deEncapse.getDestinationId())).enqueue(genericPacket);
+		ImmutablePair pair = super.getSourceDestinationEncapsulated((IpPacket) genericPacket);
+		forwardingTable.get(pair).enqueue(genericPacket);
 
 	}
 
