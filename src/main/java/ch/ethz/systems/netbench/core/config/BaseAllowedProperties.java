@@ -98,6 +98,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+            "enable_jumbo_flows",
             "empty_property",
             "max_num_flows_on_circuit",
             "circuit_wave_length_num",

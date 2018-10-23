@@ -30,8 +30,14 @@ public class MockRotorSwitch extends RotorSwitch {
             //catching the exception that might be thrown from other testing for general packets
         }
         if(((IpPacket) p).getDestinationId()==this.identifier ){
-            this.getTransportLayer().receive(p);
-            return;
+
+            if(isServer()){
+                getTransportLayer().receive(p);
+                return;
+            }else{
+                return;
+            }
+
         }
         super.receive(p);
     }

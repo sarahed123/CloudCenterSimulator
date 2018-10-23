@@ -128,6 +128,10 @@ public class MegaSwitchTest {
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter.write("network_type=circuit_switch\n");
+        runConfigWriter.write("link_bandwidth_bit_per_ns=50\n");
+        runConfigWriter.write("link_delay_ns=10\n");
+        runConfigWriter.write("output_port_max_queue_size_bytes=150000\n");
+        runConfigWriter.write("output_port_ecn_threshold_k_bytes=30000\n");
 
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
