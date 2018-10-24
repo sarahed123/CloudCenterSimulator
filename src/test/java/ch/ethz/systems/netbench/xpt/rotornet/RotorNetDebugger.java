@@ -51,9 +51,9 @@ public class RotorNetDebugger {
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=50000\n");
         runConfigWriter2.write("output_port_max_queue_size_bytes=500000\n");
         runConfigWriter2.write("max_dynamic_switch_degree=4\n");
-        runConfigWriter2.write("link_bandwidth_bit_per_ns=400\n");
+        runConfigWriter2.write("link_bandwidth_bit_per_ns=100\n");
         runConfigWriter2.write("rotor_net_reconfiguration_time_ns=0\n");
-        runConfigWriter2.write("rotor_net_reconfiguration_interval_ns=50000\n");
+        runConfigWriter2.write("rotor_net_reconfiguration_interval_ns=1000\n");
         runConfigWriter2.write("max_rotor_buffer_size_byte=50000000\n");
         runConfigWriter2.write("log_port_utilization=false\n");
 
@@ -110,7 +110,7 @@ public class RotorNetDebugger {
 
     @Test
     public void testFlow(){
-        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(0).getTransportLayer(),19,20000);
+        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(0).getTransportLayer(),19,2000000);
         Simulator.registerEvent(fse);
         Simulator.runNs(2000000);
 

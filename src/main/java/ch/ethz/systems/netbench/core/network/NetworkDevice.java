@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.core.network;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
@@ -247,7 +248,7 @@ public abstract class NetworkDevice {
 	}
 
     public ImmutablePair getSourceDestinationEncapsulated(IpPacket packet) {
-        if(configuration.getBooleanPropertyWithDefault("enable_jumbo_flows", false)){
+        if(Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_jumbo_flows", false)){
             return new ImmutablePair(packet.getSourceId(),packet.getDestinationId());
         }
         try{
