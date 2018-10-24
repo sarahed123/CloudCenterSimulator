@@ -23,6 +23,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
     HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
     private long mNumAllocatedFlows;
     private long mNumDeAllocatedFlows;
+    ConversionUnit conversionUnit;
 
     public JumboOpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
@@ -75,7 +76,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         }catch(FlowPathExists e) {
 
         }
-        this.optic.receiveFromEncapsulating(packet);
+        this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
 
         jumbo.onCircuitEntrance();
         SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
@@ -93,6 +94,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
             case "circuit_switch":
                 this.optic = networkDevice;
                 this.optic.setEncapsulatingDevice(this);
+                conversionUnit = new ConversionUnit(configuration,this,optic);
                 break;
             case "packet_switch":
                 this.electronic = networkDevice;
@@ -120,6 +122,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         JumboFlow jumboFlow = getJumboFlow(source,dest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
+            conversionUnit.onFlowFinish(source,dest,jumboFlow.getId());
             recoverPath(source,dest,jumboFlow.getId());
             mJumboFlowMap.remove(new ImmutablePair<>(source, dest));
         }

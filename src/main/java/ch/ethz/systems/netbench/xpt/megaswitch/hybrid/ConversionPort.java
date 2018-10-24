@@ -1,5 +1,7 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
+import ch.ethz.systems.netbench.core.log.EmptyPortLogger;
+import ch.ethz.systems.netbench.core.log.PortLogger;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
@@ -21,8 +23,16 @@ public class ConversionPort extends EcnTailDropOutputPort{
 
     @Override
     public void enqueue(Packet packet) {
-        assert(getQueue().isEmpty());
+    	if(!ownNetworkDevice.getConfiguration().getBooleanPropertyWithDefault("enable_jumbo_flows", false)) {
+    		assert(getQueue().isEmpty());
+    	}
+        
         super.enqueue(packet);
 
     }
+    
+    protected PortLogger createNewPortLogger() {
+		// TODO Auto-generated method stub
+		return new EmptyPortLogger(this);
+	}
 }
