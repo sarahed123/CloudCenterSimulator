@@ -55,7 +55,7 @@ public abstract class OutputPort extends Port{
         this.targetId = this.targetNetworkDevice.getIdentifier();
         if(ownNetworkDevice.configuration!=null && ownNetworkDevice.configuration.getBooleanPropertyWithDefault("log_port_utilization",true)){
             // Logging
-            this.logger = new PortLogger(this);
+            this.logger = createNewPortLogger();
         }
         else{
             this.logger = new EmptyPortLogger(this);
@@ -64,7 +64,12 @@ public abstract class OutputPort extends Port{
 
     }
 
-    protected void registerPacketDispatchedEvent(Packet packet) {
+    protected PortLogger createNewPortLogger() {
+		// TODO Auto-generated method stub
+		return new PortLogger(this);
+	}
+
+	protected void registerPacketDispatchedEvent(Packet packet) {
     	Simulator.registerEvent(new PacketDispatchedEvent(
                 getDispatchTime(packet),
                 packet,
