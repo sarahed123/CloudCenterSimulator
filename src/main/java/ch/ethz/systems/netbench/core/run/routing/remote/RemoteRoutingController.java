@@ -220,4 +220,9 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		mRecievingDestinations.put(destToR,receivingCounter);
 	}
 
+	public boolean hasRoute(Pair p) {
+		// TODO Auto-generated method stub
+		return mPaths.containsKey(p);
+	}
+
 }

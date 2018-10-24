@@ -43,7 +43,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
 
-        if(jumboFlow.getSizeByte()>=circuitThreshold && !jumboFlow.isTrivial()) {
+        if(jumboFlow.getSizeByte()>=circuitThreshold && !jumboFlow.isTrivial() && !encapsulated.isACK()) {
             try {
                 routeThroughCircuit(encapsulated,jumboFlow.getId());
                 return;
