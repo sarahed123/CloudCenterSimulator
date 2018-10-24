@@ -16,6 +16,10 @@ public class ElectronicOpticHybridGenerator extends NetworkDeviceGenerator{
 
     @Override
     public NetworkDevice generate(int identifier) {
+        if(configuration.getBooleanPropertyWithDefault("enable_jumbo_flows",false)){
+            System.out.println("Jumbo flows enabled");
+            return new JumboOpticElectronicHybrid(identifier,null,intermediaryGenerator.generate(identifier),configuration);
+        }
         return new OpticElectronicHybrid(identifier,null,intermediaryGenerator.generate(identifier),configuration);
     }
 
