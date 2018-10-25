@@ -18,7 +18,7 @@ public class ConversionUnit {
     long mLinkBandwidth;
     long mEcnThreshold;
     long mMaxQueueSize;
-    Map<Pair<Integer,Integer>,ConversionPort> mPortMap;
+    protected Map<Pair<Integer,Integer>,ConversionPort> mPortMap;
     public ConversionUnit(NBProperties conf, NetworkDevice ownDevice,NetworkDevice opticDevice){
         mOwnDevice = ownDevice;
         mConf = conf;

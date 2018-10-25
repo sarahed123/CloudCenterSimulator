@@ -26,7 +26,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
     private long mNumAllocatedFlows;
     private long mNumDeAllocatedFlows;
-    ConversionUnit conversionUnit;
+    protected ConversionUnit conversionUnit;
     public OpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
         circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
@@ -67,6 +67,10 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         return jumboFlow;
     }
 
+    protected void initConversionUnit(){
+        conversionUnit = new ConversionUnit(configuration,this,optic);
+    }
+
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
 		this.electronic.receiveFromEncapsulating(packet);
 
@@ -98,7 +102,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
             case "circuit_switch":
                 this.optic = networkDevice;
                 this.optic.setEncapsulatingDevice(this);
-                conversionUnit = new ConversionUnit(configuration,this,optic);
+                initConversionUnit();
                 break;
             case "packet_switch":
                 this.electronic = networkDevice;
@@ -146,6 +150,18 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 	@Override
     public NetworkDevice getAsNetworkDevice() {
         return this;
+    }
+
+    @Override
+    public NetworkDevice getEncapsulatedDevice(String type) {
+        switch (type){
+            case "circuit_switch":
+                return optic;
+            case "packet_switch":
+                return electronic;
+            default:
+                throw new RuntimeException("bad network type " + type);
+        }
     }
 
     @Override
