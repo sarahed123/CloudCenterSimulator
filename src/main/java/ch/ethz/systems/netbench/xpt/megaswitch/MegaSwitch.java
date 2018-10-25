@@ -9,4 +9,5 @@ public interface MegaSwitch{
     public void extend(NetworkDevice networkDevice, NBProperties conf);
     public void receiveFromEncapsulatedDevice(Packet packet);
     public NetworkDevice getAsNetworkDevice();
+    public NetworkDevice getEncapsulatedDevice(String type);
 }

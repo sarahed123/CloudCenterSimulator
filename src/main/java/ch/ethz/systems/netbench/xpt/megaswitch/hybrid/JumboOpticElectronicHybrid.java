@@ -23,7 +23,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
     HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
     private long mNumAllocatedFlows;
     private long mNumDeAllocatedFlows;
-    ConversionUnit conversionUnit;
+    protected ConversionUnit conversionUnit;
 
     public JumboOpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
@@ -87,6 +87,10 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         throw new RuntimeException("Hybrid switch is not a server");
     }
 
+    protected void initConversionUnit(){
+        conversionUnit = new ConversionUnit(configuration,this,optic);
+    }
+
     @Override
     public void extend(NetworkDevice networkDevice, NBProperties networkConf){
         String networkType = networkConf.getPropertyOrFail("network_type");
@@ -94,7 +98,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
             case "circuit_switch":
                 this.optic = networkDevice;
                 this.optic.setEncapsulatingDevice(this);
-                conversionUnit = new ConversionUnit(configuration,this,optic);
+                initConversionUnit();
                 break;
             case "packet_switch":
                 this.electronic = networkDevice;
@@ -170,6 +174,18 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
                 return electronic.getSourceInputPort(sourceNetworkDeviceId);
             default:
                 throw new RuntimeException("bad technology " + technology);
+        }
+    }
+
+    @Override
+    public NetworkDevice getEncapsulatedDevice(String type) {
+        switch (type){
+            case "circuit_switch":
+                return optic;
+            case "packet_switch":
+                return electronic;
+            default:
+                throw new RuntimeException("bad network type " + type);
         }
     }
 

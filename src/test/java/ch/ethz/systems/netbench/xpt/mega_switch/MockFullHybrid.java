@@ -11,7 +11,7 @@ import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
 public class MockFullHybrid extends OpticElectronicHybrid {
-
+	public int maxPortsNum = 0;
 	public boolean routedThroughCircuit;
 	public boolean routedThroughPacketSwitch;
 	public boolean recoveredPath;
@@ -28,6 +28,10 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 		routedThroughCircuit = true;
 		try{
 			super.routeThroughCircuit(packet, id,sourceServer,destServer);
+			int portsNum = ((MockConversionUnit) conversionUnit).getNumOfPorts();
+			if(portsNum>maxPortsNum){
+				maxPortsNum = portsNum;
+			}
 		}catch (NoPathException e){
 			noPathExceptionThrown = true;
 			throw e;
@@ -40,6 +44,11 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 		routedThroughPacketSwitch = true;
 		super.routeThroughtPacketSwitch(packet);
 			
+	}
+
+	@Override
+	protected void initConversionUnit(){
+		conversionUnit = new MockConversionUnit(configuration,this,optic);
 	}
 	
 	@Override
