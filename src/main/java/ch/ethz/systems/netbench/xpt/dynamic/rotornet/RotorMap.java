@@ -34,6 +34,7 @@ public class RotorMap extends LinkedList<Integer> {
         if(!this.contains(dest)){
             throw new NoPathException();
         }
+        dest = maybeAddOne(dest);
         RotorOutputPort port = mOutputPortMap.get(dest);
         if(port == null) {
             RotorNetController controller = (RotorNetController) getController();
@@ -43,6 +44,21 @@ public class RotorMap extends LinkedList<Integer> {
             mOutputPortMap.put(dest,port);
         }
         return port;
+    }
+
+    /**
+     * adds one to dest if the map contains own devices id.
+     * @param dest
+     * @return
+     */
+    private int maybeAddOne(int dest){
+        if(super.contains(mCurrentDevice.getIdentifier())){
+
+            if(dest == ((mCurrentDevice.getIdentifier()+1) % sNumOfNodes)){
+                return (dest + 1) % sNumOfNodes;
+            }
+        }
+        return dest;
     }
 
     @Override

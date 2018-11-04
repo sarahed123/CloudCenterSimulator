@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
@@ -35,13 +36,18 @@ public class RotorSwitch extends DynamicSwitch {
 
     @Override
     public void receive(Packet genericPacket) {
+
         IpPacket ipPacket = (IpPacket) genericPacket;
         boolean deadline = false;
         boolean nopath = false;
+
         if(ipPacket.getSourceId()==this.getIdentifier()){
+
+
             try{
                 forwardToNextSwitch(ipPacket,ipPacket.getDestinationId());
                 SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_DIRECT_FORWARD");
+
                 return;
             }catch (NoPathException e){
                 nopath = true;
@@ -67,6 +73,7 @@ public class RotorSwitch extends DynamicSwitch {
                 nopath = true;
             }
         }
+
         if(hasResources(genericPacket)){
             String counter_name = "ROTOR_PACKET_BUFFERED";
             if(nopath) counter_name = "ROTOR_PACKET_BUFFERED_NO_PATH";
@@ -81,6 +88,7 @@ public class RotorSwitch extends DynamicSwitch {
     }
 
     private void addToBuffer(Packet genericPacket) {
+
         mBuffer.addLast(genericPacket);
         mCurrentBufferSize+= genericPacket.getSizeBit();
     }
@@ -96,14 +104,18 @@ public class RotorSwitch extends DynamicSwitch {
         for(int i = 0; i<size; i++){
             IpPacket p = null;
             try{
+
                 p = (IpPacket) popFromBuffer();
 
 //                forwardToNextSwitch(p,p.getDestinationId());
                 receive(p);
+
             }catch (ReconfigurationDeadlineException | NoPathException e){
-                addToBuffer(p);
+//                    addToBuffer(p);
+                assert(false);
             }
         }
+
     }
 
     protected void sendToRandomDestination(IpPacket ipPacket) {
