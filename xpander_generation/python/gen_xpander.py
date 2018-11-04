@@ -59,13 +59,14 @@ def main(outname, d, n, delim=','):
         if(cur_lambda<lambda2):
             lambda2 = cur_lambda
             mat = cur_mat
-    #np.savetxt(outname, mat, delimiter=delim)
+    np.savetxt(outname + "_mat", mat, delimiter=delim)
     print(lambda2)
     with open(outname, 'w') as f:
         for i in range(n):
             for j in range(n):
                 if i==j or mat[i,j]==0: continue
                 f.write("%d %d\n"%(i,j))
+    
 
 if __name__ == "__main__":
     args = sys.argv[1:]

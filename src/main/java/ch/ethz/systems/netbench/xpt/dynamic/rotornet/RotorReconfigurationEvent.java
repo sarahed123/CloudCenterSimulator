@@ -40,4 +40,10 @@ public class RotorReconfigurationEvent extends Event {
             rnc.startTransmmisions();
         }
     }
+
+//    @Override
+//    public String toString(){
+//        RotorNetController rnc = (RotorNetController) getController();
+//        return rnc.getDevice(3).getRotorMap().toString();
+//    }
 }

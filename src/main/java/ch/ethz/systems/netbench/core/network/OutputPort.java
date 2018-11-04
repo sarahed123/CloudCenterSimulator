@@ -105,8 +105,8 @@ public abstract class OutputPort extends Port{
             logger.logLinkUtilized(true);
             // Add event when sending is finished
             registerPacketDispatchedEvent(packet);
-            
-            
+
+
             // It is now sending again
             isSending = true;
 
@@ -139,6 +139,7 @@ public abstract class OutputPort extends Port{
         if (!link.doesNextTransmissionFail(packet.getSizeBit())) {
             registerPacketArrivalEvent(packet);
         }
+
 
         // Again free to send other packets
         isSending = false;

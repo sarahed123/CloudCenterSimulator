@@ -89,17 +89,18 @@ def analyze_flow_completion():
             'general_flow_size_bytes_std': np.std(total_size_bytes)
         }
 
-        range_low =                     [-1,            -1,            -1,      -1,          100000,    1000000,      2434900,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              -1,    -1]
+        range_low =                     [-1,            -1,            -1,      -1,          100000,    1000000,      30000000,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              -1,    -1]
         range_high =                    [-1,            100000,        200000,  100000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  5000000,  10000000]
-        range_name =                    ["all",         "less_100KB",  "leq_200KB", "leq_100KB", "geq_100KB","geq_1MB", "geq_2.4349MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "leq_5MB", "leq_10MB"]
+        range_name =                    ["all",         "less_100KB",  "leq_200KB", "leq_100KB", "geq_100KB","geq_1MB", "geq_30MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "leq_5MB", "leq_10MB"]
 
         for flow_on_circuit in [True,False,'both']:
             range_completed_duration =      [[],            [],            [],              [],  [],         [],           [],              [],            [],         [],          [],[],              [],            [],         [],          []]
             range_completed_throughput =    [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
+            range_all_throughput =          [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
             range_num_finished_flows =      [0,             0,             0,               0,    0,       0,            0,                0,             0,        0,         0, 0,                0,             0,        0,         0]
             range_num_unfinished_flows =    [0,             0,             0,               0,    0,       0,            0,                0,             0,         0,          0,0,                0,             0,         0,          0]
-            range_low_eq =                  [0,             0,             1,               1,    1,       1,            1,                1,             1,         1,         1,1,                1,             1,         1,         1]
-            range_high_eq =                 [0,             0,             1,               1,    1,       1,            1,                1,             1,         1,         1, 1,                1,             1,         1,         1]
+            range_low_eq =                  [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1,1,                1,             1,         1,         1]
+            range_high_eq =                 [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1, 1,                1,             1,         1,         1]
 
         # Go over all flows
             for i in range(0, len(flow_ids)):
@@ -118,6 +119,7 @@ def analyze_flow_completion():
 
                             else:
                                 range_num_unfinished_flows[j] += 1
+                            range_all_throughput[j].append(sent_bytes[i] * 8 / duration[i])
 
             # Ranges statistics
             for j in range(0, len(range_name)):
@@ -146,13 +148,20 @@ def analyze_flow_completion():
                     statistics[stat_name + '_median_fct_ms'] = statistics[stat_name + '_median_fct_ns'] / 1000000
                     statistics[stat_name + '_99th_fct_ms'] = statistics[stat_name + '_99th_fct_ns'] / 1000000
                     statistics[stat_name + '_99.9th_fct_ms'] = statistics[stat_name + '_99.9th_fct_ns'] / 1000000
-                    statistics[stat_name + '_throughput_mean_Gbps'] = np.mean(range_completed_throughput[j])
-                    statistics[stat_name + '_throughput_median_Gbps'] = np.median(range_completed_throughput[j])
-                    statistics[stat_name + '_throughput_99th_Gbps'] = np.percentile(range_completed_throughput[j], 99)
-                    statistics[stat_name + '_throughput_99.9th_Gbps'] = np.percentile(range_completed_throughput[j], 99.9)
-                    statistics[stat_name + '_throughput_1th_Gbps'] = np.percentile(range_completed_throughput[j], 1)
-                    statistics[stat_name + '_throughput_0.1th_Gbps'] = np.percentile(range_completed_throughput[j], 0.1)
-                    statistics[stat_name + '_throughput_5th_Gbps'] = np.percentile(range_completed_throughput[j], 5)
+                    statistics[stat_name + '_completed_throughput_mean_Gbps'] = np.mean(range_completed_throughput[j])
+                    statistics[stat_name + '_completed_throughput_median_Gbps'] = np.median(range_completed_throughput[j])
+                    statistics[stat_name + '_completed_throughput_99th_Gbps'] = np.percentile(range_completed_throughput[j], 99)
+                    statistics[stat_name + '_completed_throughput_99.9th_Gbps'] = np.percentile(range_completed_throughput[j], 99.9)
+                    statistics[stat_name + '_completed_throughput_1th_Gbps'] = np.percentile(range_completed_throughput[j], 1)
+                    statistics[stat_name + '_completed_throughput_0.1th_Gbps'] = np.percentile(range_completed_throughput[j], 0.1)
+                    statistics[stat_name + '_completed_throughput_5th_Gbps'] = np.percentile(range_completed_throughput[j], 5)
+                    statistics[stat_name + '_throughput_mean_Gbps'] = np.mean(range_all_throughput[j])
+                    statistics[stat_name + '_throughput_median_Gbps'] = np.median(range_all_throughput[j])
+                    statistics[stat_name + '_throughput_99th_Gbps'] = np.percentile(range_all_throughput[j], 99)
+                    statistics[stat_name + '_throughput_99.9th_Gbps'] = np.percentile(range_all_throughput[j], 99.9)
+                    statistics[stat_name + '_throughput_1th_Gbps'] = np.percentile(range_all_throughput[j], 1)
+                    statistics[stat_name + '_throughput_0.1th_Gbps'] = np.percentile(range_all_throughput[j], 0.1)
+                    statistics[stat_name + '_throughput_5th_Gbps'] = np.percentile(range_all_throughput[j], 5)
                 else:
                     statistics[stat_name + '_flows_completed_fraction'] = 0
 
