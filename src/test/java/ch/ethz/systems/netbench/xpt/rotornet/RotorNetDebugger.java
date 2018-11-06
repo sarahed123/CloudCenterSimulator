@@ -212,9 +212,9 @@ public class RotorNetDebugger {
 
     @Test
     public void testFlow(){
-        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(333).getTransportLayer(),336,20000000);
-        FlowStartEvent fse2 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(334).getTransportLayer(),337,20000000);
-        FlowStartEvent fse3 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(335).getTransportLayer(),338,20000000);
+        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(333).getTransportLayer(),336,10000000);
+        FlowStartEvent fse2 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(334).getTransportLayer(),337,10000000);
+        FlowStartEvent fse3 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(335).getTransportLayer(),338,10000000);
 
         Simulator.registerEvent(fse);
         Simulator.registerEvent(fse2);

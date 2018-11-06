@@ -57,4 +57,10 @@ public class ConversionUnit {
     public void onFlowFinish(int src, int dst, long flowId){
         mPortMap.remove(new ImmutablePair<>(src,dst));
     }
+
+    public NetworkDevice getOptic() {
+        return mOptic;
+    }
+
+
 }

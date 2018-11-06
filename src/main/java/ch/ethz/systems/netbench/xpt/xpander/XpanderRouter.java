@@ -3,10 +3,7 @@ package ch.ethz.systems.netbench.xpt.xpander;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
@@ -39,7 +36,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	private final double dijkstra_max_weigh;
 	private int flowFailuresSample;
 
-	private final int mMaxNumJFlowsOncircuit;
+	protected final int mMaxNumJFlowsOncircuit;
 
     enum PathAlgorithm{
 		DIJKSTRA,
@@ -50,17 +47,14 @@ public class XpanderRouter extends RemoteRoutingController{
 	PathAlgorithm pathAlg;
 	protected Graph[] mGraphs;
 	Map<Integer, NetworkDevice> mIdToNetworkDevice;
+	boolean mIsServerOptics;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
 		super(configuration);
 
+		initGraphs(configuration,idToNetworkDevice);
 		//experimental!
-		mGraphs = new Graph[configuration.getIntegerPropertyOrFail("circuit_wave_length_num")];
-		for(int i = 0; i < mGraphs.length; i++){
-			mGraphs[i] = configuration.getGraphCopy();
-			mGraphs[i].resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
-					,idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
-		}
 
+		mIsServerOptics = configuration.getBooleanPropertyWithDefault("host_optics_enabled", false);
 		mMaxNumJFlowsOncircuit = configuration.getIntegerPropertyWithDefault("max_num_flows_on_circuit",Integer.MAX_VALUE);
 		if(mMaxNumJFlowsOncircuit==Integer.MAX_VALUE){
 			System.out.println("WARNING: property max_num_flows_on_circuit is set to infinity. Is that what you want?");
@@ -119,7 +113,14 @@ public class XpanderRouter extends RemoteRoutingController{
 		}
 	}
 
-
+	protected void initGraphs(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
+		mGraphs = new Graph[configuration.getIntegerPropertyOrFail("circuit_wave_length_num")];
+		for(int i = 0; i < mGraphs.length; i++){
+			mGraphs[i] = configuration.getGraphCopy();
+			mGraphs[i].resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
+					,idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
+		}
+	}
 
 
 	public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
@@ -128,12 +129,21 @@ public class XpanderRouter extends RemoteRoutingController{
 			mFlowIdsOnCircuit.get(pair).add(flowId);
 			throw new FlowPathExists(flowId);
 		}
+//		int sourceToCheck = mIsServerOptics ? sourceServer : sourceToR;
+//		int destToCheck = mIsServerOptics ? destServer : destToR;
 		if(mTransmittingSources.getOrDefault(sourceToR,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(destToR,0)>=mMaxNumJFlowsOncircuit){
 			SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_XPANDER_TOR");
 			throw new NoPathException(sourceToR,destToR);
 		}
+		Path p;
+		if(destToR==sourceToR){
+			List<Vertex> trivalPath = new LinkedList<>();
+			trivalPath.add(new Vertex(destToR));
+			p = new Path(trivalPath, 0d);
+		}else{
+			 p = generatePathFromGraph(sourceToR, destToR);
+		}
 
-		Path p = generatePathFromGraph(sourceToR, destToR);
 
 		updateForwardingTables(sourceServer,destServer,p,flowId);
 		removePathFromGraph(p);
@@ -180,6 +190,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 	public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
+
 		Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
 		Path p = mPaths.get(pair);
 
@@ -202,6 +213,8 @@ public class XpanderRouter extends RemoteRoutingController{
 				,flowId,Simulator.getCurrentTime(),false);
 		mPaths.remove(pair);
 
+//		int sourceToCheck = mIsServerOptics ? serverSource : sourceToR;
+//		int destToCheck = mIsServerOptics ? serverDest : destToR;
 		onPathDeAllocation(sourceToR,destToR);
 		mDeAllocatedPathsNum++;
 	}
@@ -250,6 +263,11 @@ public class XpanderRouter extends RemoteRoutingController{
 			curr = pathAsList.get(i).getId();
 			rsrs.updateForwardingTable(source,dest,curr);
 		}
+
+//		if(mIsServerOptics){
+//			RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(curr);
+//			rsrs.updateForwardingTable(source,dest,dest);
+//		}
 
 	}
 

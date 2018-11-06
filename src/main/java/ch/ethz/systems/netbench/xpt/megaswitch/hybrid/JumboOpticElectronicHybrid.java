@@ -20,7 +20,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
     protected long circuitThreshold;
     protected NetworkDevice electronic;
     protected NetworkDevice optic;
-    HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
+    protected HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
     private long mNumAllocatedFlows;
     private long mNumDeAllocatedFlows;
     protected ConversionUnit conversionUnit;
@@ -72,7 +72,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
 
         try {
-            getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),jumboFlowiId);
+            initRoute(packet,jumboFlowiId);
         }catch(FlowPathExists e) {
 
         }
@@ -82,6 +82,11 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
 
     }
+
+    protected void initRoute(IpPacket packet, long jumboFlowiId) {
+        getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),jumboFlowiId);
+    }
+
     @Override
     protected void receiveFromIntermediary(Packet genericPacket) {
         throw new RuntimeException("Hybrid switch is not a server");
@@ -114,26 +119,30 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         Encapsulatable ipPacket = (Encapsulatable) packet;
 
         if (ipPacket.getDestinationId() == this.identifier) {
-            TcpPacket deEncapse = (TcpPacket) ipPacket.deEncapsualte();
+            TcpPacket deEncapse = deEncapsulatePacket(ipPacket);
             if(deEncapse.isACK() && deEncapse.isFIN()){
-                onFlowFinished(this.identifier,ipPacket.getSourceId(),deEncapse.getFlowId());
+                onFlowFinished(this.identifier,ipPacket.getSourceId(),deEncapse.getDestinationId(),deEncapse.getSourceId(),deEncapse.getFlowId());
             }
             targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
         }
     }
 
-    protected void onFlowFinished(int source, int dest, long flowId) {
+    protected TcpPacket deEncapsulatePacket(Encapsulatable packet) {
+        return (TcpPacket) packet.deEncapsualte();
+    }
+
+    protected void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
         JumboFlow jumboFlow = getJumboFlow(source,dest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
             conversionUnit.onFlowFinish(source,dest,jumboFlow.getId());
-            recoverPath(source,dest,jumboFlow.getId());
+            recoverPath(source,dest,serverSource,serverDest,jumboFlow.getId());
             mJumboFlowMap.remove(new ImmutablePair<>(source, dest));
         }
 
     }
 
-    protected void recoverPath(int source, int dest, long jumboFlowId) {
+    protected void recoverPath(int source, int dest,int serverSource,int serverDest, long jumboFlowId) {
         try {
 
             getRemoteRouter().recoverPath(source,dest,jumboFlowId);
