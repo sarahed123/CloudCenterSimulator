@@ -237,7 +237,7 @@ public class BaseInitializer {
                 MegaSwitch megaSwitch = (MegaSwitch)existing;
                 megaSwitch.extend(networkDevice,configuration);
             }catch (ClassCastException e){
-                throw new RuntimeException("illegal to use extend with this device " +existing);
+                throw new RuntimeException("illegal to use extend with this device " +existing.getIdentifier());
             }
         }else{
             idToNetworkDevice.put(id, networkDevice);

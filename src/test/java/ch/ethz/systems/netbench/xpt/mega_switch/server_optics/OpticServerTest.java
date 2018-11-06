@@ -1,4 +1,4 @@
-package ch.ethz.systems.netbench.xpt.mega_switch;
+package ch.ethz.systems.netbench.xpt.mega_switch.server_optics;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
@@ -12,9 +12,16 @@ import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.mega_switch.MockFullHybrid;
+import ch.ethz.systems.netbench.xpt.mega_switch.MockSimpleServer;
+import ch.ethz.systems.netbench.xpt.mega_switch.SimpleSocket;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServer;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerToR;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,12 +36,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
-import static org.junit.Assert.assertTrue;
-
 @RunWith(MockitoJUnitRunner.class)
-public class JumboFullHybridTest {
+public class OpticServerTest {
 
-    MockRemoteRouter router;
+    MockServerOpticsRouter router;
     @Before
     public void setup() throws IOException {
         // main network
@@ -43,8 +48,6 @@ public class JumboFullHybridTest {
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
         runConfigWriter.write("hybrid_circuit_threshold_byte=1000\n");
-        runConfigWriter.write("enable_jumbo_flows=true\n");
-
 
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
@@ -61,7 +64,7 @@ public class JumboFullHybridTest {
         OutputPortGenerator portGen = new OutputPortGenerator(conf) {
             @Override
             public OutputPort generate(NetworkDevice own, NetworkDevice target, Link link) {
-                return new OutputPort(own, target, link, new LinkedList<Packet>()) {
+                return new OutputPort(own,target,link,new LinkedList<Packet>()) {
                     @Override
                     public void enqueue(Packet packet) {
                         guaranteedEnqueue(packet);
@@ -70,20 +73,20 @@ public class JumboFullHybridTest {
             }
         };
         IntermediaryGenerator ig = new DemoIntermediaryGenerator(conf);
-        NetworkDeviceGenerator ndg = new NetworkDeviceGenerator(conf) {
+        NetworkDeviceGenerator ndg = new OpticServerGenerator(conf){
             @Override
-            public NetworkDevice generate(int i) {
-                return new MockJumboFullHybrid(i, null, ig.generate(i), conf);
+            public NetworkDevice generate(int identifier) {
+                return new MockServerOpticToR(identifier,null,ig.generate(identifier),conf);
             }
 
             @Override
-            public NetworkDevice generate(int i, TransportLayer transportLayer) {
-                return new MockSimpleServer(i, transportLayer, ig.generate(i), conf);
+            public NetworkDevice generate(int identifier, TransportLayer server) {
+                return new MockOpticServer(identifier,server,ig.generate(identifier),conf);
             }
         };
         LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 10);
         TransportLayerGenerator tlg = new SimpleDctcpTransportLayerGenerator(conf);
-        initializer.extend(portGen, ndg, lg, tlg);
+        initializer.extend(portGen,ndg,lg,tlg);
         initializer.createInfrastructure(conf);
 
 
@@ -92,9 +95,11 @@ public class JumboFullHybridTest {
         BufferedWriter runConfigWriter2 = new BufferedWriter(new FileWriter(tempRunConfig2));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
-        runConfigWriter2.write("centered_routing_type=Xpander\n");
+        runConfigWriter2.write("centered_routing_type=semi_Xpander_server_optics\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
-        runConfigWriter2.write("circuit_wave_length_num=1\n");
+        runConfigWriter2.write("circuit_wave_length_num=2\n");
+        runConfigWriter2.write("max_num_flows_on_circuit=5\n");
+        runConfigWriter2.write("host_optics_enabled=true\n");
         runConfigWriter2.write("network_type=circuit_switch\n");
         runConfigWriter2.write("output_port_max_queue_size_bytes=150000\n");
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=30000\n");
@@ -111,12 +116,13 @@ public class JumboFullHybridTest {
         );
 
 
-        initializer.extend(1, new RemoteRoutingOutputPortGenerator(conf2), new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2), 2, conf2),
-                lg, new RemoteRoutingTransportLayerGenerator(conf2));
-        HashMap<Integer, NetworkDevice> hm = initializer.createInfrastructure(conf2);
+        initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
+                lg,new RemoteRoutingTransportLayerGenerator(conf2));
+        HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         //RoutingSelector.selectPopulator(hm, conf2);
-        router = new MockRemoteRouter(hm, conf2);
-        MockJumboFullHybrid.setRemoteRouter(router);
+        router = new MockServerOpticsRouter(hm, conf2);
+        MockOpticServer.setRemoteRouter(router);
+        MockServerOpticToR.setRemoteRouter(router);
         //creating network 3, packet switching:
         File tempRunConfig3 = File.createTempFile("temp-run-config2", ".tmp");
         BufferedWriter runConfigWriter3 = new BufferedWriter(new FileWriter(tempRunConfig3));
@@ -138,7 +144,7 @@ public class JumboFullHybridTest {
         OutputPortGenerator portGen3 = new OutputPortGenerator(conf3) {
             @Override
             public OutputPort generate(NetworkDevice own, NetworkDevice target, Link link) {
-                return new OutputPort(own, target, link, new PriorityQueue<Packet>()) {
+                return new OutputPort(own,target,link,new PriorityQueue<Packet>()) {
                     @Override
                     public void enqueue(Packet packet) {
                         guaranteedEnqueue(packet);
@@ -150,19 +156,19 @@ public class JumboFullHybridTest {
         TransportLayerGenerator tlg3 = new TransportLayerGenerator(conf3) {
             @Override
             public TransportLayer generate(int i) {
-                return new TransportLayer(i, conf3) {
+                return new TransportLayer(i,conf3) {
 
                     @Override
                     protected Socket createSocket(long l, int i, long l1) {
-                        return new SimpleSocket(this, l, this.identifier, i, l1);
+                        return new SimpleSocket(this,l,this.identifier,i,l1);
                     }
                 };
             }
         };
 
-        initializer.extend(2, portGen3, new EcmpSwitchGenerator(new DemoIntermediaryGenerator(conf3), 2, conf3),
-                lg, tlg3);
-        HashMap<Integer, NetworkDevice> hm3 = initializer.createInfrastructure(conf3);
+        initializer.extend(2,portGen3,new EcmpSwitchGenerator(new DemoIntermediaryGenerator(conf3),2, conf3),
+                lg,tlg3);
+        HashMap<Integer,NetworkDevice> hm3 = initializer.createInfrastructure(conf3);
         RoutingSelector.selectPopulator(hm3, conf3).populateRoutingTables();
 
         initializer.finalize();
@@ -172,29 +178,55 @@ public class JumboFullHybridTest {
     }
 
     @Test
-    public void testDoubleFlow(){
-        MockSimpleServer source1 = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
-        MockSimpleServer dest1 =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
-        MockSimpleServer source2 = (MockSimpleServer) BaseInitializer.getInstance().getNetworkDeviceById(4);
-        MockSimpleServer dest2 =(MockSimpleServer) (BaseInitializer.getInstance().getNetworkDeviceById(5));
-        FlowStartEvent fse = new FlowStartEvent(0, source1.getTransportLayer(), dest1.getIdentifier(), 16000);
-        FlowStartEvent fse2 = new FlowStartEvent(0, source2.getTransportLayer(), dest2.getIdentifier(), 8000);
-
-        MockJumboFullHybrid tor1 = (MockJumboFullHybrid) (BaseInitializer.getInstance().getNetworkDeviceById(0));
+    public void testSingleFlow(){
+        MockOpticServer source = (MockOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockOpticServer dest =(MockOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
+        MockServerOpticToR tor1 = (MockServerOpticToR) (BaseInitializer.getInstance().getNetworkDeviceById(0));
         Simulator.registerEvent(fse);
-        Simulator.registerEvent(fse2);
         Simulator.runNs(1000000000);
-        assert(tor1.routedThroughCircuit);
-        assert(tor1.routedThroughPacketSwitch);
-        assert(tor1.recoveredPath);
-        assert(router.routed(0,1));
-        assert(router.recovered(0,1));
-        assert(tor1.maxPortsNum==1);
-        tor1.reset();
+        assert(source.routedThroughCircuit);
+        assert(source.routedThroughPacketSwitch);
+        assert(source.recoveredPath);
+        assert(router.routed(2,3));
+        assert(router.recovered(2,3));
+        source.reset();
+    }
+
+    @Test
+    public void testTrivalPath(){
+        MockOpticServer source = (MockOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockOpticServer dest =(MockOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(4));
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
+        MockServerOpticToR tor1 = (MockServerOpticToR) (BaseInitializer.getInstance().getNetworkDeviceById(0));
+        Simulator.registerEvent(fse);
+        Simulator.runNs(1000000000);
+        assert(source.routedThroughCircuit);
+        assert(source.routedThroughPacketSwitch);
+        assert(source.recoveredPath);
+
+        source.reset();
+    }
+
+    @Test
+    public void pathAllocations(){
+        boolean thrown = false;
+        router.initRoute(0,0,2,3,0);
+        router.initRoute(0,0,2,4,0);
+        try{
+            router.initRoute(0,0,2,5,0);
+        }catch (NoPathException e){
+            thrown = true;
+        }
+
+        assert(thrown);
+        router.recoverPath(0,0,2,3,0);
+        router.initRoute(0,0,2,5,0);
     }
 
     @After
-    public void cleanup() {
+    public void clear(){
         Simulator.reset();
     }
+
 }

@@ -24,6 +24,7 @@ import ch.ethz.systems.netbench.xpt.asaf.routing.priority.PriorityFlowletInterme
 import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenodctcp.NewRenoDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
@@ -132,6 +133,8 @@ class InfrastructureSelector {
                 return new DynamicSwitchGenerator(intermediaryGenerator,configuration);
             case "semi_remote_routing_switch":
                 return new SemiRemoteRoutingSwitchGenerator(intermediaryGenerator,configuration);
+            case "optic_server":
+                return new OpticServerGenerator(intermediaryGenerator,configuration);
 
             default:
                 throw new PropertyValueInvalidException(

@@ -18,9 +18,8 @@ public class SemiXpander extends XpanderRouter {
 
     @Override
     protected Path generatePathFromGraph(int source, int dest) {
-        SemiRemoteRoutingSwitch sourceSwitch = (SemiRemoteRoutingSwitch) mIdToNetworkDevice.get(source);
-        List<List<Integer>> paths = sourceSwitch.getPathsTo(dest);
 
+        List<List<Integer>> paths = getPathsFromDevice(source,dest);
         Path ret;
         for(List<Integer> p : paths){
             try{
@@ -33,6 +32,10 @@ public class SemiXpander extends XpanderRouter {
         return new Path(0);
     }
 
+    protected List<List<Integer>> getPathsFromDevice(int source, int dest) {
+        SemiRemoteRoutingSwitch sourceSwitch = (SemiRemoteRoutingSwitch) mIdToNetworkDevice.get(source);
+        return sourceSwitch.getPathsTo(dest);
+    }
 
 
     private Path checkPath(List<Integer> p) {
@@ -48,7 +51,7 @@ public class SemiXpander extends XpanderRouter {
         throw new NoPathException();
     }
 
-    private Path checkPathInGraph(List<Integer> p, int graphIndex) {
+    protected Path checkPathInGraph(List<Integer> p, int graphIndex) {
         int curr = p.get(0);
         Path ret = new Path(0,graphIndex);
         ret.add(curr);

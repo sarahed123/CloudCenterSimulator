@@ -17,6 +17,7 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpander;
+import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
@@ -51,16 +52,19 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		
 		switch(type) {
 		case "Xpander":
-				mInstance = new XpanderRouter(idToNetworkDevice , configuration);
-				break;
+			mInstance = new XpanderRouter(idToNetworkDevice , configuration);
+			break;
 		case "dynamic":
-				mInstance = new DynamicController(idToNetworkDevice, configuration);
-				break;
-			case "rotor_net":
-				mInstance = new RotorNetController(idToNetworkDevice,configuration);
-				break;
-			case "semi_Xpander":
-				mInstance = new SemiXpander(idToNetworkDevice,configuration);
+			mInstance = new DynamicController(idToNetworkDevice, configuration);
+			break;
+		case "rotor_net":
+			mInstance = new RotorNetController(idToNetworkDevice,configuration);
+			break;
+		case "semi_Xpander":
+			mInstance = new SemiXpander(idToNetworkDevice,configuration);
+			break;
+			case "semi_Xpander_server_optics":
+				mInstance = new SemiXpanderServerOptics(idToNetworkDevice,configuration);
 				break;
 		default:
 			throw new PropertyValueInvalidException(configuration,"centered_routing_type");
@@ -211,13 +215,13 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		mRecievingDestinations.put(destToR,receivingCounter);
 	}
 
-	protected void onPathDeAllocation(int sourceToR, int destToR){
-		int transmittingCounter = mTransmittingSources.get(sourceToR);
-		int receivingCounter = mRecievingDestinations.get(destToR);
+	protected void onPathDeAllocation(int source, int dest){
+		int transmittingCounter = mTransmittingSources.get(source);
+		int receivingCounter = mRecievingDestinations.get(dest);
 		transmittingCounter--;
 		receivingCounter--;
-		mTransmittingSources.put(sourceToR,transmittingCounter);
-		mRecievingDestinations.put(destToR,receivingCounter);
+		mTransmittingSources.put(source,transmittingCounter);
+		mRecievingDestinations.put(dest,receivingCounter);
 	}
 
 	public boolean hasRoute(Pair p) {

@@ -54,9 +54,9 @@ public class MockJumboFullHybrid extends JumboOpticElectronicHybrid {
     }
 
     @Override
-    protected void recoverPath(int source, int dest, long id) {
+    protected void recoverPath(int source, int dest,int serverSource,int serverDest, long id) {
         recoveredPath = true;
-        super.recoverPath(source, dest, id);
+        super.recoverPath(source, dest,serverSource, serverDest, id);
     }
 
     @Override

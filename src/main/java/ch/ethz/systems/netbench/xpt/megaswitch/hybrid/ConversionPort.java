@@ -33,9 +33,9 @@ public class ConversionPort extends EcnTailDropOutputPort{
 
     @Override
     public void enqueue(Packet packet) {
-    	if(!ownNetworkDevice.getConfiguration().getBooleanPropertyWithDefault("enable_jumbo_flows", false)) {
-    		assert(getQueue().isEmpty());
-    	}
+//    	if(!ownNetworkDevice.getConfiguration().getBooleanPropertyWithDefault("enable_jumbo_flows", false)) {
+//    		assert(getQueue().isEmpty());
+//    	}
         
         super.enqueue(packet);
 
