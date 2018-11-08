@@ -427,7 +427,7 @@ public class SimpleTcpSocket extends Socket {
         } else if (seqNumber > receiveNextNumber) {
             selectiveAckSet.add(seqNumber, ackNumber);
         }
-        
+
         // Send out the acknowledgment
         sendWithoutResend(
                 ((FullExtTcpPacket) ((FullExtTcpPacket) (createPacket(

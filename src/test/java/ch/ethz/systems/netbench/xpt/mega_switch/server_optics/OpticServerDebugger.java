@@ -12,17 +12,10 @@ import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchGenerator;
-import ch.ethz.systems.netbench.xpt.mega_switch.MockFullHybrid;
-import ch.ethz.systems.netbench.xpt.mega_switch.MockSimpleServer;
 import ch.ethz.systems.netbench.xpt.mega_switch.SimpleSocket;
-import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServer;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
-import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerToR;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +31,7 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpticServerTest {
+public class OpticServerDebugger {
 
     MockServerOpticsRouter router;
     @Before
@@ -47,6 +40,8 @@ public class OpticServerTest {
         File tempRunConfig = File.createTempFile("temp-run-config", ".tmp");
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
+        runConfigWriter.write("run_folder_base_dir=/cs/usr/inonkp/optic_server_testing\n");
+        runConfigWriter.write("run_folder_name=results\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
         runConfigWriter.write("hybrid_circuit_threshold_byte=1000\n");
 
@@ -85,7 +80,7 @@ public class OpticServerTest {
                 return new MockOpticServer(identifier,server,ig.generate(identifier),conf);
             }
         };
-        LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 10);
+        LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 100);
         TransportLayerGenerator tlg = new SimpleDctcpTransportLayerGenerator(conf);
         initializer.extend(portGen,ndg,lg,tlg);
         initializer.createInfrastructure(conf);
@@ -99,13 +94,14 @@ public class OpticServerTest {
         runConfigWriter2.write("centered_routing_type=semi_Xpander_server_optics\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
         runConfigWriter2.write("circuit_wave_length_num=2\n");
-        runConfigWriter2.write("max_num_flows_on_circuit=5\n");
+        runConfigWriter2.write("max_num_flows_on_circuit=2\n");
         runConfigWriter2.write("host_optics_enabled=true\n");
+        runConfigWriter2.write("log_remote_paths=true\n");
         runConfigWriter2.write("network_type=circuit_switch\n");
         runConfigWriter2.write("output_port_max_queue_size_bytes=150000\n");
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=30000\n");
-        runConfigWriter2.write("link_bandwidth_bit_per_ns=50\n");
-        runConfigWriter2.write("link_delay_ns=10\n");
+        runConfigWriter2.write("link_bandwidth_bit_per_ns=500\n");
+        runConfigWriter2.write("link_delay_ns=0\n");
         runConfigWriter2.close();
         NBProperties conf2 = new NBProperties(
                 tempRunConfig2.getAbsolutePath(),
@@ -179,62 +175,22 @@ public class OpticServerTest {
     }
 
     @Test
-    public void testSingleFlow(){
-        MockOpticServer source = (MockOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
-        MockOpticServer dest =(MockOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
-        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
-        MockServerOpticToR tor1 = (MockServerOpticToR) (BaseInitializer.getInstance().getNetworkDeviceById(0));
+    public void testFlow(){
+        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),4,200000);
+        FlowStartEvent fse2 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),5,200000);
+        FlowStartEvent fse3 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),3,200000);
+
         Simulator.registerEvent(fse);
-        Simulator.runNs(1000000000);
-        assert(source.routedThroughCircuit);
-        assert(source.routedThroughPacketSwitch);
-        assert(source.recoveredPath);
-        assert(router.routed(2,3));
-        assert(router.recovered(2,3));
-        source.reset();
-    }
+        Simulator.registerEvent(fse2);
+        Simulator.registerEvent(fse3);
 
-    @Test
-    public void testTrivalPath(){
-        MockOpticServer source = (MockOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
-        MockOpticServer dest =(MockOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(4));
-        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 2000);
-        MockServerOpticToR tor1 = (MockServerOpticToR) (BaseInitializer.getInstance().getNetworkDeviceById(0));
-        Simulator.registerEvent(fse);
-        Simulator.runNs(1000000000);
-        assert(source.routedThroughCircuit);
-        assert(source.routedThroughPacketSwitch);
-        assert(source.recoveredPath);
+        Simulator.runNs(20000000);
 
-        source.reset();
-    }
 
-    @Test
-    public void pathAllocations(){
-        boolean thrown = false;
-        router.initRoute(0,1,2,3,0);
-        router.initRoute(0,0,2,4,1);
-        try{
-            router.initRoute(0,0,2,4,2);
-        }catch (FlowPathExists e){
-            thrown = true;
-        }
-        assert(thrown);
-        thrown = false;
-        try{
-            router.initRoute(0,1,2,5,3);
-        }catch (NoPathException e){
-            thrown = true;
-        }
-
-        assert(thrown);
-        router.recoverPath(0,1,2,3,0);
-        router.initRoute(0,1,2,5,4);
     }
 
     @After
     public void clear(){
-        Simulator.reset();
+        Simulator.reset(false);
     }
-
 }
