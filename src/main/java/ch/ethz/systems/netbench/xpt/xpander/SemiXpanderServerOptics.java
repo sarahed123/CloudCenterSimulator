@@ -129,7 +129,9 @@ public class SemiXpanderServerOptics extends SemiXpander {
     }
 
     protected Path checkPathInGraph(List<Integer> p, int graphIndex) {
+
         if(mServerTransmitColorsUsed.get(mCurrentServerSource).contains(graphIndex)){
+
             throw new NoPathException();
         }
         if(mServerReceiveColorsUsed.get(mCurrentServerDest).contains(graphIndex)){
