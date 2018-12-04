@@ -89,14 +89,15 @@ def analyze_flow_completion():
             'general_flow_size_bytes_std': np.std(total_size_bytes)
         }
 
-        range_low =                     [-1,            -1,            -1,      -1,          100000,    1000000,      30000000,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              -1,    -1]
-        range_high =                    [-1,            100000,        200000,  100000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  5000000,  10000000]
-        range_name =                    ["all",         "less_100KB",  "leq_200KB", "leq_100KB", "geq_100KB","geq_1MB", "geq_30MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "leq_5MB", "leq_10MB"]
+        range_low =                     [-1,            -1,            -1,      -1,          100000,    1000000,      30000000,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              200000,    100000]
+        range_high =                    [-1,            100000,        200000,  100000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  -1,  200000]
+        range_name =                    ["all",         "less_100KB",  "leq_200KB", "leq_100KB", "geq_100KB","geq_1MB", "geq_30MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "geq_200KB", "leq_200KB_geq_100KB"]
 
         for flow_on_circuit in [True,False,'both']:
             range_completed_duration =      [[],            [],            [],              [],  [],         [],           [],              [],            [],         [],          [],[],              [],            [],         [],          []]
             range_completed_throughput =    [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
             range_all_throughput =          [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
+            range_flow_size =               [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
             range_num_finished_flows =      [0,             0,             0,               0,    0,       0,            0,                0,             0,        0,         0, 0,                0,             0,        0,         0]
             range_num_unfinished_flows =    [0,             0,             0,               0,    0,       0,            0,                0,             0,         0,          0,0,                0,             0,         0,          0]
             range_low_eq =                  [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1,1,                1,             1,         1,         1]
@@ -112,6 +113,7 @@ def analyze_flow_completion():
                             (range_high[j] == -1 or (range_high_eq[j] == 0 and total_size_bytes[i] < range_high[j]) or (range_high_eq[j] == 1 and total_size_bytes[i] <= range_high[j]))
                     ):
                         if(on_circuit[i]==flow_on_circuit or flow_on_circuit=='both'):
+                            range_flow_size[j].append(total_size_bytes[i])
                             if completed[i]:
                                 range_num_finished_flows[j] += 1
                                 range_completed_duration[j].append(duration[i])
@@ -119,7 +121,8 @@ def analyze_flow_completion():
 
                             else:
                                 range_num_unfinished_flows[j] += 1
-                            range_all_throughput[j].append(sent_bytes[i] * 8 / duration[i])
+                            if duration[i]!=0:
+                                range_all_throughput[j].append(sent_bytes[i] * 8 / duration[i])
 
             # Ranges statistics
             for j in range(0, len(range_name)):
@@ -162,6 +165,7 @@ def analyze_flow_completion():
                     statistics[stat_name + '_throughput_1th_Gbps'] = np.percentile(range_all_throughput[j], 1)
                     statistics[stat_name + '_throughput_0.1th_Gbps'] = np.percentile(range_all_throughput[j], 0.1)
                     statistics[stat_name + '_throughput_5th_Gbps'] = np.percentile(range_all_throughput[j], 5)
+                    statistics[stat_name + '_flow_size_mean'] = np.mean(range_flow_size[j])
                 else:
                     statistics[stat_name + '_flows_completed_fraction'] = 0
 
