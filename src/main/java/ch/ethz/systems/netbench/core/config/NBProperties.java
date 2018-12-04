@@ -552,7 +552,7 @@ public class NBProperties extends Properties {
 				if(!Arrays.stream(BaseAllowedProperties.RUN_CONFIGURATION_ONLY).anyMatch(key::equals)
 						&& !Arrays.stream(BaseAllowedProperties.LOG).anyMatch(key::equals)
 						&& !key.equals("network_type")){
-					if(key.equals("scenario_topology_file")){
+					if(key.equals("scenario_topology_file") || key.equals("csv_size_dist_file_bytes")){
 						String[] path = value.split("/");
 						baseDir += "/" + key + "/" + path[path.length - 1].split("[.]")[0];
 						continue;

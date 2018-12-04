@@ -75,6 +75,13 @@ class TrafficSelector {
                         break;
                     }
 
+                    case "from_csv": {
+                        flowSizeDistribution = new FromCSV(
+                                configuration.getProperty("csv_size_dist_file_bytes")
+                        );
+                        break;
+                    }
+
                     default: {
                         throw new PropertyValueInvalidException(
                                 configuration,
