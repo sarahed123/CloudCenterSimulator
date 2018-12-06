@@ -7,7 +7,39 @@
     <groupId>ch.ethz.systems</groupId>
     <artifactId>netbench</artifactId>
     <version>1.0</version>
+    <profiles>
+        <!-- The configuration of the development profile -->
+        <profile>
+            <id>normal</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
 
+                <!--
+                    Specifies the build.profile.id property that must be equal than the name of
+                    the directory that contains the profile specific configuration file.
+                    Because the name of the directory that contains the configuration file of the
+                    development profile is dev, we must set the value of the build.profile.id
+                    property to dev.
+                -->
+                <enable_jumbo_flows>false</enable_jumbo_flows>
+            </properties>
+        </profile>
+        <profile>
+            <id>jumbo_flows</id>
+            <properties>
+                <!--
+                    Specifies the build.profile.id property that must be equal than the name of
+                    the directory that contains the profile specific configuration file.
+                    Because the name of the directory that contains the configuration file of the
+                    development profile is dev, we must set the value of the build.profile.id
+                    property to dev.
+                -->
+                <enable_jumbo_flows>true</enable_jumbo_flows>
+            </properties>
+        </profile>
+    </profiles>
     <properties>
         <jdk.version>1.8</jdk.version>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -59,7 +91,24 @@
             </plugin>
 
         </plugins>
-
+        <resources>
+            <!--
+                Placeholders that are found from the files located in the configured resource
+                directories are replaced with the property values found from the profile
+                specific configuration file.
+            -->
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <filters>
+            <!--
+                Ensures that the config.properties file is always loaded from the
+                configuration directory of the active Maven profile. 
+            -->
+            <filter>env.properties</filter>
+        </filters>
     </build>
 
     <!-- Project functional dependencies -->

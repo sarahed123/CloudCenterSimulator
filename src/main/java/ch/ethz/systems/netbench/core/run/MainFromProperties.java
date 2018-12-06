@@ -136,7 +136,34 @@ public class MainFromProperties {
                 BaseAllowedProperties.BASE_DIR_VARIANTS
         );
         propertiesList.add(runConfiguration);
-        
+        BufferedReader reader;
+        //load properties from environment
+        try {
+            ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+            InputStream is = classloader.getResourceAsStream("env.properties");
+            reader = new BufferedReader(new InputStreamReader(is
+            ));
+            String line = reader.readLine();
+            while (line != null) {
+
+
+                int index = line.indexOf('=');
+                if(index==-1){
+                    throw new InvalidPropertiesFormatException("arg " + line + " is not a valid property format");
+                }
+                String param = line.substring(0, index);
+                String value = line.substring(index + 1);
+                runConfiguration.overrideProperty(param, value);
+                // read next line
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // leave this for initial runs, later delete
+        assert(runConfiguration.getBooleanPropertyWithDefault("enable_jumbo_flows",false));
 
         // Dynamic overwrite of temporary config using arguments given from command line
         for (int i = 1; i < args.length; i++) {
@@ -161,12 +188,17 @@ public class MainFromProperties {
             }
 
         }
-        
+
         propertiesList.get(0).loadSubConfigurtations();
         NBProperties.constructBaseDir(propertiesList.get(0),propertiesList);
         try {
-            new File(propertiesList.get(0).getPropertyOrFail("common_base_dir")).mkdirs();
-            BufferedWriter bw = new BufferedWriter(new FileWriter(propertiesList.get(0).getPropertyOrFail("common_base_dir") + "/" +
+            String commonBaseDir = propertiesList.get(0).getPropertyOrFail("common_base_dir");
+            if(propertiesList.get(0).getBooleanPropertyWithDefault("enable_jumbo_flows",false)){
+                commonBaseDir+="Jumbo";
+            }
+
+            new File(commonBaseDir).mkdirs();
+            BufferedWriter bw = new BufferedWriter(new FileWriter(commonBaseDir + "/" +
                     propertiesList.get(0).getPropertyOrFail("common_run_name")));
             bw.write(propertiesList.get(0).getPropertyOrFail("run_folder_base_dir") + "\n");
             bw.close();
