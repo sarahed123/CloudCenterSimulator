@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.log.EmptyPortLogger;
@@ -35,6 +36,8 @@ public class ConversionPort extends EcnTailDropOutputPort{
             // this shoud not happen
 
             System.out.println(packet.toString());
+            System.out.println(packet.getFlowId());
+            System.out.println(((TcpPacket)packet).resent);
             throw new RuntimeException();
         }
         targetNetworkDevice.receiveFromEncapsulating(packet);
@@ -49,6 +52,7 @@ public class ConversionPort extends EcnTailDropOutputPort{
             super.enqueue(packet);
         else{
             System.out.println(packet.toString());
+
             throw new RuntimeException();
         }
 

@@ -162,8 +162,6 @@ public class MainFromProperties {
             e.printStackTrace();
         }
 
-        // leave this for initial runs, later delete
-        assert(runConfiguration.getBooleanPropertyWithDefault("enable_jumbo_flows",false));
 
         // Dynamic overwrite of temporary config using arguments given from command line
         for (int i = 1; i < args.length; i++) {

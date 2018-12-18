@@ -25,6 +25,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
     private final long dataSizeByte;
     // Mechanisms fields
     private int nonSequentialHash = -1;
+    public boolean resent = false;
 
     public TcpPacket(
             long flowId, long dataSizeByte,
@@ -163,4 +164,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
     }
 
 
+    public void markResent() {
+        resent = true;
+    }
 }

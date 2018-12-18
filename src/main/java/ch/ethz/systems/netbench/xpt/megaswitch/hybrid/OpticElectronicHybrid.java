@@ -44,10 +44,10 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
         TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
 //        if(!encapsulated.isACK()) System.out.println(encapsulated.getFlowId() + " " + encapsulated.getSequenceNumber() + " " + Simulator.getCurrentTime());
-        JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
-        jumboFlow.onPacketDispatch(encapsulated);
+        JumboFlow jumboFlow = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
+        jumboFlow.onPacketDispatch((TcpPacket) packet);
 
-        if(jumboFlow.getSizeByte(packet.getFlowId())>=circuitThreshold && !jumboFlow.isTrivial()) {
+        if(jumboFlow.getSizeByte(packet.getFlowId())>=circuitThreshold && this.identifier!=destinationToR) {
         	try {
         		routeThroughCircuit(encapsulated,jumboFlow.getId(),packet.getSourceId(),packet.getDestinationId());
         		return;
@@ -72,18 +72,20 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
+
 		this.electronic.receiveFromEncapsulating(packet);
 
 	}
 
 	protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId,int sourceServer, int destServer) {
-        JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
+        JumboFlow jumbo = getJumboFlow(sourceServer,destServer);
 
 		try {
 	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),sourceServer,destServer,packet.getFlowId());
 		}catch(FlowPathExists e) {
 
         }
+
         this.conversionUnit.enqueue(sourceServer,destServer,packet);
 
         jumbo.onCircuitEntrance(packet.getFlowId());
@@ -128,14 +130,15 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected void onFlowFinished(int sourceToR, int destToR, IpPacket packet) {
-        JumboFlow jumboFlow = getJumboFlow(sourceToR,destToR);
+        JumboFlow jumboFlow = getJumboFlow(packet.getDestinationId(),packet.getSourceId());
         jumboFlow.onFlowFinished(packet.getFlowId());
         if(jumboFlow.getNumFlows()==0){
 //        	recoverPath(source,dest,packet);
         	mJumboFlowMap.remove(new ImmutablePair<>(sourceToR, destToR));
+            conversionUnit.onFlowFinish(packet.getDestinationId(),packet.getSourceId(),packet.getFlowId());
+            recoverPath(sourceToR,destToR,packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
         }
-        conversionUnit.onFlowFinish(packet.getDestinationId(),packet.getSourceId(),packet.getFlowId());
-        recoverPath(sourceToR,destToR,packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
+
 	}
     
 	protected void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId) {
