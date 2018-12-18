@@ -49,7 +49,7 @@ public class JumboFlow {
             return;
         }
         long flowSize = mFlowIdToSize.remove(flowId);
-        this.mSizeByte -= flowSize;
+        //this.mSizeByte -= flowSize;
     }
 
     public int getNumFlows() {
