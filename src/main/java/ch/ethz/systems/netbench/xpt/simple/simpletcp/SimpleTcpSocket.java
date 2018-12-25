@@ -13,10 +13,7 @@ import ch.ethz.systems.netbench.xpt.tcpbase.AckRangeSet;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import ch.ethz.systems.netbench.xpt.tcpbase.TcpLogger;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpSocket.State.*;
 
@@ -36,6 +33,7 @@ public class SimpleTcpSocket extends Socket {
 
     // Maximum flow size allowed in bytes (1 terabyte)
     private static final long MAXIMUM_FLOW_SIZE = 1000000000000L;
+    private boolean finReceived;
 
     // Possible TCP states supported
     enum State {
@@ -79,6 +77,8 @@ public class SimpleTcpSocket extends Socket {
     private Set<Long> acknowledgedSegStartSeqNumbers;
     private Set<Long> sentOutUnacknowledgedSegStartSeqNumbers;
 
+    //this is a queue of packets not acked in the 3-HSHAKE stage
+    private LinkedList<Packet> unackedPackets;
     // Retransmission time-out variables
     private Map<Long, TcpPacketResendEvent> seqNumbToResendEventMap;
     private boolean firstRttMeasurement;
@@ -170,10 +170,10 @@ public class SimpleTcpSocket extends Socket {
         this.selectiveAckSet = new AckRangeSet();
         this.acknowledgedSegStartSeqNumbers = new HashSet<>();
         this.sentOutUnacknowledgedSegStartSeqNumbers = new HashSet<>();
-
+        this.unackedPackets = new LinkedList<>();
         // Flowlet tracking
         currentFlowlet = 0;
-
+        finReceived = false;
         // TCP logger
         this.tcpLogger = new TcpLogger(flowId, flowSizeByte == -1);
 
@@ -357,10 +357,23 @@ public class SimpleTcpSocket extends Socket {
 
                     // System.out.println("3-WAY HANDSHAKE: 3. Receiver received ACK.");
 
+                    while(!unackedPackets.isEmpty()){
+                        FullExtTcpPacket dataPacket = (FullExtTcpPacket) unackedPackets.pop();
+                        handleDataPacket(dataPacket);
+                    }
+
+                }else{
+                    unackedPackets.add(packet);
                 }
 
                 break;
             }
+
+//            default:
+//                System.out.println("losing packet " + packet.toString());
+//                if(this.isReceiver() && currentState==SYN_RECEIVED){
+//
+//                }
 
         }
 
@@ -414,7 +427,7 @@ public class SimpleTcpSocket extends Socket {
 
         // The receiver is always at FIRST_SEQ_NUMBER+1, having sent only the ACK+SYN message
         assert(this.sendUnackNumber == FIRST_SEQ_NUMBER + 1);
-
+        finReceived = finReceived || packet.isFIN();
         // Locally store sequence numbers
         long seqNumber = packet.getSequenceNumber();
         long ackNumber = (packet.getSequenceNumber() + packet.getDataSizeByte() + (packet.isSYN() ? 1 : 0));
@@ -437,7 +450,7 @@ public class SimpleTcpSocket extends Socket {
                         true, // ACK
                         false, // SYN
                         packet.getECN(), // ECE
-                        packet.isFIN()
+                        finReceived
                 ).setEchoFlowletId(packet.getFlowletId())))
                  .setSelectiveAck(selectiveAckSet.createSelectiveAckData()))
                  .setEchoDepartureTime(packet.getDepartureTime())
@@ -722,7 +735,8 @@ public class SimpleTcpSocket extends Socket {
                 tcpPacket.isECE(),
                 tcpPacket.isFIN()
         );
-
+//        System.out.println(resentPacket.getFlowId());
+//        System.out.println(resentPacket.toString());
         // Log statistic
         SimulationLogger.increaseStatisticCounter("TCP_RESEND_OCCURRED");
 

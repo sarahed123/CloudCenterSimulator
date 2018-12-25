@@ -134,7 +134,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         jumboFlow.onFlowFinished(packet.getFlowId());
         if(jumboFlow.getNumFlows()==0){
 //        	recoverPath(source,dest,packet);
-        	mJumboFlowMap.remove(new ImmutablePair<>(sourceToR, destToR));
+        	mJumboFlowMap.remove(packet.getDestinationId(),packet.getSourceId());
             conversionUnit.onFlowFinish(packet.getDestinationId(),packet.getSourceId(),packet.getFlowId());
             recoverPath(sourceToR,destToR,packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
         }
