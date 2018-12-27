@@ -17,7 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SimulationLogger {
-
+	private static HashMap<Long,Path> activePathMap = new HashMap<>();
+	private static Stack<Long> oldestActivePaths = new Stack<>();
+	private static BufferedWriter writerRemainingPaths;
 	// Main token identifying the run log folder
 	private static String runFolderName;
 	private static String baseDir;
@@ -157,7 +159,7 @@ public class SimulationLogger {
 			originalErrOutputStream = System.err;
 			System.setOut(new PrintStream(customOutputStreamOut));
 			System.setErr(new PrintStream(customOutputStreamErr));
-
+			writerRemainingPaths = openWriter("active_paths.log");
 			// Info
 			writerRunInfoFile = openWriter("initialization.info");
 
@@ -303,7 +305,10 @@ public class SimulationLogger {
 		logCircuitFlows();
 
 		try {
-
+			SortedSet<Long> keys = new TreeSet<>(activePathMap.keySet());
+			for(Long key: keys) {
+				writerRemainingPaths.write(activePathMap.get(key).toString() + "\n");
+			}
 			// Write basic statistics about the run
 			BufferedWriter writerStatistics = openWriter("statistics.log");
 			ArrayList<String> stats = new ArrayList<>();
@@ -673,4 +678,25 @@ public class SimulationLogger {
 
 		return statisticCounters.get(key);
     }
+
+	public static void regiserPathActive(Path p, boolean adding) {
+		if(adding) {
+			activePathMap.put(p.getId(), p);
+			oldestActivePaths.push(p.getId());
+			if(oldestActivePaths.size() > 10) {
+				oldestActivePaths.pop();
+			}
+		}else {
+			activePathMap.remove(p.getId());
+			oldestActivePaths.remove(p.getId());
+		}
+		
+	}
+
+	public static void printOldestPaths() {
+		for(Long id: oldestActivePaths) {
+			System.out.println(activePathMap.get(id).toString() + "\n");
+		}
+		
+	}
 }

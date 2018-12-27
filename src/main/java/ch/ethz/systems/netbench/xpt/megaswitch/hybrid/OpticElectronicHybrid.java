@@ -38,7 +38,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
     @Override
     public void receive(Packet genericPacket) {
-        boolean flowFinished = Simulator.isFlowFinished(genericPacket.getFlowId());
+       // boolean flowFinished = Simulator.isFlowFinished(genericPacket.getFlowId());
 
         Encapsulatable packet = (Encapsulatable) genericPacket;
 
@@ -48,7 +48,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
 
-        if(jumboFlow.getSizeByte(packet.getFlowId())>=circuitThreshold && !jumboFlow.isTrivial() && !flowFinished) {
+        if(jumboFlow.getSizeByte(packet.getFlowId())>=circuitThreshold && !jumboFlow.isTrivial()) {
         	try {
         		routeThroughCircuit(encapsulated,jumboFlow.getId(),packet.getSourceId(),packet.getDestinationId());
         		return;

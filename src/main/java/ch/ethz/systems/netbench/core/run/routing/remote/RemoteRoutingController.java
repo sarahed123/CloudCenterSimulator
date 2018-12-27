@@ -108,6 +108,10 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	}
 	
 	protected void logRoute(Path p, int source, int dest, long flowId, long time,boolean adding) {
+
+		SimulationLogger.regiserPathActive(p,adding);
+
+		
 		try {
 			if(configuration.getBooleanPropertyWithDefault("log_remote_paths", false))
 				SimulationLogger.logRemoteRoute(p,source,dest,flowId,time,adding);
@@ -203,13 +207,13 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 //		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
 		state += "Sum transmissions " + sum + ", Avg transmissions per node " + avg + ", Transmitting " + transmitting + "\n";
 		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
-		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
 		state += "flow path exists count: " + flowPathExistsCounter + "\n";
 		state += "no flow path count: " + noPathCounter + "\n";
 		mDeAllocatedPathsNum = 0;
 		mAllocateddPathsNum = 0;
 		flowPathExistsCounter = 0;
 		noPathCounter = 0;
+		
 		return state;
 	}
 
