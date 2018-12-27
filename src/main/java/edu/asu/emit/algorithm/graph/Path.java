@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Vector;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 
 /**
@@ -43,10 +44,11 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
  * @author snkas
  */
 public class Path implements BaseElementWithWeight, Serializable {
-
+	private static long pCounter = 0;
+	private long id;
 	// List of vertices in the path
 	protected final List<Vertex> vertexList;
-
+	private long issueTime;
     // Total path weight
 	private double weight;
 	private int mGraphIndex;
@@ -63,6 +65,8 @@ public class Path implements BaseElementWithWeight, Serializable {
         this.vertexList = new Vector<>();
         this.weight = cost;
         this.mGraphIndex = -1;
+        this.id = ++pCounter;
+        this.issueTime = Simulator.getCurrentTime();
     }
 
 	public Path(double cost,int graphIndex) {
@@ -81,8 +85,18 @@ public class Path implements BaseElementWithWeight, Serializable {
 		this.vertexList.addAll(vertexList);
 		this.weight = weight2;
 		this.mGraphIndex = -1;
+		this.id = ++pCounter;
+		this.issueTime = Simulator.getCurrentTime();
+	}
+	
+	public long getId() {
+		return this.id;
 	}
 
+	
+	public long getIssueTime() {
+		return this.issueTime;
+	}
     /**
      * Retrieve the total weight of the path.
      *
@@ -142,7 +156,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 
     @Override
 	public String toString() {
-		return vertexList.toString() + ":" + weight;
+		return vertexList.toString() + ":" + weight + ":" + this.id + ":" + this.issueTime;
 	}
 
 	public boolean endsWith(Vertex endVertex) {
