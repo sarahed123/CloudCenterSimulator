@@ -382,4 +382,7 @@ public class Simulator {
 
 	}
 
+	public static boolean isFlowFinished(long flowId) {
+		return finishedFlows.contains(flowId);
+	}
 }

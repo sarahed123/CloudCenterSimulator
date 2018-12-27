@@ -6,7 +6,9 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.simple.TcpPacketResendEvent;
 import ch.ethz.systems.netbench.xpt.tcpbase.AckRange;
 import ch.ethz.systems.netbench.xpt.tcpbase.AckRangeSet;
@@ -34,6 +36,7 @@ public class SimpleTcpSocket extends Socket {
     // Maximum flow size allowed in bytes (1 terabyte)
     private static final long MAXIMUM_FLOW_SIZE = 1000000000000L;
     private boolean finReceived;
+    private long finalSeq;
 
     // Possible TCP states supported
     enum State {
@@ -174,6 +177,7 @@ public class SimpleTcpSocket extends Socket {
         // Flowlet tracking
         currentFlowlet = 0;
         finReceived = false;
+        finalSeq = MAXIMUM_FLOW_SIZE;
         // TCP logger
         this.tcpLogger = new TcpLogger(flowId, flowSizeByte == -1);
 
@@ -425,6 +429,9 @@ public class SimpleTcpSocket extends Socket {
             return;
         }
 
+        if(packet.isFIN()){
+            finalSeq = packet.getSequenceNumber();
+        }
         // The receiver is always at FIRST_SEQ_NUMBER+1, having sent only the ACK+SYN message
         assert(this.sendUnackNumber == FIRST_SEQ_NUMBER + 1);
         finReceived = finReceived || packet.isFIN();
@@ -450,7 +457,7 @@ public class SimpleTcpSocket extends Socket {
                         true, // ACK
                         false, // SYN
                         packet.getECN(), // ECE
-                        finReceived
+                        receiveNextNumber >= finalSeq
                 ).setEchoFlowletId(packet.getFlowletId())))
                  .setSelectiveAck(selectiveAckSet.createSelectiveAckData()))
                  .setEchoDepartureTime(packet.getDepartureTime())

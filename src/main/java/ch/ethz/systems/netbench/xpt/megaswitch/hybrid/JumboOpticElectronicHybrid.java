@@ -120,7 +120,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         if (ipPacket.getDestinationId() == this.identifier) {
             TcpPacket deEncapse = deEncapsulatePacket(ipPacket);
             if(deEncapse.isACK() && deEncapse.isFIN()){
-                onFlowFinished(this.identifier,ipPacket.getSourceId(),deEncapse.getDestinationId(),deEncapse.getSourceId(),deEncapse.getFlowId());
+//                onFlowFinished(this.identifier,ipPacket.getSourceId(),deEncapse.getDestinationId(),deEncapse.getSourceId(),deEncapse.getFlowId());
             }
             targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
         }
@@ -130,7 +130,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         return (TcpPacket) packet.deEncapsualte();
     }
 
-    protected void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
+    public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
         JumboFlow jumboFlow = getJumboFlow(source,dest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){

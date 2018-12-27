@@ -2,6 +2,8 @@ package ch.ethz.systems.netbench.core.network;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.log.FlowLogger;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 
 public abstract class Socket {
 
@@ -61,6 +63,10 @@ public abstract class Socket {
     }
 
     protected void onAllFlowConfirmed() {
+        int sourceToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(sourceId);
+        int destToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(destinationId);
+        MegaSwitch ms = (MegaSwitch) BaseInitializer.getInstance().getIdToNetworkDevice().get(sourceToRId);
+        ms.onFlowFinished(sourceToRId,destToRId,sourceId,destinationId,flowId);
     	transportLayer.cleanupSockets(flowId);
         Simulator.registerFlowFinished(flowId);
 		

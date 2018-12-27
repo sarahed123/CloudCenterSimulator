@@ -48,10 +48,12 @@ public class DynamicController extends RemoteRoutingController {
 		Vertex destVertex = new Vertex(destToR);
 		if(mPaths.containsKey(pair)) {
 			mFlowIdsOnCircuit.get(pair).add(flowId);
+			flowPathExistsCounter++;
 			throw new FlowPathExists(flowId);
 		}
 		if(mTransmittingSources.getOrDefault(sourceToR,0) >= max_degree || mRecievingDestinations.getOrDefault(destToR,0)>=max_degree){
 			SimulationLogger.increaseStatisticCounter("DYNAMIC_CONTROLLER_NO_PATH");
+			noPathCounter++;
 			throw new NoPathException(sourceToR,destToR);
 		}
 //		((VariableGraph) mMainGraph).addEdge(source,dest,1);

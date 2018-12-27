@@ -34,7 +34,7 @@ public class OpticServer extends JumboOpticElectronicHybrid {
 
     }
 
-    protected void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
+    public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
         JumboFlow jumboFlow = getJumboFlow(serverSource,serverDest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
@@ -51,7 +51,7 @@ public class OpticServer extends JumboOpticElectronicHybrid {
         if (tcpPacket.getDestinationId() == this.identifier) {
             if(tcpPacket.isACK() && tcpPacket.isFIN()){
                 int destToR = configuration.getGraphDetails().getTorIdOfServer(tcpPacket.getSourceId());
-                onFlowFinished(this.ownToRId,destToR,tcpPacket.getDestinationId(),tcpPacket.getSourceId(),tcpPacket.getFlowId());
+//                onFlowFinished(this.ownToRId,destToR,tcpPacket.getDestinationId(),tcpPacket.getSourceId(),tcpPacket.getFlowId());
             }
 //            System.out.println("packet received at " + this.identifier + " : " + tcpPacket.toString());
             passToIntermediary(genericPacket);
