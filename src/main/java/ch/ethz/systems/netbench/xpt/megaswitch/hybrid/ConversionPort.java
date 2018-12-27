@@ -34,11 +34,11 @@ public class ConversionPort extends EcnTailDropOutputPort{
 //    	}
         if(mDisable){
             // this shoud not happen
-
+            System.out.println("packet transmitted after port disabled");
             System.out.println(packet.toString());
             System.out.println(packet.getFlowId());
             System.out.println(((TcpPacket)packet).resent);
-            throw new RuntimeException();
+//            throw new RuntimeException();
         }
         targetNetworkDevice.receiveFromEncapsulating(packet);
     }
