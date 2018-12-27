@@ -24,6 +24,8 @@ import edu.asu.emit.algorithm.graph.Path;
 import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
+	protected long flowPathExistsCounter = 0;
+	protected long noPathCounter = 0;
 	public RemoteRoutingController(NBProperties configuration) {
 		super(configuration);
 		mFlowIdsOnCircuit = new HashMap<>();
@@ -201,8 +203,13 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 //		OpticElectronicHybrid ToR = (OpticElectronicHybrid) mIdToNetworkDevice.get(67).getEncapsulatingDevice();
 		state += "Sum transmissions " + sum + ", Avg transmissions per node " + avg + ", Transmitting " + transmitting + "\n";
 		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
+		state += "Allocated: " + mAllocateddPathsNum + ", Deallocated: " + mDeAllocatedPathsNum + "\n";
+		state += "flow path exists count: " + flowPathExistsCounter + "\n";
+		state += "no flow path count: " + noPathCounter + "\n";
 		mDeAllocatedPathsNum = 0;
 		mAllocateddPathsNum = 0;
+		flowPathExistsCounter = 0;
+		noPathCounter = 0;
 		return state;
 	}
 

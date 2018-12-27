@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 public class JumboFlow {
@@ -15,9 +16,11 @@ public class JumboFlow {
     int mSource;
     int mDest;
     boolean onCircuit;
+    HashSet<Long> flowsOnCircuit;
     public JumboFlow(int source,int dest){
         mSizeByte = 0;
         mFlowIdToSize = new HashMap<>();
+        flowsOnCircuit = new HashSet<>();
         mSource = source;
         mDest = dest;
         mId = ++sIdCounter;
@@ -33,14 +36,14 @@ public class JumboFlow {
             return;
         }
         long flowSize = mFlowIdToSize.getOrDefault(packet.getFlowId(),0l);
-        long seq = packet.getSequenceNumber() + packet.getDataSizeByte();
-        if(flowSize > seq){ // should this be >=?
-            return;
-        }
-
-        long difference = seq - flowSize;
-        mSizeByte = mSizeByte + difference;
-        mFlowIdToSize.put(packet.getFlowId(),seq);
+//        long seq = packet.getSequenceNumber() + packet.getDataSizeByte();
+//        if(flowSize > seq){ // should this be >=?
+//            return;
+//        }
+//
+//        long difference = seq - flowSize;
+        mSizeByte = mSizeByte + packet.getDataSizeByte();
+        mFlowIdToSize.put(packet.getFlowId(),flowSize + packet.getDataSizeByte());
 
     }
 
@@ -49,6 +52,7 @@ public class JumboFlow {
             return;
         }
         long flowSize = mFlowIdToSize.remove(flowId);
+        flowsOnCircuit.remove(flowId);
         //this.mSizeByte -= flowSize;
     }
 
@@ -80,6 +84,10 @@ public class JumboFlow {
         return onCircuit;
     }
 
+    public boolean isOnCircuit(long flowId) {
+        return flowsOnCircuit.contains(flowId);
+    }
+
     public boolean hasFlow(long flowId) {
 	    return mFlowIdToSize.containsKey(flowId);
     }
@@ -91,5 +99,7 @@ public class JumboFlow {
 
     public void onCircuitEntrance(long flowId) {
 	    SimulationLogger.registerFlowOnCircuit(flowId);
+        flowsOnCircuit.add(flowId);
+
     }
 }
