@@ -331,7 +331,7 @@ public class SimulationLogger {
 			writerRemoteRouterStateLogCSV.close();
 			writerRemoteRouterDropStatisticsCSV.close();
 			writerFlowOnCircuit.close();
-
+			writerRemainingPaths.close();
 			// Also added ones are closed automatically at the end
 			for (BufferedWriter writer : writersAdded.values()) {
 				writer.close();
