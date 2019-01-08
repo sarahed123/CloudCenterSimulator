@@ -56,8 +56,8 @@ public class ConversionUnit {
 
     public void onFlowFinish(int src, int dst, long flowId){
         if(mPortMap.get(new ImmutablePair<>(src,dst))!=null)
-            mPortMap.get(new ImmutablePair<>(src,dst)).disable();
-        mPortMap.remove(new ImmutablePair<>(src,dst));
+            mPortMap.get(new ImmutablePair<>(src,dst)).onFlowFinished(flowId);
+       // mPortMap.remove(new ImmutablePair<>(src,dst));
     }
 
     public NetworkDevice getOptic() {

@@ -63,10 +63,26 @@ public abstract class Socket {
     }
 
     protected void onAllFlowConfirmed() {
-        int sourceToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(sourceId);
-        int destToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(destinationId);
-        MegaSwitch ms = (MegaSwitch) BaseInitializer.getInstance().getIdToNetworkDevice().get(sourceToRId);
-        ms.onFlowFinished(sourceToRId,destToRId,sourceId,destinationId,flowId);
+        // this is some block that should really be moved
+        // but its the best way to tell if a flow is finished
+        boolean exendedTopology = true;
+        int destToRId = -1;
+        int sourceToRId = -1;
+        try{
+            sourceToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(sourceId);
+            destToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(destinationId);
+        }catch (NullPointerException e){
+            exendedTopology = false;
+        }
+        if(exendedTopology){
+            try{
+                MegaSwitch ms = (MegaSwitch) BaseInitializer.getInstance().getIdToNetworkDevice().get(sourceToRId);
+                ms.onFlowFinished(sourceToRId,destToRId,sourceId,destinationId,flowId);
+            }catch (ClassCastException e){
+
+            }
+        }
+
     	transportLayer.cleanupSockets(flowId);
         Simulator.registerFlowFinished(flowId);
 		

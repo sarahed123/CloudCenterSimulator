@@ -134,7 +134,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         JumboFlow jumboFlow = getJumboFlow(source,dest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
-            conversionUnit.onFlowFinish(source,dest,jumboFlow.getId());
+            conversionUnit.onFlowFinish(source,dest,flowId);
             recoverPath(source,dest,serverSource,serverDest,jumboFlow.getId());
             mJumboFlowMap.remove(new ImmutablePair<>(source, dest));
         }
