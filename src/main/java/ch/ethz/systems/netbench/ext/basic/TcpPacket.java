@@ -71,6 +71,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.windowSize = tcpPacket.windowSize;
         this.dataSizeByte = tcpPacket.dataSizeByte;
         this.nonSequentialHash = tcpPacket.nonSequentialHash;
+        this.resent = tcpPacket.resent;
 	}
 
 	@Override

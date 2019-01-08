@@ -12,7 +12,10 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
+import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class OpticServerToR extends OpticElectronicHybrid {
 
@@ -58,4 +61,10 @@ public class OpticServerToR extends OpticElectronicHybrid {
 //    protected TcpPacket deEncapsulatePacket(Encapsulatable packet) {
 //        return (TcpPacket)packet;
 //    }
+
+    @Override
+    public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
+
+        ((MegaSwitch)targetIdToOutputPort.get(serverSource).getTargetDevice()).onFlowFinished(source, dest, serverSource, serverDest, flowId);
+    }
 }

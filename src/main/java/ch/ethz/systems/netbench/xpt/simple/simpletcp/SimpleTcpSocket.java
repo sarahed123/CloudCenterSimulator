@@ -829,7 +829,6 @@ public class SimpleTcpSocket extends Socket {
      */
     private void sendWithResend(TcpPacket tcpPacket) {
         SimulationLogger.increaseStatisticCounter("TCP_DATA_PACKETS_SENT");
-        tcpPacket.markResent();
         registerResendEvent(tcpPacket);
         transportLayer.send(tcpPacket);
     }
