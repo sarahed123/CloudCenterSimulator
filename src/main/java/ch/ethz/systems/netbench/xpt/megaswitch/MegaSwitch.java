@@ -11,4 +11,5 @@ public interface MegaSwitch{
     public void onFlowFinished(int sourceToRId, int destToRId,int sourceServer,int destServerId, long flowId);
     public NetworkDevice getAsNetworkDevice();
     public NetworkDevice getEncapsulatedDevice(String type);
+    boolean hadlePacketFromEncapsulating(Packet packet);
 }

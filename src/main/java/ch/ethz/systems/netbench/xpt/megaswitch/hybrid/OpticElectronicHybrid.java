@@ -187,6 +187,11 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     @Override
+    public boolean hadlePacketFromEncapsulating(Packet packet) {
+        return false;
+    }
+
+    @Override
     public OutputPort getTargetOuputPort(int targetId, String technology) {
 		if(technology == null) {
 			 return this.getTargetOuputPort(targetId);
