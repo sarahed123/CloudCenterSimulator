@@ -17,7 +17,7 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 public class RemoteSourceRoutingSwitch extends NetworkDevice {
-	private Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
+	protected Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
 	protected RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
 		super(identifier, transportLayer, intermediary,configuration);
 		this.forwardingTable = new HashMap<Pair<Integer,Integer>,OutputPort>();

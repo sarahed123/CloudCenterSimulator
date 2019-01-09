@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class SemiRemoteRoutingSwitch extends RemoteSourceRoutingSwitch {
     protected HashMap<Integer,List<List<Integer>>>  mPathMap;
-    SemiRemoteRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
+    public SemiRemoteRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary, configuration);
         mPathMap = readMap(configuration.getPropertyOrFail("semi_remote_routing_path_dir"));
     }

@@ -27,6 +27,10 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
     private int nonSequentialHash = -1;
     public boolean resent = false;
 
+	private int mPrevHop = -1;
+
+	protected int mColor = -1;
+
     public TcpPacket(
             long flowId, long dataSizeByte,
             int sourceId, int destinationId, int TTL, // IP header fields
@@ -72,6 +76,8 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.dataSizeByte = tcpPacket.dataSizeByte;
         this.nonSequentialHash = tcpPacket.nonSequentialHash;
         this.resent = tcpPacket.resent;
+        this.mPrevHop = tcpPacket.mPrevHop;
+        this.mColor = tcpPacket.mColor;
 	}
 
 	@Override
@@ -168,4 +174,24 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
     public void markResent() {
         resent = true;
     }
+
+	public void setPrevHop(int identifier) {
+		mPrevHop = identifier;
+		
+	}
+
+	public int getPrevHop() {
+		// TODO Auto-generated method stub
+		return mPrevHop ;
+	}
+
+	public int getColor() {
+		// TODO Auto-generated method stub
+		return mColor ;
+	}
+
+	public void color(int color) {
+		mColor = color;
+		
+	}
 }

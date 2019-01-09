@@ -59,6 +59,10 @@ public class DistributedOpticServer extends OpticServer {
                 break;
             case HAS_CIRCUIT:
                 System.out.println(packet);
+                TcpPacket tcpPacket = (TcpPacket) packet;
+                ReservationPacket rp = mFlowReservation.get(new ImmutablePair<>(packet.getSourceId(),packet.getDestinationId()));
+                tcpPacket.color(rp.getColor());
+                tcpPacket.setPrevHop(this.identifier);
                 JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
                 this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
                 jumbo.onCircuitEntrance();
@@ -98,6 +102,7 @@ public class DistributedOpticServer extends OpticServer {
 
     protected void sendReservationPackets(List<Integer> path, int color, TcpPacket packet) {
         ReservationPacket rp = new  ReservationPacket(packet,path.get(0),path.get(0),path,color,true);
+        rp.setPrevHop(this.identifier);
         routeThroughtPacketSwitch(rp);
     }
 
@@ -105,12 +110,19 @@ public class DistributedOpticServer extends OpticServer {
     public void receive(Packet genericPacket) {
         try{
             ReservationPacket ep = (ReservationPacket) genericPacket;
-
+            JumboFlow jumbo = getJumboFlow(ep.getSourceId(), ep.getOriginalServerDest());
             if(ep.isSuccess()){
-                mFlowState.put(new ImmutablePair<>(ep.getSourceId(),ep.getOriginalServerDest()),State.HAS_CIRCUIT);
+            	// if the relevant flows have finsihed, or there already is a circuit, release resources.
+            	if(jumbo.getNumFlows() == 0 ||
+            			mFlowState.get(new ImmutablePair<>(ep.getSourceId(),ep.getOriginalServerDest())) == State.HAS_CIRCUIT) {
+            		ep.setDeallocation();
+                    routeThroughtPacketSwitch(ep);
+                    return;
+            	}
+            	mFlowState.put(new ImmutablePair<>(ep.getSourceId(),ep.getOriginalServerDest()),State.HAS_CIRCUIT);
                 mFlowReservation.put(new ImmutablePair<>(ep.getSourceId(),ep.getOriginalServerDest()),ep);
             }else{
-                mFlowState.put(new ImmutablePair<>(ep.getSourceId(),ep.getOriginalServerDest()),State.NO_CIRCUIT);
+                //mFlowState.put(new ImmutablePair<>(ep.getSourceId(),ep.getOriginalServerDest()),State.NO_CIRCUIT);
             }
             return;
         }catch (ClassCastException e){

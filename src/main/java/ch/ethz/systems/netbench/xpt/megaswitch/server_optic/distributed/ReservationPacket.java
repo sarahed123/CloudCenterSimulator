@@ -12,7 +12,6 @@ public class ReservationPacket extends TcpPacket {
     private int mServerSource;
     int ToRdest;
     List<Integer> mPath;
-    int mColor;
     private int mSourceToR;
     private boolean mSuccess;
     private boolean mFailure;
@@ -54,9 +53,6 @@ public class ReservationPacket extends TcpPacket {
         return mSuccess;
     }
 
-    public int getColor() {
-        return mColor;
-    }
 
     public int getNextHop(int curr) {
         int currIndex = mPath.indexOf(curr);
