@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
 
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class EcnTailDropOutputPort extends OutputPort {
@@ -15,6 +16,12 @@ public class EcnTailDropOutputPort extends OutputPort {
 
     protected EcnTailDropOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
         super(ownNetworkDevice, targetNetworkDevice, link, new LinkedBlockingQueue<Packet>());
+        this.maxQueueSizeBits = maxQueueSizeBytes * 8L;
+        this.ecnThresholdKBits = ecnThresholdKBytes * 8L;
+    }
+
+    protected EcnTailDropOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes, Queue queue) {
+        super(ownNetworkDevice, targetNetworkDevice, link, queue);
         this.maxQueueSizeBits = maxQueueSizeBytes * 8L;
         this.ecnThresholdKBits = ecnThresholdKBytes * 8L;
     }

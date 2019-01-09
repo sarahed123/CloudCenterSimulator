@@ -1,7 +1,6 @@
 package ch.ethz.systems.netbench.core.network;
 
 import ch.ethz.systems.netbench.core.Simulator;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 public class InputPort extends Port {
 	int encapsulatingDeviceId;
@@ -39,6 +38,9 @@ public class InputPort extends Port {
 
 	public void receive(Packet packet) {
 		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
+			if(ownNetworkDevice.getEncapsulatingDevice().hadlePacketFromEncapsulating(packet)){
+				return;
+			}
 			ownNetworkDevice.receiveFromEncapsulating(packet);
 			return;
 		}

@@ -94,7 +94,7 @@ public class OpticServerDebugger {
         runConfigWriter2.write("centered_routing_type=semi_Xpander_server_optics\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
         runConfigWriter2.write("circuit_wave_length_num=2\n");
-        runConfigWriter2.write("max_num_flows_on_circuit=2\n");
+        runConfigWriter2.write("max_num_flows_on_circuit=3\n");
         runConfigWriter2.write("host_optics_enabled=true\n");
         runConfigWriter2.write("log_remote_paths=true\n");
         runConfigWriter2.write("network_type=circuit_switch\n");
@@ -176,9 +176,9 @@ public class OpticServerDebugger {
 
     @Test
     public void testFlow(){
-        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),4,200000);
-        FlowStartEvent fse2 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),5,200000);
-        FlowStartEvent fse3 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),3,200000);
+        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),4,2000000);
+        FlowStartEvent fse2 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),5,2000000);
+        FlowStartEvent fse3 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(2).getTransportLayer(),3,2000000);
 
         Simulator.registerEvent(fse);
         Simulator.registerEvent(fse2);

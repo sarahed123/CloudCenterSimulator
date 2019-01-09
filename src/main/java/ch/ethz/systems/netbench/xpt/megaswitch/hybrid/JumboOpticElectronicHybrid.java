@@ -197,6 +197,11 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         }
     }
 
+    @Override
+    public boolean hadlePacketFromEncapsulating(Packet packet) {
+        return false;
+    }
+
     protected RemoteRoutingController getRemoteRouter() {
         return RemoteRoutingController.getInstance();
     }

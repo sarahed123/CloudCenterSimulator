@@ -19,7 +19,7 @@ public abstract class OutputPort extends Port{
 
     // Internal state
     protected boolean isSending;          // True iff the output port is using the medium to send a packet
-    private final Queue<Packet> queue;  // Current queue of packets to send
+    protected final Queue<Packet> queue;  // Current queue of packets to send
     private long bufferOccupiedBits;    // Amount of bits currently occupied of the buffer
 
     // Constants
@@ -112,12 +112,16 @@ public abstract class OutputPort extends Port{
 
         } else { // If it is still sending, the packet is added to the queue, making it non-empty
             bufferOccupiedBits += packet.getSizeBit();
-            queue.add(packet);
+            addPacketToQueue(packet);
             logger.logQueueState(queue.size(), bufferOccupiedBits,packet);
         }
 
     }
-    
+
+    protected void addPacketToQueue(Packet packet){
+        queue.add(packet);
+    }
+
     protected void registerPacketArrivalEvent(Packet packet) {
     	getTargetInputPort().registerPacketArrivalEvent(packet);
 

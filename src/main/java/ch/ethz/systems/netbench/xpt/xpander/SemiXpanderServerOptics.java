@@ -16,8 +16,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 
 public class SemiXpanderServerOptics extends SemiXpander {
-    HashMap<Integer,Set<Integer>> mServerTransmitColorsUsed;
-    HashMap<Integer,Set<Integer>> mServerReceiveColorsUsed;
+    protected HashMap<Integer,Set<Integer>> mServerTransmitColorsUsed;
+    protected HashMap<Integer,Set<Integer>> mServerReceiveColorsUsed;
     int mCurrentServerSource;
     int mCurrentServerDest;
     public SemiXpanderServerOptics(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {

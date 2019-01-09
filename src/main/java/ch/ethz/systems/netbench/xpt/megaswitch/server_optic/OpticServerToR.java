@@ -15,6 +15,7 @@ import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.ReservationPacket;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class OpticServerToR extends OpticElectronicHybrid {
@@ -26,12 +27,15 @@ public class OpticServerToR extends OpticElectronicHybrid {
 
     @Override
     public void receive(Packet genericPacket) {
+
         Encapsulatable packet = (Encapsulatable) genericPacket;
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
 
         TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
         routeThroughtPacketSwitch(encapsulated);
     }
+
+
 
     @Override
     public void extend(NetworkDevice networkDevice, NBProperties networkConf){
