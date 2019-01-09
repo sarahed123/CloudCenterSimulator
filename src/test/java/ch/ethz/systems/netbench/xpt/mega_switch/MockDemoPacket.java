@@ -7,7 +7,7 @@ import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 
 public class MockDemoPacket extends TcpPacket implements Encapsulatable {
 
-	MockDemoPacket(long flowId, long dataSizeByte, int sourceId, int destinationId, int TTL, long ackSizeByte) {
+	public MockDemoPacket(long flowId, long dataSizeByte, int sourceId, int destinationId, int TTL, long ackSizeByte) {
 		super(flowId, dataSizeByte, sourceId, destinationId, TTL, 0,0,0,0,
 				false,false,false,false,false,false,false,false,false,0);
 		// TODO Auto-generated constructor stub

@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class DistributedProtocolPort extends EcnTailDropOutputPort {
-    protected DistributedProtocolPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
+    public DistributedProtocolPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
         super(ownNetworkDevice, targetNetworkDevice, link, maxQueueSizeBytes, ecnThresholdKBytes, new LinkedList());
     }
 

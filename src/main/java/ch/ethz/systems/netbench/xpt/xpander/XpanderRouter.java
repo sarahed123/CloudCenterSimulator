@@ -46,7 +46,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	PathsFilter pathsFilter;
 	PathAlgorithm pathAlg;
 	protected Graph[] mGraphs;
-	Map<Integer, NetworkDevice> mIdToNetworkDevice;
+	protected Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	boolean mIsServerOptics;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
 		super(configuration);
