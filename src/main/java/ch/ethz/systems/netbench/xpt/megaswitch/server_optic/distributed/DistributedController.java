@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Vertex;
@@ -50,7 +51,8 @@ public class DistributedController extends SemiXpanderServerOptics
     private Set getTransmittingSources(int server) {
         Set transimtting = mServerTransmitColorsUsed.get(server);
         if(transimtting==null){
-            mServerTransmitColorsUsed.put(server,new HashSet<>());
+            transimtting = new HashSet<>();
+            mServerTransmitColorsUsed.put(server,transimtting);
         }
         return transimtting;
     }
@@ -58,7 +60,8 @@ public class DistributedController extends SemiXpanderServerOptics
     private Set getReceivingSources(int server) {
         Set receving = mServerReceiveColorsUsed.get(server);
         if(receving==null){
-            mServerReceiveColorsUsed.put(server,new HashSet<>());
+            receving = new HashSet<>();
+            mServerReceiveColorsUsed.put(server,receving);
         }
         return receving;
     }
@@ -77,5 +80,10 @@ public class DistributedController extends SemiXpanderServerOptics
         }else{
             getTransmittingSources(server).remove(color);
         }
+    }
+
+    public void updateRoutingTable(int identifier, int serverSourceId, int serverDestId, int nextHop) {
+        RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(identifier);
+        rsrs.updateForwardingTable(serverSourceId,serverDestId,nextHop);
     }
 }

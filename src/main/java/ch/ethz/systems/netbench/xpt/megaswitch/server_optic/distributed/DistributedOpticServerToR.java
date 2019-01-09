@@ -22,6 +22,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
         if(nextHop == rp.getServerDest()){
             if(((DistributedController) getRemoteRouter()).serverColorAvailable(rp.getServerDest(),color,true)){
                 ((DistributedController) getRemoteRouter()).reserveServerColor(rp.getServerDest(),color,true);
+                ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier, rp.getSourceId(),rp.getServerDest(),nextHop);
                 rp.markSuccess();
                 rp.reverse();
 
@@ -36,6 +37,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
             rp.reverse();
             return;
         }
+        ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier, rp.getSourceId(),rp.getServerDest(),nextHop);
         ((DistributedController) getRemoteRouter()).decreaseEdgeCapacity(this.identifier,nextHop,color);
 
     }
@@ -49,24 +51,30 @@ public class DistributedOpticServerToR extends OpticServerToR {
             return;
         }catch (ClassCastException e){
 
-        }catch (FlowPathExists e2){
-
         }
 
        super.receive(genericPacket);
     }
 
-    private void handleReservationPacket(Packet genericPacket) {
+    protected void handleReservationPacket(Packet genericPacket) {
         ReservationPacket rp = (ReservationPacket) genericPacket;
         if(rp.idDeAllocation()){
             deallocateReservation(rp);
-
-
         }else{
-            tryReserveResources(rp);
+            try{
+                tryReserveResources(rp);
+            }catch (FlowPathExists e){
+
+            }
+
         }
 
         int nextHop = rp.getNextHop(this.getIdentifier());
+        if(this.targetIdToOutputPort.containsKey(nextHop)){
+            //if this is true then we must be at the final stage
+            this.targetIdToOutputPort.get(nextHop).enqueue(rp);
+            return;
+        }
         this.electronic.getTargetOuputPort(nextHop).enqueue(rp);
     }
 
@@ -87,8 +95,6 @@ public class DistributedOpticServerToR extends OpticServerToR {
             handleReservationPacket(packet);
         }catch (ClassCastException e){
             return false;
-        }catch (FlowPathExists e){
-
         }
         return true;
     }

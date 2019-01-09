@@ -104,6 +104,7 @@ public class BaseAllowedProperties {
             "empty_property",
             "max_num_flows_on_circuit",
             "circuit_wave_length_num",
+            "num_paths_to_randomize",
             "servers_inifinite_capcacity",
             "semi_remote_routing_path_dir",
             "edge_capacity",

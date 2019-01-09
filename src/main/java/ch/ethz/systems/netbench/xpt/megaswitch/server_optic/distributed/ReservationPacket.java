@@ -13,16 +13,18 @@ public class ReservationPacket extends TcpPacket {
     int ToRdest;
     List<Integer> mPath;
     int mColor;
+    private int mSourceToR;
     private boolean mSuccess;
     private boolean mFailure;
     private boolean mDealocation;
     private boolean reversed;
 
-    public ReservationPacket(TcpPacket packet, int dest, List<Integer> path, int color,boolean allocationReques) {
+    public ReservationPacket(TcpPacket packet, int sourceToR,int dest, List<Integer> path, int color,boolean allocationReques) {
         super(
                 packet
         );
         ToRdest = dest;
+        this.mSourceToR = sourceToR;
         this.mPath = path;
         this.mColor = color;
         this.mDealocation = !allocationReques;
@@ -65,6 +67,10 @@ public class ReservationPacket extends TcpPacket {
     }
 
     public int getServerDest() {
+        return reversed ? mServerSource : mServerDest;
+    }
+
+    public int getOriginalServerDest() {
         return mServerDest;
     }
 
@@ -78,7 +84,7 @@ public class ReservationPacket extends TcpPacket {
 
     public void reverse() {
         Collections.reverse(mPath);
-        mServerDest = mServerSource;
+//        mServerDest = mServerSource;
         reversed = true;
     }
 
@@ -88,5 +94,24 @@ public class ReservationPacket extends TcpPacket {
 
     public boolean isReversed() {
         return reversed;
+    }
+
+    public void setDeallocation() {
+        this.mDealocation = true;
+    }
+
+    @Override
+    public long getDataSizeByte() {
+        return 10;
+    }
+
+    @Override
+    public String toString(){
+        return "Reservation packet " + " server dest " + getServerDest() + " serverSource " + mServerSource + " isSuccess " + isSuccess() +
+                " isFailure " + mFailure + " isDeallocation " + mDealocation +" color " + getColor() + " path " + mPath.toString();
+    }
+
+    public int getSourceToR() {
+        return mSourceToR;
     }
 }
