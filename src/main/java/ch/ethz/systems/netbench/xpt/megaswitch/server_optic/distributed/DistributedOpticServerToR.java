@@ -22,7 +22,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
         if(nextHop == rp.getServerDest()){
             if(((DistributedController) getRemoteRouter()).serverColorAvailable(rp.getServerDest(),color,true)){
                 ((DistributedController) getRemoteRouter()).reserveServerColor(rp.getServerDest(),color,true);
-                ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier, rp.getSourceId(),rp.getServerDest(),nextHop);
+                ((DistributedController) getRemoteRouter()).updateRoutingTable(rp.getPrevHop(), rp.getSourceId(),rp.getServerDest(),nextHop,rp.getColor());
                 rp.markSuccess();
                 rp.reverse();
 
@@ -37,7 +37,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
             rp.reverse();
             return;
         }
-        ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier, rp.getSourceId(),rp.getServerDest(),nextHop);
+        ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier, rp.getSourceId(),rp.getServerDest(),nextHop,rp.getColor());
         ((DistributedController) getRemoteRouter()).decreaseEdgeCapacity(this.identifier,nextHop,color);
 
     }
@@ -72,9 +72,14 @@ public class DistributedOpticServerToR extends OpticServerToR {
         int nextHop = rp.getNextHop(this.getIdentifier());
         if(this.targetIdToOutputPort.containsKey(nextHop)){
             //if this is true then we must be at the final stage
-            this.targetIdToOutputPort.get(nextHop).enqueue(rp);
+        	//however, dont pass failures
+        	if(rp.isSuccess()) {
+        		this.targetIdToOutputPort.get(nextHop).enqueue(rp);
+        	}
+            
             return;
         }
+        rp.setPrevHop(this.identifier);
         this.electronic.getTargetOuputPort(nextHop).enqueue(rp);
     }
 

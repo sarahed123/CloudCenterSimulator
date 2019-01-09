@@ -82,8 +82,8 @@ public class DistributedController extends SemiXpanderServerOptics
         }
     }
 
-    public void updateRoutingTable(int identifier, int serverSourceId, int serverDestId, int nextHop) {
-        RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(identifier);
-        rsrs.updateForwardingTable(serverSourceId,serverDestId,nextHop);
+    public void updateRoutingTable(int prevHop, int serverSourceId, int serverDestId, int nextHop,int color) {
+        DistributedSourceRoutingSwitch drs = (DistributedSourceRoutingSwitch) mIdToNetworkDevice.get(prevHop);
+        drs.updateForwardingTable(prevHop,nextHop,color);
     }
 }
