@@ -121,7 +121,7 @@ public class DistributedController extends SemiXpanderServerOptics
         SimulationLogger.printOldestPaths();
         System.out.println("oldest states");
         SimulationLogger.printOldestDistProtocolStates();
-        String state = " Allocated " + mAllocateddPathsNum + " Deallocated " + mDeAllocatedPathsNum;
+        String state = " Allocated " + mAllocateddPathsNum + " Deallocated " + mDeAllocatedPathsNum + "\n";
         mAllocateddPathsNum = 0;
         mDeAllocatedPathsNum = 0;
         return state;
