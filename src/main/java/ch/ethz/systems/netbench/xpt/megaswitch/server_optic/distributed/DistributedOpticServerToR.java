@@ -28,15 +28,17 @@ public class DistributedOpticServerToR extends OpticServerToR {
         int color = rp.getColor();
         int nextHop = rp.getNextHop(this.getIdentifier());
         if(nextHop == rp.getServerDest()){
+        		
             try{
-                ((DistributedController) getRemoteRouter()).reserveServerColor(rp.getServerDest(),color,true);
+//                ((DistributedController) getRemoteRouter()).reserveServerColor(rp.getServerDest(),color,true);
                 ((DistributedController) getRemoteRouter()).updateRoutingTable(identifier,rp.getPrevHop(),nextHop,rp.getColor());
-                rp.markSuccess();
-                Path p = new Path(rp.getPath(),rp.getColor());
-                rp.setId(p.getId());
-                SimulationLogger.regiserPathActive(p,true);
-                ((DistributedController) getRemoteRouter()).onAallocation();
-                rp.reverse();
+                //the end server will handle this.
+//                rp.markSuccess();
+//                Path p = new Path(rp.getPath(),rp.getColor());
+//                rp.setId(p.getId());
+//                SimulationLogger.regiserPathActive(p,true);
+//                ((DistributedController) getRemoteRouter()).onAallocation();
+//                rp.reverse();
             }catch(NoPathException e){
                 rp.markFailure();
                 rp.reverse();
@@ -50,6 +52,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
             rp.reverse();
             throw new NoPathException();
         }
+        assert(capacity==1);
         ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier,rp.getPrevHop(),nextHop,rp.getColor());
         ((DistributedController) getRemoteRouter()).decreaseEdgeCapacity(this.identifier,nextHop,color);
 
@@ -115,12 +118,12 @@ public class DistributedOpticServerToR extends OpticServerToR {
             }
             ((DistributedController) getRemoteRouter()).increaseEdgeCapacity(l,r,color);
         }else{
-            ((DistributedController) getRemoteRouter()).deallocateServerColor(nextHop,color,rp.isReversed() ? false : true);
-            if(!rp.isReversed()) {
-            	SimulationLogger.regiserPathActive(new Path(rp.getPath(),rp.getColor(),rp.getId()),false);
-                rp.onFinishDeallocation();
-                ((DistributedController) getRemoteRouter()).onDeallocation();
-            }
+//            ((DistributedController) getRemoteRouter()).deallocateServerColor(nextHop,color,rp.isReversed() ? false : true);
+//            if(!rp.isReversed()) {
+//            	SimulationLogger.regiserPathActive(new Path(rp.getPath(),rp.getColor(),rp.getId()),false);
+//                rp.onFinishDeallocation();
+//                ((DistributedController) getRemoteRouter()).onDeallocation();
+//            }
             
         }
 
