@@ -80,7 +80,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
 
         }catch (NoPathException e) {
         	deallocateReservation(rp);
-            if(rp.finishedDealloc()) return;
+//            if(rp.finishedDealloc()) return;
         }
 
         int nextHop = rp.getNextHop(this.getIdentifier());

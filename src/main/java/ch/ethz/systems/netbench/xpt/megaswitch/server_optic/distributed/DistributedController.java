@@ -16,6 +16,9 @@ import java.util.Set;
 
 public class DistributedController extends SemiXpanderServerOptics
 {
+	long doubleSuccesses = 0;
+	long successes = 0;
+	long failures = 0;
 
     public DistributedController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
@@ -160,6 +163,12 @@ public class DistributedController extends SemiXpanderServerOptics
         System.out.println("oldest states");
         SimulationLogger.printOldestDistProtocolStates();
         String state = " Allocated " + mAllocateddPathsNum + " Deallocated " + mDeAllocatedPathsNum + "\n";
+        state += "double success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT") - doubleSuccesses) + "\n";
+        state += "success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT") - successes) + "\n";
+        state += "failure count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT") -failures) + "\n";
+        doubleSuccesses = SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
+        successes = SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT");
+        failures = SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT");
         mAllocateddPathsNum = 0;
         mDeAllocatedPathsNum = 0;
         return state;

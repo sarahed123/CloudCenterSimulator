@@ -190,7 +190,7 @@ public class DistributedOpticServer extends OpticServer {
 					return;
 				}
 				try {
-	                ((DistributedController) getRemoteRouter()).reserveServerColor(ep.getServerDest(),ep.getColor(),true);
+	                ((DistributedController) getRemoteRouter()).reserveServerColor(this.identifier,ep.getColor(),true);
 					ep.markSuccess();
 					Path p = new Path(ep.getPath(),ep.getColor());
 					ep.setId(p.getId());
@@ -214,17 +214,20 @@ public class DistributedOpticServer extends OpticServer {
 				// if the relevant flows have finsihed, or there already is a circuit, release resources.
 				if(jumbo.getNumFlows() == 0 ||
 						mFlowState.get(ep.getOriginalServerDest()) == State.HAS_CIRCUIT) {
+					SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
 					ep.setDeallocation();
 					ep.reverse();
 					((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), false);
 					routeThroughtPacketSwitch(ep);
 					return;
 				}
+				SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_SUCCESS_COUNT");
 				changeState(ep.getOriginalServerDest(),State.HAS_CIRCUIT);
 				mFlowReservation.put(ep.getOriginalServerDest(),ep);
 				//                System.out.println("success on reserving " + ep.toString() + " at time " + Simulator.getCurrentTime());
 			}else{
 				assert(ep.isFailure());
+				SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_FAILURE_COUNT");
 				//                System.out.println("failure for " + ep.toString());
 				((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), false);
 				if(pendingRequests==0 && mFlowState.get(ep.getOriginalServerDest())!=State.HAS_CIRCUIT){
