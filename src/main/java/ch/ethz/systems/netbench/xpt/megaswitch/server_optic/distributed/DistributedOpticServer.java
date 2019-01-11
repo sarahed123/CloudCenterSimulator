@@ -94,8 +94,11 @@ public class DistributedOpticServer extends OpticServer {
     }
 
     private void changeState(int destinationId, State state) {
-		mFlowState.put(destinationId,state);
-		SimulationLogger.distProtocolStateChange(new ImmutablePair<>(this.identifier, destinationId), state.toString());
+		State oldState = mFlowState.put(destinationId,state);
+		if(state!=oldState) {
+			SimulationLogger.distProtocolStateChange(new ImmutablePair<>(this.identifier, destinationId), state.toString());
+		}
+		
 	}
 
 	protected void onCircuitEntrance(long flowId) {
