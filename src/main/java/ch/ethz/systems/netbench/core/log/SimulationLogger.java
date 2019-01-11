@@ -10,6 +10,8 @@ import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
 
 import org.apache.commons.io.output.TeeOutputStream;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -19,6 +21,10 @@ import java.util.*;
 public class SimulationLogger {
 	private static HashMap<Long,Path> activePathMap = new HashMap<>();
 	private static Stack<Long> oldestActivePaths = new Stack<>();
+	
+	private static Stack<Pair<Integer,Integer>> oldestDistProtocolStates = new Stack<>();
+	private static HashMap<Pair<Integer,Integer>,String> activeDistProtocolStates = new HashMap<>();
+	
 	private static BufferedWriter writerRemainingPaths;
 	// Main token identifying the run log folder
 	private static String runFolderName;
@@ -697,6 +703,29 @@ public class SimulationLogger {
 		for(Long id: oldestActivePaths) {
 			System.out.println(activePathMap.get(id).toString() + "\n");
 		}
+		
+	}
+	
+	public static void printOldestDistProtocolStates() {
+		for(Pair<Integer, Integer> id: oldestDistProtocolStates) {
+			System.out.println(id.toString() + " = " + activeDistProtocolStates.get(id) + "\n");
+		}
+		
+	}
+
+	public static void distProtocolStateChange(ImmutablePair<Integer,Integer> sourceDestPair, String state) {
+		if(state.equals("NO_CIRCUIT")) {
+			oldestDistProtocolStates.remove(sourceDestPair);
+			activeDistProtocolStates.remove(sourceDestPair);
+		}else {
+			oldestDistProtocolStates.push(sourceDestPair);
+			activeDistProtocolStates.put(sourceDestPair, state + " : " + Simulator.getCurrentTime());
+			if(oldestDistProtocolStates.size() > 10) {
+				oldestDistProtocolStates.pop();
+			}
+		}
+		
+		
 		
 	}
 }

@@ -50,8 +50,8 @@ public class DistributedController extends SemiXpanderServerOptics
         }
     }
 
-    private Set getTransmittingSources(int server) {
-        Set transimtting = mServerTransmitColorsUsed.get(server);
+    private Set<Integer> getTransmittingSources(int server) {
+        Set<Integer> transimtting = mServerTransmitColorsUsed.get(server);
         if(transimtting==null){
             transimtting = new HashSet<>();
             mServerTransmitColorsUsed.put(server,transimtting);
@@ -59,8 +59,8 @@ public class DistributedController extends SemiXpanderServerOptics
         return transimtting;
     }
 
-    private Set getReceivingSources(int server) {
-        Set receving = mServerReceiveColorsUsed.get(server);
+    private Set<Integer> getReceivingSources(int server) {
+        Set<Integer> receving = mServerReceiveColorsUsed.get(server);
         if(receving==null){
             receving = new HashSet<>();
             mServerReceiveColorsUsed.put(server,receving);
@@ -117,7 +117,10 @@ public class DistributedController extends SemiXpanderServerOptics
 
     public String getCurrentState() {
         // TODO Auto-generated method stub
+    	System.out.println("oldes paths");
         SimulationLogger.printOldestPaths();
+        System.out.println("oldest states");
+        SimulationLogger.printOldestDistProtocolStates();
         String state = " Allocated " + mAllocateddPathsNum + " Deallocated " + mDeAllocatedPathsNum;
         mAllocateddPathsNum = 0;
         mDeAllocatedPathsNum = 0;
