@@ -44,7 +44,7 @@ public class EcnTailDropOutputPort extends OutputPort {
         }
 
         // Tail-drop enqueue
-        if (getBufferOccupiedBits() + ipHeader.getSizeBit() <= maxQueueSizeBits) {
+        if (hasBufferSpace(ipHeader)) {
             guaranteedEnqueue(packet);
         } else {
             onPacketDropped(ipHeader);
@@ -59,5 +59,10 @@ public class EcnTailDropOutputPort extends OutputPort {
             SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_AT_SOURCE");
         }
     }
+    
+    protected boolean hasBufferSpace(IpHeader packet) {
+    	return (getBufferOccupiedBits() + packet.getSizeBit() <= maxQueueSizeBits);
+    }
+    
 
 }
