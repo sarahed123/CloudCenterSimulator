@@ -17,12 +17,14 @@ public class DistributedOpticServerToR extends OpticServerToR {
     }
 
     private void tryReserveResources(ReservationPacket rp) {
-        if(rp.isSuccess()){
-            throw new FlowPathExists(rp.getFlowId());
-        }
         if(rp.idDeAllocation()) {
         	throw new NoPathException();
         }
+       
+        if(rp.isSuccess()){
+            throw new FlowPathExists(rp.getFlowId());
+        }
+
         int color = rp.getColor();
         int nextHop = rp.getNextHop(this.getIdentifier());
         if(nextHop == rp.getServerDest()){
