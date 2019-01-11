@@ -121,6 +121,11 @@ public class ReservationPacket extends TcpPacket {
     public long getDataSizeByte() {
         return 10;
     }
+    
+    @Override
+    public long getSizeBit() {
+        return 80;
+    }
 
     @Override
     public String toString(){
