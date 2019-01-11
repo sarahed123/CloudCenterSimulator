@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class SemiRemoteRoutingSwitch extends RemoteSourceRoutingSwitch {
         try {
             paths = readListFromFile(path +"/" + this.identifier +"_obj");
 
+
         } catch (IOException e) {
             throw new RuntimeException();
         } catch (ClassNotFoundException e) {
@@ -39,9 +41,35 @@ public class SemiRemoteRoutingSwitch extends RemoteSourceRoutingSwitch {
             if(map.get(p.get(p.size()-1))==null){
                 map.put(p.get(p.size()-1),new LinkedList<>());
             }
-            map.get(p.get(p.size()-1)).add(p);
+
+            map.get(p.get(p.size()-1)).add(removeCycles(p));
         }
         return map;
+    }
+
+    private List<Integer> removeCycles(List<Integer> p) {
+        HashMap<Integer,Boolean> visited = new HashMap<>();
+        LinkedList<Integer> ret = new LinkedList<>();
+//        if(this.identifier==332 && p.get(p.size()-1)==150){
+//            System.out.println(p.toString());
+//        }
+
+        for(int i = 0; i<p.size(); i++){
+            if(visited.get(p.get(i))==null || !visited.get(p.get(i))){
+                ret.addLast(p.get(i));
+                visited.put(p.get(i),true);
+            }else{
+//                System.out.println("removing cycle");
+                while(!ret.getLast().equals(p.get(i))){
+                    ret.removeLast();
+
+                }
+            }
+        }
+//        if(this.identifier==332 && p.get(p.size()-1)==150){
+//            System.out.println(ret);
+//        }
+        return ret;
     }
 
     protected List<Integer>[] readListFromFile(String path) throws IOException, ClassNotFoundException {

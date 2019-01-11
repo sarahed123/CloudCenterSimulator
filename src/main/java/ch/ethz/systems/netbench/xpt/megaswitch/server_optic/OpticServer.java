@@ -38,11 +38,16 @@ public class OpticServer extends JumboOpticElectronicHybrid {
         JumboFlow jumboFlow = getJumboFlow(serverSource,serverDest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
-            conversionUnit.onFlowFinish(serverSource,serverDest,jumboFlow.getId());
+            conversionUnitRecover(serverSource,serverDest,jumboFlow.getId(),flowId);
+
             recoverPath(source,dest,serverSource,serverDest,jumboFlow.getId());
             mJumboFlowMap.remove(new ImmutablePair<>(serverSource, serverDest));
         }
 
+    }
+
+    protected void conversionUnitRecover(int serverSource, int serverDest, long jumboFlowId, long flowId) {
+        conversionUnit.onFlowFinish(serverSource,serverDest,jumboFlowId);
     }
 
     @Override

@@ -11,12 +11,15 @@ public class ReservationPacket extends TcpPacket {
     private int mServerDest;
     private int mServerSource;
     int ToRdest;
+    long flowid;
     List<Integer> mPath;
     private int mSourceToR;
     private boolean mSuccess;
     private boolean mFailure;
     private boolean mDealocation;
     private boolean reversed;
+    private long mId = -1;
+    private boolean mFinishedDealloc;
 
     public ReservationPacket(TcpPacket packet, int sourceToR,int dest, List<Integer> path, int color,boolean allocationReques) {
         super(
@@ -31,7 +34,9 @@ public class ReservationPacket extends TcpPacket {
         mServerSource = packet.getSourceId();
         mSuccess = false;
         mFailure = false;
+        flowid = packet.getFlowId();
         reversed = false;
+        mFinishedDealloc = false;
     }
 
     @Override
@@ -62,6 +67,20 @@ public class ReservationPacket extends TcpPacket {
         return mPath.get(currIndex+1);
     }
 
+    public int getServerDest(int ToR) {
+        if(ToR==mSourceToR){
+            return mServerSource;
+        }
+        else{
+            return mServerDest;
+        }
+    }
+
+    @Override
+    public long getFlowId(){
+        return flowid;
+    }
+
     public int getServerDest() {
         return reversed ? mServerSource : mServerDest;
     }
@@ -79,9 +98,11 @@ public class ReservationPacket extends TcpPacket {
     }
 
     public void reverse() {
+
         Collections.reverse(mPath);
+
 //        mServerDest = mServerSource;
-        reversed = true;
+        reversed = !reversed;
     }
 
     public boolean idDeAllocation() {
@@ -103,11 +124,35 @@ public class ReservationPacket extends TcpPacket {
 
     @Override
     public String toString(){
-        return "Reservation packet " + " server dest " + getServerDest() + " serverSource " + mServerSource + " isSuccess " + isSuccess() +
-                " isFailure " + mFailure + " isDeallocation " + mDealocation +" color " + getColor() + " path " + mPath.toString();
+        return "Reservation packet " + " server dest " + mServerDest + " serverSource " + mServerSource + " isSuccess " + isSuccess() +
+                " isFailure " + mFailure + " isDeallocation " + mDealocation +" color " + getColor() + " reversed " + reversed + " path " + mPath.toString();
     }
 
     public int getSourceToR() {
         return mSourceToR;
+    }
+
+    public boolean isFailure() {
+        return mFailure;
+    }
+
+    public List<Integer> getPath(){
+        return mPath;
+    }
+
+    public void setId(long id){
+        mId = id;
+    }
+
+    public long getId() {
+        return mId;
+    }
+
+    public void onFinishDeallocation() {
+        mFinishedDealloc = true;
+    }
+
+    public boolean finishedDealloc() {
+        return mFinishedDealloc;
     }
 }
