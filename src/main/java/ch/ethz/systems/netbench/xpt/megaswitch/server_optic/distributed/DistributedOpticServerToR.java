@@ -114,9 +114,12 @@ public class DistributedOpticServerToR extends OpticServerToR {
             ((DistributedController) getRemoteRouter()).increaseEdgeCapacity(l,r,color);
         }else{
             ((DistributedController) getRemoteRouter()).deallocateServerColor(nextHop,color,rp.isReversed() ? false : true);
-            SimulationLogger.regiserPathActive(new Path(rp.getPath(),rp.getColor(),rp.getId()),false);
-            rp.onFinishDeallocation();
-            ((DistributedController) getRemoteRouter()).onDeallocation();
+            if(!rp.isReversed()) {
+            	SimulationLogger.regiserPathActive(new Path(rp.getPath(),rp.getColor(),rp.getId()),false);
+                rp.onFinishDeallocation();
+                ((DistributedController) getRemoteRouter()).onDeallocation();
+            }
+            
         }
 
     }
