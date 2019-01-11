@@ -50,6 +50,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
         if(capacity==0){
             rp.markFailure();
             rp.reverse();
+            SimulationLogger.increaseStatisticCounter("DISTRIBUTED_TOR_NO_PATH");
             throw new NoPathException();
         }
         assert(capacity==1);

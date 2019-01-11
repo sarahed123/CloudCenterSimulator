@@ -19,7 +19,10 @@ public class DistributedController extends SemiXpanderServerOptics
 	long doubleSuccesses = 0;
 	long successes = 0;
 	long failures = 0;
-
+	long torNoPath = 0;
+	long destNoPath = 0;
+	long sourceNoPath = 0;
+	
     public DistributedController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
     }
@@ -166,9 +169,19 @@ public class DistributedController extends SemiXpanderServerOptics
         state += "double success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT") - doubleSuccesses) + "\n";
         state += "success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT") - successes) + "\n";
         state += "failure count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT") -failures) + "\n";
+        
+        state += "tor no path count " + (SimulationLogger.getStatistic("DISTRIBUTED_TOR_NO_PATH") - torNoPath) + "\n";
+        state += "dest no path count " + (SimulationLogger.getStatistic("DISTRIBUTED_DEST_ENDPOINT_NO_PATH") - destNoPath) + "\n";
+        state += "source no path count " + (SimulationLogger.getStatistic("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH") -sourceNoPath) + "\n";
+        
         doubleSuccesses = SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
         successes = SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT");
         failures = SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT");
+        
+        torNoPath = SimulationLogger.getStatistic("DISTRIBUTED_TOR_NO_PATH");
+        destNoPath = SimulationLogger.getStatistic("DISTRIBUTED_DEST_ENDPOINT_NO_PATH");
+        sourceNoPath = SimulationLogger.getStatistic("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH");
+        
         mAllocateddPathsNum = 0;
         mDeAllocatedPathsNum = 0;
         return state;
