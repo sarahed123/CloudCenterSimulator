@@ -20,6 +20,9 @@ public class DistributedOpticServerToR extends OpticServerToR {
         if(rp.isSuccess()){
             throw new FlowPathExists(rp.getFlowId());
         }
+        if(rp.idDeAllocation()) {
+        	throw new NoPathException();
+        }
         int color = rp.getColor();
         int nextHop = rp.getNextHop(this.getIdentifier());
         if(nextHop == rp.getServerDest()){
@@ -35,6 +38,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
             }catch(NoPathException e){
                 rp.markFailure();
                 rp.reverse();
+                throw new NoPathException();
             }
             return;
         }
@@ -42,7 +46,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
         if(capacity==0){
             rp.markFailure();
             rp.reverse();
-            return;
+            throw new NoPathException();
         }
         ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier,rp.getPrevHop(),nextHop,rp.getColor());
         ((DistributedController) getRemoteRouter()).decreaseEdgeCapacity(this.identifier,nextHop,color);
@@ -65,16 +69,13 @@ public class DistributedOpticServerToR extends OpticServerToR {
 
     protected void handleReservationPacket(Packet genericPacket) {
         ReservationPacket rp = (ReservationPacket) genericPacket;
-        if(rp.idDeAllocation()){
-            deallocateReservation(rp);
+        try {
+        	tryReserveResources(rp);
+        }catch (FlowPathExists e){
+
+        }catch (NoPathException e) {
+        	deallocateReservation(rp);
             if(rp.finishedDealloc()) return;
-        }else{
-            try{
-                tryReserveResources(rp);
-            }catch (FlowPathExists e){
-
-            }
-
         }
 
         int nextHop = rp.getNextHop(this.getIdentifier());
