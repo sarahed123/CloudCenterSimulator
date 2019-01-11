@@ -198,7 +198,11 @@ public class DistributedOpticServer extends OpticServer {
 //                System.out.println("failure for " + ep.toString());
 
                 if(pendingRequests==0 && mFlowState.get(ep.getOriginalServerDest())!=State.HAS_CIRCUIT){
-                	assert(mFlowState.get(ep.getOriginalServerDest())==State.IN_PROCESS);
+                	if(mFlowState.get(ep.getOriginalServerDest())!=State.IN_PROCESS) {
+                		System.out.println(mFlowState.get(ep.getOriginalServerDest()));
+                		System.out.println(ep.toString());
+                		throw new RuntimeException();
+                	}
                     changeState(ep.getOriginalServerDest(),State.NO_CIRCUIT);
                 }
 

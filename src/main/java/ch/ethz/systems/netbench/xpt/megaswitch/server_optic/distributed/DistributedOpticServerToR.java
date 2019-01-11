@@ -88,7 +88,8 @@ public class DistributedOpticServerToR extends OpticServerToR {
 //        System.out.println(identifier);
 //        System.out.println(nextHop);
 //        System.out.println(rp.getFlowId());
-        this.electronic.getTargetOuputPort(nextHop).enqueue(rp);
+        DistributedProtocolPort port = (DistributedProtocolPort) this.electronic.getTargetOuputPort(nextHop);
+        port.enqueue(rp);
     }
 
     private void deallocateReservation(ReservationPacket rp) {
