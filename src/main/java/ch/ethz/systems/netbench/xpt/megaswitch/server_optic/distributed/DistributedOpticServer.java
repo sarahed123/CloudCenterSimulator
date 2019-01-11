@@ -157,7 +157,10 @@ public class DistributedOpticServer extends OpticServer {
 			}
 
 		}
-		if(pendingRequests==0) throw new NoPathException();
+		if(pendingRequests==0) {
+			SimulationLogger.increaseStatisticCounter("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH");
+			throw new NoPathException();
+		}
 	}
 
 	protected List<List<Integer>>  getAvailablePaths(int destToRId) {
@@ -198,6 +201,7 @@ public class DistributedOpticServer extends OpticServer {
 					((DistributedController) getRemoteRouter()).onAallocation();
 					
 				}catch(NoPathException e) {
+		            SimulationLogger.increaseStatisticCounter("DISTRIBUTED_DEST_ENDPOINT_NO_PATH");
 					ep.markFailure();
 				}
 				ep.reverse();
