@@ -682,7 +682,7 @@ public class SimulationLogger {
 
     public static long getStatistic(String key) {
 
-		return statisticCounters.get(key);
+		return statisticCounters.getOrDefault(key,0l);
     }
 
 	public static void regiserPathActive(Path p, boolean adding) {
