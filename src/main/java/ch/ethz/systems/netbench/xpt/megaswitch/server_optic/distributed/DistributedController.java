@@ -67,6 +67,42 @@ public class DistributedController extends SemiXpanderServerOptics
         }
         return receving;
     }
+    
+//    private void addFlowOnCircuit(int server, boolean incomming) {
+//    	if(incomming){
+//            if(mRecievingDestinations.getOrDefault(server,0) >= mMaxNumJFlowsOncircuit){
+//                throw new NoPathException();
+//            }
+//            int receiving = mRecievingDestinations.getOrDefault(server,0);
+//            receiving++;
+//            mRecievingDestinations.put(server,receiving);
+//            
+//        }else{
+//            if(mTransmittingSources.getOrDefault(server,0) >= mMaxNumJFlowsOncircuit){
+//                throw new NoPathException();
+//            }
+//            int sending = mTransmittingSources.getOrDefault(server,0);
+//            sending++;
+//            mTransmittingSources.put(server,sending);
+//            
+//        }
+//    }
+    
+//    public void removeFlowOnCircuit(int server, boolean incomming) {
+//        if(incomming){
+//            int receiving = mRecievingDestinations.get(server);
+//            receiving--;
+//            assert(receiving>=0);
+//            mRecievingDestinations.put(server,receiving);
+//
+//        }else{
+//            int sending = mTransmittingSources.get(server);
+//            sending--;
+//            assert(sending>=0);
+//            mTransmittingSources.put(server,sending);
+//
+//        }
+//    }
 
     public void reserveServerColor(int server, int color, boolean incomming) {
 //        System.out.println("trying to reserve color " + color + " for server " + server);
@@ -96,11 +132,13 @@ public class DistributedController extends SemiXpanderServerOptics
         if(incomming){
             int receiving = mRecievingDestinations.getOrDefault(server,0);
             receiving--;
+            assert(receiving>=0);
             mRecievingDestinations.put(server,receiving);
             getReceivingSources(server).remove(color);
         }else{
             int sending = mTransmittingSources.get(server);
             sending--;
+            assert(sending>=0);
             mTransmittingSources.put(server,sending);
             getTransmittingSources(server).remove(color);
         }
@@ -134,4 +172,19 @@ public class DistributedController extends SemiXpanderServerOptics
     public void onAallocation() {
         mAllocateddPathsNum++;
     }
+
+	public boolean serverHasColor(int server, int color,boolean incomming) {
+		// TODO Auto-generated method stub
+		 if(incomming){
+//           int receiving = mRecievingDestinations.getOrDefault(server,0);
+//           receiving--;
+//           mRecievingDestinations.put(server,receiving);
+           return getReceivingSources(server).contains(color);
+       }else{
+//           int sending = mTransmittingSources.get(server);
+//           sending--;
+//           mTransmittingSources.put(server,sending);
+    	   return getTransmittingSources(server).contains(color);
+       }
+	}
 }
