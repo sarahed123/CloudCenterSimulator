@@ -718,6 +718,9 @@ public class SimulationLogger {
 			oldestDistProtocolStates.remove(sourceDestPair);
 			activeDistProtocolStates.remove(sourceDestPair);
 		}else {
+			//first remove the old occurrence
+			oldestDistProtocolStates.remove(sourceDestPair);
+			//then put the new
 			oldestDistProtocolStates.push(sourceDestPair);
 			activeDistProtocolStates.put(sourceDestPair, state + " : " + Simulator.getCurrentTime());
 			if(oldestDistProtocolStates.size() > 10) {
