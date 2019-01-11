@@ -17,6 +17,7 @@ import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServer;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.omg.CORBA.INV_POLICY;
 
 import java.util.*;
 
@@ -74,8 +75,8 @@ public class DistributedOpticServer extends OpticServer {
 
             case IN_PROCESS:
                 routeThroughtPacketSwitch((TcpPacket)packet);
-                mFlowState.put(packet.getDestinationId(),State.IN_PROCESS);
-//                System.out.println("trying to go on circuit " + flowId);
+                changeState(packet.getDestinationId(),State.IN_PROCESS);
+                
                 break;
             case HAS_CIRCUIT:
 //                System.out.println("routing on circuit " + packet);
@@ -92,7 +93,12 @@ public class DistributedOpticServer extends OpticServer {
         }
     }
 
-    protected void onCircuitEntrance(long flowId) {
+    private void changeState(int destinationId, State state) {
+		mFlowState.put(destinationId,state);
+		SimulationLogger.distProtocolStateChange(new ImmutablePair<>(this.identifier, destinationId), state.toString());
+	}
+
+	protected void onCircuitEntrance(long flowId) {
 
     }
 
@@ -181,7 +187,7 @@ public class DistributedOpticServer extends OpticServer {
                     routeThroughtPacketSwitch(ep);
                     return;
             	}
-            	mFlowState.put(ep.getOriginalServerDest(),State.HAS_CIRCUIT);
+            	changeState(ep.getOriginalServerDest(),State.HAS_CIRCUIT);
                 mFlowReservation.put(ep.getOriginalServerDest(),ep);
 //                System.out.println("success on reserving " + ep.toString() + " at time " + Simulator.getCurrentTime());
             }else{
@@ -189,7 +195,7 @@ public class DistributedOpticServer extends OpticServer {
 //                System.out.println("failure for " + ep.toString());
 
                 if(pendingRequests==0 && mFlowState.get(ep.getOriginalServerDest())!=State.HAS_CIRCUIT){
-                    mFlowState.put(ep.getOriginalServerDest(),State.NO_CIRCUIT);
+                    changeState(ep.getOriginalServerDest(),State.NO_CIRCUIT);
                 }
 
             }
@@ -220,7 +226,7 @@ public class DistributedOpticServer extends OpticServer {
         rp.setDeallocation();
         rp.reverse();
         routeThroughtPacketSwitch(rp);
-        mFlowState.put(rp.getOriginalServerDest(),State.NO_CIRCUIT);
+        changeState(rp.getOriginalServerDest(),State.NO_CIRCUIT);
     }
 
 }
