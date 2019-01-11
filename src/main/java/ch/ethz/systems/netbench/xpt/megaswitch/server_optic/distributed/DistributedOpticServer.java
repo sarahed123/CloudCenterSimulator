@@ -67,6 +67,7 @@ public class DistributedOpticServer extends OpticServer {
 
             case NO_CIRCUIT:
                 try{
+                	assert(mPendingRequests.getOrDefault(packet.getDestinationId(),0)==0);
                     initRoute(packet, packet.getFlowId());
                 }catch (NoPathException e){
                     routeThroughtPacketSwitch((TcpPacket)packet);
@@ -123,7 +124,7 @@ public class DistributedOpticServer extends OpticServer {
         }
 
         int p = Math.abs(rand.nextInt(paths.size())) % paths.size();
-
+        int pendingRequests = 0;
         for(int i = 0; i < NUM_PATH_TO_RANDOMIZE; i++){
             p = (p+i) % paths.size();
             List<Integer> path = paths.get(p);
@@ -144,17 +145,17 @@ public class DistributedOpticServer extends OpticServer {
                 }
             }
             if(hasAvailableColor){
-                int pendingRequests = mPendingRequests.getOrDefault(packet.getDestinationId(),0);
+//                int pendingRequests = mPendingRequests.getOrDefault(packet.getDestinationId(),0);
                 pendingRequests++;
                 mPendingRequests.put(packet.getDestinationId(),pendingRequests);
 
                 sendReservationPackets(new LinkedList<Integer>(path),c,(TcpPacket)packet);
             }else{
-                throw new NoPathException();
+                
             }
 
         }
-
+        if(pendingRequests==0) throw new NoPathException();
     }
 
     protected List<List<Integer>>  getAvailablePaths(int destToRId) {
