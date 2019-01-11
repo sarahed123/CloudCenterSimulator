@@ -98,6 +98,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+            "distributed_protocol_enabled",
             "csv_size_dist_file_bytes",
             "host_optics_enabled",
             "enable_jumbo_flows",

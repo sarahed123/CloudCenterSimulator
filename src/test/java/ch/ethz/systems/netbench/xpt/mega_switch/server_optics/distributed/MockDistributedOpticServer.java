@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedController;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedOpticServer;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.ReservationPacket;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitch;
@@ -15,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MockDistributedOpticServer extends DistributedOpticServer {
-    static RemoteRoutingController remoteRouter;
+    static MockDistributedServerOpticsRouter remoteRouter;
     /**
      * Constructor of a network device.
      *
@@ -28,8 +29,14 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
         super(identifier, transportLayer, intermediary, configuration);
     }
 
+
     public static void setRemoteRouter(MockDistributedServerOpticsRouter remoteRouter) {
         MockDistributedOpticServer.remoteRouter = remoteRouter;
+    }
+
+    @Override
+    protected void onCircuitEntrance(long flowId) {
+        remoteRouter.markFlowRouted(flowId);
     }
 
     protected void sendReservationPackets(List<Integer> path, int color, TcpPacket packet) {

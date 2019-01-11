@@ -88,7 +88,22 @@ public class Path implements BaseElementWithWeight, Serializable {
 		this.id = ++pCounter;
 		this.issueTime = Simulator.getCurrentTime();
 	}
-	
+
+	public Path(List<Integer> list,int color) {
+		this(list.size());
+		for(int i = 0; i<list.size(); i++){
+			vertexList.add(new Vertex(list.get(i)));
+		}
+		mGraphIndex = color;
+
+	}
+
+	public Path(List<Integer> path, int color, long id) {
+		this(path,color);
+		pCounter--;
+		this.id = id;
+	}
+
 	public long getId() {
 		return this.id;
 	}

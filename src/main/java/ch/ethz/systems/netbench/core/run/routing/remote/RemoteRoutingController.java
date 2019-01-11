@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorNetController;
@@ -16,6 +17,8 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedController;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedProtocolPort;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpander;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
@@ -65,9 +68,13 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		case "semi_Xpander":
 			mInstance = new SemiXpander(idToNetworkDevice,configuration);
 			break;
-			case "semi_Xpander_server_optics":
+		case "semi_Xpander_server_optics":
+			if(Simulator.getConfiguration().getBooleanPropertyWithDefault("distributed_protocol_enabled",false)){
+				mInstance = new DistributedController(idToNetworkDevice,configuration);
+			}else{
 				mInstance = new SemiXpanderServerOptics(idToNetworkDevice,configuration);
-				break;
+			}
+			break;
 		default:
 			throw new PropertyValueInvalidException(configuration,"centered_routing_type");
 		}

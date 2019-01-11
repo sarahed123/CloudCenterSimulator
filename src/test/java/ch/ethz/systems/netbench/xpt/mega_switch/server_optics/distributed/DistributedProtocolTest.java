@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.xpt.mega_switch.server_optics.distributed;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
@@ -21,7 +22,9 @@ import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedProtocolPort;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.ReservationPacket;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,8 +49,10 @@ public class DistributedProtocolTest {
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
         runConfigWriter.write("hybrid_circuit_threshold_byte=1000\n");
-        runConfigWriter.write("circuit_wave_length_num=2\n");
         runConfigWriter.write("num_paths_to_randomize=1\n");
+        runConfigWriter.write("distributed_protocol_enabled=true\n");
+
+
 
         runConfigWriter.close();
         NBProperties conf = new NBProperties(
@@ -92,13 +97,14 @@ public class DistributedProtocolTest {
         runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n2_v2.topology\n");
         runConfigWriter2.write("centered_routing_type=distributed_controller\n");
         runConfigWriter2.write("network_device_routing=remote_routing_populator\n");
-        runConfigWriter2.write("circuit_wave_length_num=2\n");
+        runConfigWriter2.write("circuit_wave_length_num=1\n");
         runConfigWriter2.write("max_num_flows_on_circuit=5\n");
         runConfigWriter2.write("host_optics_enabled=true\n");
         runConfigWriter2.write("network_type=circuit_switch\n");
         runConfigWriter2.write("output_port_max_queue_size_bytes=150000\n");
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=30000\n");
         runConfigWriter2.write("link_bandwidth_bit_per_ns=50\n");
+        runConfigWriter2.write("semi_remote_routing_path_dir=/cs/labs/schapiram/inonkp/ksp/paths/xpander_n333_d8/10\n");
         runConfigWriter2.write("link_delay_ns=10\n");
 
         runConfigWriter2.close();
@@ -112,7 +118,7 @@ public class DistributedProtocolTest {
         );
 
 
-        initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
+        initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new SemiRemoteRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),conf2),
                 lg,new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         //RoutingSelector.selectPopulator(hm, conf2);
@@ -175,11 +181,53 @@ public class DistributedProtocolTest {
         FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 20000);
         Simulator.registerEvent(fse);
         Simulator.runNs(1000000000);
+        assert(router.routedFlow(0));
 //        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
 //        LinkedList<Integer> p = new LinkedList<>();
 //        p.add(0,1);
 //        ReservationPacket rp = new ReservationPacket(mdp,1,p,0,true);
 //        source.routeThroughtPacketSwitch(rp);
 
+    }
+
+    @Test
+    public void testDoubleFlow(){
+        MockDistributedOpticServer source = (MockDistributedOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockDistributedOpticServer dest =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
+        MockDistributedOpticServer dest2 =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(5));
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 200000);
+        FlowStartEvent fse2 = new FlowStartEvent(0, source.getTransportLayer(), dest2.getIdentifier(), 200000);
+        Simulator.registerEvent(fse);
+        Simulator.registerEvent(fse2);
+        Simulator.runNs(1000000000);
+        assert(router.routedFlow(0));
+        assert(router.routedFlow(1));
+//        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
+//        LinkedList<Integer> p = new LinkedList<>();
+//        p.add(0,1);
+//        ReservationPacket rp = new ReservationPacket(mdp,1,p,0,true);
+//        source.routeThroughtPacketSwitch(rp);
+
+    }
+
+    @Test
+    public void testTrivialFlow(){
+        MockDistributedOpticServer source = (MockDistributedOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockDistributedOpticServer dest =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(4));
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 200000);
+        Simulator.registerEvent(fse);
+        Simulator.runNs(1000000000);
+        assert(router.routedFlow(0));
+//        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
+//        LinkedList<Integer> p = new LinkedList<>();
+//        p.add(0,1);
+//        ReservationPacket rp = new ReservationPacket(mdp,1,p,0,true);
+//        source.routeThroughtPacketSwitch(rp);
+
+    }
+
+    @After
+    public void finish(){
+        Simulator.reset(false);
     }
 }
