@@ -25,6 +25,8 @@ public class DistributedController extends SemiXpanderServerOptics
 	
     public DistributedController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
+        System.out.println("running distributed controller with max flows on circuit " + mMaxNumJFlowsOncircuit);
+
     }
 
     public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
@@ -201,12 +203,12 @@ public class DistributedController extends SemiXpanderServerOptics
 //           int receiving = mRecievingDestinations.getOrDefault(server,0);
 //           receiving--;
 //           mRecievingDestinations.put(server,receiving);
-           return getReceivingSources(server).contains(color);
+           return getReceivingSources(server).contains(color) && mRecievingDestinations.getOrDefault(server,0)<=mMaxNumJFlowsOncircuit;
        }else{
 //           int sending = mTransmittingSources.get(server);
 //           sending--;
 //           mTransmittingSources.put(server,sending);
-    	   return getTransmittingSources(server).contains(color);
+    	   return getTransmittingSources(server).contains(color)&& mTransmittingSources.getOrDefault(server,0)<=mMaxNumJFlowsOncircuit;
        }
 	}
 }
