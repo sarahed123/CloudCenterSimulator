@@ -11,8 +11,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class EcnTailDropOutputPort extends OutputPort {
 
-    private final long ecnThresholdKBits;
-    private final long maxQueueSizeBits;
+    protected final long ecnThresholdKBits;
+    protected final long maxQueueSizeBits;
 
     protected EcnTailDropOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
         super(ownNetworkDevice, targetNetworkDevice, link, new LinkedBlockingQueue<Packet>());
