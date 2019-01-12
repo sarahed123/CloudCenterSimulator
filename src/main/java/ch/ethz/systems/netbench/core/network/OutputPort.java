@@ -29,7 +29,7 @@ public abstract class OutputPort extends Port{
     protected final Link link;                            // Link type, defines latency and bandwidth of the medium
                                                         // that the output port uses
     // Logging utility
-    private final PortLogger logger;
+    protected final PortLogger logger;
     private InputPort inputPort;
 
     /**
@@ -113,12 +113,18 @@ public abstract class OutputPort extends Port{
         } else { // If it is still sending, the packet is added to the queue, making it non-empty
             bufferOccupiedBits += packet.getSizeBit();
             addPacketToQueue(packet);
-            logger.logQueueState(queue.size(), bufferOccupiedBits,packet);
+            log(packet);
+            
         }
 
     }
 
-    protected void addPacketToQueue(Packet packet){
+    protected void log(Packet packet) {
+    	logger.logQueueState(queue.size(), bufferOccupiedBits,packet);
+		
+	}
+
+	protected void addPacketToQueue(Packet packet){
         queue.add(packet);
     }
 
@@ -152,7 +158,7 @@ public abstract class OutputPort extends Port{
         if (!queue.isEmpty()) {
 
             // Pop from queue
-            Packet packetFromQueue = queue.poll();
+            Packet packetFromQueue = popFromQueue();
             decreaseBufferOccupiedBits(packetFromQueue.getSizeBit());
             logger.logQueueState(queue.size(), bufferOccupiedBits,packetFromQueue);
             // Register when the packet is actually dispatched
@@ -170,7 +176,12 @@ public abstract class OutputPort extends Port{
 
     }
 
-    /**
+    protected Packet popFromQueue() {
+		// TODO Auto-generated method stub
+		return queue.poll();
+	}
+
+	/**
      * Return the network identifier of its own device (to which this output port is attached to).
      *
      * @return  Own network device identifier
