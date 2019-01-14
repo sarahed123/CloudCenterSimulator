@@ -67,4 +67,16 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
     protected RemoteRoutingController getRemoteRouter() {
         return remoteRouter;
     }
+
+    public int allocatedColor(int c) {
+        return ((MockDistributedServerOpticsRouter)getRemoteRouter()).allocatedColor(identifier,c);
+    }
+
+    public int deallocatedColor(int c) {
+        return ((MockDistributedServerOpticsRouter)getRemoteRouter()).deallocatedColor(identifier,c);
+    }
+
+    public ReservationPacket getResrvationPacket(int serverDest){
+        return mFlowReservation.get(serverDest);
+    }
 }

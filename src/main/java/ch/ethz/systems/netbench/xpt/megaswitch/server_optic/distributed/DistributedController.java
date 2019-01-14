@@ -125,6 +125,7 @@ public class DistributedController extends SemiXpanderServerOptics
             receiving++;
             mRecievingDestinations.put(server,receiving);
             getReceivingSources(server).add(color);
+            assert(getReceivingSources(server).size() <= mGraphs.length);
         }else{
             if(mTransmittingSources.getOrDefault(server,0) >= mMaxNumJFlowsOncircuit){
                 throw new NoPathException();
@@ -133,7 +134,9 @@ public class DistributedController extends SemiXpanderServerOptics
             sending++;
             mTransmittingSources.put(server,sending);
             getTransmittingSources(server).add(color);
+            assert(getTransmittingSources(server).size() <= mGraphs.length);
         }
+        assert(!serverColorAvailable(server,color,incomming));
     }
 
     public void deallocateServerColor(int server, int color, boolean incomming) {
@@ -150,6 +153,8 @@ public class DistributedController extends SemiXpanderServerOptics
             mTransmittingSources.put(server,sending);
             getTransmittingSources(server).remove(color);
         }
+        assert(serverColorAvailable(server,color,incomming));
+
     }
 
     public void updateRoutingTable( int id, int prevHop, int nextHop,int color) {

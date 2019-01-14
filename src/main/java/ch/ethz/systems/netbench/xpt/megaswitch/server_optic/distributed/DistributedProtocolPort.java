@@ -18,7 +18,8 @@ public class DistributedProtocolPort extends EcnTailDropOutputPort {
     
     protected void log(Packet packet) {
     	if(getBufferOccupiedBits() >= ecnThresholdKBits * 4) {
-    		System.out.println("Port on device " + this.getOwnId() + " has surpassed ecn thresh with " + numRpPackets + " rp packets");
+		
+//    		System.out.println("Port on device " + this.getOwnId() + " has surpassed ecn thresh with " + numRpPackets + " rp packets. last packet " + packet.toString());
     	}
 		
 	}

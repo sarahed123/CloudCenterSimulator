@@ -58,6 +58,10 @@ public class EcnTailDropOutputPort extends OutputPort {
         if (ipHeader.getSourceId() == this.getOwnId()) {
             SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_AT_SOURCE");
         }
+//	System.out.println(ipHeader.toString());
+//	System.out.println(ipHeader.getFlowId());
+//	System.out.println(this.getOwnId());
+//        System.out.println(this.getTargetId());
     }
     
     protected boolean hasBufferSpace(IpHeader packet) {

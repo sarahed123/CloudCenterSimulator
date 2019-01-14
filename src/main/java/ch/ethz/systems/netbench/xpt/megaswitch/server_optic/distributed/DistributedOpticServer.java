@@ -3,10 +3,7 @@ package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
-import ch.ethz.systems.netbench.core.network.Intermediary;
-import ch.ethz.systems.netbench.core.network.OutputPort;
-import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
@@ -24,9 +21,9 @@ import java.util.*;
 
 public class DistributedOpticServer extends OpticServer {
 	private DistributedOpticServerToR ToRDevice;
-	private HashMap<Integer, ReservationPacket> mFlowReservation;
+	protected HashMap<Integer, ReservationPacket> mFlowReservation;
 	private HashMap<Integer, Integer> mPendingRequests;
-
+	private long mConfigurationTime;
 	enum State{
 		NO_CIRCUIT,
 		IN_PROCESS,
@@ -50,7 +47,7 @@ public class DistributedOpticServer extends OpticServer {
 		mFlowReservation = new HashMap<>();
 		mPendingRequests = new HashMap<>();
 		NUM_PATH_TO_RANDOMIZE = configuration.getIntegerPropertyOrFail("num_paths_to_randomize");
-
+		mConfigurationTime = configuration.getLongPropertyOrFail("static_configuration_time_ns");
 		//        NUM_COLORS_TO_RANDOMIZE = configuration.getIntegerPropertyOrFail("num_colors_to_randomize");
 
 	}
@@ -199,6 +196,15 @@ public class DistributedOpticServer extends OpticServer {
 					ep.setId(p.getId());
 					SimulationLogger.regiserPathActive(p,true);
 					((DistributedController) getRemoteRouter()).onAallocation();
+					Simulator.registerEvent(new Event(mConfigurationTime) {
+						@Override
+						public void trigger() {
+							ep.markDelayed(mConfigurationTime);
+							ep.reverse();
+							routeThroughtPacketSwitch(ep);
+						}
+					});
+					return;
 					
 				}catch(NoPathException e) {
 		            SimulationLogger.increaseStatisticCounter("DISTRIBUTED_DEST_ENDPOINT_NO_PATH");
@@ -218,6 +224,12 @@ public class DistributedOpticServer extends OpticServer {
 				// if the relevant flows have finsihed, or there already is a circuit, release resources.
 				if(jumbo.getNumFlows() == 0 ||
 						mFlowState.get(ep.getOriginalServerDest()) == State.HAS_CIRCUIT) {
+
+					if(mFlowState.get(ep.getOriginalServerDest()) == State.IN_PROCESS){
+						if(pendingRequests==0) {
+							changeState(ep.getOriginalServerDest(), State.NO_CIRCUIT);
+						}
+					}
 					SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
 					ep.setDeallocation();
 					ep.reverse();

@@ -49,6 +49,7 @@ public class DistributedProtocolTest {
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
         runConfigWriter.write("hybrid_circuit_threshold_byte=1000\n");
+        runConfigWriter.write("static_configuration_time_ns=1000\n");
         runConfigWriter.write("num_paths_to_randomize=1\n");
         runConfigWriter.write("distributed_protocol_enabled=true\n");
 
@@ -182,6 +183,13 @@ public class DistributedProtocolTest {
         Simulator.registerEvent(fse);
         Simulator.runNs(1000000000);
         assert(router.routedFlow(0));
+        assert(source.allocatedColor(0)==1);
+        assert(source.deallocatedColor(0)==1);
+        assert(dest.deallocatedColor(0)==1);
+        assert(dest.allocatedColor(0)==1);
+        assert(router.allocatedEdge(0,1,0)==1);
+        assert(router.deallocatedEdge(0,1,0)==1);
+        assert(source.getResrvationPacket(3).getDelay()==1000);
 //        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
 //        LinkedList<Integer> p = new LinkedList<>();
 //        p.add(0,1);
@@ -202,6 +210,14 @@ public class DistributedProtocolTest {
         Simulator.runNs(1000000000);
         assert(router.routedFlow(0));
         assert(router.routedFlow(1));
+        assert(source.allocatedColor(0)==2);
+        assert(source.deallocatedColor(0)==2);
+        assert(dest.deallocatedColor(0)==1);
+        assert(dest.allocatedColor(0)==1);
+        assert(dest2.deallocatedColor(0)==1);
+        assert(dest2.allocatedColor(0)==1);
+        assert(router.allocatedEdge(0,1,0)==2);
+        assert(router.deallocatedEdge(0,1,0)==2);
 //        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
 //        LinkedList<Integer> p = new LinkedList<>();
 //        p.add(0,1);
@@ -218,6 +234,12 @@ public class DistributedProtocolTest {
         Simulator.registerEvent(fse);
         Simulator.runNs(1000000000);
         assert(router.routedFlow(0));
+        assert(source.allocatedColor(0)==1);
+        assert(source.deallocatedColor(0)==1);
+        assert(dest.deallocatedColor(0)==1);
+        assert(dest.allocatedColor(0)==1);
+        assert(router.allocatedEdge(0,1,0)==0);
+        assert(router.deallocatedEdge(0,1,0)==0);
 //        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
 //        LinkedList<Integer> p = new LinkedList<>();
 //        p.add(0,1);
