@@ -21,7 +21,6 @@ public class TcpPacketResendEvent extends Event {
     @Override
     public void trigger() {
         if (this.active) {
-            tcpPacket.markResent();
             tcpSocket.resend(tcpPacket);
         }
     }

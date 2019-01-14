@@ -53,6 +53,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
             SimulationLogger.increaseStatisticCounter("DISTRIBUTED_TOR_NO_PATH");
             throw new NoPathException();
         }
+
         assert(capacity==1);
         ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier,rp.getPrevHop(),nextHop,rp.getColor());
         ((DistributedController) getRemoteRouter()).decreaseEdgeCapacity(this.identifier,nextHop,color);

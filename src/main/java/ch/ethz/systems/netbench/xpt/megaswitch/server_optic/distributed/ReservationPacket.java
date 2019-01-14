@@ -13,6 +13,7 @@ public class ReservationPacket extends TcpPacket {
     int ToRdest;
     long flowid;
     List<Integer> mPath;
+    private long delayed;
     private int mSourceToR;
     private boolean mSuccess;
     private boolean mFailure;
@@ -37,6 +38,7 @@ public class ReservationPacket extends TcpPacket {
         flowid = packet.getFlowId();
         reversed = false;
         mFinishedDealloc = false;
+        delayed = 0;
     }
 
     @Override
@@ -159,5 +161,13 @@ public class ReservationPacket extends TcpPacket {
 
     public boolean finishedDealloc() {
         return mFinishedDealloc;
+    }
+
+    public void markDelayed(long time) {
+        delayed += time;
+    }
+
+    public long getDelay(){
+        return delayed;
     }
 }
