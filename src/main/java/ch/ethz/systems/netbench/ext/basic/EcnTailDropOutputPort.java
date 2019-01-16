@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -54,14 +55,21 @@ public class EcnTailDropOutputPort extends OutputPort {
     }
 
     protected void onPacketDropped(IpHeader ipHeader) {
-        SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED");
-        if (ipHeader.getSourceId() == this.getOwnId()) {
-            SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_AT_SOURCE");
+    	String suffix = "";
+        
+        try {
+        	TcpPacket tcpPacket = (TcpPacket) ipHeader;
+        	ipHeader = tcpPacket.deEncapsualte();
+        	if(tcpPacket.isACK()) {
+        		suffix = "ACK_";
+        	}
+        }catch(ClassCastException e) {
+        	
         }
-//	System.out.println(ipHeader.toString());
-//	System.out.println(ipHeader.getFlowId());
-//	System.out.println(this.getOwnId());
-//        System.out.println(this.getTargetId());
+        SimulationLogger.increaseStatisticCounter(suffix + "PACKETS_DROPPED");
+        if (ipHeader.getSourceId() == this.getOwnId()) {
+            SimulationLogger.increaseStatisticCounter(suffix + "PACKETS_DROPPED_AT_SOURCE");
+        }
     }
     
     protected boolean hasBufferSpace(IpHeader packet) {
