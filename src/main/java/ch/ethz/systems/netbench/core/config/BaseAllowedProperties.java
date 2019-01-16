@@ -98,6 +98,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+    		"circuit_teardown_timeout_ns",
             "static_configuration_time_ns",
             "distributed_protocol_enabled",
             "csv_size_dist_file_bytes",
