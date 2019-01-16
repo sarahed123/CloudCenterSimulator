@@ -15,7 +15,7 @@ public abstract class Event implements Comparable<Event>, Serializable {
     private final long eid;
 
     // Time to trigger
-    private final long time;
+    protected long time;
 
     /**
      * Create event which will happen the given amount of nanoseconds later.
@@ -47,6 +47,10 @@ public abstract class Event implements Comparable<Event>, Serializable {
     @Override
     public int compareTo(Event o) {
         return (this.time < o.time ? -1 : (this.time == o.time ? (this.eid < o.eid ? -1 : (this.eid == o.eid ? 0 : 1)) : 1));
+    }
+    
+    public boolean retrigger() {
+    	return false;
     }
 
 }

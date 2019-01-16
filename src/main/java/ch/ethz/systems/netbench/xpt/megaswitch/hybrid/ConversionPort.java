@@ -1,6 +1,8 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ch.ethz.systems.netbench.core.log.EmptyPortLogger;
@@ -67,6 +69,12 @@ public class ConversionPort extends EcnTailDropOutputPort{
 		return new EmptyPortLogger(this);
 	}
 
+    @Override
+    protected void onPacketDropped(IpHeader ipHeader) {
+    	 SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_ON_CONVERSION");
+        super.onPacketDropped(ipHeader);
+    }
+    
 
 
     public void onFlowFinished(long flowId) {

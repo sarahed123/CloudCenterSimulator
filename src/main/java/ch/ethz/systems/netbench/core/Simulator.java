@@ -232,7 +232,9 @@ public class Simulator {
 			if (now <= runtimeNanoseconds) {
 				eventQueue.poll();
 				event.trigger();
-						
+				if(event.retrigger()) {
+					registerEvent(event);
+				}
 
 			}
 

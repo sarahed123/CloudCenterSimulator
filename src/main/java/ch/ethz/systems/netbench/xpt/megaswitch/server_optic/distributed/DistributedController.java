@@ -181,6 +181,12 @@ public class DistributedController extends SemiXpanderServerOptics
         state += "dest no path count " + (SimulationLogger.getStatistic("DISTRIBUTED_DEST_ENDPOINT_NO_PATH") - destNoPath) + "\n";
         state += "source no path count " + (SimulationLogger.getStatistic("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH") -sourceNoPath) + "\n";
         
+        state += "ack loss " + SimulationLogger.getStatistic("ACK_PACKETS_DROPPED") + "\n";
+        state += "packet loss " + SimulationLogger.getStatistic("PACKETS_DROPPED") + "\n";
+        state += "packet loss at source " + SimulationLogger.getStatistic("PACKETS_DROPPED_AT_SOURCE")+ "\n";
+        state += "packet loss at conversion " + SimulationLogger.getStatistic("PACKETS_DROPPED_ON_CONVERSION")+ "\n";
+        
+        
         doubleSuccesses = SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
         successes = SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT");
         failures = SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT");
