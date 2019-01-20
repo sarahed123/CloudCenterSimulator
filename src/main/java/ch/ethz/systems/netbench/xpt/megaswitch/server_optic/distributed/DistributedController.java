@@ -22,6 +22,8 @@ public class DistributedController extends SemiXpanderServerOptics
 	long torNoPath = 0;
 	long destNoPath = 0;
 	long sourceNoPath = 0;
+	int concurrentPaths = 0;
+	int  maxConcurrentPaths = 0;
 	
     public DistributedController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
@@ -173,6 +175,7 @@ public class DistributedController extends SemiXpanderServerOptics
         System.out.println("oldest states");
         SimulationLogger.printOldestDistProtocolStates();
         String state = " Allocated " + mAllocateddPathsNum + " Deallocated " + mDeAllocatedPathsNum + "\n";
+        state = " max concurrent paths " + maxConcurrentPaths + "\n";
         state += "double success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT") - doubleSuccesses) + "\n";
         state += "success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT") - successes) + "\n";
         state += "failure count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT") -failures) + "\n";
@@ -202,10 +205,16 @@ public class DistributedController extends SemiXpanderServerOptics
 
     public void onDeallocation() {
         mDeAllocatedPathsNum++;
+        concurrentPaths--;
+        assert(concurrentPaths>=0);
     }
 
     public void onAallocation() {
         mAllocateddPathsNum++;
+        concurrentPaths++;
+        if(concurrentPaths > maxConcurrentPaths) {
+        	maxConcurrentPaths = concurrentPaths;
+        }
     }
 
 	public boolean serverHasColor(int server, int color,boolean incomming) {
