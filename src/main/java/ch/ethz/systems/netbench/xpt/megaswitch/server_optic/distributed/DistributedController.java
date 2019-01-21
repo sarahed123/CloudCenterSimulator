@@ -189,6 +189,7 @@ public class DistributedController extends SemiXpanderServerOptics
         state += "packet loss at source " + SimulationLogger.getStatistic("PACKETS_DROPPED_AT_SOURCE")+ "\n";
         state += "packet loss at conversion " + SimulationLogger.getStatistic("PACKETS_DROPPED_ON_CONVERSION")+ "\n";
         state += "auto teardowns " + SimulationLogger.getStatistic("AUTO_CIRCUIT_TEARDOWN_COUNT")+ "\n";
+        state += "packets on circuit " + SimulationLogger.getStatistic("PACKET_ROUTED_THROUGH_CIRCUIT")+ "\n";
         
         doubleSuccesses = SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
         successes = SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT");
