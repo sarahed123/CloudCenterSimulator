@@ -50,7 +50,7 @@ public class DistributedOpticServer extends OpticServer {
 		mPendingRequests = new HashMap<>();
 		NUM_PATH_TO_RANDOMIZE = configuration.getIntegerPropertyOrFail("num_paths_to_randomize");
 		mConfigurationTime = configuration.getLongPropertyOrFail("static_configuration_time_ns");
-		mCircuitTeardowTimeout = configuration.getLongPropertyWithDefault("circuit_teardown_timeout_ns",50000);
+		mCircuitTeardowTimeout = configuration.getLongPropertyWithDefault("circuit_teardown_timeout_ns",5000);
 		mTeardownEventsMap = new HashMap<>();
 		//        NUM_COLORS_TO_RANDOMIZE = configuration.getIntegerPropertyOrFail("num_colors_to_randomize");
 
@@ -90,7 +90,7 @@ public class DistributedOpticServer extends OpticServer {
 			JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
 			assert(((DistributedController) getRemoteRouter()).serverHasColor(this.identifier, tcpPacket.getColor(), false));
 			this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
-//			this.mTeardownEventsMap.get(rp.getOriginalServerDest()).reset(mCircuitTeardowTimeout);
+			this.mTeardownEventsMap.get(rp.getOriginalServerDest()).reset(mCircuitTeardowTimeout);
 			jumbo.onCircuitEntrance(packet.getFlowId());
 			onCircuitEntrance(packet.getFlowId());
 			SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
@@ -275,9 +275,9 @@ public class DistributedOpticServer extends OpticServer {
 	private void assignCircuit(ReservationPacket ep) {
 		changeState(ep.getOriginalServerDest(),State.HAS_CIRCUIT);
 		mFlowReservation.put(ep.getOriginalServerDest(),ep);
-//		TeardownEvent tearDownEvent = new TeardownEvent(mCircuitTeardowTimeout,ep,this);
-//		mTeardownEventsMap.put(ep.getOriginalServerDest(),tearDownEvent);
-//		Simulator.registerEvent(tearDownEvent);
+		TeardownEvent tearDownEvent = new TeardownEvent(mCircuitTeardowTimeout,ep,this);
+		mTeardownEventsMap.put(ep.getOriginalServerDest(),tearDownEvent);
+		Simulator.registerEvent(tearDownEvent);
 		
 	}
 
@@ -309,7 +309,7 @@ public class DistributedOpticServer extends OpticServer {
 		rp.setDeallocation();
 		rp.reverse();
 		routeThroughtPacketSwitch(rp);
-//		this.mTeardownEventsMap.get(rp.getOriginalServerDest()).finish();
+		this.mTeardownEventsMap.get(rp.getOriginalServerDest()).finish();
 		changeState(rp.getOriginalServerDest(),State.NO_CIRCUIT);
 	}
 

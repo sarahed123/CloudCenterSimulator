@@ -175,7 +175,7 @@ public class DistributedController extends SemiXpanderServerOptics
         System.out.println("oldest states");
         SimulationLogger.printOldestDistProtocolStates();
         String state = " Allocated " + mAllocateddPathsNum + " Deallocated " + mDeAllocatedPathsNum + "\n";
-        state = " max concurrent paths " + maxConcurrentPaths + "\n";
+        state += " max concurrent paths " + maxConcurrentPaths + "\n";
         state += "double success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT") - doubleSuccesses) + "\n";
         state += "success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT") - successes) + "\n";
         state += "failure count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT") -failures) + "\n";
@@ -188,7 +188,7 @@ public class DistributedController extends SemiXpanderServerOptics
         state += "packet loss " + SimulationLogger.getStatistic("PACKETS_DROPPED") + "\n";
         state += "packet loss at source " + SimulationLogger.getStatistic("PACKETS_DROPPED_AT_SOURCE")+ "\n";
         state += "packet loss at conversion " + SimulationLogger.getStatistic("PACKETS_DROPPED_ON_CONVERSION")+ "\n";
-        
+        state += "auto teardowns " + SimulationLogger.getStatistic("AUTO_CIRCUIT_TEARDOWN_COUNT")+ "\n";
         
         doubleSuccesses = SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
         successes = SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT");
