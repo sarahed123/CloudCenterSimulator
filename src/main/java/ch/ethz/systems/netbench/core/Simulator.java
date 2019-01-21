@@ -33,7 +33,7 @@ import java.util.Set;
 public class Simulator {
 
 	// Time interval at which to show the percentage of progress
-	private static final long PROGRESS_SHOW_INTERVAL_NS = 10000000L; // 0.01s = 10mss
+	private static long PROGRESS_SHOW_INTERVAL_NS = 10000000L; // 0.01s = 10mss
 
 	// Main ordered event queue (run variable)
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
@@ -197,7 +197,7 @@ public class Simulator {
 		if (flowsFromStartToFinish <= 0) {
 			flowsFromStartToFinish = Long.MAX_VALUE;
 		}
-		
+		PROGRESS_SHOW_INTERVAL_NS = runtimeNanoseconds/50l;
 		
 		// Log start
 		System.out.println("Starting simulation (total time: " + runtimeNanoseconds + "ns);...");

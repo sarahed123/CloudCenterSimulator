@@ -1,6 +1,7 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed;
 
 import ch.ethz.systems.netbench.core.Simulator;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Event;
 
 public class TeardownEvent extends Event {
@@ -22,6 +23,7 @@ public class TeardownEvent extends Event {
 	public void trigger() {
 		if(active) {
 			mDevice.teardownCircuit(mPacket);
+			SimulationLogger.increaseStatisticCounter("AUTO_CIRCUIT_TEARDOWN_COUNT");
 			finished = true;
 		}
 			
