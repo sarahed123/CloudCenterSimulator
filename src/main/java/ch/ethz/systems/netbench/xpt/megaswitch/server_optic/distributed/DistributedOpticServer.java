@@ -282,6 +282,8 @@ public class DistributedOpticServer extends OpticServer {
 	}
 
 	protected void teardownCircuit(ReservationPacket ep) {
+		DistributedController controller = (DistributedController) getRemoteRouter();
+		controller.deallocateServerColor(this.identifier,ep.getColor(),false);
 		ep.reverse();
 		ep.setDeallocation();
 		routeThroughtPacketSwitch(ep);
