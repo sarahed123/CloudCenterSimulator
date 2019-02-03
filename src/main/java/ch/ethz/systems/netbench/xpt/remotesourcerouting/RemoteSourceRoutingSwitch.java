@@ -92,6 +92,12 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 		
 	}
 
+	/**
+	 * will update the forwarding table according to src,dst pair
+	 * @param src
+	 * @param dest
+	 * @param nextHop
+	 */
 	public void updateForwardingTable(int src, int dest, int nextHop) {
 		forwardingTable.put(new ImmutablePair<Integer,Integer>(src,dest), targetIdToOutputPort.get(nextHop));
 		

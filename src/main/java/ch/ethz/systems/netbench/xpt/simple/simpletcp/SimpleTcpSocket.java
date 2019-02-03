@@ -461,6 +461,7 @@ public class SimpleTcpSocket extends Socket {
                 ).setEchoFlowletId(packet.getFlowletId())))
                  .setSelectiveAck(selectiveAckSet.createSelectiveAckData()))
                  .setEchoDepartureTime(packet.getDepartureTime())
+                 .markOnCircuit(packet.isOnCircuit()) // mark on circuit if relevant
         );
 
     }

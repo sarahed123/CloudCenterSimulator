@@ -18,6 +18,9 @@ import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.ReservationPacket;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+/**
+ * this class represents an optic server ToR
+ */
 public class OpticServerToR extends OpticElectronicHybrid {
 
     public OpticServerToR(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
@@ -25,6 +28,10 @@ public class OpticServerToR extends OpticElectronicHybrid {
 
     }
 
+    /**
+     * receive a packet, encapsulate it, and send.
+     * @param genericPacket
+     */
     @Override
     public void receive(Packet genericPacket) {
 
@@ -36,7 +43,11 @@ public class OpticServerToR extends OpticElectronicHybrid {
     }
 
 
-
+    /**
+     * will connect all hosts to its optic device and vice versa
+     * @param networkDevice
+     * @param networkConf
+     */
     @Override
     public void extend(NetworkDevice networkDevice, NBProperties networkConf){
         super.extend(networkDevice,networkConf);
@@ -66,6 +77,14 @@ public class OpticServerToR extends OpticElectronicHybrid {
 //        return (TcpPacket)packet;
 //    }
 
+    /**
+     * will tell the source server that flowId has finished
+     * @param source
+     * @param dest
+     * @param serverSource
+     * @param serverDest
+     * @param flowId
+     */
     @Override
     public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
 

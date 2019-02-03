@@ -40,6 +40,7 @@ public class SimulationLogger {
 	private static BufferedWriter writerPortUtilizationCsvFile;
 	private static BufferedWriter writerRemoteRouterPathLog;
 	private static BufferedWriter writerFlowOnCircuit;
+	private static BufferedWriter writerFlowsOnCircuitEntranceTime;
 	private static BufferedWriter writerRemoteRouterStateLogCSV;
 	private static BufferedWriter writerRemoteRouterDropStatisticsCSV;
 
@@ -52,7 +53,9 @@ public class SimulationLogger {
 	private static List<PortLogger> portLoggers = new ArrayList<>();
 	private static List<FlowLogger> flowLoggers = new ArrayList<>();
 	private static List<LoggerCallback> callbacks = new ArrayList<>();
-	private static Set<Long> flowsOnCircuit = new HashSet<>();
+	private static HashMap<Long,Long> flowsOnCircuit = new HashMap<>();
+
+	private static HashMap<Long,Set<Long>> flowsRequestCircuit = new HashMap<>();
 	// Statistic counters
 	private static Map<String, Long> statisticCounters = new HashMap<>();
 
@@ -63,6 +66,7 @@ public class SimulationLogger {
 
 	// Settings
 	private static boolean logHumanReadableFlowCompletionEnabled;
+	private static BufferedWriter flowRequestLogWriter;
 
 	/**
 	 * Increase a basic statistic counter with the given name by one.
@@ -168,7 +172,8 @@ public class SimulationLogger {
 			writerRemainingPaths = openWriter("active_paths.log");
 			// Info
 			writerRunInfoFile = openWriter("initialization.info");
-
+			flowRequestLogWriter = openWriter("flow_circuit_request_log.log");
+			writerFlowsOnCircuitEntranceTime = openWriter("flow_circuit_entrance_times.log");
 			writerFlowOnCircuit = openWriter("flows_on_circuit.log");
 			// Port log writers
 			writerPortQueueStateFile = openWriter("port_queue_length.csv.log");
@@ -337,6 +342,8 @@ public class SimulationLogger {
 			writerRemoteRouterStateLogCSV.close();
 			writerRemoteRouterDropStatisticsCSV.close();
 			writerFlowOnCircuit.close();
+			writerFlowsOnCircuitEntranceTime.close();
+			flowRequestLogWriter.close();
 			writerRemainingPaths.close();
 			// Also added ones are closed automatically at the end
 			for (BufferedWriter writer : writersAdded.values()) {
@@ -363,13 +370,29 @@ public class SimulationLogger {
 
 	private static void logCircuitFlows() {
 		try {
-			for (long id : flowsOnCircuit) {
+			for (long id : flowsOnCircuit.keySet()) {
 
 				writerFlowOnCircuit.write(Long.toString(id) + "\n");
+				writerFlowsOnCircuitEntranceTime.write(id + ":" + flowsOnCircuit.get(id) + "\n");
+			}
+			for (long id : flowsRequestCircuit.keySet()) {
+				flowRequestLogWriter.write(id + ":");
+				Set<Long> requests = new TreeSet(flowsRequestCircuit.get(id));
+				for(long request: requests){
+					flowRequestLogWriter.write(request + ",");
+				}
+				if(flowsOnCircuit.keySet().contains(id)){
+					flowRequestLogWriter.write("TRUE");
+
+				}else{
+					flowRequestLogWriter.write("FALSE");
+				}
+				flowRequestLogWriter.write("\n");
 			}
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
+
 
 	}
 
@@ -677,7 +700,10 @@ public class SimulationLogger {
 	}
 
 	public static void registerFlowOnCircuit(long flowId) {
-		flowsOnCircuit.add(flowId);
+		if(!flowsOnCircuit.containsKey(flowId)){
+			flowsOnCircuit.put(flowId,Simulator.getCurrentTime());
+		}
+
 	}
 
     public static long getStatistic(String key) {
@@ -730,5 +756,11 @@ public class SimulationLogger {
 		
 		
 		
+	}
+
+	public static void registerFlowCircuitRequest(long flowId) {
+		Set requests = flowsRequestCircuit.getOrDefault(flowId,new HashSet<>());
+		requests.add(Simulator.getCurrentTime());
+		flowsRequestCircuit.put(flowId,requests);
 	}
 }

@@ -16,10 +16,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 
 public class SemiXpanderServerOptics extends SemiXpander {
-    protected HashMap<Integer,Set<Integer>> mServerTransmitColorsUsed;
-    protected HashMap<Integer,Set<Integer>> mServerReceiveColorsUsed;
-    int mCurrentServerSource;
-    int mCurrentServerDest;
+    protected HashMap<Integer,Set<Integer>> mServerTransmitColorsUsed; // which colors are going into some destination
+    protected HashMap<Integer,Set<Integer>> mServerReceiveColorsUsed; // which colors are going out of some source
+    int mCurrentServerSource; // helper field - should probably not be global
+    int mCurrentServerDest; // --- """" ----
     public SemiXpanderServerOptics(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
         mServerTransmitColorsUsed = new HashMap<>();
@@ -29,8 +29,14 @@ public class SemiXpanderServerOptics extends SemiXpander {
     }
 
 
-
-
+    /**
+     * specific implementation for server optics setup
+     * @param sourceToR
+     * @param destToR
+     * @param sourceServer
+     * @param destServer
+     * @param flowId
+     */
     @Override
     public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
         mCurrentServerDest = destServer;
@@ -81,6 +87,14 @@ public class SemiXpanderServerOptics extends SemiXpander {
 
     }
 
+    /**
+     * pecific implementation for server optics setup
+     * @param sourceToR
+     * @param destToR
+     * @param serverSource
+     * @param serverDest
+     * @param flowId
+     */
     public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
 
         Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
@@ -147,6 +161,13 @@ public class SemiXpanderServerOptics extends SemiXpander {
         super.removePathFromGraph(p);
     }
 
+    /**
+     * configures the switches forwarding table according to some path
+     * @param source
+     * @param dest
+     * @param p
+     * @param flowId
+     */
     @Override
     protected void updateForwardingTables(int source, int dest, Path p, long flowId) {
         super.updateForwardingTables(source,dest,p,flowId);

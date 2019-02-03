@@ -1,34 +1,36 @@
-package ch.ethz.systems.netbench.xpt.remotesourcerouting.semi;
+package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 
-import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.network.Intermediary;
-import ch.ethz.systems.netbench.core.network.TransportLayer;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * this class holds a set of precomputed paths which it
- * will check with a centrelized controller for availability.
- * as opposed to requesting a new path all the time.
- */
-public class SemiRemoteRoutingSwitch extends RemoteSourceRoutingSwitch {
-    protected HashMap<Integer,List<List<Integer>>>  mPathMap; // a map containing lists of paths based on destination id
-
-    public SemiRemoteRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
-        super(identifier, transportLayer, intermediary, configuration);
-        mPathMap = readMap(configuration.getPropertyOrFail("semi_remote_routing_path_dir"));
+@RunWith(MockitoJUnitRunner.class)
+public class ReadPathMapTest {
+    HashMap<Integer,HashMap<Integer,List<List<Integer>>>> mPathMap;
+    String path;
+    @Before
+    public void setup() throws IOException {
+        path = "/cs/labs/schapiram/inonkp/ksp/paths/xpander_n333_d8_v2/10";
+        mPathMap = new HashMap<>();
+        for(int i=0; i<333; i++){
+            mPathMap.put(i,readMap(i));
+        }
     }
 
-    protected HashMap<Integer,List<List<Integer>>>  readMap(String path) {
+    protected HashMap<Integer,List<List<Integer>>> readMap(int identifier) {
         HashMap<Integer,List<List<Integer>>> map = new HashMap<>();
         List<Integer>[] paths;
         try {
-            paths = readListFromFile(path +"/" + this.identifier +"_obj");
+            paths = readListFromFile(path +"/" + identifier +"_obj");
 
 
         } catch (IOException e) {
@@ -48,11 +50,6 @@ public class SemiRemoteRoutingSwitch extends RemoteSourceRoutingSwitch {
         return map;
     }
 
-    /**
-     * this method will remove cycles for some path
-     * @param p
-     * @return
-     */
     private List<Integer> removeCycles(List<Integer> p) {
         HashMap<Integer,Boolean> visited = new HashMap<>();
         LinkedList<Integer> ret = new LinkedList<>();
@@ -85,7 +82,29 @@ public class SemiRemoteRoutingSwitch extends RemoteSourceRoutingSwitch {
         return paths;
     }
 
-    public List<List<Integer>> getPathsTo(int dest){
-        return mPathMap.get(dest);
+    @Test
+    public void checkPathsLengths(){
+        int pathLenghts[] = new int[20];
+        for(int i =0; i<20; i++){
+            pathLenghts[i] = 0;
+        }
+        for(int i=0; i<333; i++){
+            HashMap<Integer,List<List<Integer>>> map = mPathMap.get(i);
+            for(int index : map.keySet()){
+                if(index==i){
+                    continue;
+                }
+                for(List paths: map.get(index)){
+                    pathLenghts[paths.size()]++;
+                }
+
+            }
+
+        }
+        for(int i =0; i<20; i++){
+            System.out.println("path of length " + i + " " + pathLenghts[i]);
+        }
     }
+
+
 }

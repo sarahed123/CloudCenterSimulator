@@ -32,6 +32,12 @@ import edu.asu.emit.algorithm.graph.paths_filter.PathsFilterFirst;
 import edu.asu.emit.algorithm.graph.paths_filter.RandomPathsFilter;
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * This class is the base of all xpander routers.
+ * Its main functionallity is to use dijkstra to find paths in graph.
+ * Only used in initial experiments, since dijkstra is presumably
+ * too long.
+ */
 public class XpanderRouter extends RemoteRoutingController{
 	private final double dijkstra_max_weigh;
 	private int flowFailuresSample;
@@ -45,7 +51,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	DijkstraShortestPathAlg dijkstraAlg;
 	PathsFilter pathsFilter;
 	PathAlgorithm pathAlg;
-	protected Graph[] mGraphs;
+	protected Graph[] mGraphs; // an array of graphs to simulate colors
 	protected Map<Integer, NetworkDevice> mIdToNetworkDevice;
 	boolean mIsServerOptics;
 	public XpanderRouter(Map<Integer, NetworkDevice> idToNetworkDevice,NBProperties configuration){
@@ -54,13 +60,17 @@ public class XpanderRouter extends RemoteRoutingController{
 		initGraphs(configuration,idToNetworkDevice);
 		//experimental!
 
+		// unused
 		mIsServerOptics = configuration.getBooleanPropertyWithDefault("host_optics_enabled", false);
+
+		// the max cuncurrent flows that a source can transmit optically
 		mMaxNumJFlowsOncircuit = configuration.getIntegerPropertyWithDefault("max_num_flows_on_circuit",Integer.MAX_VALUE);
 		if(mMaxNumJFlowsOncircuit==Integer.MAX_VALUE){
 			System.out.println("WARNING: property max_num_flows_on_circuit is set to infinity. Is that what you want?");
 		}
 
 		mIdToNetworkDevice = idToNetworkDevice;
+		// main graph should not be used for multiple wave lenghts
 		mMainGraph =  configuration.getGraph();
 		mMainGraph.resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
 				,idToNetworkDevice,configuration.getIntegerPropertyWithDefault("edge_capacity",1));
@@ -69,6 +79,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		flowCounter = 0;
 		flowFailuresSample = 0;
 		String pathsFilterKey = configuration.getPropertyWithDefault("paths_filter","filter_first");
+
+		// filters filter paths by some rule
+		// not needed
 		switch(pathsFilterKey) {
 		case "filter_first":
 			pathsFilter = new PathsFilterFirst(mMainGraph);
@@ -113,6 +126,11 @@ public class XpanderRouter extends RemoteRoutingController{
 		}
 	}
 
+	/**
+	 * inits graph copies
+	 * @param configuration
+	 * @param idToNetworkDevice
+	 */
 	protected void initGraphs(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
 		mGraphs = new Graph[configuration.getIntegerPropertyOrFail("circuit_wave_length_num")];
 		for(int i = 0; i < mGraphs.length; i++){
@@ -123,6 +141,14 @@ public class XpanderRouter extends RemoteRoutingController{
 	}
 
 
+	/**
+	 * this is the base method for circuit creation
+	 * @param sourceToR
+	 * @param destToR
+	 * @param sourceServer
+	 * @param destServer
+	 * @param flowId
+	 */
 	public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
 		ImmutablePair pair = new ImmutablePair<>(sourceServer,destServer);
 		if(mPaths.containsKey(pair)) {
@@ -157,8 +183,14 @@ public class XpanderRouter extends RemoteRoutingController{
 		logRoute(p,sourceToR,destToR,flowId,Simulator.getCurrentTime(),true);
 
 	}
-	
 
+
+	/**
+	 * uses dijkstra to generate a path in the graph
+	 * @param source
+	 * @param dest
+	 * @return
+	 */
 	protected Path generatePathFromGraph(int source,int dest) {
 		Paths ps;
 		Path p = null;
@@ -179,6 +211,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		return p;
 	}
 
+	/**
+	 * resets capacities and paths map
+	 */
 	public void reset(){
 		for(int i = 0; i<mGraphs.length; i++) {
 			mGraphs[i].resetCapcities(configuration.getBooleanPropertyWithDefault("servers_inifinite_capcacity",false)
@@ -189,6 +224,14 @@ public class XpanderRouter extends RemoteRoutingController{
 		mPaths.clear();
 	}
 
+	/**
+	 * recovers a path by increasing all capacities on relevant edges.
+	 * @param sourceToR
+	 * @param destToR
+	 * @param serverSource
+	 * @param serverDest
+	 * @param flowId
+	 */
 	public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
 
 		Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
@@ -219,6 +262,11 @@ public class XpanderRouter extends RemoteRoutingController{
 		mDeAllocatedPathsNum++;
 	}
 
+	/**
+	 * removes a path from a graph, based on the path color,
+	 * by decreasing the capacity.
+	 * @param p
+	 */
 	protected void removePathFromGraph(Path p) {
 		List<Vertex> pathAsList = p.getVertexList();
 		int curr = pathAsList.get(0).getId();
@@ -232,6 +280,13 @@ public class XpanderRouter extends RemoteRoutingController{
 		
 	}
 
+	/**
+	 * not fully implemented and not used
+	 * @param src the id of the switch that will get the new path
+	 * @param dst the destination of the path
+	 * @param newPath
+	 * @param flowId
+	 */
 	@Override
 	protected void switchPath(int src,int dst, Path newPath,long flowId) {
 		//not tested!!!

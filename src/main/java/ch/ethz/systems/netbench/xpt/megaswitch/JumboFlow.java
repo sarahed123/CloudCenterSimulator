@@ -8,11 +8,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * the Jumbo Flow class aggregates flows based on some condition
+ */
 public class JumboFlow {
     private static long sIdCounter = 0;
     long mId;
     long mSizeByte;
+
+    // a map which keeps track on individual flow sizes.
     HashMap<Long,Long> mFlowIdToSize;
+
     int mSource;
     int mDest;
     boolean onCircuit;
@@ -27,10 +33,18 @@ public class JumboFlow {
         onCircuit = false;
     }
 
+    /**
+     * returns the jumbo flow size
+     * @return
+     */
     public long getSizeByte(){
         return mSizeByte;
     }
 
+    /**
+     * adds the packet size to the jumbo flow size
+     * @param packet
+     */
     public void onPacketDispatch(TcpPacket packet) {
         if(packet.isACK()){
             return;
@@ -47,6 +61,10 @@ public class JumboFlow {
 
     }
 
+    /**
+     * removes a sub flow.
+     * @param flowId
+     */
     public void onFlowFinished(long flowId){
         if(!mFlowIdToSize.containsKey(flowId)){
             return;
@@ -69,6 +87,9 @@ public class JumboFlow {
         return mId;
     }
 
+    /**
+     * called when this jumbo flow has entered the circuit (should this go into a sub class)
+     */
     public void onCircuitEntrance() {
 	    if(!onCircuit){
 	        onCircuit = true;
@@ -92,14 +113,31 @@ public class JumboFlow {
 	    return mFlowIdToSize.containsKey(flowId);
     }
 
+    /**
+     * gets the size for a specific flow
+     * @param flowId
+     * @return
+     */
     public long getSizeByte(long flowId) {
 	    if(!mFlowIdToSize.containsKey(flowId)) return 0;
 	    return mFlowIdToSize.get(flowId);
     }
 
+    /**
+     * called when a specific flow enters the circuit
+     * @param flowId
+     */
     public void onCircuitEntrance(long flowId) {
 	    SimulationLogger.registerFlowOnCircuit(flowId);
         flowsOnCircuit.add(flowId);
 
+    }
+
+    /**
+     * resets flow size in db.
+     * @param flowId
+     */
+    public void resetFlow(long flowId) {
+        mFlowIdToSize.put(flowId,0l);
     }
 }

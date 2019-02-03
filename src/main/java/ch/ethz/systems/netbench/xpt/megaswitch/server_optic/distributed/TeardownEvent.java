@@ -23,6 +23,7 @@ public class TeardownEvent extends Event {
 	public void trigger() {
 		if(active) {
 			mDevice.teardownCircuit(mPacket);
+
 			SimulationLogger.increaseStatisticCounter("AUTO_CIRCUIT_TEARDOWN_COUNT");
 			finished = true;
 		}

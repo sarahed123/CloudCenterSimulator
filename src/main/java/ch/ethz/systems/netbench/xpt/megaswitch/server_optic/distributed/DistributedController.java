@@ -24,7 +24,9 @@ public class DistributedController extends SemiXpanderServerOptics
 	long sourceNoPath = 0;
 	int concurrentPaths = 0;
 	int  maxConcurrentPaths = 0;
-	
+	long edgesUsed = 0;
+    private long edgesUsedPerFailureSum = 0;
+
     public DistributedController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
         System.out.println("running distributed controller with max flows on circuit " + mMaxNumJFlowsOncircuit);
@@ -45,10 +47,14 @@ public class DistributedController extends SemiXpanderServerOptics
 
     public void decreaseEdgeCapacity(int source, int nextHop, int color) {
         mGraphs[color].decreaseCapacity(new ImmutablePair<>(source,nextHop));
+        edgesUsed++;
+
     }
 
     public void increaseEdgeCapacity(int source, int nextHop, int color) {
         mGraphs[color].increaseCapacity(new ImmutablePair<>(source,nextHop));
+        edgesUsed--;
+        assert(edgesUsed>=0);
     }
 
     public boolean serverColorAvailable(int server, int color, boolean incomming) {
@@ -177,8 +183,9 @@ public class DistributedController extends SemiXpanderServerOptics
         String state = " Allocated " + mAllocateddPathsNum + " Deallocated " + mDeAllocatedPathsNum + "\n";
         state += " max concurrent paths " + maxConcurrentPaths + "\n";
         state += "double success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT") - doubleSuccesses) + "\n";
+        long failNum = (SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT") -failures);
         state += "success count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT") - successes) + "\n";
-        state += "failure count " + (SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT") -failures) + "\n";
+        state += "failure count " + failNum  + "\n";
         
         state += "tor no path count " + (SimulationLogger.getStatistic("DISTRIBUTED_TOR_NO_PATH") - torNoPath) + "\n";
         state += "dest no path count " + (SimulationLogger.getStatistic("DISTRIBUTED_DEST_ENDPOINT_NO_PATH") - destNoPath) + "\n";
@@ -189,12 +196,15 @@ public class DistributedController extends SemiXpanderServerOptics
         state += "packet loss at source " + SimulationLogger.getStatistic("PACKETS_DROPPED_AT_SOURCE")+ "\n";
         state += "packet loss at conversion " + SimulationLogger.getStatistic("PACKETS_DROPPED_ON_CONVERSION")+ "\n";
         state += "auto teardowns " + SimulationLogger.getStatistic("AUTO_CIRCUIT_TEARDOWN_COUNT")+ "\n";
-        state += "packets on circuit " + SimulationLogger.getStatistic("PACKET_ROUTED_THROUGH_CIRCUIT")+ "\n";
+        state += "packets on circuit " + SimulationLogger.getStatistic("PACKET_ROUTED_THROUGH_CIRCUIT") + "\n";
+
         
         doubleSuccesses = SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
         successes = SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT");
         failures = SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT");
-        
+
+        state += "avg edge used per failure " + edgesUsedPerFailureSum/failures + "\n";
+
         torNoPath = SimulationLogger.getStatistic("DISTRIBUTED_TOR_NO_PATH");
         destNoPath = SimulationLogger.getStatistic("DISTRIBUTED_DEST_ENDPOINT_NO_PATH");
         sourceNoPath = SimulationLogger.getStatistic("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH");
@@ -232,4 +242,8 @@ public class DistributedController extends SemiXpanderServerOptics
     	   return getTransmittingSources(server).contains(color)&& mTransmittingSources.getOrDefault(server,0)<=mMaxNumJFlowsOncircuit;
        }
 	}
+
+    public void onPathFailure() {
+        edgesUsedPerFailureSum += edgesUsed;
+    }
 }

@@ -44,7 +44,6 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
         TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
-//        if(!encapsulated.isACK()) System.out.println(encapsulated.getFlowId() + " " + encapsulated.getSequenceNumber() + " " + Simulator.getCurrentTime());
         JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
 
@@ -53,7 +52,6 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         		routeThroughCircuit(encapsulated,jumboFlow.getId(),packet.getSourceId(),packet.getDestinationId());
         		return;
         	}catch(NoPathException e) {
-                //SimulationLogger.increaseStatisticCounter("num_path_failures");
             }
         }
         routeThroughtPacketSwitch(encapsulated);
