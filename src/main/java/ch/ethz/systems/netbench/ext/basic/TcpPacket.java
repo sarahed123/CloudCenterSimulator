@@ -30,6 +30,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
 	private int mPrevHop = -1;
 
 	protected int mColor = -1;
+    private boolean mOnCircuit;
 
     public TcpPacket(
             long flowId, long dataSizeByte,
@@ -54,6 +55,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.FIN = FIN;
         this.windowSize = windowSize;
         this.dataSizeByte = dataSizeByte;
+        mOnCircuit = false;
 
     }
 
@@ -78,6 +80,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.resent = tcpPacket.resent;
         this.mPrevHop = tcpPacket.mPrevHop;
         this.mColor = tcpPacket.mColor;
+        this.mOnCircuit = tcpPacket.mOnCircuit;
 	}
 
 	@Override
@@ -194,4 +197,13 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
 		mColor = color;
 		
 	}
+
+    public TcpPacket markOnCircuit(boolean onCircuit) {
+        mOnCircuit = onCircuit;
+        return this;
+    }
+
+    public boolean isOnCircuit() {
+        return mOnCircuit;
+    }
 }

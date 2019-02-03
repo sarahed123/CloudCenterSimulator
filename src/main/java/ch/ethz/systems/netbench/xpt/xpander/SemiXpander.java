@@ -16,6 +16,12 @@ public class SemiXpander extends XpanderRouter {
         super(idToNetworkDevice, configuration);
     }
 
+    /**
+     * generates a paths from a pre-existing set of paths.
+     * @param source
+     * @param dest
+     * @return
+     */
     @Override
     protected Path generatePathFromGraph(int source, int dest) {
 
@@ -38,6 +44,11 @@ public class SemiXpander extends XpanderRouter {
     }
 
 
+    /**
+     * checks paths availability on all graphs
+     * @param p
+     * @return
+     */
     private Path checkPath(List<Integer> p) {
         Path ret;
         for(int i = 0;i<mGraphs.length; i++){
@@ -51,6 +62,12 @@ public class SemiXpander extends XpanderRouter {
         throw new NoPathException();
     }
 
+    /**
+     * checks paths availability on a specific path
+     * @param p
+     * @param graphIndex
+     * @return
+     */
     protected Path checkPathInGraph(List<Integer> p, int graphIndex) {
         int curr = p.get(0);
         Path ret = new Path(0,graphIndex);

@@ -89,6 +89,7 @@ public class DistributedOpticServer extends OpticServer {
 			tcpPacket.setPrevHop(this.identifier);
 			JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
 			assert(((DistributedController) getRemoteRouter()).serverHasColor(this.identifier, tcpPacket.getColor(), false));
+			tcpPacket.markOnCircuit(true);
 			this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
 			this.mTeardownEventsMap.get(rp.getOriginalServerDest()).reset(mCircuitTeardowTimeout);
 			jumbo.onCircuitEntrance(packet.getFlowId());
@@ -111,6 +112,7 @@ public class DistributedOpticServer extends OpticServer {
 	}
 
 	protected void initRoute(IpPacket packet, long jumboFlowiId) {
+		SimulationLogger.registerFlowCircuitRequest(packet.getFlowId());
 		//SemiRemoteRoutingSwitch srrs = (SemiRemoteRoutingSwitch)this.optic;
 		int destToRId = getTransportLayer().getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
 		int sourceToRId = getTransportLayer().getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(getIdentifier());
@@ -159,10 +161,12 @@ public class DistributedOpticServer extends OpticServer {
 			}
 
 		}
+
 		if(pendingRequests==0) {
 			SimulationLogger.increaseStatisticCounter("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH");
 			throw new NoPathException();
 		}
+
 	}
 
 	protected List<List<Integer>>  getAvailablePaths(int destToRId) {
@@ -248,10 +252,12 @@ public class DistributedOpticServer extends OpticServer {
 				//                System.out.println("success on reserving " + ep.toString() + " at time " + Simulator.getCurrentTime());
 			}else{
 				assert(ep.isFailure());
-				SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_FAILURE_COUNT");
+
+				((DistributedController) getRemoteRouter()).onPathFailure();
 				//                System.out.println("failure for " + ep.toString());
 				((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), false);
 				if(pendingRequests==0 && mFlowState.get(ep.getOriginalServerDest())!=State.HAS_CIRCUIT){
+					SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_FAILURE_COUNT");
 					if(mFlowState.get(ep.getOriginalServerDest())!=State.IN_PROCESS) {
 						System.out.println(mFlowState.get(ep.getOriginalServerDest()));
 						System.out.println(ep.toString());
@@ -282,6 +288,8 @@ public class DistributedOpticServer extends OpticServer {
 	}
 
 	protected void teardownCircuit(ReservationPacket ep) {
+		JumboFlow jumbo = getJumboFlow(this.identifier,ep.getOriginalServerDest());
+		jumbo.resetFlow(ep.getFlowId());
 		DistributedController controller = (DistributedController) getRemoteRouter();
 		controller.deallocateServerColor(this.identifier,ep.getColor(),false);
 		ep.reverse();

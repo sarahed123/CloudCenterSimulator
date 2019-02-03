@@ -15,6 +15,9 @@ import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitc
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+/**
+ * optic serve class
+ */
 public class OpticServer extends JumboOpticElectronicHybrid {
     private final int ownToRId;
     /**
@@ -34,6 +37,15 @@ public class OpticServer extends JumboOpticElectronicHybrid {
 
     }
 
+    /**
+     * called when flowId has finished
+     * will recover the path if the corresponding jumbo flow finished
+     * @param source
+     * @param dest
+     * @param serverSource
+     * @param serverDest
+     * @param flowId
+     */
     public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
         JumboFlow jumboFlow = getJumboFlow(serverSource,serverDest);
         jumboFlow.onFlowFinished(flowId);
@@ -50,6 +62,10 @@ public class OpticServer extends JumboOpticElectronicHybrid {
         conversionUnit.onFlowFinish(serverSource,serverDest,jumboFlowId);
     }
 
+    /**
+     * receive method here, should probably solve code duplication
+     * @param genericPacket
+     */
     @Override
     public void receive(Packet genericPacket) {
         TcpPacket tcpPacket = (TcpPacket) genericPacket;
@@ -76,6 +92,12 @@ public class OpticServer extends JumboOpticElectronicHybrid {
         routeThroughtPacketSwitch((TcpPacket)genericPacket );
 
     }
+
+    /**
+     * inits the route through the centralized controller
+     * @param packet
+     * @param jumboFlowiId
+     */
     @Override
     protected void initRoute(IpPacket packet, long jumboFlowiId) {
         int destToRId = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());

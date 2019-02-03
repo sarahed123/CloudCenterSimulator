@@ -2,6 +2,9 @@ package ch.ethz.systems.netbench.xpt.megaswitch;
 
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
+/**
+ * unused as other solutions have been found.
+ */
 public class MegaPacket extends IpPacket {
 
 	IpPacket encapsulated;

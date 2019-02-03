@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.basic;
 
+import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.OutputPort;
@@ -7,6 +8,7 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -14,17 +16,18 @@ public class EcnTailDropOutputPort extends OutputPort {
 
     protected final long ecnThresholdKBits;
     protected final long maxQueueSizeBits;
+    protected final boolean mPrioritizeAcksOnCircuit;
 
     protected EcnTailDropOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
-        super(ownNetworkDevice, targetNetworkDevice, link, new LinkedBlockingQueue<Packet>());
-        this.maxQueueSizeBits = maxQueueSizeBytes * 8L;
-        this.ecnThresholdKBits = ecnThresholdKBytes * 8L;
+        this(ownNetworkDevice, targetNetworkDevice, link,maxQueueSizeBytes, ecnThresholdKBytes, new LinkedList<>());
     }
 
     protected EcnTailDropOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes, Queue queue) {
         super(ownNetworkDevice, targetNetworkDevice, link, queue);
         this.maxQueueSizeBits = maxQueueSizeBytes * 8L;
         this.ecnThresholdKBits = ecnThresholdKBytes * 8L;
+        NBProperties configs = ownNetworkDevice.getConfiguration();
+        mPrioritizeAcksOnCircuit = configs.getBooleanPropertyWithDefault("prioritize_acks_on_circuit",false);
     }
 
     /**
@@ -46,12 +49,28 @@ public class EcnTailDropOutputPort extends OutputPort {
 
         // Tail-drop enqueue
         if (hasBufferSpace(ipHeader)) {
+
             guaranteedEnqueue(packet);
         } else {
             onPacketDropped(ipHeader);
 
         }
 
+    }
+
+    @Override
+    protected void addPacketToQueue(Packet packet){
+        try{
+            TcpPacket tcpPacket = (TcpPacket) packet;
+            if(mPrioritizeAcksOnCircuit && tcpPacket.isOnCircuit() && tcpPacket.isACK()){
+                ((LinkedList)queue).addFirst(tcpPacket);
+                return;
+            }
+
+        }catch (ClassCastException e){
+
+        }
+        super.addPacketToQueue(packet);
     }
 
     protected void onPacketDropped(IpHeader ipHeader) {
