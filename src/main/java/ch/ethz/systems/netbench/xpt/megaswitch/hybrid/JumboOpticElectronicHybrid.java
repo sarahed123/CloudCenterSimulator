@@ -15,7 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 
-public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
+public class JumboOpticElectronicHybrid extends OpticElectronicHybrid implements MegaSwitch {
 
     protected long circuitThreshold;
     protected NetworkDevice electronic;
@@ -33,43 +33,15 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         mNumDeAllocatedFlows = 0;
 
     }
-    @Override
-    public void receive(Packet genericPacket) {
 
-        Encapsulatable packet = (Encapsulatable) genericPacket;
 
-        int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
-        TcpPacket encapsulated = (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
-        JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId());
-        jumboFlow.onPacketDispatch(encapsulated);
-        if(jumboFlow.getSizeByte()>=circuitThreshold && !jumboFlow.isTrivial() && !(encapsulated.isACK())) {
-            try {
-                routeThroughCircuit(encapsulated,jumboFlow.getId());
-                return;
-            }catch(NoPathException e) {
-                //SimulationLogger.increaseStatisticCounter("num_path_failures");
-            }
-        }
-        routeThroughtPacketSwitch(encapsulated);
-    }
-
-    protected JumboFlow getJumboFlow(int source, int dest){
-        JumboFlow jumboFlow = mJumboFlowMap.get(new ImmutablePair<>(source,dest));
-        if(jumboFlow==null) {
-            jumboFlow = new JumboFlow(source,dest);
-            mJumboFlowMap.put(new ImmutablePair<>(source,dest),jumboFlow);
-        }
-        return jumboFlow;
-    }
 
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
         this.electronic.receiveFromEncapsulating(packet);
 
     }
 
-    protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId) {
-        JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
-
+    protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId,int sourceToR, int destToR) {
         try {
             initRoute(packet,jumboFlowiId);
         }catch(FlowPathExists e) {
@@ -77,8 +49,7 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         }
         this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
 
-        jumbo.onCircuitEntrance();
-        SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
+
 
     }
 
@@ -86,49 +57,12 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),jumboFlowiId);
     }
 
-    @Override
-    protected void receiveFromIntermediary(Packet genericPacket) {
-        throw new RuntimeException("Hybrid switch is not a server");
-    }
 
-    protected void initConversionUnit(){
-        conversionUnit = new ConversionUnit(configuration,this,optic);
-    }
 
-    @Override
-    public void extend(NetworkDevice networkDevice, NBProperties networkConf){
-        String networkType = networkConf.getPropertyOrFail("network_type");
-        switch (networkType){
-            case "circuit_switch":
-                this.optic = networkDevice;
-                this.optic.setEncapsulatingDevice(this);
-                initConversionUnit();
-                break;
-            case "packet_switch":
-                this.electronic = networkDevice;
-                this.electronic.setEncapsulatingDevice(this);
-                break;
-            default:
-                throw new RuntimeException("bad network type " + networkType);
-        }
-    }
 
-    @Override
-    public void receiveFromEncapsulatedDevice(Packet packet) {
-        Encapsulatable ipPacket = (Encapsulatable) packet;
-
-        if (ipPacket.getDestinationId() == this.identifier) {
-            TcpPacket deEncapse = deEncapsulatePacket(ipPacket);
-            if(deEncapse.isACK() && deEncapse.isFIN()){
-//                onFlowFinished(this.identifier,ipPacket.getSourceId(),deEncapse.getDestinationId(),deEncapse.getSourceId(),deEncapse.getFlowId());
-            }
-            targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
-        }
-    }
-
-    protected TcpPacket deEncapsulatePacket(Encapsulatable packet) {
-        return (TcpPacket) packet.deEncapsualte();
-    }
+//    protected TcpPacket deEncapsulatePacket(Encapsulatable packet) {
+//        return (TcpPacket) packet.deEncapsualte();
+//    }
 
     public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
         JumboFlow jumboFlow = getJumboFlow(source,dest);
@@ -150,68 +84,11 @@ public class JumboOpticElectronicHybrid extends NetworkDevice implements MegaSwi
         }
     }
 
-    @Override
-    public NetworkDevice getAsNetworkDevice() {
-        return this;
-    }
 
-    @Override
-    public OutputPort getTargetOuputPort(int targetId, String technology) {
-        if(technology == null) {
-            return this.getTargetOuputPort(targetId);
-        }
-        switch (technology){
-            case "optic":
-                return optic.getTargetOuputPort(targetId);
-            case "electronic":
-                return electronic.getTargetOuputPort(targetId);
-            default:
-                throw new RuntimeException("bad technology " + technology);
-        }
-    }
 
-    @Override
-    public InputPort getSourceInputPort(int sourceNetworkDeviceId, String technology){
-        if(technology == null) {
-            return this.getSourceInputPort(sourceNetworkDeviceId);
-        }
-        switch (technology){
-            case "optic":
-                return optic.getSourceInputPort(sourceNetworkDeviceId);
-            case "electronic":
-                return electronic.getSourceInputPort(sourceNetworkDeviceId);
-            default:
-                throw new RuntimeException("bad technology " + technology);
-        }
-    }
 
-    @Override
-    public NetworkDevice getEncapsulatedDevice(String type) {
-        switch (type){
-            case "circuit_switch":
-                return optic;
-            case "packet_switch":
-                return electronic;
-            default:
-                throw new RuntimeException("bad network type " + type);
-        }
-    }
 
-    @Override
-    public boolean hadlePacketFromEncapsulating(Packet packet) {
-        return false;
-    }
 
-    protected RemoteRoutingController getRemoteRouter() {
-        return RemoteRoutingController.getInstance();
-    }
 
-    public String getState() {
-//        JumboFlow j = getJumboFlow(this.identifier,53);
-//        String state = "Node " + this.identifier + " Allocated: " + this.mNumAllocatedFlows + ", deAllocated: " + this.mNumDeAllocatedFlows + ", total size: " +
-//                j.getSizeByte() + ", on circuit " + j.isOnCircuit() + "\n";
-//        mNumDeAllocatedFlows = 0;
-//        mNumAllocatedFlows = 0;
-        return "";
-    }
+
 }

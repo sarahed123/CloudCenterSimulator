@@ -63,7 +63,7 @@ public class DistributedOpticServer extends OpticServer {
 	}
 
 	@Override
-	protected void routeThroughCircuit(IpPacket packet, long flowId){
+	protected void routeThroughCircuit(IpPacket packet, long flowId, int sourceToR, int destToR){
 
 		switch(mFlowState.getOrDefault(packet.getDestinationId(),State.NO_CIRCUIT)){
 
