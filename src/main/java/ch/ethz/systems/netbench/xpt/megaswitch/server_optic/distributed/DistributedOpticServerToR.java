@@ -11,17 +11,21 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Path;
 
+/**
+ * the DistributedOpticServerToR handles reservation packets.
+ * Its never meant to have an optic connection
+ */
 public class DistributedOpticServerToR extends OpticServerToR {
     public DistributedOpticServerToR(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary, configuration);
     }
 
     private void tryReserveResources(ReservationPacket rp) {
-        if(rp.idDeAllocation()) {
+        if(rp.idDeAllocation()) { // dont reserve for deallocation packets
         	throw new NoPathException();
         }
        
-        if(rp.isSuccess()){
+        if(rp.isSuccess()){ // dont do double reservations
             throw new FlowPathExists(rp.getFlowId());
         }
 
@@ -30,15 +34,9 @@ public class DistributedOpticServerToR extends OpticServerToR {
         if(nextHop == rp.getServerDest()){
         		
             try{
-//                ((DistributedController) getRemoteRouter()).reserveServerColor(rp.getServerDest(),color,true);
-                ((DistributedController) getRemoteRouter()).updateRoutingTable(identifier,rp.getPrevHop(),nextHop,rp.getColor());
-                //the end server will handle this.
-//                rp.markSuccess();
-//                Path p = new Path(rp.getPath(),rp.getColor());
-//                rp.setId(p.getId());
-//                SimulationLogger.regiserPathActive(p,true);
-//                ((DistributedController) getRemoteRouter()).onAallocation();
-//                rp.reverse();
+                // this part doesnt necessarily need to be here. can be moved bellow
+                ((DistributedController) getRemoteRouter()).updateRoutingTable(identifier,rp.getPrevHop(),nextHop,rp.getColor()); // update the routing table to point to server dest
+
             }catch(NoPathException e){
                 rp.markFailure();
                 rp.reverse();
@@ -47,7 +45,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
             return;
         }
         long capacity = ((DistributedController) getRemoteRouter()).checkEdgeCapacity(this.identifier,nextHop,color);
-        if(capacity==0){
+        if(capacity==0){ // edge of this color already in use
             rp.markFailure();
             rp.reverse();
             SimulationLogger.increaseStatisticCounter("DISTRIBUTED_TOR_NO_PATH");
@@ -55,7 +53,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
         }
 
         assert(capacity==1);
-        ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier,rp.getPrevHop(),nextHop,rp.getColor());
+        ((DistributedController) getRemoteRouter()).updateRoutingTable(this.identifier,rp.getPrevHop(),nextHop,rp.getColor()); // update the routing table to point to next hop
         ((DistributedController) getRemoteRouter()).decreaseEdgeCapacity(this.identifier,nextHop,color);
 
     }
@@ -82,20 +80,16 @@ public class DistributedOpticServerToR extends OpticServerToR {
 
         }catch (NoPathException e) {
         	deallocateReservation(rp);
-//            if(rp.finishedDealloc()) return;
+
         }
 
         int nextHop = rp.getNextHop(this.getIdentifier());
-        if(this.targetIdToOutputPort.containsKey(nextHop)){
-            //if this is true then we must be at the final stage
+        if(this.targetIdToOutputPort.containsKey(nextHop)){//if this is true then we must be at the final stage
             this.targetIdToOutputPort.get(nextHop).enqueue(rp);
             return;
         }
         rp.setPrevHop(this.identifier);
-//        System.out.println(rp);
-//        System.out.println(identifier);
-//        System.out.println(nextHop);
-//        System.out.println(rp.getFlowId());
+
         DistributedProtocolPort port = (DistributedProtocolPort) this.electronic.getTargetOuputPort(nextHop);
         port.enqueue(rp);
     }
@@ -103,13 +97,14 @@ public class DistributedOpticServerToR extends OpticServerToR {
     private void deallocateReservation(ReservationPacket rp) {
         int color = rp.getColor();
         int nextHop = rp.getNextHop(this.getIdentifier());
-        if(nextHop != rp.getServerDest()){
+        if(nextHop != rp.getServerDest()){ // increase the edge capacity for network edges
 
-//            System.out.println(identifier + " " + nextHop);
+            /**
+             * the edge to increase capacity for depends if we are reversed or not
+             */
             int l = rp.isReversed() ? nextHop : this.identifier;
             int r = rp.isReversed() ? this.identifier : nextHop;
-//            System.out.println(((DistributedController) getRemoteRouter()).checkEdgeCapacity(l,r,color));
-//            System.out.println(rp.toString());
+
             if(((DistributedController) getRemoteRouter()).checkEdgeCapacity(l,r,color)!=0){
                 System.out.println(rp);
                 System.out.println(((DistributedController) getRemoteRouter()).checkEdgeCapacity(l,r,color));
@@ -120,12 +115,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
             }
             ((DistributedController) getRemoteRouter()).increaseEdgeCapacity(l,r,color);
         }else{
-//            ((DistributedController) getRemoteRouter()).deallocateServerColor(nextHop,color,rp.isReversed() ? false : true);
-//            if(!rp.isReversed()) {
-//            	SimulationLogger.regiserPathActive(new Path(rp.getPath(),rp.getColor(),rp.getId()),false);
-//                rp.onFinishDeallocation();
-//                ((DistributedController) getRemoteRouter()).onDeallocation();
-//            }
+
             
         }
 
