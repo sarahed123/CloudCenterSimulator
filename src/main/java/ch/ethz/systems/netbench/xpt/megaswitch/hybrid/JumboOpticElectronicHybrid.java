@@ -17,29 +17,18 @@ import java.util.HashMap;
 
 public class JumboOpticElectronicHybrid extends OpticElectronicHybrid implements MegaSwitch {
 
-    protected long circuitThreshold;
-    protected NetworkDevice electronic;
-    protected NetworkDevice optic;
-    protected HashMap<Pair<Integer,Integer>,JumboFlow> mJumboFlowMap;
-    private long mNumAllocatedFlows;
-    private long mNumDeAllocatedFlows;
-    protected ConversionUnit conversionUnit;
 
     public JumboOpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary,configuration);
-        circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
-        mJumboFlowMap = new HashMap<>();
-        mNumAllocatedFlows = 0;
-        mNumDeAllocatedFlows = 0;
+
 
     }
 
-
-
-    protected void routeThroughtPacketSwitch(TcpPacket packet) {
-        this.electronic.receiveFromEncapsulating(packet);
-
+    @Override
+    protected JumboFlow getJumboFlow(int sourceToR, int destToR, int serverSource, int serverDest) {
+        return getJumboFlow(sourceToR,destToR);
     }
+
 
     protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId,int sourceToR, int destToR) {
         try {

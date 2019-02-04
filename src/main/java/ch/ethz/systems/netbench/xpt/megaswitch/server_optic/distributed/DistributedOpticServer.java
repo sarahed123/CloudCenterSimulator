@@ -108,7 +108,7 @@ public class DistributedOpticServer extends OpticServer {
 	}
 
 	protected void onCircuitEntrance(long flowId) {
-
+		// used for testing
 	}
 
 	protected void initRoute(IpPacket packet, long jumboFlowiId) {

@@ -27,7 +27,12 @@ public class EcnTailDropOutputPort extends OutputPort {
         this.maxQueueSizeBits = maxQueueSizeBytes * 8L;
         this.ecnThresholdKBits = ecnThresholdKBytes * 8L;
         NBProperties configs = ownNetworkDevice.getConfiguration();
-        mPrioritizeAcksOnCircuit = configs.getBooleanPropertyWithDefault("prioritize_acks_on_circuit",false);
+        if(configs!=null){ // it might be null in testing
+            mPrioritizeAcksOnCircuit = configs.getBooleanPropertyWithDefault("prioritize_acks_on_circuit",false);
+        }else{
+            mPrioritizeAcksOnCircuit = false;
+        }
+
     }
 
     /**
@@ -75,13 +80,15 @@ public class EcnTailDropOutputPort extends OutputPort {
 
     protected void onPacketDropped(IpHeader ipHeader) {
     	String suffix = "";
-        
+
         try {
         	TcpPacket tcpPacket = (TcpPacket) ipHeader;
-        	ipHeader = tcpPacket.deEncapsualte();
-        	if(tcpPacket.isACK()) {
-        		suffix = "ACK_";
-        	}
+            if(tcpPacket.isACK()) {
+                suffix = "ACK_";
+            }
+            tcpPacket = (TcpPacket) tcpPacket.deEncapsualte();
+            ipHeader = tcpPacket != null ? tcpPacket : ipHeader;
+
         }catch(ClassCastException e) {
         	
         }

@@ -68,10 +68,6 @@ public class OpticServerToR extends OpticElectronicHybrid {
 
     }
 
-    @Override
-    protected void onFlowFinished(int sourceToR, int destToR, IpPacket packet) {
-        // do nothing, but allow server to handle
-    }
 
 //    protected TcpPacket deEncapsulatePacket(Encapsulatable packet) {
 //        return (TcpPacket)packet;

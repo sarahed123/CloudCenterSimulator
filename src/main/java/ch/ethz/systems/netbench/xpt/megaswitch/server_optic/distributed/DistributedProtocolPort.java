@@ -9,6 +9,11 @@ import ch.ethz.systems.netbench.ext.basic.IpHeader;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * The distributed port's main function is to allow
+ * high priority to reservation packets and disallow
+ * reservation packets to be dropped.
+ */
 public class DistributedProtocolPort extends EcnTailDropOutputPort {
 	private int numRpPackets;
     public DistributedProtocolPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
@@ -24,6 +29,10 @@ public class DistributedProtocolPort extends EcnTailDropOutputPort {
 		
 	}
 
+    /**
+     * adds reservation packets to front of queue
+     * @param packet
+     */
     @Override
     protected void addPacketToQueue(Packet packet){
         try{
@@ -49,7 +58,12 @@ public class DistributedProtocolPort extends EcnTailDropOutputPort {
     	
 		return p;
 	}
-    
+
+    /**
+     * always return true if packet is a reservation packet
+     * @param packet
+     * @return
+     */
     @Override
     protected boolean hasBufferSpace(IpHeader packet) {
     	 try{

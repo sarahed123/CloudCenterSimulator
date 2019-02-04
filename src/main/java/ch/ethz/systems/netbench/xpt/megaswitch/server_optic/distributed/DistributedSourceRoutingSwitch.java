@@ -18,6 +18,13 @@ public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * while it has the same signature as super the reconfiguration is done
+	 * via the prevhop color pair.
+	 * @param prevHop
+	 * @param nextHop
+	 * @param color
+	 */
 	public void updateForwardingTable(int prevHop, int nextHop, int color) {
 //		System.out.println("updateForwardingTable " + " prevhop " + prevHop + " color " + color + " nexthop " + nextHop + " id " + identifier);
 		super.updateForwardingTable(prevHop, color, nextHop);
@@ -28,7 +35,11 @@ public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
 		// TODO Auto-generated method stub
 		return forwardingTable.get(new ImmutablePair<Integer,Integer>(prevHop,color));
 	}
-	
+
+	/**
+	 * forward to next switch by previous hop color pair.
+	 * @param packet
+	 */
 	protected void forwardToNextSwitch(IpPacket packet) {
     	TcpPacket tcpPacket = (TcpPacket) packet;
     	int prevHop = tcpPacket.getPrevHop();

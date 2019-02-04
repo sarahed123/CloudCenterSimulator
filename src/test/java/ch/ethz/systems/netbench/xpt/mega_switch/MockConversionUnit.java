@@ -9,7 +9,15 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class MockConversionUnit extends ConversionUnit {
     public MockConversionUnit(NBProperties conf, NetworkDevice ownDevice, NetworkDevice opticDevice) {
+
         super(conf, ownDevice, opticDevice);
+    }
+
+    @Override
+    protected void initPortParams(){
+        mLinkBandwidth = 100;
+        mEcnThreshold = 30000;
+        mMaxQueueSize = 150000;
     }
 
     public void enqueue(int src, int dst, Packet packet){

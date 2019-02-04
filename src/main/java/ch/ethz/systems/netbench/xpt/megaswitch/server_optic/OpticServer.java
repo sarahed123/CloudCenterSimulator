@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ConversionUnit;
@@ -78,19 +79,12 @@ public class OpticServer extends JumboOpticElectronicHybrid {
             passToIntermediary(genericPacket);
             return;
         }
-        JumboFlow jumboFlow = getJumboFlow(tcpPacket.getSourceId(),tcpPacket.getDestinationId());
-        jumboFlow.onPacketDispatch(tcpPacket);
-        assert(!jumboFlow.isTrivial());
-        if(jumboFlow.getSizeByte()>=circuitThreshold && !tcpPacket.isACK()) {
-            try {
-                routeThroughCircuit(tcpPacket,jumboFlow.getId());
-                return;
-            }catch(NoPathException e) {
-                //SimulationLogger.increaseStatisticCounter("num_path_failures");
-            }
-        }
-        routeThroughtPacketSwitch((TcpPacket)genericPacket );
+        super.receive(genericPacket);
 
+    }
+
+    protected TcpPacket encapsulatePacket(Encapsulatable packet) {
+        return (TcpPacket) packet;
     }
 
     /**
@@ -121,6 +115,14 @@ public class OpticServer extends JumboOpticElectronicHybrid {
         conversionUnit = new ConversionUnit(configuration,this,optic);
     }
 
+    /**
+     * recover path using the remote router
+     * @param source
+     * @param dest
+     * @param serverSource
+     * @param serverDest
+     * @param jumboFlowId
+     */
     @Override
     protected void recoverPath(int source, int dest,int serverSource,int serverDest, long jumboFlowId) {
         assert(this.identifier==serverSource);

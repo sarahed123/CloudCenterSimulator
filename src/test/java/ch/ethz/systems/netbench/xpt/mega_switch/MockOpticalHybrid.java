@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
@@ -47,5 +48,9 @@ public class MockOpticalHybrid extends OpticElectronicHybrid {
 		throw new NoPathException();
 		
 	}
+    @Override
+    protected boolean isCircuitable(JumboFlow jumboFlow, TcpPacket packet) {
+        return true;
+    }
     
 }
