@@ -134,10 +134,13 @@ public class JumboFlow {
     }
 
     /**
-     * resets flow size in db.
+     * resets flow size in db. if a circuit is established for this flow it may need to be teared down
      * @param flowId
      */
     public void resetFlow(long flowId) {
+        long flowSize = mFlowIdToSize.get(flowId);
+        mSizeByte -= flowSize;
+        assert(mSizeByte>=0);
         mFlowIdToSize.put(flowId,0l);
     }
 }

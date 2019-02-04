@@ -60,7 +60,7 @@ public class OpticServer extends JumboOpticElectronicHybrid {
     }
 
     protected void conversionUnitRecover(int serverSource, int serverDest, long jumboFlowId, long flowId) {
-        conversionUnit.onFlowFinish(serverSource,serverDest,jumboFlowId);
+        conversionUnit.onFlowFinish(serverSource,serverDest,flowId);
     }
 
     /**
@@ -85,6 +85,10 @@ public class OpticServer extends JumboOpticElectronicHybrid {
 
     protected TcpPacket encapsulatePacket(Encapsulatable packet) {
         return (TcpPacket) packet;
+    }
+
+    protected JumboFlow getJumboFlow(int sourceToR, int destToR, int serverSource, int serverDest) {
+        return getJumboFlow(serverSource,serverDest);
     }
 
     /**

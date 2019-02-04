@@ -19,24 +19,28 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.*;
 
+/**
+ * the distributed optic server will initiate establishment of circuit request
+ * when needed.
+ */
 public class DistributedOpticServer extends OpticServer {
-	private DistributedOpticServerToR ToRDevice;
-	protected HashMap<Integer, ReservationPacket> mFlowReservation;
-	private HashMap<Integer, Integer> mPendingRequests;
-	private long mConfigurationTime;
-	private long mCircuitTeardowTimeout;
+	private DistributedOpticServerToR ToRDevice; // the ToR fo this device
+	protected HashMap<Integer, ReservationPacket> mFlowReservation; // a map which contains information about reservation packets per destination
+	private HashMap<Integer, Integer> mPendingRequests; // the number of pending request to a certain destination
+	private long mConfigurationTime; // the internal switches reconfiguration time, typacally assuming this can be done in parallel
+	private long mCircuitTeardowTimeout; // the amount of time before a circuit should be teared down due to inuse
 	enum State{
-		NO_CIRCUIT,
-		IN_PROCESS,
-		HAS_CIRCUIT
+		NO_CIRCUIT, // the destination does not have a circuit
+		IN_PROCESS, // there are pending requests to establish a circuit to a destination
+		HAS_CIRCUIT // the destination has a circuit
 	}
-	HashMap<Integer,State> mFlowState;
+	HashMap<Integer,State> mFlowState; // circuit states per destination
 	static Random rand =  Simulator.selectIndependentRandom("semit_remote_paths_randomizer");
-	final int NUM_PATH_TO_RANDOMIZE;
-	private HashMap<Integer, TeardownEvent> mTeardownEventsMap;
-	//    final int NUM_COLORS_TO_RANDOMIZE;
+	final int NUM_PATH_TO_RANDOMIZE; // the number of paths to randomize
+	private HashMap<Integer, TeardownEvent> mTeardownEventsMap; // a map from destinations to tear down events
+
 	/**
-	 * Constructor of a network device.
+	 *
 	 *
 	 * @param identifier     Network device identifier
 	 * @param transportLayer Transport layer instance (null, if only router and not a server)
@@ -69,7 +73,7 @@ public class DistributedOpticServer extends OpticServer {
 
 		case NO_CIRCUIT:
 			try{
-				assert(mPendingRequests.getOrDefault(packet.getDestinationId(),0)==0);
+				assert(mPendingRequests.getOrDefault(packet.getDestinationId(),0)==0); // asert there are no pending requests
 				initRoute(packet, packet.getFlowId());
 			}catch (NoPathException e){
 				routeThroughtPacketSwitch((TcpPacket)packet);
@@ -82,10 +86,9 @@ public class DistributedOpticServer extends OpticServer {
 
 			break;
 		case HAS_CIRCUIT:
-			//                System.out.println("routing on circuit " + packet);
 			TcpPacket tcpPacket = (TcpPacket) packet;
-			ReservationPacket rp = mFlowReservation.get(packet.getDestinationId());
-			tcpPacket.color(rp.getColor());
+			ReservationPacket rp = mFlowReservation.get(packet.getDestinationId()); // get the underline reservation packet
+			tcpPacket.color(rp.getColor()); // paint all packets with the reserved color
 			tcpPacket.setPrevHop(this.identifier);
 			JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
 			assert(((DistributedController) getRemoteRouter()).serverHasColor(this.identifier, tcpPacket.getColor(), false));
@@ -113,34 +116,30 @@ public class DistributedOpticServer extends OpticServer {
 
 	protected void initRoute(IpPacket packet, long jumboFlowiId) {
 		SimulationLogger.registerFlowCircuitRequest(packet.getFlowId());
-		//SemiRemoteRoutingSwitch srrs = (SemiRemoteRoutingSwitch)this.optic;
 		int destToRId = getTransportLayer().getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
 		int sourceToRId = getTransportLayer().getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(getIdentifier());
 		List<List<Integer>> paths = new LinkedList<>();
-		if(destToRId==sourceToRId){
+		if(destToRId==sourceToRId){ // trivail path
 			List<Integer> path = new LinkedList<>();
 			path.add(sourceToRId);
 			paths.add(path);
 		}else{
-			paths = getAvailablePaths(destToRId);
-			//            if(packet.getFlowId()==246){
-			//                System.out.println(destToRId);
-			//                System.out.println(paths.toString());
-			//            }
+			paths = getAvailablePaths(destToRId); // these are the available pre computed paths
+
 		}
 
-		int p = Math.abs(rand.nextInt(paths.size())) % paths.size();
+		int p = Math.abs(rand.nextInt(paths.size())) % paths.size(); // randomize a starting index for the paths
 		int pendingRequests = 0;
 		for(int i = 0; i < NUM_PATH_TO_RANDOMIZE; i++){
 			p = (p+i) % paths.size();
 			List<Integer> path = paths.get(p);
 
 			DistributedController controller = (DistributedController) getRemoteRouter();
-			int numColorsAvailable = controller.getWaveLengthNum();
+			int numColorsAvailable = controller.getWaveLengthNum(); // number of wavelengths allowed
 			//this is not the right way, get it from the ToR optic device
 			int c = Math.abs(rand.nextInt(numColorsAvailable)) % numColorsAvailable;
 			boolean hasAvailableColor = false;
-			for(int j = 0; j<numColorsAvailable; j++){
+			for(int j = 0; j<numColorsAvailable; j++){ // iterate over all colors starting at a certain index to see if one is available
 				c = (c+j) % numColorsAvailable;
 				try{
 					controller.reserveServerColor(this.identifier,c,false);	
@@ -152,7 +151,7 @@ public class DistributedOpticServer extends OpticServer {
 			}
 			if(hasAvailableColor){
 				//                int pendingRequests = mPendingRequests.getOrDefault(packet.getDestinationId(),0);
-				pendingRequests++;
+				pendingRequests++; // count the number of pending requests
 				mPendingRequests.put(packet.getDestinationId(),pendingRequests);
 
 				sendReservationPackets(new LinkedList<Integer>(path),c,(TcpPacket)packet);
@@ -169,11 +168,22 @@ public class DistributedOpticServer extends OpticServer {
 
 	}
 
+	/**
+	 * get available paths from ToR
+	 * @param destToRId
+	 * @return
+	 */
 	protected List<List<Integer>>  getAvailablePaths(int destToRId) {
 		SemiRemoteRoutingSwitch srrs = (SemiRemoteRoutingSwitch)ToRDevice.getEncapsulatedDevice("circuit_switch");
 		return srrs.getPathsTo(destToRId);
 	}
 
+	/**
+	 * send out reservation packet
+	 * @param path
+	 * @param color
+	 * @param packet
+	 */
 	protected void sendReservationPackets(List<Integer> path, int color, TcpPacket packet) {
 		ReservationPacket rp = new  ReservationPacket(packet,path.get(0),path.get(0),path,color,true);
 		rp.setPrevHop(this.identifier);
@@ -182,30 +192,28 @@ public class DistributedOpticServer extends OpticServer {
 
 	@Override
 	public void receive(Packet genericPacket) {
-		//        if(genericPacket.getFlowId()==246){
-		//            System.out.println(this.identifier);
-		//            System.out.println(genericPacket.toString());
-		//        }
+
 		try{
 			ReservationPacket ep = (ReservationPacket) genericPacket;
-			if(ep.getOriginalServerDest()==this.identifier) {
-				//we are receiver
+			if(ep.getOriginalServerDest()==this.identifier) { //we are receiver
+
 				if(ep.idDeAllocation()) {
-					assert(ep.isSuccess());
+					assert(ep.isSuccess()); // this is a tear down of an existing circuit
 					((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), true);
 					SimulationLogger.regiserPathActive(new Path(ep.getPath(),ep.getColor(),ep.getId()),false);
 					ep.onFinishDeallocation();
 	                ((DistributedController) getRemoteRouter()).onDeallocation();
 					return;
 				}
-				try {
-	                ((DistributedController) getRemoteRouter()).reserveServerColor(this.identifier,ep.getColor(),true);
+				try { // this is  an incoming request
+	                ((DistributedController) getRemoteRouter()).reserveServerColor(this.identifier,ep.getColor(),true); // reserve end color
 					ep.markSuccess();
 					Path p = new Path(ep.getPath(),ep.getColor());
 					ep.setId(p.getId());
 					SimulationLogger.regiserPathActive(p,true);
 					((DistributedController) getRemoteRouter()).onAallocation();
 					Simulator.registerEvent(new Event(mConfigurationTime) {
+						// send the packet after every one had time to reconfigure
 						@Override
 						public void trigger() {
 							ep.markDelayed(mConfigurationTime);
@@ -247,15 +255,15 @@ public class DistributedOpticServer extends OpticServer {
 					return;
 				}
 				SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_SUCCESS_COUNT");
+				//if weve made it this far then we are succeful
 				assignCircuit(ep);
 				
-				//                System.out.println("success on reserving " + ep.toString() + " at time " + Simulator.getCurrentTime());
 			}else{
 				assert(ep.isFailure());
 
 				((DistributedController) getRemoteRouter()).onPathFailure();
 				//                System.out.println("failure for " + ep.toString());
-				((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), false);
+				((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), false); // deallocate color
 				if(pendingRequests==0 && mFlowState.get(ep.getOriginalServerDest())!=State.HAS_CIRCUIT){
 					SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_FAILURE_COUNT");
 					if(mFlowState.get(ep.getOriginalServerDest())!=State.IN_PROCESS) {
@@ -263,7 +271,7 @@ public class DistributedOpticServer extends OpticServer {
 						System.out.println(ep.toString());
 						throw new RuntimeException();
 					}
-					changeState(ep.getOriginalServerDest(),State.NO_CIRCUIT);
+					changeState(ep.getOriginalServerDest(),State.NO_CIRCUIT); // if no more requests are pending, change state to NO_CIRCUIT
 				}
 
 			}
@@ -278,18 +286,26 @@ public class DistributedOpticServer extends OpticServer {
 		super.receive(genericPacket);
 	}
 
+	/**
+	 * this is called when a circuit is fully assigned
+	 * @param ep
+	 */
 	private void assignCircuit(ReservationPacket ep) {
-		changeState(ep.getOriginalServerDest(),State.HAS_CIRCUIT);
+		changeState(ep.getOriginalServerDest(),State.HAS_CIRCUIT); // change state
 		mFlowReservation.put(ep.getOriginalServerDest(),ep);
-		TeardownEvent tearDownEvent = new TeardownEvent(mCircuitTeardowTimeout,ep,this);
+		TeardownEvent tearDownEvent = new TeardownEvent(mCircuitTeardowTimeout,ep,this); // register auto tear down event
 		mTeardownEventsMap.put(ep.getOriginalServerDest(),tearDownEvent);
 		Simulator.registerEvent(tearDownEvent);
 		
 	}
 
+	/**
+	 * called to tear down circuit started with ep
+	 * @param ep
+	 */
 	protected void teardownCircuit(ReservationPacket ep) {
 		JumboFlow jumbo = getJumboFlow(this.identifier,ep.getOriginalServerDest());
-		jumbo.resetFlow(ep.getFlowId());
+		jumbo.resetFlow(ep.getFlowId()); // reset flow size
 		DistributedController controller = (DistributedController) getRemoteRouter();
 		controller.deallocateServerColor(this.identifier,ep.getColor(),false);
 		ep.reverse();
@@ -315,12 +331,14 @@ public class DistributedOpticServer extends OpticServer {
 		if(mFlowState.get(serverDest) != State.HAS_CIRCUIT){
 			return;
 		}
-		controller.deallocateServerColor(this.identifier,rp.getColor(),false);
-		rp.setDeallocation();
-		rp.reverse();
-		routeThroughtPacketSwitch(rp);
+		teardownCircuit(rp);
+//		controller.deallocateServerColor(this.identifier,rp.getColor(),false);
+//		rp.setDeallocation();
+//		rp.reverse();
+//		routeThroughtPacketSwitch(rp);
 		this.mTeardownEventsMap.get(rp.getOriginalServerDest()).finish();
-		changeState(rp.getOriginalServerDest(),State.NO_CIRCUIT);
+//		changeState(rp.getOriginalServerDest(),State.NO_CIRCUIT);
 	}
+
 
 }
