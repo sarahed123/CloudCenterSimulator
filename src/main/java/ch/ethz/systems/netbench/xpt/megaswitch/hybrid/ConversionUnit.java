@@ -4,7 +4,6 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.ext.basic.EcnTailDropOutputPort;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -15,19 +14,24 @@ public class ConversionUnit {
     NetworkDevice mOptic;
     NBProperties mConf;
     NetworkDevice mOwnDevice;
-    long mLinkBandwidth;
-    long mEcnThreshold;
-    long mMaxQueueSize;
+    protected long mLinkBandwidth;
+    protected long mEcnThreshold;
+    protected long mMaxQueueSize;
     protected Map<Pair<Integer,Integer>,ConversionPort> mPortMap;
     public ConversionUnit(NBProperties conf, NetworkDevice ownDevice,NetworkDevice opticDevice){
         mOwnDevice = ownDevice;
         mConf = conf;
         mOptic = opticDevice;
         mPortMap = new HashMap<>();
-        mLinkBandwidth = opticDevice.getConfiguration().getLongPropertyOrFail("link_bandwidth_bit_per_ns");
-        mEcnThreshold = opticDevice.getConfiguration().getLongPropertyOrFail("output_port_ecn_threshold_k_bytes");
-        mMaxQueueSize = opticDevice.getConfiguration().getLongPropertyOrFail("output_port_max_queue_size_bytes");
+        initPortParams();
 
+
+    }
+
+    protected void initPortParams() {
+        mLinkBandwidth = mOptic.getConfiguration().getLongPropertyOrFail("link_bandwidth_bit_per_ns");
+        mEcnThreshold = mOptic.getConfiguration().getLongPropertyOrFail("output_port_ecn_threshold_k_bytes");
+        mMaxQueueSize = mOptic.getConfiguration().getLongPropertyOrFail("output_port_max_queue_size_bytes");
     }
 
     public void enqueue(int src, int dst, Packet packet){

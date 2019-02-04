@@ -29,9 +29,9 @@ public class MockOpticServer extends OpticServer {
     }
 
     @Override
-    protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId) {
+    protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId,int sourceToR,int destToR) {
         routedThroughCircuit = true;
-        super.routeThroughCircuit(packet, jumboFlowiId);
+        super.routeThroughCircuit(packet, jumboFlowiId,-1,-1);
     }
 
     @Override

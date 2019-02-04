@@ -7,20 +7,23 @@ import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * a reservation packet is used to assign circuits online.
+ */
 public class ReservationPacket extends TcpPacket {
-    private int mServerDest;
-    private int mServerSource;
-    int ToRdest;
+    private int mServerDest; // server destination
+    private int mServerSource; // server origin
+    int ToRdest; // the ToR on the destination
     long flowid;
-    List<Integer> mPath;
-    private long delayed;
-    private int mSourceToR;
-    private boolean mSuccess;
-    private boolean mFailure;
-    private boolean mDealocation;
-    private boolean reversed;
-    private long mId = -1;
-    private boolean mFinishedDealloc;
+    List<Integer> mPath; // the circuit path to try and assign
+    private long delayed; // delayed incurred typically from reconfiguration events
+    private int mSourceToR; // the ToR on the source
+    private boolean mSuccess; // if the reservation succeeded to assign a full circuit
+    private boolean mFailure; // if the reservation failed somewhere
+    private boolean mDealocation; // marked to tell the switches to deallocate resources
+    private boolean reversed; // has the path been reversed
+    private long mId = -1; // an id for the reservation, typically the path id
+    private boolean mFinishedDealloc; // is the deallocation finished
 
     public ReservationPacket(TcpPacket packet, int sourceToR,int dest, List<Integer> path, int color,boolean allocationReques) {
         super(
@@ -61,6 +64,11 @@ public class ReservationPacket extends TcpPacket {
     }
 
 
+    /**
+     * get the next hop of the path based on the curr node
+     * @param curr
+     * @return
+     */
     public int getNextHop(int curr) {
         int currIndex = mPath.indexOf(curr);
         if(currIndex + 1 == mPath.size()){
@@ -83,6 +91,10 @@ public class ReservationPacket extends TcpPacket {
         return flowid;
     }
 
+    /**
+     * if reversed return server source else return server dest
+     * @return
+     */
     public int getServerDest() {
         return reversed ? mServerSource : mServerDest;
     }
@@ -99,6 +111,9 @@ public class ReservationPacket extends TcpPacket {
         mFailure = true;
     }
 
+    /**
+     * reverses the path
+     */
     public void reverse() {
 
         Collections.reverse(mPath);

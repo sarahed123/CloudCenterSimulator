@@ -26,10 +26,10 @@ public class MockJumboFullHybrid extends JumboOpticElectronicHybrid {
     }
 
     @Override
-    protected void routeThroughCircuit(IpPacket packet, long flowId) {
+    protected void routeThroughCircuit(IpPacket packet, long flowId,int sourceToR,int destToR) {
         routedThroughCircuit = true;
         try{
-            super.routeThroughCircuit(packet,flowId);
+            super.routeThroughCircuit(packet,flowId,-1,-1);
             int portsNum = ((MockConversionUnit) conversionUnit).getNumOfPorts();
             if(portsNum>maxPortsNum){
                 maxPortsNum = portsNum;
