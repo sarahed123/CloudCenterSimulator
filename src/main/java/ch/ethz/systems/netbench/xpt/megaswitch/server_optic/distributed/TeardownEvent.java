@@ -26,7 +26,7 @@ public class TeardownEvent extends Event {
 	@Override
 	public void trigger() {
 		if(active) {
-			mDevice.teardownCircuit(mPacket);
+			mDevice.onFlowFinished(-1,-1,this.mDevice.getIdentifier(),mPacket.getOriginalServerDest(),mPacket.getFlowId());
 
 			SimulationLogger.increaseStatisticCounter("AUTO_CIRCUIT_TEARDOWN_COUNT");
 			finished = true;

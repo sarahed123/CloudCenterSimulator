@@ -8,7 +8,6 @@ import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
-import com.sun.corba.se.impl.orbutil.graph.Graph;
 
 import java.util.HashSet;
 import java.util.Set;

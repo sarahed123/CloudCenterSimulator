@@ -37,7 +37,8 @@ public class ConversionPort extends EcnTailDropOutputPort{
 //    		SimulationLogger.increaseStatisticCounter("PACKET_SENT_AFTER_PATH_RECOVEREd);
 //    		return;
 //    	}
-        if(finishedFlows.contains(packet.getFlowId())){
+        TcpPacket tcpPacket = (TcpPacket) packet;
+        if(finishedFlows.contains(tcpPacket.getJumboFlowId())){
             // this shoud not happen
             System.out.println("packet transmitted after flow finished");
             System.out.println(packet.toString());
@@ -54,7 +55,9 @@ public class ConversionPort extends EcnTailDropOutputPort{
 //    	if(!ownNetworkDevice.getConfiguration().getBooleanPropertyWithDefault("enable_jumbo_flows", false)) {
 //    		assert(getQueue().isEmpty());
 //    	}
-        if(!finishedFlows.contains(packet.getFlowId()))
+        TcpPacket tcpPacket = (TcpPacket) packet;
+        assert(tcpPacket.getJumboFlowId() != -1);
+        if(!finishedFlows.contains(tcpPacket.getJumboFlowId()))
             super.enqueue(packet);
         else{
             System.out.println("flow is finished for " + packet.getFlowId());

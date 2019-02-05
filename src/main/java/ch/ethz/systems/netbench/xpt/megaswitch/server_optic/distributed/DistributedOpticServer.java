@@ -304,8 +304,8 @@ public class DistributedOpticServer extends OpticServer {
 	 * @param ep
 	 */
 	protected void teardownCircuit(ReservationPacket ep) {
-		JumboFlow jumbo = getJumboFlow(this.identifier,ep.getOriginalServerDest());
-		jumbo.resetFlow(ep.getFlowId()); // reset flow size
+//		JumboFlow jumbo = getJumboFlow(this.identifier,ep.getOriginalServerDest());
+//		jumbo.resetFlow(ep.getFlowId()); // reset flow size
 		DistributedController controller = (DistributedController) getRemoteRouter();
 		controller.deallocateServerColor(this.identifier,ep.getColor(),false);
 		ep.reverse();
@@ -315,9 +315,6 @@ public class DistributedOpticServer extends OpticServer {
 		
 	}
 
-	protected void conversionUnitRecover(int serverSource, int serverDest, long jumboFlowId, long flowId) {
-		conversionUnit.onFlowFinish(serverSource,serverDest,flowId);
-	}
 
 	@Override
 	protected void recoverPath(int source, int dest,int serverSource,int serverDest, long jumboFlowId) {

@@ -146,7 +146,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
         }
         if(isOnCircuit){
-            conversionUnit.onFlowFinish(sourceServer,destServerId,flowId);
+            conversionUnit.onFlowFinish(sourceServer,destServerId,jumboFlow.getId());
             recoverPath(sourceToRId,destToRId,destServerId,sourceServer,flowId);
         }
 
