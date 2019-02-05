@@ -31,6 +31,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
 
 	protected int mColor = -1;
     private boolean mOnCircuit;
+    private long mJumboFlowId;
 
     public TcpPacket(
             long flowId, long dataSizeByte,
@@ -56,6 +57,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.windowSize = windowSize;
         this.dataSizeByte = dataSizeByte;
         mOnCircuit = false;
+        mJumboFlowId = -1;
 
     }
 
@@ -81,6 +83,7 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
         this.mPrevHop = tcpPacket.mPrevHop;
         this.mColor = tcpPacket.mColor;
         this.mOnCircuit = tcpPacket.mOnCircuit;
+        this.mJumboFlowId = tcpPacket.mJumboFlowId;
 	}
 
 	@Override
@@ -205,5 +208,13 @@ public abstract class TcpPacket extends IpPacket implements TcpHeader,Encapsulat
 
     public boolean isOnCircuit() {
         return mOnCircuit;
+    }
+
+    public void setJumboFlowId(long id) {
+        mJumboFlowId = id;
+    }
+
+    public long getJumboFlowId() {
+        return mJumboFlowId;
     }
 }

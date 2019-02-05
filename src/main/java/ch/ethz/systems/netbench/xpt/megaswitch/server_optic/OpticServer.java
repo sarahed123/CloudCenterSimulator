@@ -38,30 +38,6 @@ public class OpticServer extends JumboOpticElectronicHybrid {
 
     }
 
-    /**
-     * called when flowId has finished
-     * will recover the path if the corresponding jumbo flow finished
-     * @param source
-     * @param dest
-     * @param serverSource
-     * @param serverDest
-     * @param flowId
-     */
-    public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
-        JumboFlow jumboFlow = getJumboFlow(serverSource,serverDest);
-        jumboFlow.onFlowFinished(flowId);
-        if(jumboFlow.getNumFlows()==0){
-            conversionUnitRecover(serverSource,serverDest,jumboFlow.getId(),flowId);
-
-            recoverPath(source,dest,serverSource,serverDest,jumboFlow.getId());
-            mJumboFlowMap.remove(new ImmutablePair<>(serverSource, serverDest));
-        }
-
-    }
-
-    protected void conversionUnitRecover(int serverSource, int serverDest, long jumboFlowId, long flowId) {
-        conversionUnit.onFlowFinish(serverSource,serverDest,flowId);
-    }
 
     /**
      * receive method here, should probably solve code duplication

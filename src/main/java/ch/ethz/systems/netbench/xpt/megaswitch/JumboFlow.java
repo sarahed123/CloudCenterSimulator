@@ -33,6 +33,14 @@ public class JumboFlow {
         onCircuit = false;
     }
 
+    public int getSource(){
+        return mSource;
+    }
+
+    public int getDest(){
+        return mDest;
+    }
+
     /**
      * returns the jumbo flow size
      * @return
@@ -49,6 +57,7 @@ public class JumboFlow {
         if(packet.isACK()){
             return;
         }
+        packet.setJumboFlowId(this.mId);
         long flowSize = mFlowIdToSize.getOrDefault(packet.getFlowId(),0l);
 //        long seq = packet.getSequenceNumber() + packet.getDataSizeByte();
 //        if(flowSize > seq){ // should this be >=?
