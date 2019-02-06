@@ -15,7 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 
-public class JumboOpticElectronicHybrid extends OpticElectronicHybrid implements MegaSwitch {
+public class JumboOpticElectronicHybrid extends OpticElectronicHybrid {
 
 
     public JumboOpticElectronicHybrid(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
@@ -26,25 +26,9 @@ public class JumboOpticElectronicHybrid extends OpticElectronicHybrid implements
 
     @Override
     protected JumboFlow getJumboFlow(int sourceToR, int destToR, int serverSource, int serverDest) {
-        return getJumboFlow(sourceToR,destToR);
+        return getJumboFlow(sourceToR,destToR).setSourceToR(sourceToR).setDestToR(destToR);
     }
 
-
-    protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId,int sourceServer, int destServer) {
-        try {
-            initRoute(packet,jumboFlowiId);
-        }catch(FlowPathExists e) {
-
-        }
-        this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
-
-
-
-    }
-
-    protected void initRoute(IpPacket packet, long jumboFlowiId) {
-        getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),jumboFlowiId);
-    }
 
 
 
@@ -73,14 +57,6 @@ public class JumboOpticElectronicHybrid extends OpticElectronicHybrid implements
 //        conversionUnit.onFlowFinish(jumbo.getSource(),jumbo.getDest(),jumbo.getId());
 //    }
 
-    protected void recoverPath(int source, int dest,int serverSource,int serverDest, long jumboFlowId) {
-        try {
-
-            getRemoteRouter().recoverPath(source,dest,jumboFlowId);
-        }catch(NoPathException e) {
-
-        }
-    }
 
 
 

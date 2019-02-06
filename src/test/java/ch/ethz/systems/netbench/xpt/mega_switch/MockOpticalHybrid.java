@@ -25,9 +25,9 @@ public class MockOpticalHybrid extends OpticElectronicHybrid {
     }
 
     @Override
-    protected void routeThroughCircuit(IpPacket packet, long id,int sourceServer, int destServer) {
+    protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow) {
         try{
-            super.routeThroughCircuit(packet, id,sourceServer,destServer);
+            super.routeThroughCircuit(packet, jFlow);
         }catch (NoPathException e){
             noPathExceptionThrown = true;
             throw e;

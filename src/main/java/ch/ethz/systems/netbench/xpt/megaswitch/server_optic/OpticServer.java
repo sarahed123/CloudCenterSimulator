@@ -5,21 +5,16 @@ import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
-import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ConversionUnit;
-import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.JumboOpticElectronicHybrid;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 
 /**
  * optic serve class
  */
-public class OpticServer extends JumboOpticElectronicHybrid {
+public class OpticServer extends OpticElectronicHybrid {
     private final int ownToRId;
     /**
      * Constructor of a network device.
@@ -59,25 +54,21 @@ public class OpticServer extends JumboOpticElectronicHybrid {
 
     }
 
+    @Override
     protected TcpPacket encapsulatePacket(Encapsulatable packet) {
         return (TcpPacket) packet;
     }
 
-    protected JumboFlow getJumboFlow(int sourceToR, int destToR, int serverSource, int serverDest) {
-        return getJumboFlow(serverSource,serverDest);
+    protected int getDestToRWithDefault(int serverId, int defToRId) {
+        int destToRId = configuration.getGraphDetails().getTorIdOfServer(serverId);
+
+        return destToRId;
     }
 
-    /**
-     * inits the route through the centralized controller
-     * @param packet
-     * @param jumboFlowiId
-     */
-    @Override
-    protected void initRoute(IpPacket packet, long jumboFlowiId) {
-        int destToRId = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
-
-        getRemoteRouter().initRoute(this.ownToRId,destToRId,this.identifier,packet.getDestinationId(),jumboFlowiId);
+    protected int getSourceToRWithDefault(int serverId, int defToRId) {
+        return this.ownToRId;
     }
+
 
     @Override
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
@@ -95,22 +86,9 @@ public class OpticServer extends JumboOpticElectronicHybrid {
         conversionUnit = new ConversionUnit(configuration,this,optic);
     }
 
-    /**
-     * recover path using the remote router
-     * @param source
-     * @param dest
-     * @param serverSource
-     * @param serverDest
-     * @param jumboFlowId
-     */
     @Override
-    protected void recoverPath(int source, int dest,int serverSource,int serverDest, long jumboFlowId) {
-        assert(this.identifier==serverSource);
-        try {
-
-            getRemoteRouter().recoverPath(source,dest,serverSource,serverDest,jumboFlowId);
-        }catch(NoPathException e) {
-
-        }
+    protected void recoverPath(JumboFlow jumboFlow) {
+        assert(this.identifier==jumboFlow.getSource());
+        super.recoverPath(jumboFlow);
     }
 }
