@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.JumboOpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
@@ -26,10 +27,10 @@ public class MockJumboFullHybrid extends JumboOpticElectronicHybrid {
     }
 
     @Override
-    protected void routeThroughCircuit(IpPacket packet, long flowId,int sourceToR,int destToR) {
+    protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow) {
         routedThroughCircuit = true;
         try{
-            super.routeThroughCircuit(packet,flowId,-1,-1);
+            super.routeThroughCircuit(packet,jFlow);
             int portsNum = ((MockConversionUnit) conversionUnit).getNumOfPorts();
             if(portsNum>maxPortsNum){
                 maxPortsNum = portsNum;
@@ -54,9 +55,9 @@ public class MockJumboFullHybrid extends JumboOpticElectronicHybrid {
     }
 
     @Override
-    protected void recoverPath(int source, int dest,int serverSource,int serverDest, long id) {
+    protected void recoverPath(JumboFlow jFlow) {
         recoveredPath = true;
-        super.recoverPath(source, dest,serverSource, serverDest, id);
+        super.recoverPath(jFlow);
     }
 
     @Override

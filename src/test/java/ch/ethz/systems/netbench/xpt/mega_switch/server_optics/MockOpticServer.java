@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServer;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
 
@@ -29,9 +30,9 @@ public class MockOpticServer extends OpticServer {
     }
 
     @Override
-    protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId,int sourceToR,int destToR) {
+    protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow) {
         routedThroughCircuit = true;
-        super.routeThroughCircuit(packet, jumboFlowiId,-1,-1);
+        super.routeThroughCircuit(packet, jFlow);
     }
 
     @Override
@@ -41,9 +42,9 @@ public class MockOpticServer extends OpticServer {
     }
 
     @Override
-    protected void recoverPath(int source, int dest,int serverSource,int serverDest, long jumboFlowId) {
+    protected void recoverPath(JumboFlow jFlow) {
         recoveredPath = true;
-        super.recoverPath(source,dest,serverSource,serverDest,jumboFlowId);
+        super.recoverPath(jFlow);
     }
 
     @Override

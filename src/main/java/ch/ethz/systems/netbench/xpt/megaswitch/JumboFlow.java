@@ -168,4 +168,12 @@ public class JumboFlow {
         mDestToR = destToR;
         return this;
     }
+
+    public int getDestToR() {
+        return mDestToR;
+    }
+
+    public int getSourceToR() {
+        return mSourceToR;
+    }
 }

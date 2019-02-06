@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
@@ -24,10 +25,10 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 	}
 	
 	@Override
-	protected void routeThroughCircuit(IpPacket packet, long id,int sourceServer,int destServer) {
+	protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow) {
 		routedThroughCircuit = true;
 		try{
-			super.routeThroughCircuit(packet, id,sourceServer,destServer);
+			super.routeThroughCircuit(packet, jFlow);
 			int portsNum = ((MockConversionUnit) conversionUnit).getNumOfPorts();
 			if(portsNum>maxPortsNum){
 				maxPortsNum = portsNum;
@@ -52,9 +53,9 @@ public class MockFullHybrid extends OpticElectronicHybrid {
 	}
 	
 	@Override
-	protected void recoverPath(int source, int dest,int sourceServer, int destServer, long id) {
+	protected void recoverPath(JumboFlow jFlow) {
 		recoveredPath = true;
-		super.recoverPath(source, dest, sourceServer, destServer, id);
+		super.recoverPath(jFlow);
 	}
 	
 	@Override

@@ -1,11 +1,9 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingPacket;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
@@ -44,12 +42,14 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
 
         TcpPacket encapsulated = encapsulatePacket(packet);
-        JumboFlow jumboFlow = getJumboFlow(encapsulated.getSourceId(),encapsulated.getDestinationId(),packet.getSourceId(),packet.getDestinationId());
+        JumboFlow jumboFlow = getJumboFlow(getSourceToRWithDefault(packet.getSourceId(),encapsulated.getSourceId()),
+                getDestToRWithDefault(packet.getDestinationId(),encapsulated.getDestinationId()),
+                packet.getSourceId(),packet.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
 
         if(isCircuitable(jumboFlow,encapsulated)) {
         	try {
-        		routeThroughCircuit(encapsulated,jumboFlow.getId(),packet.getSourceId(),packet.getDestinationId());
+        		routeThroughCircuit(encapsulated,jumboFlow);
                 jumboFlow.onCircuitEntrance(packet.getFlowId());
                 SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
         		return;
@@ -57,6 +57,14 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
             }
         }
         routeThroughtPacketSwitch(encapsulated);
+    }
+
+    protected int getDestToRWithDefault(int serverId, int defToRId) {
+        return defToRId;
+    }
+
+    protected int getSourceToRWithDefault(int serverId, int defToRId) {
+        return defToRId;
     }
 
     protected TcpPacket encapsulatePacket(Encapsulatable packet) {
@@ -85,15 +93,15 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		this.electronic.receiveFromEncapsulating(packet);
 	}
 
-	protected void routeThroughCircuit(IpPacket packet, long jumboFlowId,int sourceServer, int destServer) {
+	protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow) {
 
 		try {
-	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),sourceServer,destServer,jumboFlowId);
+	    	getRemoteRouter().initRoute(jFlow.getSourceToR(),jFlow.getDestToR(),jFlow.getSource(),jFlow.getDest(),jFlow.getId());
 		}catch(FlowPathExists e) {
 
         }
 
-        this.conversionUnit.enqueue(sourceServer,destServer,packet);
+        this.conversionUnit.enqueue(jFlow.getSource(),jFlow.getDest(),packet);
 
 
 		
@@ -170,7 +178,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
             conversionUnitRecover(jumboFlow);
-            recoverPath(sourceToR,destToR,serverSource,serverDest,jumboFlow.getId());
+            recoverPath(jumboFlow);
             mJumboFlowMap.remove(new ImmutablePair<>(jumboFlow.getSource(), jumboFlow.getDest()));
         }
 
@@ -189,10 +197,10 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 //        recoverPath(sourceToR,destToR,packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
 //	}
     
-	protected void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId) {
+	protected void recoverPath(JumboFlow jFlow) {
 		try {
 
-			getRemoteRouter().recoverPath(sourceToR,destToR,serverSource,serverDest,flowId);
+			getRemoteRouter().recoverPath(jFlow.getSourceToR(),jFlow.getDestToR(),jFlow.getSource(),jFlow.getDest(),jFlow.getId());
 		}catch(NoPathException e) {
 
 		}

@@ -67,7 +67,7 @@ public class DistributedOpticServer extends OpticServer {
 	}
 
 	@Override
-	protected void routeThroughCircuit(IpPacket packet, long flowId, int sourceToR, int destToR){
+	protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow){
 
 		switch(mFlowState.getOrDefault(packet.getDestinationId(),State.NO_CIRCUIT)){
 
@@ -317,15 +317,15 @@ public class DistributedOpticServer extends OpticServer {
 
 
 	@Override
-	protected void recoverPath(int source, int dest,int serverSource,int serverDest, long jumboFlowId) {
+	protected void recoverPath(JumboFlow jFlow) {
 		//        System.out.println("trying to recover path from " + serverSource + " to " + serverDest);
 		DistributedController controller = (DistributedController) getRemoteRouter();
-		ReservationPacket rp = mFlowReservation.get(serverDest);
+		ReservationPacket rp = mFlowReservation.get(jFlow.getDest());
 		if(rp==null){
-			assert(mFlowState.get(serverDest) != State.HAS_CIRCUIT);
+			assert(mFlowState.get(jFlow.getDest()) != State.HAS_CIRCUIT);
 			return;
 		}
-		if(mFlowState.get(serverDest) != State.HAS_CIRCUIT){
+		if(mFlowState.get(jFlow.getDest()) != State.HAS_CIRCUIT){
 			return;
 		}
 		teardownCircuit(rp);
