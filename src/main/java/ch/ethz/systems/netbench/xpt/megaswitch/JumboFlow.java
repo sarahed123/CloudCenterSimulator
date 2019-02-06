@@ -23,6 +23,9 @@ public class JumboFlow {
     int mDest;
     boolean onCircuit;
     HashSet<Long> flowsOnCircuit;
+    private int mSourceToR;
+    private int mDestToR;
+
     public JumboFlow(int source,int dest){
         mSizeByte = 0;
         mFlowIdToSize = new HashMap<>();
@@ -31,6 +34,8 @@ public class JumboFlow {
         mDest = dest;
         mId = ++sIdCounter;
         onCircuit = false;
+        mSourceToR = -1;
+        mDestToR = -1;
     }
 
     public int getSource(){
@@ -54,10 +59,11 @@ public class JumboFlow {
      * @param packet
      */
     public void onPacketDispatch(TcpPacket packet) {
+        packet.setJumboFlowId(this.mId);
         if(packet.isACK()){
             return;
         }
-        packet.setJumboFlowId(this.mId);
+
         long flowSize = mFlowIdToSize.getOrDefault(packet.getFlowId(),0l);
 //        long seq = packet.getSequenceNumber() + packet.getDataSizeByte();
 //        if(flowSize > seq){ // should this be >=?
@@ -151,5 +157,15 @@ public class JumboFlow {
         mSizeByte -= flowSize;
         assert(mSizeByte>=0);
         mFlowIdToSize.put(flowId,0l);
+    }
+
+    public JumboFlow setSourceToR(int sourceToR) {
+        mSourceToR = sourceToR;
+        return this;
+    }
+
+    public JumboFlow setDestToR(int destToR) {
+        mDestToR = destToR;
+        return this;
     }
 }

@@ -104,7 +104,7 @@ public class RemoteRouterTest {
     	remoteRouter.initRoute(1, 4,0);
     	boolean thrown = false;
     	try{
-			remoteRouter.initRoute(1, 4,1);
+			remoteRouter.initRoute(1, 4,0);
 		}catch(FlowPathExists e){
 			thrown = true;
 		}
@@ -115,7 +115,7 @@ public class RemoteRouterTest {
 
     	System.out.println("recovering path one");
     	remoteRouter.recoverPath(1,4, 0);
-        remoteRouter.recoverPath(1,4, 1);
+//        remoteRouter.recoverPath(1,4, 0);
     	remoteRouter.initRoute(1, 4,3);
     	thrown = false;
     	try{

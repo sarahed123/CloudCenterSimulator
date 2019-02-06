@@ -72,7 +72,7 @@ public class MultiWaveLengthTest {
         remoteRouter.initRoute(1, 3,0);
         boolean thrown = false;
         try{
-            remoteRouter.initRoute(1, 3,1);
+            remoteRouter.initRoute(1, 3,0);
         }catch(FlowPathExists e){
             thrown = true;
         }
@@ -81,7 +81,7 @@ public class MultiWaveLengthTest {
 
         System.out.println("recovering path one");
         remoteRouter.recoverPath(1,3, 0);
-        remoteRouter.recoverPath(1,3, 1);
+//        remoteRouter.recoverPath(1,3, 1);
 
         remoteRouter.initRoute(1, 3,3);
         remoteRouter.initRoute(2, 3,4);

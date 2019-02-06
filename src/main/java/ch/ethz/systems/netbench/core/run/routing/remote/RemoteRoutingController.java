@@ -153,10 +153,10 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * edges from the graph
 	 * @param source
 	 * @param dest
-	 * @param flowId the flow id
+	 * @param jumboFlowId the jumbo flow id
 	 */
-	public void initRoute(int source,int dest, long flowId){
-		this.initRoute(source,dest,source,dest,flowId);
+	public void initRoute(int source,int dest, long jumboFlowId){
+		this.initRoute(source,dest,source,dest,jumboFlowId);
 	}
 
 
