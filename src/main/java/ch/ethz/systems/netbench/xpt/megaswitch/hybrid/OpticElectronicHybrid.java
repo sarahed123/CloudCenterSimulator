@@ -65,7 +65,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected JumboFlow getJumboFlow(int sourceToR, int destToR, int serverSource, int serverDest) {
-        return getJumboFlow(serverSource,serverDest);
+        return getJumboFlow(serverSource,serverDest).setSourceToR(sourceToR).setDestToR(destToR);
     }
 
     protected JumboFlow getJumboFlow(int source, int dest){
@@ -85,10 +85,10 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		this.electronic.receiveFromEncapsulating(packet);
 	}
 
-	protected void routeThroughCircuit(IpPacket packet, long jumboFlowiId,int sourceServer, int destServer) {
+	protected void routeThroughCircuit(IpPacket packet, long jumboFlowId,int sourceServer, int destServer) {
 
 		try {
-	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),sourceServer,destServer,packet.getFlowId());
+	    	getRemoteRouter().initRoute(this.identifier,packet.getDestinationId(),sourceServer,destServer,jumboFlowId);
 		}catch(FlowPathExists e) {
 
         }
@@ -135,19 +135,43 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         }
     }
 
-    @Override
-    public void onFlowFinished(int sourceToRId, int destToRId, int sourceServer, int destServerId, long flowId) {
-        JumboFlow jumboFlow = getJumboFlow(sourceServer,destServerId);
-        boolean isOnCircuit = jumboFlow.isOnCircuit(flowId);
+//    @Override
+//    public void onFlowFinished(int sourceToRId, int destToRId, int sourceServer, int destServerId, long flowId) {
+//        JumboFlow jumboFlow = getJumboFlow(sourceServer,destServerId);
+//        boolean isOnCircuit = jumboFlow.isOnCircuit(flowId);
+//        jumboFlow.onFlowFinished(flowId);
+//        if(jumboFlow.getNumFlows()==0){
+////        	recoverPath(source,dest,packet);
+//            mJumboFlowMap.remove(new ImmutablePair<>(sourceServer,destServerId));
+//
+//        }
+//        if(isOnCircuit){
+//            conversionUnit.onFlowFinish(sourceServer,destServerId,jumboFlow.getId());
+//            recoverPath(sourceToRId,destToRId,destServerId,sourceServer,flowId);
+//        }
+//
+//    }
+
+    protected void conversionUnitRecover(JumboFlow jumbo) {
+        conversionUnit.onFlowFinish(jumbo.getSource(),jumbo.getDest(),jumbo.getId());
+    }
+
+    /**
+     * called when flowId has finished
+     * will recover the path if the corresponding jumbo flow finished
+     * @param sourceToR
+     * @param destToR
+     * @param serverSource
+     * @param serverDest
+     * @param flowId
+     */
+    public void onFlowFinished(int sourceToR, int destToR,int serverSource,int serverDest, long flowId) {
+        JumboFlow jumboFlow = getJumboFlow(sourceToR,destToR,serverSource,serverDest);
         jumboFlow.onFlowFinished(flowId);
         if(jumboFlow.getNumFlows()==0){
-//        	recoverPath(source,dest,packet);
-            mJumboFlowMap.remove(new ImmutablePair<>(sourceServer,destServerId));
-
-        }
-        if(isOnCircuit){
-            conversionUnit.onFlowFinish(sourceServer,destServerId,jumboFlow.getId());
-            recoverPath(sourceToRId,destToRId,destServerId,sourceServer,flowId);
+            conversionUnitRecover(jumboFlow);
+            recoverPath(sourceToR,destToR,serverSource,serverDest,jumboFlow.getId());
+            mJumboFlowMap.remove(new ImmutablePair<>(jumboFlow.getSource(), jumboFlow.getDest()));
         }
 
     }
@@ -168,7 +192,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 	protected void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId) {
 		try {
 
-			getRemoteRouter().recoverPath(sourceToR,destToR,serverDest,serverSource,flowId);
+			getRemoteRouter().recoverPath(sourceToR,destToR,serverSource,serverDest,flowId);
 		}catch(NoPathException e) {
 
 		}

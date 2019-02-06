@@ -18,7 +18,6 @@ import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.*;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
-import com.sun.org.apache.regexp.internal.RE;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

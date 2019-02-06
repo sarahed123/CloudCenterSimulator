@@ -152,7 +152,7 @@ public class XpanderRouter extends RemoteRoutingController{
 	public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
 		ImmutablePair pair = new ImmutablePair<>(sourceServer,destServer);
 		if(mPaths.containsKey(pair)) {
-			mFlowIdsOnCircuit.get(pair).add(flowId);
+//			mFlowIdsOnCircuit.get(pair).add(flowId);
 			throw new FlowPathExists(flowId);
 		}
 //		int sourceToCheck = mIsServerOptics ? sourceServer : sourceToR;
@@ -176,9 +176,9 @@ public class XpanderRouter extends RemoteRoutingController{
 		onPathAllocation(sourceToR,destToR);
 		mAllocateddPathsNum++;
 		mPaths.put(new ImmutablePair<>(sourceServer,destServer), p);
-		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
-		hs.add(flowId);
-		mFlowIdsOnCircuit.put(pair,hs);
+//		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
+//		hs.add(flowId);
+//		mFlowIdsOnCircuit.put(pair,hs);
 		flowCounter++;
 		logRoute(p,sourceToR,destToR,flowId,Simulator.getCurrentTime(),true);
 
@@ -236,12 +236,12 @@ public class XpanderRouter extends RemoteRoutingController{
 
 		Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
 		Path p = mPaths.get(pair);
-
 		if(p==null) {
 			throw new NoPathException();
 		}
-		mFlowIdsOnCircuit.get(pair).remove(flowId);
-		if(!mFlowIdsOnCircuit.get(pair).isEmpty()) return;
+
+//		mFlowIdsOnCircuit.get(pair).remove(flowId);
+//		if(!mFlowIdsOnCircuit.get(pair).isEmpty()) return;
 
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
