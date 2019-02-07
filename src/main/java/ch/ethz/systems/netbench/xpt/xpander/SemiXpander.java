@@ -47,15 +47,15 @@ public class SemiXpander extends XpanderRouter {
 
 
     /**
-     * checks paths availability on all graphs
+     * checks paths availability on all colors
      * @param p
      * @return
      */
     private Path checkPath(List<Integer> p) {
         Path ret;
-        for(int i = 0;i<mGraphs.length; i++){
+        for(int c = 0;c<mGraphs.length; c++){
             try{
-                ret = checkPathInGraph(p,i);
+                ret = checkPathInGraph(p,c);
             }catch(NoPathException e){
                 continue;
             }
@@ -67,15 +67,15 @@ public class SemiXpander extends XpanderRouter {
     /**
      * checks paths availability on a specific path
      * @param p
-     * @param graphIndex
+     * @param color
      * @return
      */
-    protected Path checkPathInGraph(List<Integer> p, int graphIndex) {
+    protected Path checkPathInGraph(List<Integer> p, int color) {
         int curr = p.get(0);
-        Path ret = new Path(0,graphIndex);
+        Path ret = new Path(0,color);
         ret.add(curr);
         for(int i = 0;i < p.size()-1; i++){
-            if(mGraphs[graphIndex].getEdgeCapacity(new Vertex(curr),new Vertex(p.get(i+1)))==0){
+            if(mGraphs[color].getEdgeCapacity(new Vertex(curr),new Vertex(p.get(i+1)))==0){
                 throw new NoPathException();
             }
             curr = p.get(i+1);

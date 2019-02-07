@@ -212,24 +212,24 @@ public class OpticServerTest {
     @Test
     public void pathAllocations(){
         boolean thrown = false;
-        router.initRoute(0,1,2,3,0);
-        router.initRoute(0,0,2,4,1);
+        router.initRoute(2,3,2,3,0);
+        router.initRoute(2,4,2,4,1);
         try{
-            router.initRoute(0,0,2,4,2);
+            router.initRoute(2,4,2,4,1);
         }catch (FlowPathExists e){
             thrown = true;
         }
         assert(thrown);
         thrown = false;
         try{
-            router.initRoute(0,1,2,5,3);
+            router.initRoute(2,5,2,5,3);
         }catch (NoPathException e){
             thrown = true;
         }
 
         assert(thrown);
-        router.recoverPath(0,1,2,3,0);
-        router.initRoute(0,1,2,5,4);
+        router.recoverPath(2,3,2,3,0);
+        router.initRoute(2,5,2,5,4);
     }
 
     @After

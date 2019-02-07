@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * reservation packets to be dropped.
  */
 public class DistributedProtocolPort extends EcnTailDropOutputPort {
-	private int numRpPackets;
+	private int numRpPackets; // initally used for debugging
     public DistributedProtocolPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, long maxQueueSizeBytes, long ecnThresholdKBytes) {
         super(ownNetworkDevice, targetNetworkDevice, link, maxQueueSizeBytes, ecnThresholdKBytes, new LinkedList<Packet>());
         numRpPackets = 0;
@@ -24,8 +24,8 @@ public class DistributedProtocolPort extends EcnTailDropOutputPort {
     protected void log(Packet packet) {
     	if(getBufferOccupiedBits() >= ecnThresholdKBits * 4) {
 		
-//    		System.out.println("Port on device " + this.getOwnId() + " has surpassed ecn thresh with " + numRpPackets + " rp packets. last packet " + packet.toString());
     	}
+    	super.log(packet);
 		
 	}
 

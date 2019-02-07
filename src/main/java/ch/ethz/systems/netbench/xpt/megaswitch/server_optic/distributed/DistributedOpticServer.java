@@ -4,12 +4,9 @@ import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
-import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
-import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServer;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
@@ -24,6 +21,8 @@ import java.util.*;
  * when needed.
  */
 public class DistributedOpticServer extends OpticServer {
+	private HashSet<Integer> mTransmittingColors; // keeps track of colors currently in use for transmission
+	private HashSet<Integer> mReceveingColors; // keeps track of colors currently in use for receiving
 	private DistributedOpticServerToR ToRDevice; // the ToR fo this device
 	protected HashMap<Integer, ReservationPacket> mFlowReservation; // a map which contains information about reservation packets per destination
 	private HashMap<Integer, Integer> mPendingRequests; // the number of pending request to a certain destination
@@ -54,8 +53,10 @@ public class DistributedOpticServer extends OpticServer {
 		mPendingRequests = new HashMap<>();
 		NUM_PATH_TO_RANDOMIZE = configuration.getIntegerPropertyOrFail("num_paths_to_randomize");
 		mConfigurationTime = configuration.getLongPropertyOrFail("static_configuration_time_ns");
-		mCircuitTeardowTimeout = configuration.getLongPropertyWithDefault("circuit_teardown_timeout_ns",5000);
+		mCircuitTeardowTimeout = configuration.getLongPropertyWithDefault("circuit_teardown_timeout_ns",30000);
 		mTeardownEventsMap = new HashMap<>();
+		mTransmittingColors = new HashSet<>();
+		mReceveingColors = new HashSet<>();
 		//        NUM_COLORS_TO_RANDOMIZE = configuration.getIntegerPropertyOrFail("num_colors_to_randomize");
 
 	}
@@ -74,7 +75,7 @@ public class DistributedOpticServer extends OpticServer {
 		case NO_CIRCUIT:
 			try{
 				assert(mPendingRequests.getOrDefault(packet.getDestinationId(),0)==0); // asert there are no pending requests
-				initRoute(packet, packet.getFlowId());
+				initRouteRequest(packet);
 			}catch (NoPathException e){
 				routeThroughtPacketSwitch((TcpPacket)packet);
 				break;
@@ -91,7 +92,7 @@ public class DistributedOpticServer extends OpticServer {
 			tcpPacket.color(rp.getColor()); // paint all packets with the reserved color
 			tcpPacket.setPrevHop(this.identifier);
 			JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
-			assert(((DistributedController) getRemoteRouter()).serverHasColor(this.identifier, tcpPacket.getColor(), false));
+			assert(hasColor(tcpPacket.getColor(), false));
 			tcpPacket.markOnCircuit(true);
 			this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
 			this.mTeardownEventsMap.get(rp.getOriginalServerDest()).reset(mCircuitTeardowTimeout);
@@ -102,6 +103,22 @@ public class DistributedOpticServer extends OpticServer {
 		}
 	}
 
+	/**
+	 * checks the color is available for receving/transmitting
+	 * @param color
+	 * @param receiving
+	 * @return
+	 */
+	private boolean hasColor(int color, boolean receiving) {
+		HashSet colorSet = receiving ?  mReceveingColors : mTransmittingColors ;
+		return colorSet.contains(color);
+	}
+
+	/**
+	 * changes state for destiantionId
+	 * @param destinationId
+	 * @param state
+	 */
 	private void changeState(int destinationId, State state) {
 		State oldState = mFlowState.put(destinationId,state);
 		if(state!=oldState) {
@@ -114,7 +131,11 @@ public class DistributedOpticServer extends OpticServer {
 		// used for testing
 	}
 
-	protected void initRoute(IpPacket packet, long jumboFlowiId) {
+	/**
+	 * inits a route request by sending our reservation packets
+	 * @param packet the packet containing details such as destiantion id
+	 */
+	protected void initRouteRequest(IpPacket packet) {
 		SimulationLogger.registerFlowCircuitRequest(packet.getFlowId());
 		int destToRId = getTransportLayer().getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(packet.getDestinationId());
 		int sourceToRId = getTransportLayer().getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(getIdentifier());
@@ -142,7 +163,7 @@ public class DistributedOpticServer extends OpticServer {
 			for(int j = 0; j<numColorsAvailable; j++){ // iterate over all colors starting at a certain index to see if one is available
 				c = (c+j) % numColorsAvailable;
 				try{
-					controller.reserveServerColor(this.identifier,c,false);	
+					reserveServerColor(c,false);
 					hasAvailableColor = true;
 					break;
 				}catch (NoPathException e){
@@ -150,7 +171,6 @@ public class DistributedOpticServer extends OpticServer {
 				}
 			}
 			if(hasAvailableColor){
-				//                int pendingRequests = mPendingRequests.getOrDefault(packet.getDestinationId(),0);
 				pendingRequests++; // count the number of pending requests
 				mPendingRequests.put(packet.getDestinationId(),pendingRequests);
 
@@ -166,6 +186,24 @@ public class DistributedOpticServer extends OpticServer {
 			throw new NoPathException();
 		}
 
+	}
+
+	/**
+	 * reserves the colors, or if color is not available
+	 * throw NoPathExcetion
+	 * @param color
+	 * @param receiving a boolean for whether this is a transmission or receiving request
+	 */
+	protected void reserveServerColor(int color, boolean receiving) {
+		int circuitLimit = getRemoteRouter().getCircuitFlowLimit();
+		HashSet colorSet = receiving ?  mReceveingColors : mTransmittingColors ;
+		if(colorSet.size()>=circuitLimit){
+			throw  new NoPathException();
+		}
+		if(colorSet.contains(color)){
+			throw  new NoPathException();
+		}
+		colorSet.add(color);
 	}
 
 	/**
@@ -199,14 +237,14 @@ public class DistributedOpticServer extends OpticServer {
 
 				if(ep.idDeAllocation()) {
 					assert(ep.isSuccess()); // this is a tear down of an existing circuit
-					((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), true);
+					deallocateServerColor(ep.getColor(), true);
 					SimulationLogger.regiserPathActive(new Path(ep.getPath(),ep.getColor(),ep.getId()),false);
 					ep.onFinishDeallocation();
 	                ((DistributedController) getRemoteRouter()).onDeallocation();
 					return;
 				}
 				try { // this is  an incoming request
-	                ((DistributedController) getRemoteRouter()).reserveServerColor(this.identifier,ep.getColor(),true); // reserve end color
+	                reserveServerColor(ep.getColor(),true); // reserve end color
 					ep.markSuccess();
 					Path p = new Path(ep.getPath(),ep.getColor());
 					ep.setId(p.getId());
@@ -233,7 +271,6 @@ public class DistributedOpticServer extends OpticServer {
 			}
 			
 			JumboFlow jumbo = getJumboFlow(ep.getSourceId(), ep.getOriginalServerDest());
-			//System.out.println(genericPacket.toString());
 			int pendingRequests = mPendingRequests.get(ep.getOriginalServerDest());
 			pendingRequests--;
 			mPendingRequests.put(ep.getOriginalServerDest(),pendingRequests);
@@ -248,10 +285,7 @@ public class DistributedOpticServer extends OpticServer {
 						}
 					}
 					SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
-					ep.setDeallocation();
-					ep.reverse();
-					((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), false);
-					routeThroughtPacketSwitch(ep);
+					teardownCircuit(ep);
 					return;
 				}
 				SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_SUCCESS_COUNT");
@@ -262,8 +296,7 @@ public class DistributedOpticServer extends OpticServer {
 				assert(ep.isFailure());
 
 				((DistributedController) getRemoteRouter()).onPathFailure();
-				//                System.out.println("failure for " + ep.toString());
-				((DistributedController) getRemoteRouter()).deallocateServerColor(this.identifier,ep.getColor(), false); // deallocate color
+				deallocateServerColor(ep.getColor(), false); // deallocate color
 				if(pendingRequests==0 && mFlowState.get(ep.getOriginalServerDest())!=State.HAS_CIRCUIT){
 					SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_FAILURE_COUNT");
 					if(mFlowState.get(ep.getOriginalServerDest())!=State.IN_PROCESS) {
@@ -281,9 +314,14 @@ public class DistributedOpticServer extends OpticServer {
 		}
 		TcpPacket tcpPacket = (TcpPacket) genericPacket;
 		if(tcpPacket.getColor()!=-1) {
-			assert(((DistributedController) getRemoteRouter()).serverHasColor(this.identifier, tcpPacket.getColor(), true));
+			assert(hasColor(tcpPacket.getColor(), true));
 		}
 		super.receive(genericPacket);
+	}
+
+	protected void deallocateServerColor(int color, boolean receiving) {
+		HashSet colorSet = receiving ?  mReceveingColors : mTransmittingColors ;
+		colorSet.remove(color);
 	}
 
 	/**
@@ -300,25 +338,19 @@ public class DistributedOpticServer extends OpticServer {
 	}
 
 	/**
-	 * called to tear down circuit started with ep
+	 * called to tear down circuit started with ep, and change state to state
 	 * @param ep
 	 */
 	protected void teardownCircuit(ReservationPacket ep) {
-//		JumboFlow jumbo = getJumboFlow(this.identifier,ep.getOriginalServerDest());
-//		jumbo.resetFlow(ep.getFlowId()); // reset flow size
-		DistributedController controller = (DistributedController) getRemoteRouter();
-		controller.deallocateServerColor(this.identifier,ep.getColor(),false);
+		deallocateServerColor(ep.getColor(),false);
 		ep.reverse();
 		ep.setDeallocation();
 		routeThroughtPacketSwitch(ep);
-		changeState(ep.getOriginalServerDest(),State.NO_CIRCUIT);
-		
 	}
 
 
 	@Override
 	protected void recoverPath(JumboFlow jFlow) {
-		//        System.out.println("trying to recover path from " + serverSource + " to " + serverDest);
 		DistributedController controller = (DistributedController) getRemoteRouter();
 		ReservationPacket rp = mFlowReservation.get(jFlow.getDest());
 		if(rp==null){
@@ -329,12 +361,8 @@ public class DistributedOpticServer extends OpticServer {
 			return;
 		}
 		teardownCircuit(rp);
-//		controller.deallocateServerColor(this.identifier,rp.getColor(),false);
-//		rp.setDeallocation();
-//		rp.reverse();
-//		routeThroughtPacketSwitch(rp);
+		changeState(rp.getOriginalServerDest(),State.NO_CIRCUIT);
 		this.mTeardownEventsMap.get(rp.getOriginalServerDest()).finish();
-//		changeState(rp.getOriginalServerDest(),State.NO_CIRCUIT);
 	}
 
 

@@ -26,7 +26,6 @@ public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
 	 * @param color
 	 */
 	public void updateForwardingTable(int prevHop, int nextHop, int color) {
-//		System.out.println("updateForwardingTable " + " prevhop " + prevHop + " color " + color + " nexthop " + nextHop + " id " + identifier);
 		super.updateForwardingTable(prevHop, color, nextHop);
 		
 	}
@@ -43,7 +42,6 @@ public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
 	protected void forwardToNextSwitch(IpPacket packet) {
     	TcpPacket tcpPacket = (TcpPacket) packet;
     	int prevHop = tcpPacket.getPrevHop();
-//		System.out.println("forwardToNextSwitch " + " prevhop " + prevHop + " color " + tcpPacket.getColor());
     	tcpPacket.setPrevHop(identifier);
     	forwardingTable.get(new ImmutablePair<Integer,Integer>(prevHop,tcpPacket.getColor())).enqueue(packet);
 		

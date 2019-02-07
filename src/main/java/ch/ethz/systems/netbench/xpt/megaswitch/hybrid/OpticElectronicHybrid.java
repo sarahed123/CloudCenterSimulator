@@ -195,18 +195,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
     }
 
-//    protected void onFlowFinished(int sourceToR, int destToR, IpPacket packet) {
-//        JumboFlow jumboFlow = getJumboFlow(sourceToR,destToR);
-//
-//        jumboFlow.onFlowFinished(packet.getFlowId());
-//        if(jumboFlow.getNumFlows()==0){
-////        	recoverPath(source,dest,packet);
-//        	mJumboFlowMap.remove(new ImmutablePair<>(sourceToR,destToR));
-//
-//        }
-//        conversionUnit.onFlowFinish(packet.getDestinationId(),packet.getSourceId(),packet.getFlowId());
-//        recoverPath(sourceToR,destToR,packet.getSourceId(),packet.getDestinationId(),packet.getFlowId());
-//	}
+
     
 	protected void recoverPath(JumboFlow jFlow) {
 		try {
@@ -275,11 +264,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 	}
 
     public String getState() {
-//        JumboFlow j = getJumboFlow(this.identifier,53);
-//        String state = "Node " + this.identifier + " Allocated: " + this.mNumAllocatedFlows + ", deAllocated: " + this.mNumDeAllocatedFlows + ", total size: " +
-//                j.getSizeByte() + ", on circuit " + j.isOnCircuit() + "\n";
-//        mNumDeAllocatedFlows = 0;
-//        mNumAllocatedFlows = 0;
+
         return "";
     }
 

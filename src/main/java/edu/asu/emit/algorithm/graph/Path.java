@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Vector;
 
 import ch.ethz.systems.netbench.core.Simulator;
-import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingPath;
 
 /**
  * The class defines a path in graph.
@@ -51,7 +50,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 	private long issueTime;
     // Total path weight
 	private double weight;
-	private int mGraphIndex;
+	private int mColor;
     /**
      * Create a path which should have a pre-determined weight.
      *
@@ -64,14 +63,14 @@ public class Path implements BaseElementWithWeight, Serializable {
 	public Path(double cost) {
         this.vertexList = new Vector<>();
         this.weight = cost;
-        this.mGraphIndex = -1;
+        this.mColor = -1;
         this.id = ++pCounter;
         this.issueTime = Simulator.getCurrentTime();
     }
 
-	public Path(double cost,int graphIndex) {
+	public Path(double cost,int color) {
 		this(cost);
-		this.mGraphIndex = graphIndex;
+		this.mColor = color;
 	}
 
     /**
@@ -84,7 +83,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 		this.vertexList = new Vector<>();
 		this.vertexList.addAll(vertexList);
 		this.weight = weight2;
-		this.mGraphIndex = -1;
+		this.mColor = -1;
 		this.id = ++pCounter;
 		this.issueTime = Simulator.getCurrentTime();
 	}
@@ -94,7 +93,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 		for(int i = 0; i<list.size(); i++){
 			vertexList.add(new Vertex(list.get(i)));
 		}
-		mGraphIndex = color;
+		mColor = color;
 
 	}
 
@@ -194,11 +193,11 @@ public class Path implements BaseElementWithWeight, Serializable {
 		return vertexList.get(0);
 	}
 
-	public void fromGraphIndex(int i) {
-		this.mGraphIndex = i;
+	public void setColor(int c) {
+		this.mColor = c;
 	}
 
-	public int fromGraph() {
-		return mGraphIndex;
+	public int getColor() {
+		return mColor;
 	}
 }
