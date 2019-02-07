@@ -24,7 +24,9 @@ public class SemiXpander extends XpanderRouter {
      */
     @Override
     protected Path generatePathFromGraph(int source, int dest) {
-
+        if(source==dest && trivialPathAllowed()){
+            return allocateTrivialPath(source,dest);
+        }
         List<List<Integer>> paths = getPathsFromDevice(source,dest);
         Path ret;
         for(List<Integer> p : paths){

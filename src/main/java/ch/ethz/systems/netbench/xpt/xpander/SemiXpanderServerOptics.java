@@ -31,104 +31,130 @@ public class SemiXpanderServerOptics extends SemiXpander {
 
     /**
      * specific implementation for server optics setup
-     * @param sourceToR
-     * @param destToR
-     * @param sourceServer
-     * @param destServer
-     * @param flowId
+     * @param transimttingSource
+     * @param receivingDest
+     * @param sourceKey
+     * @param destKey
+     * @param jumboFlowId
      */
     @Override
-    public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
-        mCurrentServerDest = destServer;
-        mCurrentServerSource = sourceServer;
-        Set transimtting = mServerTransmitColorsUsed.get(sourceServer);
+    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId){
+        mCurrentServerDest = receivingDest;
+        mCurrentServerSource = transimttingSource;
+        Set transimtting = mServerTransmitColorsUsed.get(mCurrentServerSource);
         if(transimtting==null){
-            mServerTransmitColorsUsed.put(sourceServer,new HashSet<>());
+            mServerTransmitColorsUsed.put(mCurrentServerSource,new HashSet<>());
         }
 
-        Set receving = mServerReceiveColorsUsed.get(destServer);
+        Set receving = mServerReceiveColorsUsed.get(mCurrentServerDest);
         if(receving==null){
-            mServerReceiveColorsUsed.put(destServer,new HashSet<>());
+            mServerReceiveColorsUsed.put(mCurrentServerDest,new HashSet<>());
         }
+//
+//        ImmutablePair pair = new ImmutablePair<>(sourceKey, destKey);
+//        if(mPaths.containsKey(pair)) {
+//            mFlowIdsOnCircuit.get(pair).add(jumboFlowId);
+//            throw new FlowPathExists(jumboFlowId);
+//        }
 
-        ImmutablePair pair = new ImmutablePair<>(sourceServer,destServer);
-        if(mPaths.containsKey(pair)) {
-            mFlowIdsOnCircuit.get(pair).add(flowId);
-            throw new FlowPathExists(flowId);
-        }
+        super.initRoute(transimttingSource,receivingDest,sourceKey,destKey,jumboFlowId);
+
 //        int sourceToCheck = mIsServerOptics ? sourceServer : sourceToR;
 //        int destToCheck = mIsServerOptics ? destServer : destToR;
-        if(mTransmittingSources.getOrDefault(sourceServer,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(destServer,0)>=mMaxNumJFlowsOncircuit){
-            SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_XPANDER_SERVER");
-            throw new NoPathException(sourceToR,destToR);
-        }
-        Path p;
-        if(destToR==sourceToR){
-            p = allocateTrivialPath(sourceServer,destServer);
-//            List<Vertex> trivalPath = new LinkedList<>();
-            p.add(destToR);
-        }else{
-            p = generatePathFromGraph(sourceToR, destToR);
-        }
-
-
-
-
-        updateForwardingTables(sourceServer,destServer,p,flowId);
-        removePathFromGraph(p);
-        onPathAllocation(sourceServer,destServer);
-        mAllocateddPathsNum++;
-        mPaths.put(new ImmutablePair<>(sourceServer,destServer), p);
-        HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
-        hs.add(flowId);
-        mFlowIdsOnCircuit.put(pair,hs);
-        flowCounter++;
-        logRoute(p,sourceToR,destToR,flowId, Simulator.getCurrentTime(),true);
+//        if(mTransmittingSources.getOrDefault(sourceKey,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(destKey,0)>=mMaxNumJFlowsOncircuit){
+//            SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_XPANDER_SERVER");
+//            throw new NoPathException(transimttingSource, receivingDest);
+//        }
+//        Path p;
+//        if(receivingDest == transimttingSource){
+//            p = allocateTrivialPath(sourceKey, destKey);
+////            List<Vertex> trivalPath = new LinkedList<>();
+//            p.add(receivingDest);
+//        }else{
+//            p = generatePathFromGraph(transimttingSource, receivingDest);
+//        }
+//
+//
+//
+//
+//        updateForwardingTables(sourceKey, destKey,p, jumboFlowId);
+//        removePathFromGraph(p);
+//        onPathAllocation(sourceKey, destKey);
+//        mAllocateddPathsNum++;
+//        mPaths.put(new ImmutablePair<>(sourceKey, destKey), p);
+//        HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
+//        hs.add(jumboFlowId);
+//        mFlowIdsOnCircuit.put(pair,hs);
+//        flowCounter++;
+//        logRoute(p, transimttingSource, receivingDest, jumboFlowId, Simulator.getCurrentTime(),true);
 
     }
 
-    /**
-     * pecific implementation for server optics setup
-     * @param sourceToR
-     * @param destToR
-     * @param serverSource
-     * @param serverDest
-     * @param flowId
-     */
-    public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
+    @Override
+    protected boolean trivialPathAllowed() {
+        return true;
+    }
 
-        Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
-        Path p = mPaths.get(pair);
+    @Override
+    protected Path generatePathFromGraph(int sourceServer, int destServer) {
+        int sourceToR = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(sourceServer);
+        int destToR = Simulator.getConfiguration().getGraphDetails().getTorIdOfServer(destServer);
+        return super.generatePathFromGraph(sourceToR,destToR);
+    }
 
-        if(p==null) {
-            throw new NoPathException();
-        }
-        mFlowIdsOnCircuit.get(pair).remove(flowId);
-        if(!mFlowIdsOnCircuit.get(pair).isEmpty()) return;
+//    /**
+//     * pecific implementation for server optics setup
+//     * @param sourceToR
+//     * @param destToR
+//     * @param serverSource
+//     * @param serverDest
+//     * @param flowId
+//     */
+//    public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
+//
+//        Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
+//        Path p = mPaths.get(pair);
+//
+//        if(p==null) {
+//            throw new NoPathException();
+//        }
+//        mFlowIdsOnCircuit.get(pair).remove(flowId);
+//        if(!mFlowIdsOnCircuit.get(pair).isEmpty()) return;
+//
+//        for(int i=0; i< p.getVertexList().size() - 1;i++){
+//            Vertex v = p.getVertexList().get(i);
+//            Vertex u = p.getVertexList().get(i+1);
+//            mGraphs[p.fromGraph()].increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
+//            // recover the opisite edge
+//            //mMainGraph.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
+//
+//
+//        }
+//
+//        logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
+//                ,flowId,Simulator.getCurrentTime(),false);
+//        mPaths.remove(pair);
+//
+////		int sourceToCheck = mIsServerOptics ? serverSource : sourceToR;
+////		int destToCheck = mIsServerOptics ? serverDest : destToR;
+//        onPathDeAllocation(serverSource,serverDest);
+//        mDeAllocatedPathsNum++;
+//        mServerTransmitColorsUsed.get(serverSource).remove(p.fromGraph());
+//        mServerReceiveColorsUsed.get(serverDest).remove(p.fromGraph());
+//    }
 
-        for(int i=0; i< p.getVertexList().size() - 1;i++){
-            Vertex v = p.getVertexList().get(i);
-            Vertex u = p.getVertexList().get(i+1);
-            mGraphs[p.fromGraph()].increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
-            // recover the opisite edge
-            //mMainGraph.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
 
+    @Override
+    protected void returnPathToGraph(Path p, int sourceKey, int destKey, int transimttingSource, int receivingDest, long jumboFlowId) {
 
-        }
-        mServerTransmitColorsUsed.get(serverSource).remove(p.fromGraph());
-        mServerReceiveColorsUsed.get(serverDest).remove(p.fromGraph());
-        logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
-                ,flowId,Simulator.getCurrentTime(),false);
-        mPaths.remove(pair);
-
-//		int sourceToCheck = mIsServerOptics ? serverSource : sourceToR;
-//		int destToCheck = mIsServerOptics ? serverDest : destToR;
-        onPathDeAllocation(serverSource,serverDest);
-        mDeAllocatedPathsNum++;
+        super.returnPathToGraph(p,sourceKey,destKey,transimttingSource,receivingDest,jumboFlowId);
+        mServerTransmitColorsUsed.get(transimttingSource).remove(p.fromGraph());
+        mServerReceiveColorsUsed.get(receivingDest).remove(p.fromGraph());
     }
 
 
-    private Path allocateTrivialPath(int sourceServer, int destServer) {
+    @Override
+    protected Path allocateTrivialPath(int sourceServer, int destServer) {
         for(int i = 0;i<mGraphs.length; i++){
             if(mServerTransmitColorsUsed.get(mCurrentServerSource).contains(i)){
                 continue;

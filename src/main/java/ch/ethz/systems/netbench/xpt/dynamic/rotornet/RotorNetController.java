@@ -54,7 +54,7 @@ public class RotorNetController extends DynamicController {
     }
 
     @Override
-    public void initRoute(int source, int dest, int sourceServer, int destServer, long flowId) {
+    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId) {
     	
 
         
