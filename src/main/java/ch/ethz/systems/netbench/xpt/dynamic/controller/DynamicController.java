@@ -92,7 +92,7 @@ public class DynamicController extends RemoteRoutingController {
 	}
 
 	@Override
-	protected int getCircuitFlowLimit() {
+	public int getCircuitFlowLimit() {
 		return max_degree;
 	}
 

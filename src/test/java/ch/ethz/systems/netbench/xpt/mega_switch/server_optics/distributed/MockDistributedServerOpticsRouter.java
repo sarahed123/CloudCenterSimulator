@@ -32,35 +32,35 @@ public class MockDistributedServerOpticsRouter extends DistributedController{
         routedFlows.add(flowId);
     }
 
-    @Override
-    public void deallocateServerColor(int server, int color, boolean incomming) {
-        super.deallocateServerColor(server,color,incomming);
-        HashMap<Integer,Integer> colors = dealloctedColors.getOrDefault(server,new HashMap<>());
-        int times = colors.getOrDefault(color,0);
-        times++;
-        colors.put(color,times);
-        dealloctedColors.put(server,colors);
-        assert(serverColorAvailable(server,color,incomming));
-    }
-    @Override
-    public void reserveServerColor(int server, int color, boolean incomming) {
-        super.reserveServerColor(server,color,incomming);
-        HashMap<Integer,Integer> colors = reservedColors.getOrDefault(server,new HashMap<>());
-        int times = colors.getOrDefault(color,0);
-        times++;
-        colors.put(color,times);
-        reservedColors.put(server,colors);
-        assert(!serverColorAvailable(server,color,incomming));
+//    @Override
+//    public void deallocateServerColor(int server, int color, boolean incomming) {
+//        super.deallocateServerColor(server,color,incomming);
+//        HashMap<Integer,Integer> colors = dealloctedColors.getOrDefault(server,new HashMap<>());
+//        int times = colors.getOrDefault(color,0);
+//        times++;
+//        colors.put(color,times);
+//        dealloctedColors.put(server,colors);
+//        assert(serverColorAvailable(server,color,incomming));
+//    }
+//    @Override
+//    public void reserveServerColor(int server, int color, boolean incomming) {
+//        super.reserveServerColor(server,color,incomming);
+//        HashMap<Integer,Integer> colors = reservedColors.getOrDefault(server,new HashMap<>());
+//        int times = colors.getOrDefault(color,0);
+//        times++;
+//        colors.put(color,times);
+//        reservedColors.put(server,colors);
+//        assert(!serverColorAvailable(server,color,incomming));
+//
+//    }
 
-    }
-
-    public int allocatedColor(int server, int c) {
-        return reservedColors.getOrDefault(server,new HashMap<>()).getOrDefault(c,0);
-    }
-
-    public int deallocatedColor(int server, int c) {
-        return dealloctedColors.getOrDefault(server,new HashMap<>()).getOrDefault(c,0);
-    }
+//    public int allocatedColor(int server, int c) {
+//        return reservedColors.getOrDefault(server,new HashMap<>()).getOrDefault(c,0);
+//    }
+//
+//    public int deallocatedColor(int server, int c) {
+//        return dealloctedColors.getOrDefault(server,new HashMap<>()).getOrDefault(c,0);
+//    }
 
     @Override
     public void decreaseEdgeCapacity(int source, int dest, int color){

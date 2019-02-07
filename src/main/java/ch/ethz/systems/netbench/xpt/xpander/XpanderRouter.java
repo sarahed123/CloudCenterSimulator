@@ -7,16 +7,12 @@ import java.util.*;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
-import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import edu.asu.emit.algorithm.graph.Graph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Path;
 import edu.asu.emit.algorithm.graph.Paths;
@@ -143,56 +139,9 @@ public class XpanderRouter extends RemoteRoutingController{
 
 
 
-//	/**
-//	 * this is the base method for circuit creation
-//	 * @param sourceToR
-//	 * @param destToR
-//	 * @param source
-//	 * @param dest
-//	 * @param flowId
-//	 */
-//	public void initRoute(int sourceToR,int destToR, int source, int dest, long flowId){
-//		ImmutablePair pair = new ImmutablePair<>(source,dest);
-//		if(destToR==sourceToR){
-//			throw new NoPathException(); // assuming the EPS will pick it up
-//		}
-//		if(mPaths.containsKey(pair)) {
-////			mFlowIdsOnCircuit.get(pair).add(flowId);
-//			throw new FlowPathExists(flowId);
-//		}
-////		int sourceToCheck = mIsServerOptics ? sourceServer : sourceToR;
-////		int destToCheck = mIsServerOptics ? destServer : destToR;
-//		if(mTransmittingSources.getOrDefault(sourceToR,0) >= mMaxNumJFlowsOncircuit || mRecievingDestinations.getOrDefault(destToR,0)>=mMaxNumJFlowsOncircuit){
-//			SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_XPANDER_TOR");
-//			throw new NoPathException(sourceToR,destToR);
-//		}
-//		Path p;
-//
-////		if(destToR==sourceToR){
-////			List<Vertex> trivalPath = new LinkedList<>();
-////			trivalPath.add(new Vertex(destToR));
-////			p = new Path(trivalPath, 0d);
-////
-////		}else{
-////			 p = generatePathFromGraph(sourceToR, destToR);
-////		}
-//
-//		p = generatePathFromGraph(sourceToR, destToR);
-//		updateForwardingTables(source,dest,p,flowId);
-//		removePathFromGraph(p);
-//		onPathAllocation(sourceToR,destToR);
-//		mAllocateddPathsNum++;
-//		mPaths.put(new ImmutablePair<>(source,dest), p);
-////		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
-////		hs.add(flowId);
-////		mFlowIdsOnCircuit.put(pair,hs);
-//		flowCounter++;
-//		logRoute(p,sourceToR,destToR,flowId,Simulator.getCurrentTime(),true);
-//
-//	}
 
 	@Override
-	protected int getCircuitFlowLimit() {
+	public int getCircuitFlowLimit() {
 		return mMaxNumJFlowsOncircuit;
 	}
 
@@ -210,16 +159,12 @@ public class XpanderRouter extends RemoteRoutingController{
 			DijkstraShortestPathAlg dijkstra = new DijkstraShortestPathAlg(mGraphs[i],dijkstra_max_weigh,null);
 			ps = dijkstra.getShortestPath(mGraphs[i].getVertex(source), mGraphs[i].getVertex(dest));
 			p = pathsFilter.filterPaths(ps);
-			p.fromGraphIndex(i);
+			p.setColor(i);
 			if(p.getVertexList().size()>0){
 				break;
 			}
 
 		}
-		//Paths ps  = dijkstraAlg.getShortestPath(mMainGraph.getVertex(source), mMainGraph.getVertex(dest));
-		//System.out.println(ps);
-		//Path p = pathsFilter.filterPaths(ps);
-		//System.out.println(p);
 		return p;
 	}
 
@@ -236,34 +181,6 @@ public class XpanderRouter extends RemoteRoutingController{
 		mPaths.clear();
 	}
 
-//	/**
-//	 * recovers a path by increasing all capacities on relevant edges.
-//	 * @param sourceToR
-//	 * @param destToR
-//	 * @param serverSource
-//	 * @param serverDest
-//	 * @param flowId
-//	 */
-//	public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
-//
-//		Pair<Integer, Integer> pair = new ImmutablePair<>(serverSource,serverDest);
-//		Path p = mPaths.get(pair);
-//		if(p==null) {
-//			throw new NoPathException();
-//		}
-//
-////		mFlowIdsOnCircuit.get(pair).remove(flowId);
-////		if(!mFlowIdsOnCircuit.get(pair).isEmpty()) return;
-//
-//		logRoute(p,p.getVertexList().get(0).getId(),p.getVertexList().get(p.getVertexList().size()-1).getId()
-//				,flowId,Simulator.getCurrentTime(),false);
-//		mPaths.remove(pair);
-//
-////		int sourceToCheck = mIsServerOptics ? serverSource : sourceToR;
-////		int destToCheck = mIsServerOptics ? serverDest : destToR;
-//		onPathDeAllocation(sourceToR,destToR);
-//		mDeAllocatedPathsNum++;
-//	}
 
 	@Override
 	protected void returnPathToGraph(Path p, int sourceKey, int destKey, int transimttingSource, int receivingDest, long jumboFlowId) {
@@ -271,8 +188,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		for(int i=0; i< p.getVertexList().size() - 1;i++){
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);
-			mGraphs[p.fromGraph()].increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
-			// recover the opisite edge
+			mGraphs[p.getColor()].increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
+			// recover the opisite edge - currently not used
 			//mMainGraph.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
 
 
@@ -289,8 +206,8 @@ public class XpanderRouter extends RemoteRoutingController{
 		int curr = pathAsList.get(0).getId();
 		for(int i = 1; i<pathAsList.size();i++){
 			int next = pathAsList.get(i).getId();
-			mGraphs[p.fromGraph()].decreaseCapacity(new ImmutablePair<Integer, Integer>(curr, next));
-			// delete the opisite edge
+			mGraphs[p.getColor()].decreaseCapacity(new ImmutablePair<Integer, Integer>(curr, next));
+			// delete the opisite edge - currently not used
 			//mMainGraph.decreaseCapacity(new ImmutablePair<Integer, Integer>(next, curr));
 			curr = next;
 		}
@@ -336,10 +253,6 @@ public class XpanderRouter extends RemoteRoutingController{
 			rsrs.updateForwardingTable(source,dest,curr);
 		}
 
-//		if(mIsServerOptics){
-//			RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(curr);
-//			rsrs.updateForwardingTable(source,dest,dest);
-//		}
 
 	}
 

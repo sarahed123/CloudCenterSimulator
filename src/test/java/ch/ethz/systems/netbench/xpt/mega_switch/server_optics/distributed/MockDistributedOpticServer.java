@@ -12,11 +12,14 @@ import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.Reservat
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MockDistributedOpticServer extends DistributedOpticServer {
     static MockDistributedServerOpticsRouter remoteRouter;
+    HashMap<Integer,Integer> reservedColors;
+    HashMap<Integer,Integer> dealloctedColors;
     /**
      * Constructor of a network device.
      *
@@ -27,6 +30,8 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
      */
     protected MockDistributedOpticServer(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary, configuration);
+        reservedColors = new HashMap<>();
+        dealloctedColors = new HashMap<>();
     }
 
 
@@ -41,6 +46,26 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
 
     protected void sendReservationPackets(List<Integer> path, int color, TcpPacket packet) {
         super.sendReservationPackets(path,color,packet);
+    }
+
+    @Override
+    public void deallocateServerColor(int color, boolean incomming) {
+        super.deallocateServerColor(color,incomming);
+        int times = dealloctedColors.getOrDefault(color,0);
+        times++;
+        dealloctedColors.put(color,times);
+
+//        assert(serverColorAvailable(server,color,incomming));
+    }
+
+    @Override
+    public void reserveServerColor( int color, boolean incomming) {
+        super.reserveServerColor(color,incomming);
+        int times = reservedColors.getOrDefault(color,0);
+        times++;
+        reservedColors.put(color,times);
+//        assert(!serverColorAvailable(server,color,incomming));
+
     }
 
     @Override
@@ -69,11 +94,11 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
     }
 
     public int allocatedColor(int c) {
-        return ((MockDistributedServerOpticsRouter)getRemoteRouter()).allocatedColor(identifier,c);
+        return reservedColors.getOrDefault(c,0);
     }
 
     public int deallocatedColor(int c) {
-        return ((MockDistributedServerOpticsRouter)getRemoteRouter()).deallocatedColor(identifier,c);
+        return dealloctedColors.getOrDefault(c,0);
     }
 
     public ReservationPacket getResrvationPacket(int serverDest){

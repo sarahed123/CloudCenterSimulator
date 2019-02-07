@@ -44,9 +44,8 @@ public class OpticServer extends OpticElectronicHybrid {
         if (tcpPacket.getDestinationId() == this.identifier) {
             if(tcpPacket.isACK() && tcpPacket.isFIN()){
                 int destToR = configuration.getGraphDetails().getTorIdOfServer(tcpPacket.getSourceId());
-//                onFlowFinished(this.ownToRId,destToR,tcpPacket.getDestinationId(),tcpPacket.getSourceId(),tcpPacket.getFlowId());
+
             }
-//            System.out.println("packet received at " + this.identifier + " : " + tcpPacket.toString());
             passToIntermediary(genericPacket);
             return;
         }

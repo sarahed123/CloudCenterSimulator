@@ -162,17 +162,17 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 
 	/**
 	 * this is the base method for circuit creation
-	 * @param transimttingSource
-	 * @param receivingDest
-	 * @param sourceKey
-	 * @param destKey
-	 * @param jumboFlowId
+	 * @param transimttingSource the actaul source device who will transmit
+	 * @param receivingDest the actual destination device who will receiv
+	 * @param sourceKey the source key to aggregate by
+	 * @param destKey the dest key to aggregate by
+	 * @param jumboFlowId the jumbo flow id
 	 */
 	public void initRoute(int transimttingSource,int receivingDest, int sourceKey, int destKey, long jumboFlowId){
 		ImmutablePair pair = new ImmutablePair<>(sourceKey,destKey);
 
-		if(mPaths.containsKey(pair)) {
-//			mFlowIdsOnCircuit.get(pair).add(jumboFlowId);
+		if(mPaths.containsKey(pair)) { // no  no need to create a new circuit
+
 			throw new FlowPathExists(jumboFlowId);
 		}
 
@@ -181,22 +181,13 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 			throw new NoPathException(); // assuming the EPS will pick it up
 		}
 
-//		int sourceToCheck = mIsServerOptics ? sourceServer : transimttingSource;
-//		int destToCheck = mIsServerOptics ? destServer : receivingDest;
+		//check that circuit limit has not been reached:
 		if(mTransmittingSources.getOrDefault(transimttingSource,0) >= getCircuitFlowLimit() || mRecievingDestinations.getOrDefault(receivingDest,0)>=getCircuitFlowLimit()){
 			SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_TOR");
 			throw new NoPathException(transimttingSource,receivingDest);
 		}
 		Path p;
 
-//		if(receivingDest==transimttingSource){
-//			List<Vertex> trivalPath = new LinkedList<>();
-//			trivalPath.add(new Vertex(receivingDest));
-//			p = new Path(trivalPath, 0d);
-//
-//		}else{
-//			 p = generatePathFromGraph(transimttingSource, receivingDest);
-//		}
 
 		p = generatePathFromGraph(transimttingSource, receivingDest);
 		updateForwardingTables(sourceKey,destKey,p,jumboFlowId);
@@ -204,28 +195,47 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		onPathAllocation(transimttingSource,receivingDest);
 		mAllocateddPathsNum++;
 		mPaths.put(pair, p);
-//		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
-//		hs.add(jumboFlowId);
-//		mFlowIdsOnCircuit.put(pair,hs);
 		flowCounter++;
 		logRoute(p,transimttingSource,receivingDest,jumboFlowId,Simulator.getCurrentTime(),true);
 	}
 
+	/**
+	 *
+	 * @return true if there is a need to allocate trivial paths, else false
+	 */
 	protected boolean trivialPathAllowed() {
 		return false;
 	}
+
 
 	protected Path allocateTrivialPath(int source,int dest){
 		throw new NoPathException();
 	}
 
+	/**
+	 * removes the path from the graph such that other requests will not be issued same edges.
+	 * @param p
+	 */
 	protected abstract void removePathFromGraph(Path p);
 
+	/**
+	 * reconfigure the routing tables in switches according to source-dest pair
+	 * @param source
+	 * @param dest
+	 * @param p
+	 * @param flowId
+	 */
 	protected abstract void updateForwardingTables(int source, int dest, Path p, long flowId);
 
+	/**
+	 * generate a path from sourceToR to destToR
+	 * @param sourceToR
+	 * @param destToR
+	 * @return
+	 */
 	protected abstract Path generatePathFromGraph(int sourceToR, int destToR);
 
-	protected abstract int getCircuitFlowLimit();
+	public abstract int getCircuitFlowLimit();
 
 	/**
 	 * resets the graph to its original state
@@ -255,6 +265,15 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		mDeAllocatedPathsNum--;
 	}
 
+	/**
+	 * return path p to the graph
+	 * @param p
+	 * @param sourceKey
+	 * @param destKey
+	 * @param transimttingSource
+	 * @param receivingDest
+	 * @param jumboFlowId
+	 */
 	protected abstract void returnPathToGraph(Path p, int sourceKey, int destKey, int transimttingSource, int receivingDest, long jumboFlowId);
 
 	/**

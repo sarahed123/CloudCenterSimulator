@@ -69,9 +69,6 @@ public class OpticServerToR extends OpticElectronicHybrid {
     }
 
 
-//    protected TcpPacket deEncapsulatePacket(Encapsulatable packet) {
-//        return (TcpPacket)packet;
-//    }
 
     /**
      * will tell the source server that flowId has finished

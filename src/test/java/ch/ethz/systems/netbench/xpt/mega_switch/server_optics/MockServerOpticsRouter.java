@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.mega_switch.server_optics;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
@@ -42,6 +43,8 @@ public class MockServerOpticsRouter extends SemiXpanderServerOptics {
 
         return super.generatePathFromGraph(source, dest);
     }
+
+
 
     protected Path getPath(int src,int dst) {
         return  mPaths.get(new ImmutablePair<>(src,dst));

@@ -118,7 +118,6 @@ public class ReservationPacket extends TcpPacket {
 
         Collections.reverse(mPath);
 
-//        mServerDest = mServerSource;
         reversed = !reversed;
     }
 

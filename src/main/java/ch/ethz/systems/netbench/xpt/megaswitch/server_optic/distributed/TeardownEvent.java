@@ -26,6 +26,7 @@ public class TeardownEvent extends Event {
 	@Override
 	public void trigger() {
 		if(active) {
+			//this will mimic a call as if the flow has finished since the logic should be the same
 			mDevice.onFlowFinished(-1,-1,this.mDevice.getIdentifier(),mPacket.getOriginalServerDest(),mPacket.getFlowId());
 
 			SimulationLogger.increaseStatisticCounter("AUTO_CIRCUIT_TEARDOWN_COUNT");
