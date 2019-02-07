@@ -33,7 +33,7 @@ public class DistributedController extends SemiXpanderServerOptics
 
     }
 
-    public void initRoute(int sourceToR,int destToR, int sourceServer, int destServer, long flowId){
+    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId){
 
     }
 

@@ -2,13 +2,11 @@ package ch.ethz.systems.netbench.core.run.routing.remote;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorNetController;
 
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyMissingException;
@@ -18,12 +16,14 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedController;
-import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedProtocolPort;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpander;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Path;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class RemoteRoutingController extends RoutingPopulator{
@@ -160,7 +160,73 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	}
 
 
-	public abstract void initRoute(int sourceToR,int destToR, int sourceServer,int destServer,long flowId);
+	/**
+	 * this is the base method for circuit creation
+	 * @param transimttingSource
+	 * @param receivingDest
+	 * @param sourceKey
+	 * @param destKey
+	 * @param jumboFlowId
+	 */
+	public void initRoute(int transimttingSource,int receivingDest, int sourceKey, int destKey, long jumboFlowId){
+		ImmutablePair pair = new ImmutablePair<>(sourceKey,destKey);
+
+		if(mPaths.containsKey(pair)) {
+//			mFlowIdsOnCircuit.get(pair).add(jumboFlowId);
+			throw new FlowPathExists(jumboFlowId);
+		}
+
+		if(receivingDest==transimttingSource && !trivialPathAllowed()){
+
+			throw new NoPathException(); // assuming the EPS will pick it up
+		}
+
+//		int sourceToCheck = mIsServerOptics ? sourceServer : transimttingSource;
+//		int destToCheck = mIsServerOptics ? destServer : receivingDest;
+		if(mTransmittingSources.getOrDefault(transimttingSource,0) >= getCircuitFlowLimit() || mRecievingDestinations.getOrDefault(receivingDest,0)>=getCircuitFlowLimit()){
+			SimulationLogger.increaseStatisticCounter("TOO_MANY_DESTS_OR_SOURCES_ON_TOR");
+			throw new NoPathException(transimttingSource,receivingDest);
+		}
+		Path p;
+
+//		if(receivingDest==transimttingSource){
+//			List<Vertex> trivalPath = new LinkedList<>();
+//			trivalPath.add(new Vertex(receivingDest));
+//			p = new Path(trivalPath, 0d);
+//
+//		}else{
+//			 p = generatePathFromGraph(transimttingSource, receivingDest);
+//		}
+
+		p = generatePathFromGraph(transimttingSource, receivingDest);
+		updateForwardingTables(sourceKey,destKey,p,jumboFlowId);
+		removePathFromGraph(p);
+		onPathAllocation(transimttingSource,receivingDest);
+		mAllocateddPathsNum++;
+		mPaths.put(pair, p);
+//		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
+//		hs.add(jumboFlowId);
+//		mFlowIdsOnCircuit.put(pair,hs);
+		flowCounter++;
+		logRoute(p,transimttingSource,receivingDest,jumboFlowId,Simulator.getCurrentTime(),true);
+	}
+
+	protected boolean trivialPathAllowed() {
+		return false;
+	}
+
+	protected Path allocateTrivialPath(int source,int dest){
+		throw new NoPathException();
+	}
+
+	protected abstract void removePathFromGraph(Path p);
+
+	protected abstract void updateForwardingTables(int source, int dest, Path p, long flowId);
+
+	protected abstract Path generatePathFromGraph(int sourceToR, int destToR);
+
+	protected abstract int getCircuitFlowLimit();
+
 	/**
 	 * resets the graph to its original state
 	 */
@@ -173,7 +239,24 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		this.recoverPath(src,dst,src,dst,jumboFlowId);
 	}
 
-	public abstract void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId);
+	public void recoverPath(int transimttingSource,int receivingDest, int sourceKey, int destKey, long jumboFlowId){
+
+		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(sourceKey, destKey);
+		Path p = mPaths.get(pair);
+
+		if(p==null) {
+			throw new NoPathException();
+		}
+
+		returnPathToGraph(p,sourceKey,destKey,transimttingSource,receivingDest,jumboFlowId);
+		logRoute(mPaths.get(pair),transimttingSource,receivingDest,jumboFlowId, Simulator.getCurrentTime(),false);
+		mPaths.remove(pair);
+		onPathDeAllocation(transimttingSource,receivingDest);
+		mDeAllocatedPathsNum--;
+	}
+
+	protected abstract void returnPathToGraph(Path p, int sourceKey, int destKey, int transimttingSource, int receivingDest, long jumboFlowId);
+
 	/**
 	 * public for testing but should be a private method to handle path switching
 	 * @param src the id of the switch that will get the new path

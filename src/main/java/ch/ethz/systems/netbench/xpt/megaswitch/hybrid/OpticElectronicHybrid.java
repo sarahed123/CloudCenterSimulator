@@ -96,7 +96,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 	protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow) {
 
 		try {
-	    	getRemoteRouter().initRoute(jFlow.getSourceToR(),jFlow.getDestToR(),jFlow.getSource(),jFlow.getDest(),jFlow.getId());
+		    int transmittingSource = getTransmittingSource(jFlow);
+		    int receiveingDest = getReceivingDest(jFlow);
+	    	getRemoteRouter().initRoute(transmittingSource,receiveingDest,jFlow.getSource(),jFlow.getDest(),jFlow.getId());
 		}catch(FlowPathExists e) {
 
         }
@@ -106,7 +108,16 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
 		
 	}
-	@Override
+
+    protected int getReceivingDest(JumboFlow jFlow) {
+        return jFlow.getDestToR();
+    }
+
+    protected int getTransmittingSource(JumboFlow jFlow) {
+        return jFlow.getSourceToR();
+    }
+
+    @Override
     protected void receiveFromIntermediary(Packet genericPacket) {
         throw new RuntimeException("Hybrid switch is not a server");
     }
@@ -199,8 +210,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     
 	protected void recoverPath(JumboFlow jFlow) {
 		try {
-
-			getRemoteRouter().recoverPath(jFlow.getSourceToR(),jFlow.getDestToR(),jFlow.getSource(),jFlow.getDest(),jFlow.getId());
+            int transmittingSource = getTransmittingSource(jFlow);
+            int receiveingDest = getReceivingDest(jFlow);
+			getRemoteRouter().recoverPath(transmittingSource,receiveingDest,jFlow.getSource(),jFlow.getDest(),jFlow.getId());
 		}catch(NoPathException e) {
 
 		}

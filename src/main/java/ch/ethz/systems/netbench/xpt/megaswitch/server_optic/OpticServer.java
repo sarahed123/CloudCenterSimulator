@@ -59,12 +59,24 @@ public class OpticServer extends OpticElectronicHybrid {
         return (TcpPacket) packet;
     }
 
+    @Override
     protected int getDestToRWithDefault(int serverId, int defToRId) {
         int destToRId = configuration.getGraphDetails().getTorIdOfServer(serverId);
 
         return destToRId;
     }
 
+    @Override
+    protected int getReceivingDest(JumboFlow jFlow) {
+        return jFlow.getDest();
+    }
+
+    @Override
+    protected int getTransmittingSource(JumboFlow jFlow) {
+        return jFlow.getSource();
+    }
+
+    @Override
     protected int getSourceToRWithDefault(int serverId, int defToRId) {
         return this.ownToRId;
     }
