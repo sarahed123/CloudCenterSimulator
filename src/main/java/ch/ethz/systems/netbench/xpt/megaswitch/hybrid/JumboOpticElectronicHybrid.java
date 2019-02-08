@@ -29,40 +29,4 @@ public class JumboOpticElectronicHybrid extends OpticElectronicHybrid {
         return getJumboFlow(sourceToR,destToR).setSourceToR(sourceToR).setDestToR(destToR);
     }
 
-
-
-
-
-//    /**
-//     * called when flowId has finished
-//     * will recover the path if the corresponding jumbo flow finished
-//     * @param sourceToR
-//     * @param destToR
-//     * @param serverSource
-//     * @param serverDest
-//     * @param flowId
-//     */
-//    public void onFlowFinished(int sourceToR, int destToR,int serverSource,int serverDest, long flowId) {
-//        JumboFlow jumboFlow = getJumboFlow(sourceToR,destToR,serverSource,serverDest);
-//        jumboFlow.onFlowFinished(flowId);
-//        if(jumboFlow.getNumFlows()==0){
-//            conversionUnitRecover(jumboFlow,flowId);
-//            recoverPath(sourceToR,destToR,serverSource,serverDest,jumboFlow.getId());
-//            mJumboFlowMap.remove(new ImmutablePair<>(jumboFlow.getSource(), jumboFlow.getDest()));
-//        }
-//
-//    }
-//
-//    protected void conversionUnitRecover(JumboFlow jumbo, long flowId) {
-//        conversionUnit.onFlowFinish(jumbo.getSource(),jumbo.getDest(),jumbo.getId());
-//    }
-
-
-
-
-
-
-
-
-
 }

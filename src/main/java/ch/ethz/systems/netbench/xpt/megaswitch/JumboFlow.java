@@ -65,12 +65,6 @@ public class JumboFlow {
         }
 
         long flowSize = mFlowIdToSize.getOrDefault(packet.getFlowId(),0l);
-//        long seq = packet.getSequenceNumber() + packet.getDataSizeByte();
-//        if(flowSize > seq){ // should this be >=?
-//            return;
-//        }
-//
-//        long difference = seq - flowSize;
         mSizeByte = mSizeByte + packet.getDataSizeByte();
         mFlowIdToSize.put(packet.getFlowId(),flowSize + packet.getDataSizeByte());
 

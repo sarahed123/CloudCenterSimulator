@@ -240,6 +240,9 @@ public abstract class NetworkDevice {
     }
 
 	public void receiveFromEncapsulating(Packet packet) {
+		/**
+		 * check first if we need pass the packet back to the encapsulating device
+		 */
 		if(((IpPacket)packet).getDestinationId()==this.identifier) {
 			passToEncapsulatingDevice(packet);
 			return;

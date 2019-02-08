@@ -36,17 +36,19 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
     @Override
     public void receive(Packet genericPacket) {
-       // boolean flowFinished = Simulator.isFlowFinished(genericPacket.getFlowId());
 
         Encapsulatable packet = (Encapsulatable) genericPacket;
 
 
-        TcpPacket encapsulated = encapsulatePacket(packet);
+        TcpPacket encapsulated = encapsulatePacket(packet); // encapsulate the packet
         JumboFlow jumboFlow = getJumboFlow(getSourceToRWithDefault(packet.getSourceId(),encapsulated.getSourceId()),
                 getDestToRWithDefault(packet.getDestinationId(),encapsulated.getDestinationId()),
                 packet.getSourceId(),packet.getDestinationId());
         jumboFlow.onPacketDispatch(encapsulated);
 
+        /**
+         * if is circuitable then try to route through the circuit
+         */
         if(isCircuitable(jumboFlow,encapsulated)) {
         	try {
         		routeThroughCircuit(encapsulated,jumboFlow);
@@ -67,15 +69,37 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         return defToRId;
     }
 
+    /**
+     * encapsulate the packet
+     * @param packet
+     * @return
+     */
     protected TcpPacket encapsulatePacket(Encapsulatable packet) {
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
-        return (TcpPacket) packet.encapsulate(this.identifier,destinationToR);
+        /**
+         * encapsulate the packet with new source and destination ids
+         */
+        return (TcpPacket) packet.encapsulate(this.identifier,destinationToR); 
     }
 
+    /**
+     * get the jumbo flow for this class's aggregation scheme
+     * @param sourceToR
+     * @param destToR
+     * @param serverSource
+     * @param serverDest
+     * @return
+     */
     protected JumboFlow getJumboFlow(int sourceToR, int destToR, int serverSource, int serverDest) {
         return getJumboFlow(serverSource,serverDest).setSourceToR(sourceToR).setDestToR(destToR);
     }
 
+    /**
+     * gets the jumbo flow with source-dest pair, or create a new one
+     * @param source
+     * @param dest
+     * @return
+     */
     protected JumboFlow getJumboFlow(int source, int dest){
         JumboFlow jumboFlow = mJumboFlowMap.get(new ImmutablePair<>(source,dest));
         if(jumboFlow==null) {
@@ -98,6 +122,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		try {
 		    int transmittingSource = getTransmittingSource(jFlow);
 		    int receiveingDest = getReceivingDest(jFlow);
+		    /**
+		     * init the route
+		     */
 	    	getRemoteRouter().initRoute(transmittingSource,receiveingDest,jFlow.getSource(),jFlow.getDest(),jFlow.getId());
 		}catch(FlowPathExists e) {
 
@@ -109,10 +136,20 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		
 	}
 
+	/**
+	 * get the receiving destination by this class's aggregation scheme
+	 * @param jFlow
+	 * @return
+	 */
     protected int getReceivingDest(JumboFlow jFlow) {
         return jFlow.getDestToR();
     }
 
+    /**
+     * get the transmitting source by this class's aggregation scheme
+     * @param jFlow
+     * @return
+     */
     protected int getTransmittingSource(JumboFlow jFlow) {
         return jFlow.getSourceToR();
     }
@@ -125,6 +162,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     @Override
     public void extend(NetworkDevice networkDevice, NBProperties networkConf){
         String networkType = networkConf.getPropertyOrFail("network_type");
+        /**
+         * set the new device according to the network type
+         */
         switch (networkType){
             case "circuit_switch":
                 this.optic = networkDevice;
@@ -145,32 +185,21 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         Encapsulatable ipPacket = (Encapsulatable) packet;
 
         if (ipPacket.getDestinationId() == this.identifier) {
+        	/**
+        	 * de-encapsulate the packet first, then send to the origin server
+        	 */
             TcpPacket deEncapse = (TcpPacket) ipPacket.deEncapsualte();
             if(deEncapse.isACK() && deEncapse.isFIN()){
-            	//onFlowFinished(this.identifier,ipPacket.getSourceId(),(IpPacket)deEncapse);
-//                onFlowFinished(ipPacket.getSourceId(),this.identifier,(IpPacket)deEncapse.encapsulate(deEncapse.getDestinationId(),deEncapse.getSourceId()));
+            	// use to be how we check for finished flow
             }
             targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
         }
     }
 
-//    @Override
-//    public void onFlowFinished(int sourceToRId, int destToRId, int sourceServer, int destServerId, long flowId) {
-//        JumboFlow jumboFlow = getJumboFlow(sourceServer,destServerId);
-//        boolean isOnCircuit = jumboFlow.isOnCircuit(flowId);
-//        jumboFlow.onFlowFinished(flowId);
-//        if(jumboFlow.getNumFlows()==0){
-////        	recoverPath(source,dest,packet);
-//            mJumboFlowMap.remove(new ImmutablePair<>(sourceServer,destServerId));
-//
-//        }
-//        if(isOnCircuit){
-//            conversionUnit.onFlowFinish(sourceServer,destServerId,jumboFlow.getId());
-//            recoverPath(sourceToRId,destToRId,destServerId,sourceServer,flowId);
-//        }
-//
-//    }
-
+    /**
+     * recover resources for the conversion unit for this jumbo flow
+     * @param jumbo
+     */
     protected void conversionUnitRecover(JumboFlow jumbo) {
         conversionUnit.onFlowFinish(jumbo.getSource(),jumbo.getDest(),jumbo.getId());
     }
@@ -201,6 +230,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		try {
             int transmittingSource = getTransmittingSource(jFlow);
             int receiveingDest = getReceivingDest(jFlow);
+            /**
+             * recover the path
+             */
 			getRemoteRouter().recoverPath(transmittingSource,receiveingDest,jFlow.getSource(),jFlow.getDest(),jFlow.getId());
 		}catch(NoPathException e) {
 
@@ -214,6 +246,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
     @Override
     public NetworkDevice getEncapsulatedDevice(String type) {
+    	/**
+    	 * get the encapsulating device by this type
+    	 */
         switch (type){
             case "circuit_switch":
                 return optic;
@@ -268,6 +303,12 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         return "";
     }
 
+    /**
+     * does the jumbFlow and the packet meets the critirea to enter the circuit
+     * @param jumboFlow
+     * @param packet
+     * @return
+     */
     protected boolean isCircuitable(JumboFlow jumboFlow, TcpPacket packet) {
         return jumboFlow.getSizeByte()>=circuitThreshold && !jumboFlow.isTrivial() && !(packet.isACK());
     }

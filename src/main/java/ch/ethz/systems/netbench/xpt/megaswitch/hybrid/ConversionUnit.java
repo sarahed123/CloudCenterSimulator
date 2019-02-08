@@ -10,6 +10,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * mimics the E2O unit
+ * In the future it may include some logic i.e.
+ * number of flows allowed through it.
+ * @author IK
+ *
+ */
 public class ConversionUnit {
     NetworkDevice mOptic;
     NBProperties mConf;
@@ -28,12 +35,21 @@ public class ConversionUnit {
 
     }
 
+    /**
+     * gets the paramets from the target optic device
+     */
     protected void initPortParams() {
         mLinkBandwidth = mOptic.getConfiguration().getLongPropertyOrFail("link_bandwidth_bit_per_ns");
         mEcnThreshold = mOptic.getConfiguration().getLongPropertyOrFail("output_port_ecn_threshold_k_bytes");
         mMaxQueueSize = mOptic.getConfiguration().getLongPropertyOrFail("output_port_max_queue_size_bytes");
     }
 
+    /**
+     * enqueues the packt on a port, or if none exists create one.
+     * @param src
+     * @param dst
+     * @param packet
+     */
     public void enqueue(int src, int dst, Packet packet){
         ConversionPort port = mPortMap.get(new ImmutablePair<>(src,dst));
         if(port==null){
@@ -58,10 +74,16 @@ public class ConversionUnit {
         port.enqueue(packet);
     }
 
-    public void onFlowFinish(int src, int dst, long flowId){
+    /**
+     * remove the src-dst pair output port
+     * @param src
+     * @param dst
+     * @param jFlowId
+     */
+    public void onFlowFinish(int src, int dst, long jFlowId){
         if(mPortMap.get(new ImmutablePair<>(src,dst))!=null)
-            mPortMap.get(new ImmutablePair<>(src,dst)).onFlowFinished(flowId);
-       // mPortMap.remove(new ImmutablePair<>(src,dst));
+            mPortMap.get(new ImmutablePair<>(src,dst)).onFlowFinished(jFlowId);
+        mPortMap.remove(new ImmutablePair<>(src,dst));
     }
 
     public NetworkDevice getOptic() {

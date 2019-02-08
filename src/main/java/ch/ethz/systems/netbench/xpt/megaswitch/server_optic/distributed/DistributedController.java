@@ -44,16 +44,35 @@ public class DistributedController extends SemiXpanderServerOptics
         throw new RuntimeException("cant use recoverPath for distributed setting!");
     }
 
+    /**
+     * returns the edge capacity of graph color, and edge source-nextHop
+     * @param source
+     * @param nextHop
+     * @param color
+     * @return
+     */
     public long checkEdgeCapacity(int source, int nextHop, int color) {
         return mGraphs[color].getEdgeCapacity(new Vertex(source),new Vertex(nextHop));
     }
 
+    /**
+     * decreases capacity by 1 for graph color, and edge source-nextHop
+     * @param source
+     * @param nextHop
+     * @param color
+     */
     public void decreaseEdgeCapacity(int source, int nextHop, int color) {
         mGraphs[color].decreaseCapacity(new ImmutablePair<>(source,nextHop));
         edgesUsed++;
 
     }
 
+    /**
+     * increase capacity by 1 for graph color, and edge source-nextHop
+     * @param source
+     * @param nextHop
+     * @param color
+     */
     public void increaseEdgeCapacity(int source, int nextHop, int color) {
         mGraphs[color].increaseCapacity(new ImmutablePair<>(source,nextHop));
         edgesUsed--;

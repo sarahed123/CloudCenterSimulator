@@ -18,6 +18,11 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 import java.util.HashSet;
 
+/**
+ * mimics a E2O conversion port
+ * @author IK
+ *
+ */
 public class ConversionPort extends EcnTailDropOutputPort{
 
     private boolean mDisable;
@@ -31,35 +36,30 @@ public class ConversionPort extends EcnTailDropOutputPort{
 
     @Override
     protected void registerPacketArrivalEvent(Packet packet) {
-//    	ImmutablePair p = targetNetworkDevice.getSourceDestinationEncapsulated((IpPacket)packet);
-    	
-//    	if(!RemoteRoutingController.getInstance().hasRoute(p)) {
-//    		SimulationLogger.increaseStatisticCounter("PACKET_SENT_AFTER_PATH_RECOVEREd);
-//    		return;
-//    	}
+
         TcpPacket tcpPacket = (TcpPacket) packet;
         if(finishedFlows.contains(tcpPacket.getJumboFlowId())){
-            // this shoud not happen
+            // this shoud not happen, but might for some end cases
             System.out.println("packet transmitted after flow finished");
             System.out.println(packet.toString());
             System.out.println(packet.getFlowId());
             System.out.println(((TcpPacket)packet).resent);
             return;
-//            throw new RuntimeException();
+
         }
         targetNetworkDevice.receiveFromEncapsulating(packet);
     }
 
     @Override
     public void enqueue(Packet packet) {
-//    	if(!ownNetworkDevice.getConfiguration().getBooleanPropertyWithDefault("enable_jumbo_flows", false)) {
-//    		assert(getQueue().isEmpty());
-//    	}
         TcpPacket tcpPacket = (TcpPacket) packet;
         assert(tcpPacket.getJumboFlowId() != -1);
         if(!finishedFlows.contains(tcpPacket.getJumboFlowId()))
             super.enqueue(packet);
         else{
+        	/**
+        	 * dont allow packets from finished flow on the circuit
+        	 */
             System.out.println("flow is finished for " + packet.getFlowId());
             System.out.println(packet.toString());
         }
@@ -80,7 +80,7 @@ public class ConversionPort extends EcnTailDropOutputPort{
     
 
 
-    public void onFlowFinished(long flowId) {
-        finishedFlows.add(flowId);
+    public void onFlowFinished(long jFlowId) {
+        finishedFlows.add(jFlowId);
     }
 }
