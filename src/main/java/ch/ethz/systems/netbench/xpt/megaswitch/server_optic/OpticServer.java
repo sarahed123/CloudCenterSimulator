@@ -27,9 +27,6 @@ public class OpticServer extends OpticElectronicHybrid {
     protected OpticServer(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer, intermediary, configuration);
         this.ownToRId = configuration.getGraphDetails().getTorIdOfServer(this.identifier);
-//        MegaSwitch megaSwitch = (MegaSwitch) this.targetIdToOutputPort.get(ownToRId).getTargetDevice();
-//
-//        conversionUnit = new ConversionUnit(configuration,this,megaSwitch.getEncapsulatedDevice("circuit_switch"));
 
     }
 
@@ -91,7 +88,10 @@ public class OpticServer extends OpticElectronicHybrid {
         this.receive(genericPacket);
     }
 
-
+    /**
+     * inits the connection between this and the optic device on the ToR
+     * @param optic
+     */
     public void createOpticConnection(NetworkDevice optic) {
 
         conversionUnit = new ConversionUnit(configuration,this,optic);

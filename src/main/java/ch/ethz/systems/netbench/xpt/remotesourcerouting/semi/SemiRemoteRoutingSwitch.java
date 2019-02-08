@@ -24,6 +24,11 @@ public class SemiRemoteRoutingSwitch extends RemoteSourceRoutingSwitch {
         mPathMap = readMap(configuration.getPropertyOrFail("semi_remote_routing_path_dir"));
     }
 
+    /**
+     * reads a map of paths stored in path
+     * @param path the dir of all paths
+     * @return
+     */
     protected HashMap<Integer,List<List<Integer>>>  readMap(String path) {
         HashMap<Integer,List<List<Integer>>> map = new HashMap<>();
         List<Integer>[] paths;

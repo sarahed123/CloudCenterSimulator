@@ -10,10 +10,6 @@ public class InputPort extends Port {
 		this.ownNetworkDevice = ownNetworkDevice;
 		this.sourceNetworkDevice = sourceNetworkDevice;
 		this.link = link;
-//		this.encapsulatingDeviceId = -1;
-//		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
-//			this.encapsulatingDeviceId = ownNetworkDevice.getEncapsulatingDevice().getAsNetworkDevice().identifier;
-//		}
 	}
 	
 	public NetworkDevice getOwnNetworkDevice() {
@@ -24,6 +20,10 @@ public class InputPort extends Port {
 		return this.sourceNetworkDevice;
 	}
 
+	/**
+	 * registers an arrival event of packet
+	 * @param packet
+	 */
     public void registerPacketArrivalEvent(Packet packet) {
 		Simulator.registerEvent(
 				new PacketArrivalEvent(
@@ -35,9 +35,15 @@ public class InputPort extends Port {
     }
 
 
-
+    /**
+     * receive a packet for preprocessing before moving to device
+     * @param packet
+     */
 	public void receive(Packet packet) {
 		if(ownNetworkDevice.getEncapsulatingDevice()!=null) {
+			/**
+			 * check if the encapsulating device will handle the packet 
+			 */
 			if(ownNetworkDevice.getEncapsulatingDevice().hadlePacketFromEncapsulating(packet)){
 				return;
 			}

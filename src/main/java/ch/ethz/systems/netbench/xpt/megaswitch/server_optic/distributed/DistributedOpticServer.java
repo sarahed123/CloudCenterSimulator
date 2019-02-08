@@ -57,7 +57,6 @@ public class DistributedOpticServer extends OpticServer {
 		mTeardownEventsMap = new HashMap<>();
 		mTransmittingColors = new HashSet<>();
 		mReceveingColors = new HashSet<>();
-		//        NUM_COLORS_TO_RANDOMIZE = configuration.getIntegerPropertyOrFail("num_colors_to_randomize");
 
 	}
 
