@@ -6,19 +6,14 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchGenerator;
-import ch.ethz.systems.netbench.xpt.mega_switch.MockFullHybrid;
-import ch.ethz.systems.netbench.xpt.mega_switch.MockSimpleServer;
 import ch.ethz.systems.netbench.xpt.mega_switch.SimpleSocket;
-import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServer;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
-import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerToR;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.MockRemoteRouter;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.FlowPathExists;
@@ -117,7 +112,7 @@ public class OpticServerTest {
         );
 
 
-        initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
+        initializer.extend(1,new LightOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
                 lg,new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         //RoutingSelector.selectPopulator(hm, conf2);

@@ -3,25 +3,18 @@ package ch.ethz.systems.netbench.xpt.mega_switch.server_optics.distributed;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchGenerator;
-import ch.ethz.systems.netbench.xpt.mega_switch.MockDemoPacket;
 import ch.ethz.systems.netbench.xpt.mega_switch.SimpleSocket;
-import ch.ethz.systems.netbench.xpt.mega_switch.server_optics.MockOpticServer;
-import ch.ethz.systems.netbench.xpt.mega_switch.server_optics.MockServerOpticToR;
-import ch.ethz.systems.netbench.xpt.mega_switch.server_optics.MockServerOpticsRouter;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedProtocolPort;
-import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.ReservationPacket;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 import org.junit.After;
@@ -35,8 +28,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.PriorityQueue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DistributedProtocolTest {
@@ -119,7 +110,7 @@ public class DistributedProtocolTest {
         );
 
 
-        initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new SemiRemoteRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),conf2),
+        initializer.extend(1,new LightOutputPortGenerator(conf2),new SemiRemoteRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),conf2),
                 lg,new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         //RoutingSelector.selectPopulator(hm, conf2);

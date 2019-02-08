@@ -7,29 +7,17 @@ import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
-import ch.ethz.systems.netbench.ext.basic.TcpPacket;
-import ch.ethz.systems.netbench.ext.demo.DemoIntermediary;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
-import ch.ethz.systems.netbench.ext.demo.DemoPacket;
-import ch.ethz.systems.netbench.ext.demo.DemoTransportLayerGenerator;
-import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
-import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
-import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
-import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpTransportLayer;
-import static org.mockito.Mockito.*;
 
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
-import com.sun.org.apache.bcel.internal.generic.NOP;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.BufferedWriter;
@@ -40,8 +28,6 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HybridCircuitTest {
@@ -135,7 +121,7 @@ public class HybridCircuitTest {
         );
         
 
-        initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
+        initializer.extend(1,new LightOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
                 lg2,new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         RoutingSelector.selectPopulator(hm, conf2);

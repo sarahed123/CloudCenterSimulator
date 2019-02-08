@@ -7,7 +7,7 @@ import ch.ethz.systems.netbench.core.run.infrastructure.LinkGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.NetworkDeviceGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.OutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.infrastructure.TransportLayerGenerator;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.ext.bare.BareTransportLayerGenerator;
 import ch.ethz.systems.netbench.ext.basic.EcnTailDropOutputPortGenerator;
@@ -209,7 +209,8 @@ class InfrastructureSelector {
             case "unlimited":
                 return new UnlimitedOutputPortGenerator(configuration);
             case "remote":
-                return new RemoteRoutingOutputPortGenerator(configuration);
+            case "light_port":
+                return new LightOutputPortGenerator(configuration);
 
             default:
                 throw new PropertyValueInvalidException(
