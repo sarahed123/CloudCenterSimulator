@@ -6,7 +6,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-
-import static org.mockito.Mockito.spy;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RemoteOutputPortTest {
@@ -128,7 +126,7 @@ public class RemoteOutputPortTest {
                 BaseAllowedProperties.BASE_DIR_VARIANTS
         );
 
-        initializer.extend(1,new RemoteRoutingOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
+        initializer.extend(1,new LightOutputPortGenerator(conf2),new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2),2, conf2),
                 lg2,new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         RoutingSelector.selectPopulator(hm, conf2);

@@ -6,7 +6,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
-import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
@@ -27,7 +27,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.PriorityQueue;
 
 import static org.junit.Assert.assertTrue;
 
@@ -111,7 +110,7 @@ public class JumboFullHybridTest {
         );
 
 
-        initializer.extend(1, new RemoteRoutingOutputPortGenerator(conf2), new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2), 2, conf2),
+        initializer.extend(1, new LightOutputPortGenerator(conf2), new RemoteSourceRoutingSwitchGenerator(new DemoIntermediaryGenerator(conf2), 2, conf2),
                 lg, new RemoteRoutingTransportLayerGenerator(conf2));
         HashMap<Integer, NetworkDevice> hm = initializer.createInfrastructure(conf2);
         //RoutingSelector.selectPopulator(hm, conf2);
