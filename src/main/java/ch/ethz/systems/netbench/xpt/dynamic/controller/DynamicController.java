@@ -37,47 +37,24 @@ public class DynamicController extends RemoteRoutingController {
 
 	}
 
-//	@Override
-//	public void initRoute(int sourceToR, int destToR, int source, int dest, long flowId) {
-//		Pair<Integer, Integer> pair = new ImmutablePair<>(source,dest);
-//
-//		Vertex sourceVertex = new Vertex(sourceToR);
-//		Vertex destVertex = new Vertex(destToR);
-//		if(mPaths.containsKey(pair)) {
-////			mFlowIdsOnCircuit.get(pair).add(flowId);
-//			flowPathExistsCounter++;
-//			throw new FlowPathExists(flowId);
-//		}
-//		if(mTransmittingSources.getOrDefault(sourceToR,0) >= max_degree || mRecievingDestinations.getOrDefault(destToR,0)>=max_degree){
-//			SimulationLogger.increaseStatisticCounter("DYNAMIC_CONTROLLER_NO_PATH");
-//			noPathCounter++;
-//			throw new NoPathException(sourceToR,destToR);
-//		}
-////		((VariableGraph) mMainGraph).addEdge(source,dest,1);
-//		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(sourceToR);
-//		sourceDevice.addConnection(mIdToNetworkDevice.get(sourceToR),mIdToNetworkDevice.get(destToR),source,dest);
-//		LinkedList<Vertex> path = new LinkedList<Vertex>();
-//		path.add(sourceVertex);
-//		path.add(destVertex);
-//		Path finalPath = new Path(path, 1);
-//		mPaths.put(pair, finalPath);
-////		HashSet hs = (HashSet) mFlowIdsOnCircuit.getOrDefault(pair,new HashSet<>());
-////		hs.add(flowId);
-////		mFlowIdsOnCircuit.put(pair,hs);
-//		logRoute(finalPath,sourceToR,destToR,flowId, Simulator.getCurrentTime(),true);
-//		onPathAllocation(sourceToR,destToR);
-//		mAllocateddPathsNum++;
-//	}
 
 	@Override
 	protected void removePathFromGraph(Path p) {
 
 	}
 
+	/**
+	 * update a devices forwarding table with source dest key
+	 * with first id of path to last id
+	 * @param sourceKey
+	 * @param destKey
+	 * @param p
+	 * @param jumboFlowId
+	 */
 	@Override
-	protected void updateForwardingTables(int source, int dest, Path p, long flowId) {
+	protected void updateForwardingTables(int sourceKey, int destKey, Path p, long jumboFlowId) {
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(p.getFirstVertex().getId());
-		sourceDevice.addConnection(mIdToNetworkDevice.get(p.getFirstVertex().getId()),mIdToNetworkDevice.get(p.getLastVertex().getId()),source,dest);
+		sourceDevice.addConnection(mIdToNetworkDevice.get(p.getLastVertex().getId()),jumboFlowId);
 	}
 
 	@Override
@@ -103,42 +80,20 @@ public class DynamicController extends RemoteRoutingController {
 
 	}
 
-//	@Override
-//	public void recoverPath(int src, int dst,int serverSource, int serverDest, long flowId) {
-////		if(!((VariableGraph) mMainGraph).hasEdge(src,dst)){
-////			return;
-////		}
-//
-//		Pair<Integer, Integer> pair = new ImmutablePair<Integer, Integer>(serverSource, serverDest);
-//		Path p = mPaths.get(pair);
-//
-//		if(p==null) {
-//			throw new NoPathException();
-//		}
-////		((VariableGraph) mMainGraph).deleteEdge(pair);
-////		mFlowIdsOnCircuit.get(pair).remove(flowId);
-////		if(mFlowIdsOnCircuit.get(pair).isEmpty()){
-////			DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(src);
-////			sourceDevice.removeConnection(serverSource,serverDest);
-////			logRoute(mPaths.get(pair),src,dst,flowId, Simulator.getCurrentTime(),false);
-////			mPaths.remove(pair);
-////			onPathDeAllocation(src,dst);
-////			mDeAllocatedPathsNum--;
-////		}
-//
-//
-//		logRoute(mPaths.get(pair),src,dst,flowId, Simulator.getCurrentTime(),false);
-//		mPaths.remove(pair);
-//		onPathDeAllocation(src,dst);
-//		mDeAllocatedPathsNum--;
-//
-//
-//	}
 
+	/**
+	 * remove a dynamic connection of source dest keys
+	 * @param p
+	 * @param sourceKey
+	 * @param destKey
+	 * @param transimttingSource
+	 * @param receivingDest
+	 * @param jumboFlowId
+	 */
 	@Override
 	protected void returnPathToGraph(Path p, int sourceKey, int destKey, int transimttingSource, int receivingDest, long jumboFlowId) {
 		DynamicDevice sourceDevice =  (DynamicDevice) mIdToNetworkDevice.get(transimttingSource);
-		sourceDevice.removeConnection(sourceKey,destKey);
+		sourceDevice.removeConnection(jumboFlowId);
 	}
 
 

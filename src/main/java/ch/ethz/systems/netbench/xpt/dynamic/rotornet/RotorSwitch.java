@@ -12,9 +12,12 @@ import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import java.util.Collections;
 import java.util.LinkedList;
 
+/**
+ * the rotor switch
+ */
 public class RotorSwitch extends DynamicSwitch {
-    protected RotorMap mRotorMap;
-    protected long mCurrentBufferSize;
+    protected RotorMap mRotorMap; // the map telling it which devices it is connected to
+    protected long mCurrentBufferSize; // the rotor buffer, if this is full dont allow forwarding
     private static long sMaxBufferSizeBit;
     private LinkedList<Packet> mBuffer;
     /**
@@ -41,30 +44,30 @@ public class RotorSwitch extends DynamicSwitch {
         boolean deadline = false;
         boolean nopath = false;
 
-        if(ipPacket.getSourceId()==this.getIdentifier()){
+        if(ipPacket.getSourceId()==this.getIdentifier()){ // we are the first hop
 
 
             try{
+                // first try direct forward
                 forwardToNextSwitch(ipPacket,ipPacket.getDestinationId());
                 SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_DIRECT_FORWARD");
 
                 return;
             }catch (NoPathException e){
                 nopath = true;
-//                sendToRandomDestination(ipPacket);
             }catch (ReconfigurationDeadlineException e){
                 deadline = true;
-//                sendToRandomDestination(ipPacket);
             }
             try{
+                // then try random forward
                 sendToRandomDestination(ipPacket);
                 return;
             }catch(NoPathException e){
 
             }
-        }else {
+        }else { // we have already done one random hop
             try {
-                forwardToNextSwitch(ipPacket, ipPacket.getDestinationId());
+                forwardToNextSwitch(ipPacket, ipPacket.getDestinationId()); // try forward to destination switch
                 SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_INDIRECT_FORWARD");
                 return;
             } catch (ReconfigurationDeadlineException e) {
@@ -74,7 +77,7 @@ public class RotorSwitch extends DynamicSwitch {
             }
         }
 
-        if(hasResources(genericPacket)){
+        if(hasResources(genericPacket)){ // if we have resources then re add packet to buffer
             String counter_name = "ROTOR_PACKET_BUFFERED";
             if(nopath) counter_name = "ROTOR_PACKET_BUFFERED_NO_PATH";
             if(deadline) counter_name = "ROTOR_PACKET_BUFFERED_DEADLINE";
@@ -99,6 +102,7 @@ public class RotorSwitch extends DynamicSwitch {
         return p;
     }
 
+    // send all pending data
     void sendPendingData(){
         int size = mBuffer.size();
         for(int i = 0; i<size; i++){
@@ -107,17 +111,19 @@ public class RotorSwitch extends DynamicSwitch {
 
                 p = (IpPacket) popFromBuffer();
 
-//                forwardToNextSwitch(p,p.getDestinationId());
                 receive(p);
 
             }catch (ReconfigurationDeadlineException | NoPathException e){
-//                    addToBuffer(p);
-                assert(false);
+                assert(false); // this should not happen as the exceptions need to caught bellow
             }
         }
 
     }
 
+    /**
+     * randomizes a destination and if it has buffer space send to it.
+     * @param ipPacket
+     */
     protected void sendToRandomDestination(IpPacket ipPacket) {
         Collections.shuffle(mRotorMap,mRotorMap.mRnd);
         for(int i = 0;i<mRotorMap.size();i++){
@@ -148,8 +154,7 @@ public class RotorSwitch extends DynamicSwitch {
         if(mRotorMap.contains(destination)){
             RotorOutputPort port = mRotorMap.getOutpurPort(destination);
             port.enqueue(ipPacket);
-//            System.out.println(ipPacket.toString());
-//            System.out.println(this.identifier + " " + destination);
+
             return;
         }
         throw new NoPathException();
@@ -171,8 +176,12 @@ public class RotorSwitch extends DynamicSwitch {
         return mRotorMap;
     }
 
+    /**
+     * sets a new rotor map
+     * @param rotortMap
+     */
     public void setRotortMap(RotorMap rotortMap) {
-        rotortMap.clearOutputPorts();
+        rotortMap.clearOutputPorts(); // first clear the new map ports.
         this.mRotorMap = rotortMap;
         mRotorMap.setCurrentDevice(this);
     }

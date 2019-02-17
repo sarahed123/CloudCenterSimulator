@@ -4,9 +4,17 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 
 public interface DynamicDevice {
 
-	public void addConnection(NetworkDevice  source,NetworkDevice  dest, int serverSource, int serverDest);
-	
-	public void removeConnection(int serverSource, int serverDest);
+	/**
+	 * add a connection to device dest
+	 * @param dest
+	 */
+	public void addConnection(NetworkDevice  dest, long jumboFlowId);
+
+	/**
+	 * remove a connection by jumbo flow id
+	 * @param jumboFlowId
+	 */
+	public void removeConnection(long jumboFlowId);
 	
 
 }

@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class RotorNetController extends DynamicController {
-    public static long sNextReconfigurationTime = 0;
-    protected final long mReconfigurationInterval;
-    protected final long mReconfigurationTime;
-    int mNumCycles;
-    int mCurrCycle;
+    public static long sNextReconfigurationTime = 0; // the time for the next reconfiguration event
+    protected final long mReconfigurationInterval; // how much time between reconfigurations
+    protected final long mReconfigurationTime; // the time it takes to do the reconfiguration
+    int mNumCycles; // the total num of cycles to go through all permutations
+    int mCurrCycle; //
     long indirectHops, directHops;
     ArrayList<RotorMap> mRotorMaps;
     RotorSwitch[] mRotorsArray;
@@ -42,6 +42,7 @@ public class RotorNetController extends DynamicController {
 
     }
 
+    // the initial configuration
     private void setInitialConnections() {
         RotorSwitch[] devices = mRotorsArray;
         for(int j = 0;j<mIdToNetworkDevice.size();j++){
@@ -67,24 +68,33 @@ public class RotorNetController extends DynamicController {
 
     }
 
+    /**
+     * configures all devices rotor maps
+     */
     public void reconfigureRotorSwitches(){
         RotorSwitch[] devices = mRotorsArray;
         mCurrCycle++;
-        if(mCurrCycle==mNumCycles) {
+        if(mCurrCycle==mNumCycles) { // if we ran through all cycles
             resetAllMaps();
             mCurrCycle = 0;
             return;
         }
+
+        /**
+         *  move the rotor map one down:
+         */
         RotorMap tempMap = devices[0].getRotorMap();
         for(int i=0 ; i<devices.length-1; i+=1){
             RotorSwitch device = devices[i];
             RotorSwitch nextDevice = devices[(i+1)];
-//          System.out.println(device.getIdentifier() + " from " + device.getRotorMap() + " to " + nextDevice.getRotorMap());
             device.setRotortMap(nextDevice.getRotorMap());
         }
         devices[devices.length-1].setRotortMap(tempMap);
     }
 
+    /**
+     * resets all mpa to their original devices.
+     */
 	private void resetAllMaps() {
 		for(int i=0 ; i<mRotorMaps.size(); i+=1){
             RotorMap map = mRotorMaps.get(i);
@@ -107,6 +117,9 @@ public class RotorNetController extends DynamicController {
         return device;
     }
 
+    /**
+     * restart transmissions after a reconfiguration event
+     */
     protected void startTransmmisions() {
         for(int i = 0; i< mRotorsArray.length;i++){
             mRotorsArray[i].sendPendingData();
@@ -121,6 +134,9 @@ public class RotorNetController extends DynamicController {
         return "second hops " + indirect + " direct hops " + direct;
     }
 
+    /**
+     * registers the next reconfiguration event
+     */
     protected void registerReconfigurationEvent() {
         Simulator.registerEvent(new RotorReconfigurationEvent(mReconfigurationInterval,mReconfigurationTime));
         sNextReconfigurationTime = Simulator.getCurrentTime() + mReconfigurationInterval;
