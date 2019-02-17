@@ -33,6 +33,10 @@ public class RotorOutputPort extends DynamicOutuptPort {
 		this.mRotorMap = rotorMap;
 	}
 
+	/**
+	 * only send if the next reconfiguration event is not closer then the packet transmission time
+	 * @param packet    Packet instance
+	 */
 	@Override
 	public void enqueue(Packet packet) {
 		IpPacket ipPacket = (IpPacket) packet;

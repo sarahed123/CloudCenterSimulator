@@ -4,6 +4,9 @@ import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 
+/**
+ * the reconfiguration event will reconfigure all rotor switches to the next cycle
+ */
 public class RotorReconfigurationEvent extends Event {
     long mReconfigurationTime;
     /**
@@ -28,6 +31,9 @@ public class RotorReconfigurationEvent extends Event {
         return RemoteRoutingController.getInstance();
     }
 
+    /**
+     * an inner class to signal the end of the reconfiguration
+     */
     private class ReconfigurationEndEvent extends Event {
         public ReconfigurationEndEvent(long mReconfigurationTime) {
             super(mReconfigurationTime);
@@ -36,8 +42,8 @@ public class RotorReconfigurationEvent extends Event {
         @Override
         public void trigger() {
             RotorNetController rnc = (RotorNetController) getController();
-            rnc.registerReconfigurationEvent();
-            rnc.startTransmmisions();
+            rnc.registerReconfigurationEvent(); // register another reconfiguration event
+            rnc.startTransmmisions(); // start all transmissions again
         }
     }
 

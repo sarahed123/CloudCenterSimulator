@@ -250,11 +250,23 @@ public abstract class NetworkDevice {
 		receive(packet);
 	}
 
+
+    /**
+     * a method to return the correct pair key. should probably think of something smarter here
+     * @param packet
+     * @return
+     */
     public ImmutablePair getSourceDestinationEncapsulated(IpPacket packet) {
         if(Simulator.getConfiguration().getBooleanPropertyWithDefault("enable_jumbo_flows", false)){
+            /**
+             * if jumbo flows enabled dont de-enacpsulate
+             */
             return new ImmutablePair(packet.getSourceId(),packet.getDestinationId());
         }
         try{
+            /**
+             * if not then de-enacpsulate
+             */
             IpPacket deEncapse = (IpPacket) (((Encapsulatable) packet).deEncapsualte());
             return new ImmutablePair(deEncapse.getSourceId(),deEncapse.getDestinationId());
         }catch(ClassCastException e){
