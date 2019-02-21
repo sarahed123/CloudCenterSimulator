@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.xpt.remotesourcerouting;
 import java.util.HashMap;
 import java.util.Map;
 
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,10 +18,10 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 
 public class RemoteSourceRoutingSwitch extends NetworkDevice {
-	protected Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
+	protected Map<Long,OutputPort> forwardingTable;
 	protected RemoteSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
 		super(identifier, transportLayer, intermediary,configuration);
-		this.forwardingTable = new HashMap<Pair<Integer,Integer>,OutputPort>();
+		this.forwardingTable = new HashMap();
 	}
 
 	/**
@@ -43,8 +44,9 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     }
     
     protected void forwardToNextSwitch(IpPacket packet) {
-    	ImmutablePair pair = super.getSourceDestinationEncapsulated(packet);
-    	forwardingTable.get(pair).enqueue(packet);
+//    	ImmutablePair pair = super.getSourceDestinationEncapsulated(packet);
+		TcpPacket tcpPacket = (TcpPacket) packet;
+    	forwardingTable.get(tcpPacket.getJumboFlowId()).enqueue(packet);
 		
 	}
     
@@ -93,14 +95,19 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	}
 
 	/**
-	 * will update the forwarding table according to src,dst pair
-	 * @param src
-	 * @param dest
+	 * will update the forwarding table according to jumbo flow id
 	 * @param nextHop
 	 */
-	public void updateForwardingTable(int src, int dest, int nextHop) {
-		forwardingTable.put(new ImmutablePair<Integer,Integer>(src,dest), targetIdToOutputPort.get(nextHop));
+	public void updateForwardingTable(long jumboFlowId, int nextHop) {
+		forwardingTable.put(jumboFlowId, targetIdToOutputPort.get(nextHop));
 		
+	}
+
+	public void removeFromForwardingTable(long jumboFlowId){
+		if(!forwardingTable.containsKey(jumboFlowId)){
+			throw new RuntimeException("no such jumboflow id " + jumboFlowId + " in forwarding table");
+		}
+		forwardingTable.remove(jumboFlowId);
 	}
 
 	public OutputPort getNextHop(int src, int dest) {

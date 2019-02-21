@@ -189,6 +189,8 @@ public class XpanderRouter extends RemoteRoutingController{
 			Vertex v = p.getVertexList().get(i);
 			Vertex u = p.getVertexList().get(i+1);
 			mGraphs[p.getColor()].increaseCapacity(new ImmutablePair<Integer,Integer>(v.getId(),u.getId()));
+			RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(v.getId());
+			rsrs.removeFromForwardingTable(jumboFlowId);
 			// recover the opisite edge - currently not used
 			//mMainGraph.increaseCapacity(new ImmutablePair<Integer,Integer>(u.getId(),v.getId()));
 
@@ -234,9 +236,9 @@ public class XpanderRouter extends RemoteRoutingController{
 	 * @param source
 	 * @param dest
 	 * @param p
-	 * @param flowId 
+	 * @param jumboFlowId
 	 */
-	protected void updateForwardingTables(int source, int dest, Path p, long flowId) {
+	protected void updateForwardingTables(int source, int dest, Path p, long jumboFlowId) {
 		List<Vertex> pathAsList = p.getVertexList();
 		if(pathAsList.size()==0){
 			flowFailuresSample++;
@@ -250,7 +252,7 @@ public class XpanderRouter extends RemoteRoutingController{
 
 			RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(curr);
 			curr = pathAsList.get(i).getId();
-			rsrs.updateForwardingTable(source,dest,curr);
+			rsrs.updateForwardingTable(jumboFlowId,curr);
 		}
 
 
