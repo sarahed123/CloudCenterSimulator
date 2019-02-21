@@ -9,13 +9,18 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitch;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
+	protected Map<Pair<Integer,Integer>,OutputPort> forwardingTable;
 
 	public DistributedSourceRoutingSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary,
                                           NBProperties configuration) {
 		super(identifier, transportLayer, intermediary, configuration);
-		// TODO Auto-generated constructor stub
+		this.forwardingTable = new HashMap<>();
 	}
 
 	/**
@@ -26,13 +31,13 @@ public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
 	 * @param color
 	 */
 	public void updateForwardingTable(int prevHop, int nextHop, int color) {
-		super.updateForwardingTable(prevHop, color, nextHop);
+		forwardingTable.put(new ImmutablePair<>(prevHop, color), targetIdToOutputPort.get(nextHop));
 		
 	}
 	
 	public OutputPort getNextHop(int prevHop, int color) {
 		// TODO Auto-generated method stub
-		return forwardingTable.get(new ImmutablePair<Integer,Integer>(prevHop,color));
+		return forwardingTable.get(new ImmutablePair(prevHop,color));
 	}
 
 	/**
@@ -43,7 +48,7 @@ public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
     	TcpPacket tcpPacket = (TcpPacket) packet;
     	int prevHop = tcpPacket.getPrevHop();
     	tcpPacket.setPrevHop(identifier);
-    	forwardingTable.get(new ImmutablePair<Integer,Integer>(prevHop,tcpPacket.getColor())).enqueue(packet);
+    	forwardingTable.get(new ImmutablePair(prevHop,tcpPacket.getColor())).enqueue(packet);
 		
 	}
 

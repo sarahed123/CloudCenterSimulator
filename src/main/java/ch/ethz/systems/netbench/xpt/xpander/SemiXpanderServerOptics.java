@@ -71,6 +71,8 @@ public class SemiXpanderServerOptics extends SemiXpander {
     protected void returnPathToGraph(Path p, int sourceKey, int destKey, int transimttingSource, int receivingDest, long jumboFlowId) {
 
         super.returnPathToGraph(p,sourceKey,destKey,transimttingSource,receivingDest,jumboFlowId);
+        RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(p.getLastVertex().getId());
+        rsrs.removeFromForwardingTable(jumboFlowId);
         mServerTransmitColorsUsed.get(transimttingSource).remove(p.getColor());
         mServerReceiveColorsUsed.get(receivingDest).remove(p.getColor());
     }
@@ -117,12 +119,12 @@ public class SemiXpanderServerOptics extends SemiXpander {
      * @param source
      * @param dest
      * @param p
-     * @param flowId
+     * @param jumboFlowId
      */
     @Override
-    protected void updateForwardingTables(int source, int dest, Path p, long flowId) {
-        super.updateForwardingTables(source,dest,p,flowId);
+    protected void updateForwardingTables(int source, int dest, Path p, long jumboFlowId) {
+        super.updateForwardingTables(source,dest,p,jumboFlowId);
         RemoteSourceRoutingSwitch rsrs = (RemoteSourceRoutingSwitch) mIdToNetworkDevice.get(p.getLastVertex().getId());
-        rsrs.updateForwardingTable(source,dest,dest);
+        rsrs.updateForwardingTable(jumboFlowId,dest);
     }
 }
