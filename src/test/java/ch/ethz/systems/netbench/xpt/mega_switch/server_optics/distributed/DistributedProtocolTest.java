@@ -39,7 +39,9 @@ public class DistributedProtocolTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
-        runConfigWriter.write("hybrid_circuit_threshold_byte=1000\n");
+        runConfigWriter.write("hybrid_circuit_threshold_byte=5000\n");
+        runConfigWriter.write("run_folder_base_dir=/cs/usr/inonkp/distributed_protocol_testing\n");
+        runConfigWriter.write("run_folder_name=results\n");
         runConfigWriter.write("static_configuration_time_ns=1000\n");
         runConfigWriter.write("num_paths_to_randomize=1\n");
         runConfigWriter.write("distributed_protocol_enabled=true\n");
@@ -181,6 +183,31 @@ public class DistributedProtocolTest {
         assert(router.allocatedEdge(0,1,0)==1);
         assert(router.deallocatedEdge(0,1,0)==1);
         assert(source.getResrvationPacket(3).getDelay()==1000);
+//        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
+//        LinkedList<Integer> p = new LinkedList<>();
+//        p.add(0,1);
+//        ReservationPacket rp = new ReservationPacket(mdp,1,p,0,true);
+//        source.routeThroughtPacketSwitch(rp);
+
+    }
+
+    @Test
+    public void testDoubleFlowSingleSource(){
+        MockDistributedOpticServer source = (MockDistributedOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(2);
+        MockDistributedOpticServer dest =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(3));
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 20000);
+        FlowStartEvent fse2 = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 20000);
+        Simulator.registerEvent(fse);
+        Simulator.registerEvent(fse2);
+        Simulator.runNs(1000000000);
+//        assert(router.routedFlow(0));
+//        assert(source.allocatedColor(0)==1);
+//        assert(source.deallocatedColor(0)==1);
+//        assert(dest.deallocatedColor(0)==1);
+//        assert(dest.allocatedColor(0)==1);
+//        assert(router.allocatedEdge(0,1,0)==1);
+//        assert(router.deallocatedEdge(0,1,0)==1);
+//        assert(source.getResrvationPacket(3).getDelay()==1000);
 //        MockDemoPacket mdp = new MockDemoPacket(0, 1000, 2, 3,100,0);
 //        LinkedList<Integer> p = new LinkedList<>();
 //        p.add(0,1);

@@ -108,7 +108,7 @@ public class RemoteRouterTest {
 			thrown = true;
 		}
 
-    	assert(device.getNextHop(1,4) != null);
+    	assert(device.getNextHop(0) != null);
 		assert(thrown);
 
 
@@ -129,8 +129,8 @@ public class RemoteRouterTest {
     	remoteRouter.reset();
     	remoteRouter.initRoute(1, 4,0);
     	remoteRouter.initRoute(1, 2,1);
-		assert(device.getNextHop(1,4) != null);
-		assert(device.getNextHop(1,2) != null);
+		assert(device.getNextHop(0) != null);
+		assert(device.getNextHop(1) != null);
     	
     }
     

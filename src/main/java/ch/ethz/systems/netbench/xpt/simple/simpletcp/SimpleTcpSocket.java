@@ -35,8 +35,9 @@ public class SimpleTcpSocket extends Socket {
 
     // Maximum flow size allowed in bytes (1 terabyte)
     private static final long MAXIMUM_FLOW_SIZE = 1000000000000L;
-    private boolean finReceived;
+    protected boolean finReceived;
     private long finalSeq;
+    protected boolean finSent;
 
     // Possible TCP states supported
     enum State {
@@ -51,7 +52,7 @@ public class SimpleTcpSocket extends Socket {
     /// TCP PARAMETERS
 
     // Maximum segment size (MSS) (data carried by a TCP packet); can be dynamically found using MTU-discovery
-    private final long MAX_SEGMENT_SIZE;
+    protected final long MAX_SEGMENT_SIZE;
     private final double MAX_SEGMENT_SIZE_SQUARED;
 
     // Maximum (congestion) window size
@@ -71,13 +72,13 @@ public class SimpleTcpSocket extends Socket {
     protected double slowStartThreshold; // ssthresh:    Threshold for congestion window when it goes to congestion avoidance phase
     protected double congestionWindow;   // cwnd:        Congestion window size, maximum size defined by network
     private long sendUnackNumber;        // SND.UNA:     First number which is in window, still unacknowledged
-    private long sendNextNumber;         // SND.NXT:     Next sequence number to be used
+    protected long sendNextNumber;         // SND.NXT:     Next sequence number to be used
     private long receiveNextNumber;      // RCV.NXT:     Next sequence number that needs to be received to move window
     private long highestSentOutNumber;   // SND.MAXNXT:  The highest byte sequence number sent out (exclusive)
 
     // Selective acknowledgment variables
     private AckRangeSet selectiveAckSet;
-    private Set<Long> acknowledgedSegStartSeqNumbers;
+    protected Set<Long> acknowledgedSegStartSeqNumbers;
     private Set<Long> sentOutUnacknowledgedSegStartSeqNumbers;
 
     //this is a queue of packets not acked in the 3-HSHAKE stage
@@ -177,6 +178,7 @@ public class SimpleTcpSocket extends Socket {
         // Flowlet tracking
         currentFlowlet = 0;
         finReceived = false;
+        finSent = false;
         finalSeq = MAXIMUM_FLOW_SIZE;
         // TCP logger
         this.tcpLogger = new TcpLogger(flowId, flowSizeByte == -1);
@@ -316,7 +318,9 @@ public class SimpleTcpSocket extends Socket {
                     ));
 
                     // Start sending
-                    sendPendingData();
+                    onEstablishedHandle();
+
+
 
                     // System.out.println("3-WAY HANDSHAKE: 2. Sender received ACK+SYN, sent back ACK.");
 
@@ -383,6 +387,10 @@ public class SimpleTcpSocket extends Socket {
 
     }
 
+    protected void onEstablishedHandle() {
+        sendPendingData();
+    }
+
     /**
      * Handling of a packet when in ESTABLISHED state (most interesting).
      *
@@ -406,7 +414,7 @@ public class SimpleTcpSocket extends Socket {
      *
      * @param packet    TCP packet instance
      */
-    private void handleDataPacket(TcpPacket packet) {
+    protected void handleDataPacket(TcpPacket packet) {
 
         // Invariants
 
@@ -449,6 +457,12 @@ public class SimpleTcpSocket extends Socket {
         }
 
         // Send out the acknowledgment
+        sendAcknowledgment(packet);
+
+
+    }
+
+    protected void sendAcknowledgment(TcpPacket packet) {
         sendWithoutResend(
                 ((FullExtTcpPacket) ((FullExtTcpPacket) (createPacket(
                         0, // Data size (byte)
@@ -459,11 +473,10 @@ public class SimpleTcpSocket extends Socket {
                         packet.getECN(), // ECE
                         receiveNextNumber >= finalSeq
                 ).setEchoFlowletId(packet.getFlowletId())))
-                 .setSelectiveAck(selectiveAckSet.createSelectiveAckData()))
-                 .setEchoDepartureTime(packet.getDepartureTime())
-                 .markOnCircuit(packet.isOnCircuit()) // mark on circuit if relevant
+                        .setSelectiveAck(selectiveAckSet.createSelectiveAckData()))
+                        .setEchoDepartureTime(packet.getDepartureTime())
+                        .markOnCircuit(packet.isOnCircuit()) // mark on circuit if relevant
         );
-
     }
 
     /**
@@ -471,7 +484,7 @@ public class SimpleTcpSocket extends Socket {
      *
      * @param packet    TCP packet instance
      */
-    private void handleAcknowledgment(FullExtTcpPacket packet) {
+    protected void handleAcknowledgment(FullExtTcpPacket packet) {
 
         // Invariant: receiver can *only* receive a duplicate third handshake acknowledgment
         long ack = packet.getAcknowledgementNumber();
@@ -566,9 +579,8 @@ public class SimpleTcpSocket extends Socket {
         }
 
         // Increment window for every packet acknowledged by this acknowledgement
-        for (int i = 0; i < newPacketsAcked; i++) {
-            phaseIncrementCongestionWindow();
-        }
+        incrementCongestionWindow(newPacketsAcked);
+
 
         // Update alpha
         updateAlpha(packet, acknowledgedBytes);
@@ -594,6 +606,12 @@ public class SimpleTcpSocket extends Socket {
 
     }
 
+    protected void incrementCongestionWindow(int newPacketsAcked) {
+        for (int i = 0; i < newPacketsAcked; i++) {
+            phaseIncrementCongestionWindow();
+        }
+    }
+
     /**
      * Update alpha hook for DCTCP.
      *
@@ -617,7 +635,7 @@ public class SimpleTcpSocket extends Socket {
      * packets as is permitted given the existing window
      * and the packets already sent out but not yet confirmed.
      */
-    private void sendPendingData() {
+    protected void sendPendingData() {
         assert(sendNextNumber >= sendUnackNumber);
 
         // Calculate congestion window difference
@@ -652,7 +670,7 @@ public class SimpleTcpSocket extends Socket {
      * @param seq               Sequence number
      * @param amountToSendByte  Amount of data to send out
      */
-    private void sendOutDataPacket(long seq, long amountToSendByte) {
+    protected void sendOutDataPacket(long seq, long amountToSendByte) {
         assert(seq <= sendNextNumber && !acknowledgedSegStartSeqNumbers.contains(seq));
 
         // Log that it is now sent out (could happen again)
@@ -665,6 +683,7 @@ public class SimpleTcpSocket extends Socket {
 
         // Update the highest sent out number (used to determine flight size)
         highestSentOutNumber = Math.max(highestSentOutNumber, sendNextNumber);
+        boolean fin = this.sendNextNumber > this.flowSizeByte;
 
         // Send with wanting a confirmation
         sendWithResend(createPacket(
@@ -674,8 +693,9 @@ public class SimpleTcpSocket extends Socket {
                 false, // ACK
                 false, // SYN
                 false,  // ECE
-                this.sendNextNumber > this.flowSizeByte // this is the test to see if we are finished with the flow
+                fin // this is the test to see if we are finished with the flow
         ));
+        finSent = finSent || fin;
 
     }
 
@@ -692,7 +712,7 @@ public class SimpleTcpSocket extends Socket {
      * in the slow-start phase, and linearly (roughly one SMSS per RTT)
      * if it is in the congestion-avoidance phase.
      */
-    private void phaseIncrementCongestionWindow() {
+    protected void phaseIncrementCongestionWindow() {
 
         // Slow start, scales exponentially: for every packet
         // confirmed, it increases the window with one more
@@ -805,7 +825,7 @@ public class SimpleTcpSocket extends Socket {
      *
      * @return Flow size in bytes
      */
-    private long getFlowSizeByte(long seq) {
+    protected long getFlowSizeByte(long seq) {
         return Math.min(MAX_SEGMENT_SIZE, flowSizeByte - seq + 1);
     }
 
@@ -817,7 +837,7 @@ public class SimpleTcpSocket extends Socket {
      *
      * @param packet     TCP packet instance
      */
-    private void sendWithoutResend(Packet packet) {
+    protected void sendWithoutResend(Packet packet) {
         SimulationLogger.increaseStatisticCounter("TCP_ACK_PACKETS_SENT");
         transportLayer.send(packet);
     }
@@ -828,7 +848,7 @@ public class SimpleTcpSocket extends Socket {
      *
      * @param tcpPacket     TCP packet instance
      */
-    private void sendWithResend(TcpPacket tcpPacket) {
+    protected void sendWithResend(TcpPacket tcpPacket) {
         SimulationLogger.increaseStatisticCounter("TCP_DATA_PACKETS_SENT");
         registerResendEvent(tcpPacket);
         transportLayer.send(tcpPacket);
@@ -839,7 +859,7 @@ public class SimpleTcpSocket extends Socket {
      *
      * @param tcpPacket     TCP packet instance
      */
-    private void registerResendEvent(TcpPacket tcpPacket) {
+    protected void registerResendEvent(TcpPacket tcpPacket) {
         TcpPacketResendEvent event = new TcpPacketResendEvent(roundTripTimeout, tcpPacket, this);
         Simulator.registerEvent(event);
         seqNumbToResendEventMap.put(tcpPacket.getSequenceNumber(), event);
@@ -852,8 +872,11 @@ public class SimpleTcpSocket extends Socket {
      *
      * @param seq    Sequence number of the packet
      */
-    private void cancelResendEvent(long seq) {
+    protected void cancelResendEvent(long seq) {
         TcpPacketResendEvent event = seqNumbToResendEventMap.get(seq);
+        if(event==null){
+            throw new IllegalStateException();
+        }
         event.cancel();
         seqNumbToResendEventMap.remove(seq);
     }

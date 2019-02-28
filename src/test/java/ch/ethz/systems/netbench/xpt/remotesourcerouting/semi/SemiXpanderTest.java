@@ -95,7 +95,7 @@ public class SemiXpanderTest {
     public void simpleTest(){
         RemoteRoutingController.getInstance().initRoute(0,1,0);
         MockSemiRemoteSwitch semi = (MockSemiRemoteSwitch) BaseInitializer.getInstance().getNetworkDeviceById(0);
-        assert(semi.getNextHop(0,1).getTargetId()==83);
+        assert(semi.getNextHop(0).getTargetId()==83);
         RemoteRoutingController.getInstance().recoverPath(0,1,0);
     }
 

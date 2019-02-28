@@ -44,9 +44,14 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
     }
     
     protected void forwardToNextSwitch(IpPacket packet) {
-//    	ImmutablePair pair = super.getSourceDestinationEncapsulated(packet);
-		TcpPacket tcpPacket = (TcpPacket) packet;
-    	forwardingTable.get(tcpPacket.getJumboFlowId()).enqueue(packet);
+		long jumboFlowId = -1;
+		try{
+			TcpPacket tcpPacket = (TcpPacket) packet;
+			jumboFlowId = tcpPacket.getJumboFlowId();
+		}catch (ClassCastException e){
+
+		}
+    	forwardingTable.get(jumboFlowId).enqueue(packet);
 		
 	}
     
@@ -110,9 +115,9 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 		forwardingTable.remove(jumboFlowId);
 	}
 
-	public OutputPort getNextHop(int src, int dest) {
+	public OutputPort getNextHop(long jumboFlowId) {
 		// TODO Auto-generated method stub
-		return forwardingTable.get(new ImmutablePair<Integer,Integer>(src,dest));
+		return forwardingTable.get(jumboFlowId);
 	}
 
 

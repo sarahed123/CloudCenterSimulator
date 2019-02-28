@@ -153,6 +153,7 @@ public class DistributedController extends SemiXpanderServerOptics
 
 
     public void onPathFailure() {
+        SimulationLogger.increaseStatisticCounter("DISTRIBUTED_PATH_FAILURE_COUNT");
         edgesUsedPerFailureSum += edgesUsed;
     }
 }

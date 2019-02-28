@@ -80,9 +80,9 @@ public class ConversionUnit {
      * @param dst
      * @param jFlowId
      */
-    public void onFlowFinish(int src, int dst, long jFlowId){
+    public void onJumboFlowFinish(int src, int dst, long jFlowId){
         if(mPortMap.get(new ImmutablePair<>(src,dst))!=null)
-            mPortMap.get(new ImmutablePair<>(src,dst)).onFlowFinished(jFlowId);
+            mPortMap.get(new ImmutablePair<>(src,dst)).onJumboFlowFinished(jFlowId);
         mPortMap.remove(new ImmutablePair<>(src,dst));
     }
 
@@ -91,4 +91,8 @@ public class ConversionUnit {
     }
 
 
+    public void onFlowFinish(int src, int dst, long flowId) {
+        if(mPortMap.get(new ImmutablePair<>(src,dst))!=null)
+            mPortMap.get(new ImmutablePair<>(src,dst)).onFlowFinished(flowId);
+    }
 }

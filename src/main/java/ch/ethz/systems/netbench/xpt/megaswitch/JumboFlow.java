@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.xpt.megaswitch;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedOpticServer;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,9 +23,11 @@ public class JumboFlow {
     int mSource;
     int mDest;
     boolean onCircuit;
+    HashSet<Long> flows;
     HashSet<Long> flowsOnCircuit;
     private int mSourceToR;
     private int mDestToR;
+    private String mState;
 
     public JumboFlow(int source,int dest){
         mSizeByte = 0;
@@ -36,6 +39,8 @@ public class JumboFlow {
         onCircuit = false;
         mSourceToR = -1;
         mDestToR = -1;
+        mState = null;
+        flows = new HashSet<>();
     }
 
     public int getSource(){
@@ -63,7 +68,7 @@ public class JumboFlow {
         if(packet.isACK()){
             return;
         }
-
+        flows.add(packet.getFlowId());
         long flowSize = mFlowIdToSize.getOrDefault(packet.getFlowId(),0l);
         mSizeByte = mSizeByte + packet.getDataSizeByte();
         mFlowIdToSize.put(packet.getFlowId(),flowSize + packet.getDataSizeByte());
@@ -80,6 +85,7 @@ public class JumboFlow {
         }
         long flowSize = mFlowIdToSize.remove(flowId);
         flowsOnCircuit.remove(flowId);
+        flows.remove(flowId);
         //this.mSizeByte -= flowSize;
     }
 
@@ -108,6 +114,10 @@ public class JumboFlow {
 	    for(long id : flowIds){
             SimulationLogger.registerFlowOnCircuit(id);
         }
+    }
+
+    public Set<Long> getFlows(){
+        return flows;
     }
 
     public boolean isOnCircuit() {
@@ -169,5 +179,14 @@ public class JumboFlow {
 
     public int getSourceToR() {
         return mSourceToR;
+    }
+
+    public void setState(String state) {
+        mState = state;
+
+    }
+
+    public String getState(){
+        return mState;
     }
 }
