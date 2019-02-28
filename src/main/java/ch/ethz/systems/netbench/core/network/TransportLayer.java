@@ -177,7 +177,9 @@ public abstract class TransportLayer {
 			System.out.println("Done restoring simulator");
 		}
 	}
-	
-	
 
+
+    public long getFlowSize(long flowId) {
+        return flowIdToSocket.get(flowId).flowSizeByte;
+    }
 }

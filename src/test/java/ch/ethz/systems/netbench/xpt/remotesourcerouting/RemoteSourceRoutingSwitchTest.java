@@ -132,12 +132,12 @@ public class RemoteSourceRoutingSwitchTest {
         when(packet.getDestinationId()).thenReturn(4);
         when(packet.getFlowId()).thenReturn((long) 0);
         when(packet.deEncapsualte()).thenReturn(packet);
-
+        source.forwardingTable.put(-1L,source.getTargetOuputPort(next.getIdentifier()));
         // Give device the packet
         source.receiveFromTransportLayer(packet);
         verify(source,times(1)).receive(packet);
         verify(source,times(1)).forwardToNextSwitch(packet);
-
+        next.forwardingTable.put(-1L,next.getTargetOuputPort(2));
         next.receive(packet);
         verify(next,times(1)).forwardToNextSwitch(packet);
     }

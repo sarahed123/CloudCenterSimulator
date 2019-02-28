@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.ext.basic.EcnTailDropOutputPort;
 import ch.ethz.systems.netbench.ext.basic.IpHeader;
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,9 +23,6 @@ public class DistributedProtocolPort extends EcnTailDropOutputPort {
     }
     
     protected void log(Packet packet) {
-    	if(getBufferOccupiedBits() >= ecnThresholdKBits * 4) {
-		
-    	}
     	super.log(packet);
 		
 	}
@@ -42,6 +40,11 @@ public class DistributedProtocolPort extends EcnTailDropOutputPort {
             return;
         }catch (ClassCastException e){
 
+        }
+        TcpPacket tcpPacket = (TcpPacket) packet;
+        if(tcpPacket.isACK()){
+            ((LinkedList<Packet>)queue).addFirst(packet);
+            return;
         }
         super.addPacketToQueue(packet);
     }

@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.run.MainFromProperties;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingPacket;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
 
@@ -22,8 +23,8 @@ public class SimulationLogger {
 	private static HashMap<Long,Path> activePathMap = new HashMap<>();
 	private static Stack<Long> oldestActivePaths = new Stack<>();
 	
-	private static Stack<Pair<Integer,Integer>> oldestDistProtocolStates = new Stack<>();
-	private static HashMap<Pair<Integer,Integer>,String> activeDistProtocolStates = new HashMap<>();
+	private static Stack<Long> oldestDistProtocolStates = new Stack<>();
+	private static HashMap<Long,JumboFlow> activeDistProtocolStates = new HashMap<>();
 	
 	private static BufferedWriter writerRemainingPaths;
 	// Main token identifying the run log folder
@@ -699,6 +700,10 @@ public class SimulationLogger {
 
 	}
 
+	public static boolean isFlowOnCircuit(long flowId){
+		return flowsOnCircuit.containsKey(flowId);
+	}
+
 	public static void registerFlowOnCircuit(long flowId) {
 		if(!flowsOnCircuit.containsKey(flowId)){
 			flowsOnCircuit.put(flowId,Simulator.getCurrentTime());
@@ -733,22 +738,22 @@ public class SimulationLogger {
 	}
 	
 	public static void printOldestDistProtocolStates() {
-		for(Pair<Integer, Integer> id: oldestDistProtocolStates) {
-			System.out.println(id.toString() + " = " + activeDistProtocolStates.get(id) + "\n");
+		for(Long id: oldestDistProtocolStates) {
+			System.out.println(id.toString() + " = " + activeDistProtocolStates.get(id).getState() + " " + activeDistProtocolStates.get(id).getSizeByte()  + "\n");
 		}
 		
 	}
 
-	public static void distProtocolStateChange(ImmutablePair<Integer,Integer> sourceDestPair, String state) {
-		if(state.equals("NO_CIRCUIT")) {
-			oldestDistProtocolStates.remove(sourceDestPair);
-			activeDistProtocolStates.remove(sourceDestPair);
+	public static void distProtocolStateChange(long jFlowId, JumboFlow jFlow) {
+		if(jFlow.getState().equals("NO_CIRCUIT")) {
+			oldestDistProtocolStates.remove(jFlowId);
+			activeDistProtocolStates.remove(jFlowId);
 		}else {
 			//first remove the old occurrence
-			oldestDistProtocolStates.remove(sourceDestPair);
+			oldestDistProtocolStates.remove(jFlowId);
 			//then put the new
-			oldestDistProtocolStates.push(sourceDestPair);
-			activeDistProtocolStates.put(sourceDestPair, state + " : " + Simulator.getCurrentTime());
+			oldestDistProtocolStates.push(jFlowId);
+			activeDistProtocolStates.put(jFlowId, jFlow);
 			if(oldestDistProtocolStates.size() > 10) {
 				oldestDistProtocolStates.pop();
 			}

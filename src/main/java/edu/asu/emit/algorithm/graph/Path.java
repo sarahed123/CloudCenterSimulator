@@ -51,7 +51,9 @@ public class Path implements BaseElementWithWeight, Serializable {
     // Total path weight
 	private double weight;
 	private int mColor;
-    /**
+	private long mFlowSize = -1; // for debugging
+
+	/**
      * Create a path which should have a pre-determined weight.
      *
      * Afterwards, the vertex list *must* be adapted to include
@@ -199,5 +201,9 @@ public class Path implements BaseElementWithWeight, Serializable {
 
 	public int getColor() {
 		return mColor;
+	}
+
+	public void setFlowSize(long flowSize) {
+		mFlowSize = flowSize;
 	}
 }
