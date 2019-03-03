@@ -3,6 +3,7 @@ package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.BFSMetric;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
@@ -29,10 +30,12 @@ public class DistributedController extends SemiXpanderServerOptics
 	int  maxConcurrentPaths = 0;
 	long edgesUsed = 0;
     private long edgesUsedPerFailureSum = 0;
+    private BFSMetric mBfsMetric;
 
     public DistributedController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
         System.out.println("running distributed controller with max flows on circuit " + mMaxNumJFlowsOncircuit);
+        mBfsMetric = new BFSMetric(mGraphs);
 
     }
 
