@@ -16,10 +16,12 @@ public class BFSMetric implements Metric {
     private final BFS[] mBFSs;
     private double mOpportunitiesMissed;
     private double mComparisons;
+	private double mNoOpportunity;
     public BFSMetric(Graph[] graphs){
         mGraphs = graphs;
         mComparisons = 0d;
         mOpportunitiesMissed = 0d;
+        mNoOpportunity = 0d;
         mBFSs = new BFS[mGraphs.length];
         for(int i=0; i<mBFSs.length;i++){
             mBFSs[i] = new BFS(mGraphs[i]);
@@ -61,18 +63,21 @@ public class BFSMetric implements Metric {
         if(!result && evaluation.getEvaluation()==1d){
             mOpportunitiesMissed +=1d;
         }
+        if(!result && evaluation.getEvaluation()==0d){
+            mNoOpportunity +=1d;
+        }
         mComparisons++;
         evaluation.markEvaluated();
     }
 
     @Override
-    public double calculateMetric() {
+    public double calculateMetric(String metric) {
         return mOpportunitiesMissed/mComparisons;
     }
 
     @Override
     public String toString() {
-        return "BFS: " + mOpportunitiesMissed/mComparisons;
+        return "BFS (missed opportunities): " + mOpportunitiesMissed/mComparisons + "\nBFS (no opportunity): " + mNoOpportunity/mComparisons;
     }
 
 
