@@ -3,17 +3,19 @@ package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.BFSMetric;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.Evaluation;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
+import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * this class is used mainly for logging, and some global variables
@@ -45,6 +47,16 @@ public class DistributedController extends SemiXpanderServerOptics
 
     public void recoverPath(int sourceToR, int destToR, int serverSource, int serverDest,long flowId){
         throw new RuntimeException("cant use recoverPath for distributed setting!");
+    }
+
+    public Evaluation evaluateRequest(JumboFlow jumboFlow){
+        Evaluation evaluation = new Evaluation(mBfsMetric);
+        evaluation.evaluateRequest(jumboFlow);
+        return evaluation;
+    }
+
+    public void evaluate(LinkedList<Evaluation> evaluations, boolean finalResult){
+        evaluations.get(0).evaluate(finalResult);
     }
 
     /**
@@ -129,7 +141,7 @@ public class DistributedController extends SemiXpanderServerOptics
         failures = SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT");
 
         state += "avg edge used per failure " + edgesUsedPerFailureSum/failures + "\n";
-
+        state += mBfsMetric.toString() + "\n";
         torNoPath = SimulationLogger.getStatistic("DISTRIBUTED_TOR_NO_PATH");
         destNoPath = SimulationLogger.getStatistic("DISTRIBUTED_DEST_ENDPOINT_NO_PATH");
         sourceNoPath = SimulationLogger.getStatistic("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH");

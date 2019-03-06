@@ -1,10 +1,13 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed;
 
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.ext.poissontraffic.RandomCollection;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.Evaluation;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,6 +27,7 @@ public class ReservationPacket extends TcpPacket {
     private boolean reversed; // has the path been reversed
     private long mId = -1; // an id for the reservation, typically the path id
     private boolean mFinishedDealloc; // is the deallocation finished
+    private LinkedList<Evaluation> mEvaluations;
 
     public ReservationPacket(TcpPacket packet, int sourceToR,int dest, List<Integer> path, int color,boolean allocationReques) {
         super(
@@ -42,6 +46,7 @@ public class ReservationPacket extends TcpPacket {
         reversed = false;
         mFinishedDealloc = false;
         delayed = 0;
+        mEvaluations = new LinkedList();
     }
 
     @Override
@@ -183,5 +188,13 @@ public class ReservationPacket extends TcpPacket {
 
     public long getDelay(){
         return delayed;
+    }
+
+    public void addEvaluation(Evaluation evaluation) {
+        mEvaluations.add(evaluation);
+    }
+
+    public LinkedList<Evaluation> getEvaluations(){
+        return mEvaluations;
     }
 }

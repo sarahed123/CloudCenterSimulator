@@ -44,8 +44,8 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
         remoteRouter.markFlowRouted(flowId);
     }
 
-    protected void sendReservationPackets(List<Integer> path, int color, TcpPacket packet) {
-        super.sendReservationPackets(path,color,packet);
+    protected ReservationPacket sendReservationPackets(List<Integer> path, int color, TcpPacket packet) {
+        return super.sendReservationPackets(path,color,packet);
     }
 
     @Override

@@ -1,7 +1,9 @@
 # Topology:
-# 0--1
 #
-# All nodes are ToRs
+#  0    1
+# | |  | |
+# 2,4  3,5
+#
 
 # Details
 |V|=2

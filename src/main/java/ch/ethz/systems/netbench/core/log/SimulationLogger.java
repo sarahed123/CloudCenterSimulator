@@ -6,7 +6,10 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.run.MainFromProperties;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingPacket;
+import ch.ethz.systems.netbench.ext.poissontraffic.RandomCollection;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.BFSMetric;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.Metric;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import edu.asu.emit.algorithm.graph.Path;
 
@@ -68,6 +71,7 @@ public class SimulationLogger {
 	// Settings
 	private static boolean logHumanReadableFlowCompletionEnabled;
 	private static BufferedWriter flowRequestLogWriter;
+	private static LinkedList<Metric> sMetrics;
 
 	/**
 	 * Increase a basic statistic counter with the given name by one.
@@ -155,12 +159,11 @@ public class SimulationLogger {
 		} else {
 			baseDir = specificRunFolderBaseDirectory;
 		}
-
+		sMetrics = new LinkedList<>();
 		try {
 
 			// Create run token folder
 			new File(getRunFolderFull()).mkdirs();
-
 			// Copy console output to the run folder
 			FileOutputStream fosOS = new FileOutputStream(getRunFolderFull() + "/console.txt");
 			TeeOutputStream customOutputStreamOut = new TeeOutputStream(System.out, fosOS);
@@ -329,6 +332,12 @@ public class SimulationLogger {
 			for (String s : stats) {
 				writerStatistics.write(s + ": " + statisticCounters.get(s) + "\n");
 			}
+
+			BufferedWriter writerMetrics = openWriter("metrics.log");
+			for(Metric metric: sMetrics){
+				writerMetrics.write(metric.toString() + "\n");
+			}
+			writerMetrics.close();
 			writerStatistics.close();
 			statisticCounters.clear();
 			// Close *all* the running log files
@@ -767,5 +776,9 @@ public class SimulationLogger {
 		Set requests = flowsRequestCircuit.getOrDefault(flowId,new HashSet<>());
 		requests.add(Simulator.getCurrentTime());
 		flowsRequestCircuit.put(flowId,requests);
+	}
+
+	public static void registerMetric(Metric metric) {
+		sMetrics.add(metric);
 	}
 }
