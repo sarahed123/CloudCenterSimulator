@@ -22,7 +22,6 @@ public class BFS {
         distances.put(curr,0);
         visited.add(curr);
         while(curr != dest){
-
             Vertex currVertex = new Vertex(curr);
             List<Vertex> neighbours = mGraph.getAdjacentVertices(currVertex);
             for(Vertex v: neighbours){

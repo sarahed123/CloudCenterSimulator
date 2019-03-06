@@ -1,11 +1,17 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics;
 
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
+import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedOpticServer;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.algorithms.BFS;
 
-public class BFSMetric implements Metric {
+import java.util.Map;
 
+public class BFSMetric implements Metric {
     private final Graph[] mGraphs;
     private final BFS[] mBFSs;
     private double mOpportunitiesMissed;
@@ -14,39 +20,59 @@ public class BFSMetric implements Metric {
         mGraphs = graphs;
         mComparisons = 0d;
         mOpportunitiesMissed = 0d;
-        mBFSs = new BFS[graphs.length];
-        for(int i=0; i<graphs.length; i++){
-            mBFSs[i] = new BFS(graphs[i]);
+        mBFSs = new BFS[mGraphs.length];
+        for(int i=0; i<mBFSs.length;i++){
+            mBFSs[i] = new BFS(mGraphs[i]);
         }
+        SimulationLogger.registerMetric(this);
     }
 
     @Override
-    public Evaluation evaluatePathRequest(int source, int dest) {
-        int distance = Integer.MAX_VALUE;
-        for(BFS bfs: mBFSs){
+    public double evaluateRequest(JumboFlow jumboFlow) {
+        double evaluation = 0d;
+        Map<Integer,NetworkDevice> idToNetworkDevice = BaseInitializer.getInstance().getIdToNetworkDevice();
+        DistributedOpticServer serverSourceDevice = (DistributedOpticServer) idToNetworkDevice.get(jumboFlow.getSource());
+        DistributedOpticServer serverDestDevice = (DistributedOpticServer) idToNetworkDevice.get(jumboFlow.getDest());
+        if(!serverSourceDevice.canAllocateColor(false) || !serverDestDevice.canAllocateColor(true)){
+            return evaluation;
+        }
+        for(int i=0; i<mGraphs.length; i++){
+
             try{
-                distance = bfs.getDistance(source,dest);
+                if(serverSourceDevice.hasColor(i,false)) continue;
+                if(serverDestDevice.hasColor(i,true)) continue;
+                int distance = mBFSs[i].getDistance(jumboFlow.getSourceToR(),jumboFlow.getDestToR());
+                evaluation = 1d;
+                break;
             }catch (NoPathException e){
 
             }
 
         }
-        return new Evaluation(distance==Integer.MAX_VALUE ? 0d : 1d);
+
+        return evaluation;
     }
 
     @Override
-    public void compareEvaluationWithResult(Evaluation evaluation, boolean result) {
+    public void evaluate(Evaluation evaluation, boolean result) {
+        if(evaluation.isEvaluated()){
+            throw new IllegalStateException("evaluation evaluated more then once");
+        }
         if(!result && evaluation.getEvaluation()==1d){
             mOpportunitiesMissed +=1d;
         }
         mComparisons++;
         evaluation.markEvaluated();
-
     }
 
     @Override
-    public double getMetric() {
+    public double calculateMetric() {
         return mOpportunitiesMissed/mComparisons;
+    }
+
+    @Override
+    public String toString() {
+        return "BFS: " + mOpportunitiesMissed/mComparisons;
     }
 
 

@@ -1,8 +1,9 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics;
 
-public interface Metric {
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 
-    public Evaluation evaluatePathRequest(int source, int dest);
-    public void compareEvaluationWithResult(Evaluation evaluation, boolean result);
-    public double getMetric();
+public interface Metric {
+    public double evaluateRequest(JumboFlow jumboFlow);
+    public double calculateMetric();
+    void evaluate(Evaluation evaluation, boolean finalResult);
 }
