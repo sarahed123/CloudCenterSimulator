@@ -75,9 +75,10 @@ public class EcmpRoutingUtility {
         int[][] shortestPathLen = EcmpRoutingUtility.calculateShortestPaths(graph);
 
         System.out.print("Populating ECMP forward routing tables...");
-
+        double numShortestPathsAvgs = 0;
         // Go over every network device pair and set the forwarder switch routing table
         for (int i = 0; i < numNodes; i++) {
+            double numShortestPathsAvg = 0;
             for (int j = 0; j < numNodes; j++) {
                 if (i != j) {
 
@@ -89,6 +90,7 @@ public class EcmpRoutingUtility {
                         if (isEcmp) {
 
                             if (shortestPathLen[i][j] == shortestPathLen[v.getId()][j] + 1) {
+                                numShortestPathsAvg++;
                                 ((EcmpSwitchRoutingInterface) idToNetworkDevice.get(i)).addDestinationToNextSwitch(j, v.getId());
                             }
 
@@ -109,9 +111,10 @@ public class EcmpRoutingUtility {
             if (numNodes > 10 && (i + 1) % ((numNodes / 10)) == 0) {
                 System.out.print(" " + (((double) i + 1) / (numNodes) * 100) + "%...");
             }
+            numShortestPathsAvgs+= numShortestPathsAvg/(numNodes-1);
 
         }
-
+        if(isEcmp) System.out.println("ecmp num shortest paths average " + numShortestPathsAvgs/numNodes);
         System.out.println(" done.");
 
     }

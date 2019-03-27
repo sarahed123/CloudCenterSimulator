@@ -186,6 +186,20 @@ public class MetricTest {
         Simulator.runNs(1000000000);
     }
 
+    @Test
+    public void testDoubleFlowSameSource(){
+        MockDistributedOpticServer source = (MockDistributedOpticServer) BaseInitializer.getInstance().getNetworkDeviceById(3);
+        MockDistributedOpticServer source2 =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(6));
+        MockDistributedOpticServer dest =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(4));
+        MockDistributedOpticServer dest2 =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(7));
+
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 200000);
+        FlowStartEvent fse2 = new FlowStartEvent(0, source.getTransportLayer(), dest2.getIdentifier(), 200000);
+        Simulator.registerEvent(fse);
+        Simulator.registerEvent(fse2);
+        Simulator.runNs(1000000000);
+    }
+
     @After
     public void finish(){
         Simulator.reset(false);
