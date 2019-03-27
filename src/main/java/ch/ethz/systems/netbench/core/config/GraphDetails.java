@@ -193,6 +193,12 @@ public class GraphDetails {
         return torNodeIds.size();
     }
 
+
+    public Set<Integer> TorIds() {
+        return torNodeIds;
+    }
+
+
     /**
      * Get the number of switches (nodes that cannot have
      * a transport layer, nor be directly connected to a server).

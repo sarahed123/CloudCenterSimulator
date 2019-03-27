@@ -202,6 +202,7 @@ public class DistributedOpticServer extends OpticServer {
 
 		if(pendingRequests==0) {
 			SimulationLogger.increaseStatisticCounter("DISTRIBUTED_SOURCE_ENDPOINT_NO_PATH");
+			evaluation.evaluate(false);
 			throw new NoPathException();
 		}
 
@@ -321,13 +322,14 @@ public class DistributedOpticServer extends OpticServer {
 
 				deallocateServerColor(ep.getColor(), false); // deallocate color
 				if(pendingRequests==0 && mFlowState.get(ep.getOriginalServerDest())!=State.HAS_CIRCUIT){
+					assert(mFlowState.get(ep.getOriginalServerDest())==State.IN_PROCESS);
 					((DistributedController) getRemoteRouter()).onPathFailure();
 
-					if(mFlowState.get(ep.getOriginalServerDest())!=State.IN_PROCESS) {
-						System.out.println(mFlowState.get(ep.getOriginalServerDest()));
-						System.out.println(ep.toString());
-						throw new RuntimeException();
-					}
+//					if(mFlowState.get(ep.getOriginalServerDest())!=State.IN_PROCESS) {
+//						System.out.println(mFlowState.get(ep.getOriginalServerDest()));
+//						System.out.println(ep.toString());
+//						throw new RuntimeException();
+//					}
 					((DistributedController) getRemoteRouter()).evaluate(ep.getEvaluations(),false);
 					changeState(ep.getOriginalServerDest(),State.NO_CIRCUIT); // if no more requests are pending, change state to NO_CIRCUIT
 				}
@@ -400,7 +402,8 @@ public class DistributedOpticServer extends OpticServer {
 			return;
 		}
 		teardownCircuit(rp);
-		changeState(rp.getOriginalServerDest(),State.NO_CIRCUIT);
+		int pendingRequests = mPendingRequests.get(rp.getOriginalServerDest());
+		changeState(rp.getOriginalServerDest(), pendingRequests==0 ? State.NO_CIRCUIT : State.IN_PROCESS);
 		this.mTeardownEventsMap.get(rp.getOriginalServerDest()).finish();
 	}
 

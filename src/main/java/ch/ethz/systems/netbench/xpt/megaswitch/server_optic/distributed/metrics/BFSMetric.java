@@ -58,7 +58,8 @@ public class BFSMetric implements Metric {
     @Override
     public void evaluate(Evaluation evaluation, boolean result) {
         if(evaluation.isEvaluated()){
-            throw new IllegalStateException("evaluation evaluated more then once");
+            //throw new IllegalStateException("evaluation evaluated more then once");
+	    return;
         }
         if(!result && evaluation.getEvaluation()==1d){
             mOpportunitiesMissed +=1d;

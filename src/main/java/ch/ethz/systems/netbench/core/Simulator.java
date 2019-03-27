@@ -31,7 +31,6 @@ import java.util.Set;
  * event after event.
  */
 public class Simulator {
-
 	// Time interval at which to show the percentage of progress
 	private static long PROGRESS_SHOW_INTERVAL_NS = 10000000L; // 0.01s = 10mss
 
