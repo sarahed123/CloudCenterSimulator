@@ -6,6 +6,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import edu.asu.emit.algorithm.lp.gurobi.GurobiSolver;
+import gurobi.GRBException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
@@ -108,12 +109,130 @@ public class LPTest {
     }
 
     @Test
-    public void testGurobi() {
-        List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
-        sourceDestPairs.add(new ImmutablePair<>(3,7));
-        sourceDestPairs.add(new ImmutablePair<>(5,4));
-        //readGraph();
-        GurobiSolver.solve(props,sourceDestPairs);
+    public void testGurobi_v0() {
+        props.setProperty("scenario_topology_file","example/topologies/simple/simple_n2.topology");
+        try {
+            List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
+            sourceDestPairs.add(new ImmutablePair<>(0,1));
+            //readGraph();
+            Double solution = GurobiSolver.solve(props,sourceDestPairs,1);
+            assert(solution==1);
+
+            GurobiSolver.writeModel("/cs/usr/inonkp/test_gurobi/simple_n2_v0_1c_1.lp");
+            GurobiSolver.close();
+        } catch (GRBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGurobi_v1() {
+        props.setProperty("scenario_topology_file","example/topologies/simple/simple_n3_v2.topology");
+        try {
+            List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
+            sourceDestPairs.add(new ImmutablePair<>(3,7));
+            sourceDestPairs.add(new ImmutablePair<>(5,4));
+            //readGraph();
+            Double solution = GurobiSolver.solve(props,sourceDestPairs,1);
+            assert(solution==2);
+
+            GurobiSolver.writeModel("/cs/usr/inonkp/test_gurobi/simple_n3_v2_1c_1.lp");
+            GurobiSolver.close();
+        } catch (GRBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGurobi_v2() {
+        props.setProperty("scenario_topology_file","example/topologies/simple/simple_n3_v2.topology");
+        try {
+            List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
+            sourceDestPairs.add(new ImmutablePair<>(3,4));
+            sourceDestPairs.add(new ImmutablePair<>(5,4));
+            //readGraph();
+            Double solution = GurobiSolver.solve(props,sourceDestPairs,1);
+            assert(solution==1);
+
+            GurobiSolver.writeModel("/cs/usr/inonkp/test_gurobi/simple_n3_v2_1c_2.lp");
+            GurobiSolver.close();
+        } catch (GRBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGurobi_v3() {
+        props.setProperty("scenario_topology_file","example/topologies/simple/simple_n2.topology");
+        try {
+            List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
+            sourceDestPairs.add(new ImmutablePair<>(0,1));
+            sourceDestPairs.add(new ImmutablePair<>(0,1));
+            //readGraph();
+            Double solution = GurobiSolver.solve(props,sourceDestPairs,2);
+            assert(solution==2);
+
+            GurobiSolver.writeModel("/cs/usr/inonkp/test_gurobi/simple_n2_v0_1c_1.lp");
+            GurobiSolver.close();
+        } catch (GRBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGurobi_v4() {
+        props.setProperty("scenario_topology_file","example/topologies/simple/simple_n3_v2.topology");
+        try {
+            List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
+            sourceDestPairs.add(new ImmutablePair<>(3,4));
+            sourceDestPairs.add(new ImmutablePair<>(5,4));
+            //readGraph();
+            Double solution = GurobiSolver.solve(props,sourceDestPairs,2);
+            assert(solution==2);
+
+            GurobiSolver.writeModel("/cs/usr/inonkp/test_gurobi/simple_n3_v2_1c_2.lp");
+            GurobiSolver.close();
+        } catch (GRBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGurobi_v5() {
+        props.setProperty("scenario_topology_file","example/topologies/simple/simple_n3_v2.topology");
+        try {
+            List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
+            sourceDestPairs.add(new ImmutablePair<>(3,4));
+            sourceDestPairs.add(new ImmutablePair<>(5,4));
+            sourceDestPairs.add(new ImmutablePair<>(5,4));
+            //readGraph();
+            Double solution = GurobiSolver.solve(props,sourceDestPairs,2);
+            assert(solution==2);
+
+            GurobiSolver.writeModel("/cs/usr/inonkp/test_gurobi/simple_n3_v2_1c_2.lp");
+            GurobiSolver.close();
+        } catch (GRBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGurobi_v6() {
+        props.setProperty("scenario_topology_file","example/topologies/simple/simple_n3_v2.topology");
+        try {
+            List<ImmutablePair<Integer,Integer>> sourceDestPairs = new LinkedList<>();
+            sourceDestPairs.add(new ImmutablePair<>(3,4));
+            sourceDestPairs.add(new ImmutablePair<>(5,4));
+            sourceDestPairs.add(new ImmutablePair<>(5,4));
+            //readGraph();
+            Double solution = GurobiSolver.solve(props,sourceDestPairs,3);
+            assert(solution==3);
+
+            GurobiSolver.writeModel("/cs/usr/inonkp/test_gurobi/simple_n3_v2_1c_2.lp");
+            GurobiSolver.close();
+        } catch (GRBException e) {
+            e.printStackTrace();
+        }
     }
 
     private void readGraph(List<ImmutablePair<Integer, Integer>> sourceDestPairs) {

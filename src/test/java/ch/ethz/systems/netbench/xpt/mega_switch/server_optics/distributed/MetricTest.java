@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
 import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingTransportLayerGenerator;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
@@ -120,6 +121,7 @@ public class MetricTest {
         HashMap<Integer,NetworkDevice> hm = initializer.createInfrastructure(conf2);
         //RoutingSelector.selectPopulator(hm, conf2);
         router = new MockDistributedServerOpticsRouter(hm, conf2);
+        RemoteRoutingController.setRemoteRouter(router);
         MockDistributedOpticServer.setRemoteRouter(router);
         MockDistributedToR.setRemoteRouter(router);
         //creating network 3, packet switching:
@@ -179,11 +181,11 @@ public class MetricTest {
         MockDistributedOpticServer dest =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(4));
         MockDistributedOpticServer dest2 =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(7));
 
-        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 200000);
-        FlowStartEvent fse2 = new FlowStartEvent(0, source2.getTransportLayer(), dest2.getIdentifier(), 200000);
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 20000);
+        FlowStartEvent fse2 = new FlowStartEvent(0, source2.getTransportLayer(), dest2.getIdentifier(), 2000000);
         Simulator.registerEvent(fse);
         Simulator.registerEvent(fse2);
-        Simulator.runNs(1000000000);
+        Simulator.runNs(10000000);
     }
 
     @Test
@@ -193,11 +195,11 @@ public class MetricTest {
         MockDistributedOpticServer dest =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(4));
         MockDistributedOpticServer dest2 =(MockDistributedOpticServer) (BaseInitializer.getInstance().getNetworkDeviceById(7));
 
-        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 200000);
-        FlowStartEvent fse2 = new FlowStartEvent(0, source.getTransportLayer(), dest2.getIdentifier(), 200000);
+        FlowStartEvent fse = new FlowStartEvent(0, source.getTransportLayer(), dest.getIdentifier(), 20000);
+        FlowStartEvent fse2 = new FlowStartEvent(0, source.getTransportLayer(), dest2.getIdentifier(), 2000000);
         Simulator.registerEvent(fse);
         Simulator.registerEvent(fse2);
-        Simulator.runNs(1000000000);
+        Simulator.runNs(100000);
     }
 
     @After

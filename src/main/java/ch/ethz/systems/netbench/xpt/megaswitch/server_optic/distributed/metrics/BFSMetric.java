@@ -77,6 +77,11 @@ public class BFSMetric implements Metric {
     }
 
     @Override
+    public void outputMetricPeriodic() {
+        System.out.println(this.toString());
+    }
+
+    @Override
     public String toString() {
         return "BFS (missed opportunities): " + mOpportunitiesMissed/mComparisons + "\nBFS (no opportunity): " + mNoOpportunity/mComparisons;
     }
