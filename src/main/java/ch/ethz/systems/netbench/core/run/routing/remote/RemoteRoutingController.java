@@ -86,7 +86,11 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		}
 	}
 
-	protected abstract void reset_state(NBProperties configuration);
+    public static void setRemoteRouter(RemoteRoutingController router) {
+		mInstance = router;
+    }
+
+    protected abstract void reset_state(NBProperties configuration);
 
 	private void setHeaderSize(long headerSize) {
 		this.headerSize = headerSize;

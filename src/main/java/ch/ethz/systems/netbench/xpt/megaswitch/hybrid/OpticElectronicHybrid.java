@@ -216,9 +216,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     public void onFlowFinished(int sourceToR, int destToR,int serverSource,int serverDest, long flowId) {
         JumboFlow jumboFlow = getJumboFlow(sourceToR,destToR,serverSource,serverDest);
         jumboFlow.onFlowFinished(flowId);
-        if(optic!=null) conversionUnit.onFlowFinish(jumboFlow.getSource(),jumboFlow.getDest(),flowId);
+        if(hasOpticConnection()) conversionUnit.onFlowFinish(jumboFlow.getSource(),jumboFlow.getDest(),flowId);
         if(jumboFlow.getNumFlows()==0){
-            if(optic!=null){
+            if(hasOpticConnection()){
                 conversionUnitRecover(jumboFlow);
                 recoverPath(jumboFlow);
             }
@@ -227,9 +227,12 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
     }
 
+    protected boolean hasOpticConnection() {
+        return conversionUnit.getOptic()!=null;
+    }
 
-    
-	protected void recoverPath(JumboFlow jFlow) {
+
+    protected void recoverPath(JumboFlow jFlow) {
 		try {
             int transmittingSource = getTransmittingSource(jFlow);
             int receiveingDest = getReceivingDest(jFlow);

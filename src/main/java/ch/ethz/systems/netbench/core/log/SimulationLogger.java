@@ -781,4 +781,28 @@ public class SimulationLogger {
 	public static void registerMetric(Metric metric) {
 		sMetrics.add(metric);
 	}
+
+	public static void registerCommodities(String fileName,HashSet<Pair<Integer,Integer>> commodities) {
+
+		BufferedWriter commoditiesWriter = openWriter("commodities/" + fileName);
+		try{
+			for(Pair commodity: commodities){
+				commoditiesWriter.write(commodity.getLeft() + " " + commodity.getRight() + "\n");
+			}
+			commoditiesWriter.close();
+		}catch (IOException e){
+			throw new RuntimeException(e);
+		}
+
+
+	}
+
+	public static void initSubFolder(String folderName) {
+		File dir = new File(getRunFolderFull() + "/" + folderName);
+		dir.mkdir();
+	}
+
+	public static void initCommoditiesFolder(){
+		initSubFolder("commodities");
+	}
 }

@@ -392,7 +392,6 @@ public class DistributedOpticServer extends OpticServer {
 
 	@Override
 	protected void recoverPath(JumboFlow jFlow) {
-		DistributedController controller = (DistributedController) getRemoteRouter();
 		ReservationPacket rp = mFlowReservation.get(jFlow.getDest());
 		if(rp==null){
 			assert(mFlowState.get(jFlow.getDest()) != State.HAS_CIRCUIT);

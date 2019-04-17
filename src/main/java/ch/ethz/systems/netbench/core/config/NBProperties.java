@@ -62,7 +62,6 @@ public class NBProperties extends Properties {
 	 */
 	public NBProperties(String fileName, String[]... additionalAllowedProperties) {
 		this.fileName = fileName;
-
 		// Read completely from file
 		try {
 			InputStream input = new FileInputStream(fileName);

@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
+import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.AvgSuccessMetric;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.BFSMetric;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.Evaluation;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
@@ -33,11 +34,13 @@ public class DistributedController extends SemiXpanderServerOptics
 	long edgesUsed = 0;
     private long edgesUsedPerFailureSum = 0;
     private BFSMetric mBfsMetric;
+    private AvgSuccessMetric mAvgSuccessMetric;
 
     public DistributedController(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
         super(idToNetworkDevice, configuration);
         System.out.println("running distributed controller with max flows on circuit " + mMaxNumJFlowsOncircuit);
         mBfsMetric = new BFSMetric(mGraphs);
+        mAvgSuccessMetric = new AvgSuccessMetric();
 
     }
 
@@ -50,7 +53,7 @@ public class DistributedController extends SemiXpanderServerOptics
     }
 
     public Evaluation evaluateRequest(JumboFlow jumboFlow){
-        Evaluation evaluation = new Evaluation(mBfsMetric);
+        Evaluation evaluation = new Evaluation(mAvgSuccessMetric);
         evaluation.evaluateRequest(jumboFlow);
         return evaluation;
     }
@@ -134,13 +137,17 @@ public class DistributedController extends SemiXpanderServerOptics
         state += "packet loss at conversion " + SimulationLogger.getStatistic("PACKETS_DROPPED_ON_CONVERSION")+ "\n";
         state += "auto teardowns " + SimulationLogger.getStatistic("AUTO_CIRCUIT_TEARDOWN_COUNT")+ "\n";
         state += "packets on circuit " + SimulationLogger.getStatistic("PACKET_ROUTED_THROUGH_CIRCUIT") + "\n";
-
+        mAvgSuccessMetric.outputMetricPeriodic();
         
         doubleSuccesses = SimulationLogger.getStatistic("DISTRIBUTED_PATH_DOUBLE_SUCCESS_COUNT");
         successes = SimulationLogger.getStatistic("DISTRIBUTED_PATH_SUCCESS_COUNT");
         failures = SimulationLogger.getStatistic("DISTRIBUTED_PATH_FAILURE_COUNT");
+        try{
+            state += "avg edge used per failure " + edgesUsedPerFailureSum/failures + "\n";
+        }catch (ArithmeticException e){
 
-        state += "avg edge used per failure " + edgesUsedPerFailureSum/failures + "\n";
+        }
+
         state += mBfsMetric.toString() + "\n";
         torNoPath = SimulationLogger.getStatistic("DISTRIBUTED_TOR_NO_PATH");
         destNoPath = SimulationLogger.getStatistic("DISTRIBUTED_DEST_ENDPOINT_NO_PATH");
