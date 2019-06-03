@@ -53,6 +53,7 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
         super.deallocateServerColor(color,incomming);
         int times = dealloctedColors.getOrDefault(color,0);
         times++;
+        System.out.println(identifier + " deallocating " + color + " incomming " + incomming);
         dealloctedColors.put(color,times);
 
 //        assert(serverColorAvailable(server,color,incomming));
@@ -61,8 +62,10 @@ public class MockDistributedOpticServer extends DistributedOpticServer {
     @Override
     public void reserveServerColor( int color, boolean incomming) {
         super.reserveServerColor(color,incomming);
+
         int times = reservedColors.getOrDefault(color,0);
         times++;
+        System.out.println(identifier + " allocating " + color  + " incomming " + incomming);
         reservedColors.put(color,times);
 //        assert(!serverColorAvailable(server,color,incomming));
 

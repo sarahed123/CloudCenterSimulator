@@ -198,6 +198,13 @@ public class MainFromProperties {
             new File(commonBaseDir).mkdirs();
             BufferedWriter bw = new BufferedWriter(new FileWriter(commonBaseDir + "/" +
                     propertiesList.get(0).getPropertyOrFail("common_run_name")));
+            for(NBProperties properties: propertiesList){
+                String[] props = properties.toString().split(", ");
+                for (String prop: props){
+                    bw.write(prop + "\n");
+                }
+                bw.write("\n");
+            }
             bw.write(propertiesList.get(0).getPropertyOrFail("run_folder_base_dir") + "\n");
             bw.close();
         } catch (IOException e) {

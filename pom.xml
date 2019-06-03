@@ -180,6 +180,69 @@
             </properties>
         </profile>
         <profile>
+            <build>
+            <plugins>
+
+                <!-- Compilation -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.5.1</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                </plugin>
+
+                <!-- Runnable, use assembly:single -->
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+
+                        <outputDirectory>${project.basedir}</outputDirectory>
+                        <finalName>NetBench</finalName>
+                        <archive>
+                            <manifest>
+                                <mainClass>ch.ethz.systems.netbench.core.run.MainFromProperties</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+
+                </plugin>
+
+            </plugins>
+            <resources>
+                <!--
+                    Placeholders that are found from the files located in the configured resource
+                    directories are replaced with the property values found from the profile
+                    specific configuration file.
+                -->
+                <resource>
+                    <filtering>true</filtering>
+                    <directory>src/main/resources</directory>
+                </resource>
+            </resources>
+            <filters>
+                <!--
+                    Ensures that the config.properties file is always loaded from the
+                    configuration directory of the active Maven profile. 
+                -->
+                <filter>env.properties</filter>
+            </filters>
+        </build>
             <id>jumbo_flows</id>
             <properties>
                 <!--

@@ -140,7 +140,7 @@ public class OpticServerTest {
         OutputPortGenerator portGen3 = new OutputPortGenerator(conf3) {
             @Override
             public OutputPort generate(NetworkDevice own, NetworkDevice target, Link link) {
-                return new OutputPort(own,target,link,new PriorityQueue<Packet>()) {
+                return new OutputPort(own,target,link,new LinkedList<>()) {
                     @Override
                     public void enqueue(Packet packet) {
                         guaranteedEnqueue(packet);
