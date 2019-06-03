@@ -3,21 +3,20 @@ package ch.ethz.systems.netbench.xpt.rotornet;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.config.TopologyServerExtender;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.NullTrasportLayer;
 import ch.ethz.systems.netbench.core.run.RoutingSelector;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
-import ch.ethz.systems.netbench.core.run.traffic.FlowStartEventTest;
 import ch.ethz.systems.netbench.ext.basic.EcnTailDropOutputPort;
 import ch.ethz.systems.netbench.ext.basic.EcnTailDropOutputPortGenerator;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.demo.DemoIntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchGenerator;
-import ch.ethz.systems.netbench.xpt.mega_switch.MockFullHybrid;
-import ch.ethz.systems.netbench.xpt.mega_switch.MockSimpleServer;
-import ch.ethz.systems.netbench.xpt.mega_switch.SimpleSocket;
+import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.DummyServer;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
@@ -32,12 +31,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.PriorityQueue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RotorNetDebugger {
     private MockRotorController controller;
+    private NBProperties configuration;
 
     @Before
     public void setup() throws IOException {
@@ -45,12 +43,12 @@ public class RotorNetDebugger {
         File tempRunConfig = File.createTempFile("temp-run-config", ".tmp");
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
-        runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n333_e12.topology\n");
-        runConfigWriter.write("hybrid_circuit_threshold_byte=2\n");
+        runConfigWriter.write("scenario_topology_file=example/topologies/rotornet/simple_n100.topology\n");
+        runConfigWriter.write("hybrid_circuit_threshold_byte=200\n");
         runConfigWriter.write("link_delay_ns=0\n");
         runConfigWriter.write("run_folder_base_dir=/cs/usr/inonkp/rotor_net_testing\n");
         runConfigWriter.write("run_folder_name=results\n");
-        runConfigWriter.write("link_bandwidth_bit_per_ns=400\n");
+        runConfigWriter.write("link_bandwidth_bit_per_ns=999999999\n");
         runConfigWriter.write("output_port_ecn_threshold_k_bytes=50000\n");
         runConfigWriter.write("output_port_max_queue_size_bytes=500000\n");
         runConfigWriter.write("network_device_routing=remote_routing_populator\n");
@@ -67,7 +65,19 @@ public class RotorNetDebugger {
         );
         Simulator.setup(0, conf);
 
+        // Extend topology
+        new TopologyServerExtender(
+                conf.getTopologyFileNameOrFail(),
+                SimulationLogger.getRunFolderFull() + "/extended_topology.txt"
+        ).extendRegular(1);
+
+        // Log info about extension
+        SimulationLogger.logInfo("OVERRODE_TOPOLOGY_FILE_WITH_SERVER_EXTENSION", "servers/node=" + 1);
+        conf.markExtended();
+    // Override configuration property
+        conf.overrideProperty("scenario_topology_file", SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
         BaseInitializer initializer = BaseInitializer.getInstance();
+
         OutputPortGenerator portGen = new OutputPortGenerator(conf) {
             @Override
             public OutputPort generate(NetworkDevice own, NetworkDevice target, Link link) {
@@ -85,32 +95,35 @@ public class RotorNetDebugger {
                     protected RemoteRoutingController getRemoteRouter(){
                         return controller;
                     }
+
+                    @Override
+                    protected void sendToServer(Packet packet, int serverId){
+                        targetIdToOutputPort.get(serverId).getTargetDevice().getSourceInputPort(identifier).receive(packet);
+                    }
                 };
             }
 
             @Override
             public NetworkDevice generate(int i, TransportLayer transportLayer) {
-                return new MockSimpleServer(i,transportLayer,ig.generate(i),configuration);
+                return new DummyServer(i,transportLayer,ig.generate(i),configuration);
             }
         };
-        LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 100);
+        LinkGenerator lg = new PerfectSimpleLinkGenerator(0, 9999999);
         TransportLayerGenerator tlg = new SimpleDctcpTransportLayerGenerator(conf);
         initializer.extend(portGen,ndg,lg,tlg);
         initializer.createInfrastructure(conf);
-
+        configuration = conf;
         //creating network 2:
         File tempRunConfig2 = File.createTempFile("temp-run-config2", ".tmp");
         BufferedWriter runConfigWriter2 = new BufferedWriter(new FileWriter(tempRunConfig2));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
-        runConfigWriter2.write("scenario_topology_file=example/topologies/simple/simple_n333_e0.topology\n");
-
-
+        runConfigWriter2.write("scenario_topology_file=example/topologies/rotornet/simple_n100_no_servers.topology\n");
         runConfigWriter2.write("network_type=circuit_switch\n");
         runConfigWriter2.write("link_delay_ns=0\n");
         runConfigWriter2.write("output_port_ecn_threshold_k_bytes=50000\n");
         runConfigWriter2.write("output_port_max_queue_size_bytes=500000\n");
-        runConfigWriter2.write("max_dynamic_switch_degree=37\n");
-        runConfigWriter2.write("link_bandwidth_bit_per_ns=400\n");
+        runConfigWriter2.write("max_dynamic_switch_degree=10\n");
+        runConfigWriter2.write("link_bandwidth_bit_per_ns=100\n");
         runConfigWriter2.write("rotor_net_reconfiguration_time_ns=0\n");
         runConfigWriter2.write("rotor_net_reconfiguration_interval_ns=1000\n");
         runConfigWriter2.write("max_rotor_buffer_size_byte=50000000\n");
@@ -157,7 +170,7 @@ public class RotorNetDebugger {
                         }, conf2);
                     }
                 },
-                new PerfectSimpleLinkGenerator(conf2), new SimpleDctcpTransportLayerGenerator(conf2));
+                new PerfectSimpleLinkGenerator(conf2), new NullTrasportLayer(conf2));
         HashMap<Integer,NetworkDevice> hm = BaseInitializer.getInstance().createInfrastructure(conf2);
         controller = new MockRotorController(hm,conf2);
         MockRotorMap.setRouter(controller);
@@ -168,11 +181,11 @@ public class RotorNetDebugger {
         File tempRunConfig3 = File.createTempFile("temp-run-config2", ".tmp");
         BufferedWriter runConfigWriter3 = new BufferedWriter(new FileWriter(tempRunConfig3));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
-        runConfigWriter3.write("scenario_topology_file=example/topologies/xpander/xpander_n333_d36.topology\n");
+        runConfigWriter3.write("scenario_topology_file=example/topologies/xpander/xpander_n100_d10.topology\n");
         runConfigWriter3.write("network_device_routing=ecmp\n");
         runConfigWriter3.write("network_type=packet_switch\n");
-        runConfigWriter3.write("link_delay_ns=0\n");
-        runConfigWriter3.write("link_bandwidth_bit_per_ns=400\n");
+        runConfigWriter3.write("link_delay_ns=15\n");
+        runConfigWriter3.write("link_bandwidth_bit_per_ns=100\n");
         runConfigWriter3.write("output_port_ecn_threshold_k_bytes=50000\n");
         runConfigWriter3.write("output_port_max_queue_size_bytes=500000\n");
         runConfigWriter3.close();
@@ -188,20 +201,10 @@ public class RotorNetDebugger {
 
         OutputPortGenerator portGen3 = new EcnTailDropOutputPortGenerator(5000000,500000,conf3);
         IntermediaryGenerator ig3 = new DemoIntermediaryGenerator(conf3);
-        TransportLayerGenerator tlg3 = new TransportLayerGenerator(conf3) {
-            @Override
-            public TransportLayer generate(int i) {
-                return new TransportLayer(i,conf3) {
+        TransportLayerGenerator tlg3 = new NullTrasportLayer(conf3);
+        lg = new PerfectSimpleLinkGenerator(0, 100);
 
-                    @Override
-                    protected Socket createSocket(long l, int i, long l1) {
-                        return new SimpleSocket(this,l,this.identifier,i,l1);
-                    }
-                };
-            }
-        };
-
-        initializer.extend(2,portGen3,new EcmpSwitchGenerator(new DemoIntermediaryGenerator(conf3),333, conf3),
+        initializer.extend(2,portGen3,new EcmpSwitchGenerator(new DemoIntermediaryGenerator(conf3),100, conf3),
                 lg,tlg3);
         HashMap<Integer,NetworkDevice> hm3 = initializer.createInfrastructure(conf3);
         RoutingSelector.selectPopulator(hm3, conf3).populateRoutingTables();
@@ -212,13 +215,19 @@ public class RotorNetDebugger {
 
     @Test
     public void testFlow(){
-        FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(333).getTransportLayer(),336,10000000);
-        FlowStartEvent fse2 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(334).getTransportLayer(),337,10000000);
-        FlowStartEvent fse3 = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(335).getTransportLayer(),338,10000000);
+        for(int j = 100; j < 101; j++){
+            for(int i = 199; i < 200; i++){
+                if(i==j){
+                    continue;
+                }
+                if(configuration.getGraphDetails().getTorIdOfServer(i) == configuration.getGraphDetails().getTorIdOfServer(j)){
+                    continue;
+                }
+                FlowStartEvent fse = new FlowStartEvent(0,BaseInitializer.getInstance().getNetworkDeviceById(j).getTransportLayer(),i,90000000);
+                Simulator.registerEvent(fse);
 
-        Simulator.registerEvent(fse);
-        Simulator.registerEvent(fse2);
-        Simulator.registerEvent(fse3);
+            }
+        }
 
         Simulator.runNs(20000000);
 

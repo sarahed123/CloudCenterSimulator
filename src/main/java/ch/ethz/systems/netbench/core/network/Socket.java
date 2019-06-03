@@ -52,7 +52,7 @@ public abstract class Socket {
         assert(!this.isReceiver && this.remainderToConfirmFlowSizeByte >= newlyConfirmedFlowByte && newlyConfirmedFlowByte > 0);
         this.remainderToConfirmFlowSizeByte -= newlyConfirmedFlowByte;
         this.privateLogger.logFlowAcknowledged(newlyConfirmedFlowByte);
-        
+
         // Remove references to the socket after finish
         if (isAllFlowConfirmed()) {
         	

@@ -8,7 +8,7 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 public class SimpleServer extends NetworkDevice {
 
 
-    private OutputPort onlyPort;
+    protected OutputPort onlyPort;
 
     /**
      * Constructor of a network device.
@@ -45,7 +45,7 @@ public class SimpleServer extends NetworkDevice {
         this.onlyPort = outputPort;
     }
 
-    private void sendToToR(IpPacket packet) {
+    protected void sendToToR(IpPacket packet) {
         this.onlyPort.enqueue(packet);
     }
 

@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
@@ -18,6 +19,8 @@ import java.util.HashMap;
 
 public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
+    private final long mElectricSwitchTimeNs;
+    private boolean useDummyServers;
     protected long circuitThreshold;
     protected NetworkDevice electronic;
     protected NetworkDevice optic;
@@ -30,8 +33,9 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
         mJumboFlowMap = new HashMap<>();
         mNumAllocatedFlows = 0;
-
+        useDummyServers = configuration.getBooleanPropertyWithDefault("use_dummy_servers",false);
         mNumDeAllocatedFlows = 0;
+        mElectricSwitchTimeNs = configuration.getLongPropertyWithDefault("electric_switching_time_ns",200);
 
     }
     @Override
@@ -75,6 +79,10 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
      * @return
      */
     protected TcpPacket encapsulatePacket(Encapsulatable packet) {
+//        if(configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId())==null){
+//            System.out.println(packet.getDestinationId());
+//            System.out.print(packet);
+//        }
         int destinationToR = configuration.getGraphDetails().getTorIdOfServer(packet.getDestinationId());
         /**
          * encapsulate the packet with new source and destination ids
@@ -114,7 +122,13 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
-		this.electronic.receiveFromEncapsulating(packet);
+        Simulator.registerEvent(new Event(mElectricSwitchTimeNs /* switching time*/) {
+            @Override
+            public void trigger() {
+                electronic.receiveFromEncapsulating(packet);
+            }
+        });
+
 	}
 
 	protected void routeThroughCircuit(IpPacket packet, JumboFlow jFlow) {
@@ -191,9 +205,19 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
             TcpPacket deEncapse = (TcpPacket) ipPacket.deEncapsualte();
             if(deEncapse.isACK() && deEncapse.isFIN()){
             	// use to be how we check for finished flow
+
             }
-            targetIdToOutputPort.get(deEncapse.getDestinationId()).enqueue(deEncapse);
+            sendToServer(deEncapse,deEncapse.getDestinationId());
         }
+    }
+
+    protected void sendToServer(Packet packet,int serverId){
+        if(useDummyServers){
+            //treat as the server.
+            targetIdToOutputPort.get(serverId).getTargetDevice().getSourceInputPort(identifier).receive(packet);
+            return;
+        }
+        targetIdToOutputPort.get(serverId).enqueue(packet);
     }
 
     /**
@@ -228,7 +252,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected boolean hasOpticConnection() {
-        return conversionUnit.getOptic()!=null;
+        return conversionUnit!= null && conversionUnit.getOptic()!=null;
     }
 
 

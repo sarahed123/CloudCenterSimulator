@@ -98,6 +98,8 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+    		"electric_switching_time_ns",
+    		"use_dummy_servers",
     		"enable_distributed_transport_layer",
     		"prioritize_acks_on_circuit",
     		"circuit_teardown_timeout_ns",
