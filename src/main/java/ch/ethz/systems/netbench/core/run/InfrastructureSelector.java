@@ -31,6 +31,7 @@ import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitc
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpledctcp.SimpleDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpTransportLayerGenerator;
+import ch.ethz.systems.netbench.xpt.simple.simpleudp.SimpleUdpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.EcmpThenSourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.sourcerouting.SourceRoutingSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.voijslav.ports.BoundedPriorityOutputPortGenerator;
@@ -282,6 +283,9 @@ class InfrastructureSelector {
 
             case "null":
                 return new NullTrasportLayer(configuration);
+
+            case "simple_udp":
+                return new SimpleUdpTransportLayerGenerator(configuration);
 
             default:
                 throw new PropertyValueInvalidException(

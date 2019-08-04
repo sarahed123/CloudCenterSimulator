@@ -27,7 +27,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
     }
     private NBProperties configuration;
     private final double lambdaFlowStartsPerSecond;
-    private final FlowSizeDistribution flowSizeDistribution;
+    protected final FlowSizeDistribution flowSizeDistribution;
     private final Random ownIndependentRng;
     private final RandomCollection<Pair<Integer, Integer>> randomPairGenerator;
 
@@ -154,7 +154,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                     double serverProb = torPairProb / (srcServers.size() * dstServers.size());
                     for (int src : srcServers) {
                         for (int dst : dstServers) {
-                            this.randomPairGenerator.add(serverProb, new ImmutablePair<>(src, dst));
+                            addToPool(serverProb,new ImmutablePair<>(src, dst));
                         }
                     }
 
@@ -168,6 +168,10 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
             System.out.println("ToR #" + tors.get(i) + " has probability " + probRes.get(i));
         }
 
+    }
+
+    protected void addToPool(double serverProb, ImmutablePair<Integer, Integer> pair) {
+        this.randomPairGenerator.add(serverProb, pair);
     }
 
     /**
@@ -184,7 +188,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         for (Integer src : this.idToTransportLayerMap.keySet()){
             for (Integer dst : this.idToTransportLayerMap.keySet()){
                 if(!src.equals(dst)) {
-                    this.randomPairGenerator.add(pdfNumBytes, new ImmutablePair<>(src, dst));
+                    addToPool(pdfNumBytes,new ImmutablePair<>(src, dst));
                 }
             }
         }
@@ -234,7 +238,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
             chosen.add(servers.get(i));
             for (int j = 0; j < numChosenServers; j++) {
                 if (i != j) {
-                    this.randomPairGenerator.add(serverPairProb, new ImmutablePair<>(servers.get(i), servers.get(j)));
+                    addToPool(serverPairProb, new ImmutablePair<>(servers.get(i), servers.get(j)));
                 }
 
             }
@@ -282,7 +286,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                     for (Integer svrA : configuration.getGraphDetails().getServersOfTor(torA)) {
                         for (Integer svrB : configuration.getGraphDetails().getServersOfTor(torB)) {
                             // Add to random pair generator
-                            this.randomPairGenerator.add(serverPairProb, new ImmutablePair<>(svrA, svrB));
+                            addToPool(serverPairProb, new ImmutablePair<>(svrA, svrB));
                         }
                     }
 
@@ -355,7 +359,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                     double serverProb = torPairProb / (srcServers.size() * dstServers.size());
                     for (int src : srcServers) {
                         for (int dst : dstServers) {
-                            this.randomPairGenerator.add(serverProb, new ImmutablePair<>(src, dst));
+                            addToPool(serverProb, new ImmutablePair<>(src, dst));
                         }
                     }
 
@@ -417,7 +421,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                 if (i != j) {
                     // ToR-pair probability with diagonal waste normalized out
                     double torPairProb = torProbI * torProbJ / (1 - wastedProbability);
-                    this.randomPairGenerator.add(torPairProb, new ImmutablePair<>(tors.get(i), tors.get(j)));
+                    addToPool(torPairProb, new ImmutablePair<>(tors.get(i), tors.get(j)));
                 }
 
             }
@@ -478,8 +482,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
             // Add to random pair generator
             for (Integer svrA : configuration.getGraphDetails().getServersOfTor(first)) {
                 for (Integer svrB : configuration.getGraphDetails().getServersOfTor(second)) {
-                    this.randomPairGenerator.add(serverPairProb, new ImmutablePair<>(svrA, svrB));
-                    this.randomPairGenerator.add(serverPairProb, new ImmutablePair<>(svrB, svrA));
+                    addToPool(serverPairProb, new ImmutablePair<>(svrA, svrB));
+                    addToPool(serverPairProb, new ImmutablePair<>(svrB, svrA));
                 }
             }
             chosen.add(new ImmutablePair<>(first, second));
@@ -549,7 +553,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                 double pdfNumBytes = Double.valueOf(spl[3]);
 
                 // Add random pair generator
-                this.randomPairGenerator.add(pdfNumBytes, new ImmutablePair<>(src, dst));
+                addToPool(pdfNumBytes, new ImmutablePair<>(src, dst));
 
                 // Add to total probability sum
                 totalPdfSum += pdfNumBytes;

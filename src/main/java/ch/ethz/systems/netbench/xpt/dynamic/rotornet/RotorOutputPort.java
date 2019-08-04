@@ -12,12 +12,14 @@ public class RotorOutputPort extends DynamicOutuptPort {
 	RotorSwitch mOriginalDevice;
 	RotorMap mRotorMap;
 	private long mDispatchTime;
+	int mPacketSentCounter;
 
 	protected RotorOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link,
 			long maxQueueSizeBytes, long ecnThresholdKBytes) {
 		super(ownNetworkDevice, targetNetworkDevice, link, maxQueueSizeBytes, ecnThresholdKBytes);
 		mOriginalDevice = (RotorSwitch) ownNetworkDevice;
 		this.ownNetworkDevice = ownNetworkDevice;
+		mPacketSentCounter = 0;
 	}
 
 	public RotorSwitch getOriginalDevice(){
@@ -49,7 +51,7 @@ public class RotorOutputPort extends DynamicOutuptPort {
 		if(Simulator.getCurrentTime() + time > RotorNetController.sNextReconfigurationTime){
 			onConfigurationTimeExceeded();
 		}
-
+		mPacketSentCounter++;
 		super.enqueue(packet);
 	}
 
@@ -64,5 +66,11 @@ public class RotorOutputPort extends DynamicOutuptPort {
 
 		return time;
 	}
+
+	@Override
+	protected void log(Packet packet) {
+
+	}
+
 
 }

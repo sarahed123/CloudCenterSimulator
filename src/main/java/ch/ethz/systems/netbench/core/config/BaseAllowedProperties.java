@@ -98,6 +98,9 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+    		"conversion_link_bandwidth_bit_per_ns",
+    		"fluid_flow_num_flows_for_pair",
+    		"modulation_frequency",
     		"electric_switching_time_ns",
     		"use_dummy_servers",
     		"enable_distributed_transport_layer",

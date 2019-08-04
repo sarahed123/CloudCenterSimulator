@@ -1,9 +1,11 @@
 package ch.ethz.systems.netbench.xpt.simple.simpleserver;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.infrastructure.IntermediaryGenerator;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.xpt.simple.simpleudp.SimpleUdpTransportLayer;
 
 public class SimpleServer extends NetworkDevice {
 
@@ -59,4 +61,5 @@ public class SimpleServer extends NetworkDevice {
     public String toString(){
         return "SimpleServer " + this.getIdentifier();
     }
+
 }

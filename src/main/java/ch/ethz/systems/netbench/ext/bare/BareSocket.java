@@ -15,7 +15,7 @@ import java.util.Set;
 public class BareSocket extends Socket {
 
     // Constants
-    private static final long MAX_SEGMENT_SIZE = 1380L;
+    protected static final long MAX_SEGMENT_SIZE = 1380L;
     private static final double MAX_SEGMENT_SIZE_SQUARED = MAX_SEGMENT_SIZE * MAX_SEGMENT_SIZE;
     private static final long MIN_WINDOW_SIZE = 3 * 1380;
     private static final double DCTCP_WEIGHT_NEW_ESTIMATION = 0.0625 ; // 0 < g < 1 is the weight given to new samples
@@ -355,7 +355,7 @@ public class BareSocket extends Socket {
      *
      * @return  TCP packet instance
      */
-    private BarePacket createPacket(
+    protected BarePacket createPacket(
             long dataSizeByte,
             long sequenceNumber,
             long ackNumber,

@@ -10,6 +10,7 @@ import ch.ethz.systems.netbench.ext.poissontraffic.PoissonArrivalPlanner;
 import ch.ethz.systems.netbench.ext.simpletraffic.SimpleTrafficPlanner;
 import ch.ethz.systems.netbench.ext.trafficpair.TrafficPairPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.flowsize.*;
+import ch.ethz.systems.netbench.xpt.fluidflow.FluidFlowTrafficPlanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -171,6 +172,14 @@ class TrafficSelector {
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,
                                     PoissonArrivalPlanner.PairDistribution.DUAL_ALL_TO_ALL_SERVER_FRACTION,
+                                    configuration
+                            );
+                        case "fluid_flow":
+                            return new FluidFlowTrafficPlanner(idToTransportLayer,
+                                    configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
+                                    flowSizeDistribution,
+                                    configuration.getIntegerPropertyWithDefault("scenario_topology_extend_servers_per_tl_node",0) == 0 ?
+                                            PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL : PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL_FRACTION,
                                     configuration
                             );
 

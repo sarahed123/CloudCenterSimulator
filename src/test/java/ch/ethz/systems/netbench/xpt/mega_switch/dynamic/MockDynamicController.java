@@ -20,8 +20,8 @@ public class MockDynamicController extends DynamicController {
 	}
 	
 	@Override
-	public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId) {
-		super.initRoute(transimttingSource, receivingDest, sourceKey, destKey, jumboFlowId);
+	public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId, long sizeBit) {
+		super.initRoute(transimttingSource, receivingDest, sourceKey, destKey, jumboFlowId, sizeBit);
 
 		routed.put(new ImmutablePair<Integer, Integer>(transimttingSource, receivingDest), true);
 
