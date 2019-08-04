@@ -164,7 +164,8 @@ public class RotorNetTest {
         r1.receive(packet);
         Simulator.runNs(2000000);
         MockRotorSwitch r6 = (MockRotorSwitch) BaseInitializer.getInstance().getNetworkDeviceById(6);
-        assert(packet.path.toString().equals("[0, 6, 6, 6, 19]"));
+        System.out.println(packet.path);
+        assert(packet.path.toString().equals("[0, 6, 19]"));
 
     }
 
