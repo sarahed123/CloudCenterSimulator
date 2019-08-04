@@ -41,7 +41,7 @@ public class MockRotorSwitch extends RotorSwitch {
     }
 
     protected boolean hasResources(Packet genericPacket) {
-        return super.hasResources(genericPacket);
+        return super.hasResources(genericPacket.getSizeBit());
     }
 
     public void setBufferSize(int bufferSize) {

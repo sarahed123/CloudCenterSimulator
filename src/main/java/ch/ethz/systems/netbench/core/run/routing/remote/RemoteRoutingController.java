@@ -163,6 +163,10 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 		this.initRoute(source,dest,source,dest,jumboFlowId, 0);
 	}
 
+	public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId){
+		this.initRoute(transimttingSource,receivingDest,sourceKey,destKey,jumboFlowId, 0);
+	}
+
 
 	/**
 	 * this is the base method for circuit creation
