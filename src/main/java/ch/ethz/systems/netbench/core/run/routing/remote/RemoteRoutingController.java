@@ -160,7 +160,7 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * @param jumboFlowId the jumbo flow id
 	 */
 	public void initRoute(int source,int dest, long jumboFlowId){
-		this.initRoute(source,dest,source,dest,jumboFlowId);
+		this.initRoute(source,dest,source,dest,jumboFlowId, 0);
 	}
 
 
@@ -171,8 +171,9 @@ public abstract class RemoteRoutingController extends RoutingPopulator{
 	 * @param sourceKey the source key to aggregate by
 	 * @param destKey the dest key to aggregate by
 	 * @param jumboFlowId the jumbo flow id
+	 * @param sizeBit
 	 */
-	public void initRoute(int transimttingSource,int receivingDest, int sourceKey, int destKey, long jumboFlowId){
+	public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId, long sizeBit){
 		ImmutablePair pair = new ImmutablePair<>(sourceKey,destKey);
 
 		if(mPaths.containsKey(pair)) { // no  no need to create a new circuit

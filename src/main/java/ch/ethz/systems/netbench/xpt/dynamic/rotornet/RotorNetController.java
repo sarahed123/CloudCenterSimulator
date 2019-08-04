@@ -5,6 +5,7 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.xpt.dynamic.controller.DynamicController;
+import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -55,8 +56,7 @@ public class RotorNetController extends DynamicController {
     }
 
     @Override
-    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId) {
-    	
+    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId, long sizeBit) {
 
         
     }
@@ -122,16 +122,25 @@ public class RotorNetController extends DynamicController {
      */
     protected void startTransmmisions() {
         for(int i = 0; i< mRotorsArray.length;i++){
-            mRotorsArray[i].sendPendingData();
+            mRotorsArray[i].resetBuffer();
+
         }
+        int direct = 0;
+        for(int i = 0; i< mRotorsArray.length;i++){
+
+            direct += mRotorsArray[i].sendDirectPendingData();
+        }
+
     }
 
     public String getCurrentState() {
-        long indirect = SimulationLogger.getStatistic("ROTOR_PACKET_INDIRECT_FORWARD") - indirectHops;
+        long indirect = SimulationLogger.getStatistic("ROTOR_PACKET_RANDOM_FORWARD") - indirectHops;
         long direct = SimulationLogger.getStatistic("ROTOR_PACKET_DIRECT_FORWARD") - directHops;
-        indirectHops = SimulationLogger.getStatistic("ROTOR_PACKET_INDIRECT_FORWARD");
+        indirectHops = SimulationLogger.getStatistic("ROTOR_PACKET_RANDOM_FORWARD");
         directHops = SimulationLogger.getStatistic("ROTOR_PACKET_DIRECT_FORWARD");
-        return "second hops " + indirect + " direct hops " + direct;
+        return "random hops " + indirect + " direct hops " + direct + "\n" + "packets lost at source " +
+                SimulationLogger.getStatistic("ROTOR_PACKET_LOST_AT_SOURCE") +"\n" + "deadline " +
+                SimulationLogger.getStatistic("ROTOR_PACKET_BUFFERED_DEADLINE") + "\n";
     }
 
     /**

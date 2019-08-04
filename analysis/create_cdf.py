@@ -2,7 +2,7 @@ import numpy as np
 import csv
 import sys
 import os
-
+import matplotlib.pyplot as plt
 
 ##################################
 # Setup
@@ -118,7 +118,6 @@ def analyze_flow_completion_cdfs():
             # Create CDF
             sorted_data = np.sort(range_completed_duration[j])
             cdf_y_vals = np.arange(len(sorted_data))/float(len(sorted_data)-1)
-
             plot_y_vals = np.interp(plot_x_vals, sorted_data, cdf_y_vals)
 
             # Write CDF of range to file

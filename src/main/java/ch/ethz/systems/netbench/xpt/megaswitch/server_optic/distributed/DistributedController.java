@@ -3,16 +3,11 @@ package ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.AvgSuccessMetric;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.BFSMetric;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.Evaluation;
-import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitch;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import ch.ethz.systems.netbench.xpt.xpander.SemiXpanderServerOptics;
-import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
-import edu.asu.emit.algorithm.graph.Graph;
 import edu.asu.emit.algorithm.graph.Vertex;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -44,7 +39,7 @@ public class DistributedController extends SemiXpanderServerOptics
 
     }
 
-    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId){
+    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId, long sizeBit){
         throw new RuntimeException("cant use initRoute for distributed setting!");
     }
 

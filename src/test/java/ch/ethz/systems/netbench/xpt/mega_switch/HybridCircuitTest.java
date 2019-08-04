@@ -144,10 +144,10 @@ public class HybridCircuitTest {
     @Test
     public void sendTwoFlows(){
 
-        RemoteRoutingController.getInstance().initRoute(0,1,2,5,0);
+        RemoteRoutingController.getInstance().initRoute(0,1,2,5,0, packet.getSizeBit());
         boolean thrown = false;
         try{
-            RemoteRoutingController.getInstance().initRoute(0,1,4,3,0);
+            RemoteRoutingController.getInstance().initRoute(0,1,4,3,0, packet.getSizeBit());
         }catch(NoPathException e){
             thrown = true;
         }

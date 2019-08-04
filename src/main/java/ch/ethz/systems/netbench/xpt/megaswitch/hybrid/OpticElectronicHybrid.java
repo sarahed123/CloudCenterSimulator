@@ -102,6 +102,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         return getJumboFlow(serverSource,serverDest).setSourceToR(sourceToR).setDestToR(destToR);
     }
 
+
     /**
      * gets the jumbo flow with source-dest pair, or create a new one
      * @param source
@@ -139,7 +140,7 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 		    /**
 		     * init the route
 		     */
-	    	getRemoteRouter().initRoute(transmittingSource,receiveingDest,jFlow.getSource(),jFlow.getDest(),jFlow.getId());
+	    	getRemoteRouter().initRoute(transmittingSource,receiveingDest,jFlow.getSource(),jFlow.getDest(),jFlow.getId(),packet.getSizeBit());
 		}catch(FlowPathExists e) {
 
         }

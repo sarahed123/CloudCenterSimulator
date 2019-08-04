@@ -30,9 +30,10 @@ public class SemiXpanderServerOptics extends SemiXpander {
      * @param sourceKey
      * @param destKey
      * @param jumboFlowId
+     * @param sizeBit
      */
     @Override
-    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId){
+    public void initRoute(int transimttingSource, int receivingDest, int sourceKey, int destKey, long jumboFlowId, long sizeBit){
         mCurrentServerDest = receivingDest;
         mCurrentServerSource = transimttingSource;
         Set transimtting = mServerTransmitColorsUsed.get(mCurrentServerSource);
@@ -45,7 +46,7 @@ public class SemiXpanderServerOptics extends SemiXpander {
             mServerReceiveColorsUsed.put(mCurrentServerDest,new HashSet<>());
         }
 
-        super.initRoute(transimttingSource,receivingDest,sourceKey,destKey,jumboFlowId);
+        super.initRoute(transimttingSource,receivingDest,sourceKey,destKey,jumboFlowId, sizeBit);
 
 
     }

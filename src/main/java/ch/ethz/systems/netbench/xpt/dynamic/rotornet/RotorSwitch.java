@@ -1,25 +1,28 @@
 package ch.ethz.systems.netbench.xpt.dynamic.rotornet;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
-import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicSwitch;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * the rotor switch
  */
 public class RotorSwitch extends DynamicSwitch {
+    protected long mPortsBufferSize;
     protected RotorMap mRotorMap; // the map telling it which devices it is connected to
-    protected long mCurrentBufferSize; // the rotor buffer, if this is full dont allow forwarding
+    protected long mPoolBufferSize; // the rotor buffer, if this is full dont allow forwarding
     private static long sMaxBufferSizeBit;
-    private LinkedList<Packet> mBuffer;
+    private LinkedList<IpPacket> mBuffer;
     /**
      * Constructor of a network device.
      *
@@ -33,8 +36,9 @@ public class RotorSwitch extends DynamicSwitch {
         mRotorMap = new RotorMap(new RotorOutputPortGenerator(configuration) , new PerfectSimpleLinkGenerator(configuration),this);
         mRotorMap.setCurrentDevice(this);
         mBuffer = new LinkedList<>();
-        mCurrentBufferSize = 0;
-
+        mPoolBufferSize = 0;
+        mPortsBufferSize = 0;
+        
     }
 
     @Override
@@ -62,7 +66,7 @@ public class RotorSwitch extends DynamicSwitch {
                 // then try random forward
                 sendToRandomDestination(ipPacket);
                 return;
-            }catch(NoPathException e){
+            }catch(ReconfigurationDeadlineException e){
 
             }
         }else { // we have already done one random hop
@@ -77,48 +81,70 @@ public class RotorSwitch extends DynamicSwitch {
             }
         }
 
-        if(hasResources(genericPacket)){ // if we have resources then re add packet to buffer
+        if(hasPoolResources(genericPacket.getSizeBit())){ // if we have resources then re add packet to buffer
             String counter_name = "ROTOR_PACKET_BUFFERED";
             if(nopath) counter_name = "ROTOR_PACKET_BUFFERED_NO_PATH";
             if(deadline) counter_name = "ROTOR_PACKET_BUFFERED_DEADLINE";
             SimulationLogger.increaseStatisticCounter(counter_name);
             addToBuffer(genericPacket);
-
+            return;
         }
 
+        SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_LOST_AT_" +( (ipPacket.getSourceId()==this.getIdentifier()) ? "SOURCE" : "SECOND_HOP"));
 
+    }
 
+    private boolean hasPoolResources(long sizeBit) {
+        return mPoolBufferSize + sizeBit <= sMaxBufferSizeBit;
     }
 
     private void addToBuffer(Packet genericPacket) {
 
-        mBuffer.addLast(genericPacket);
-        mCurrentBufferSize+= genericPacket.getSizeBit();
+        mBuffer.addLast((IpPacket) genericPacket);
+        mPoolBufferSize += genericPacket.getSizeBit();
     }
 
     private Packet popFromBuffer(){
         Packet p = mBuffer.pop();
-        mCurrentBufferSize -= p.getSizeBit();
+        mPoolBufferSize -= p.getSizeBit();
         return p;
+    }
+
+    int sendDirectPendingData(){
+        List<IpPacket> directForward = mBuffer.stream()
+                .filter(p -> hasDirectLink(p.getDestinationId())).collect(Collectors.toList());
+
+        mBuffer.removeIf(p -> hasDirectLink(p.getDestinationId()));
+
+        int size = directForward.size();
+        for(int i = 0; i<size; i++){
+            IpPacket p = directForward.get(i);
+            mPoolBufferSize -= p.getSizeBit();
+            try{
+                forwardToNextSwitch(p, p.getDestinationId());
+                if(p.getSourceId()==this.identifier)
+                    SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_DIRECT_FORWARD");
+
+            }catch (ReconfigurationDeadlineException e){
+//                addToBuffer(p);
+            }
+        }
+
+        return size;
     }
 
     // send all pending data
     void sendPendingData(){
+
         int size = mBuffer.size();
         for(int i = 0; i<size; i++){
-            IpPacket p = null;
-            try{
-
-                p = (IpPacket) popFromBuffer();
-
-                receive(p);
-
-            }catch (ReconfigurationDeadlineException | NoPathException e){
-                assert(false); // this should not happen as the exceptions need to caught bellow
-            }
+            IpPacket ipPacket = (IpPacket) popFromBuffer();
+            receive(ipPacket);
         }
 
     }
+
+
 
     /**
      * randomizes a destination and if it has buffer space send to it.
@@ -128,22 +154,26 @@ public class RotorSwitch extends DynamicSwitch {
         Collections.shuffle(mRotorMap,mRotorMap.mRnd);
         for(int i = 0;i<mRotorMap.size();i++){
             RotorSwitch target = (RotorSwitch) mRotorMap.getOutpurPort(mRotorMap.get(i)).getTargetDevice();
-            if(target.hasResources(ipPacket)){
+            if(target.hasResources(ipPacket.getSizeBit())){
                 try{
                     forwardToNextSwitch(ipPacket,target.getIdentifier());
                     SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_RANDOM_FORWARD");
 
                     return;
                 }catch (ReconfigurationDeadlineException e){
-
+                    SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_ALL_DEADLINE");
                 }
+            }else{
+
             }
         }
-        throw new NoPathException();
+
+
+        throw new ReconfigurationDeadlineException();
     }
 
-    protected boolean hasResources(Packet genericPacket) {
-        return mCurrentBufferSize + genericPacket.getSizeBit() <= sMaxBufferSizeBit;
+    protected boolean hasResources(long sizeBit) {
+        return  hasPoolResources(sizeBit);
     }
 
     static void setMaxBufferSizeByte(long sizeByte){
@@ -154,9 +184,13 @@ public class RotorSwitch extends DynamicSwitch {
         if(mRotorMap.contains(destination)){
             RotorOutputPort port = mRotorMap.getOutpurPort(destination);
             port.enqueue(ipPacket);
+            if(ipPacket.getSourceId()!=this.identifier){
+            }
+            mPortsBufferSize += ipPacket.getSizeBit();
 
             return;
         }
+
         throw new NoPathException();
     }
 
@@ -184,5 +218,23 @@ public class RotorSwitch extends DynamicSwitch {
         rotortMap.clearOutputPorts(); // first clear the new map ports.
         this.mRotorMap = rotortMap;
         mRotorMap.setCurrentDevice(this);
+    }
+
+    public boolean hasDirectLink(int destination) {
+        return mRotorMap.contains(destination);
+    }
+
+
+
+    public boolean hasAvailableSecondHop(long sizeBit) {
+        for(int i = 0;i<mRotorMap.size();i++){
+            RotorSwitch target = (RotorSwitch) mRotorMap.getOutpurPort(mRotorMap.get(i)).getTargetDevice();
+            if(target.hasResources(sizeBit)) return true;
+        }
+        return false;
+    }
+
+    public void resetBuffer() {
+        mPortsBufferSize = 0;
     }
 }

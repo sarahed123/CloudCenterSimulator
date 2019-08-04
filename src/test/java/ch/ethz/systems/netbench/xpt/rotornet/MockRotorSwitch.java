@@ -1,18 +1,12 @@
 package ch.ethz.systems.netbench.xpt.rotornet;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
-import ch.ethz.systems.netbench.xpt.dynamic.rotornet.ReconfigurationDeadlineException;
-import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorOutputPortGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitch;
-import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
-
-import java.util.Collections;
 
 public class MockRotorSwitch extends RotorSwitch {
     protected MockRotorSwitch(int identifier, TransportLayer transportLayer, Intermediary intermediary, NBProperties configuration) {
@@ -51,10 +45,10 @@ public class MockRotorSwitch extends RotorSwitch {
     }
 
     public void setBufferSize(int bufferSize) {
-        this.mCurrentBufferSize = bufferSize;
+        this.mPoolBufferSize = bufferSize;
     }
 
     public long getBufferSize() {
-        return mCurrentBufferSize;
+        return mPoolBufferSize;
     }
 }

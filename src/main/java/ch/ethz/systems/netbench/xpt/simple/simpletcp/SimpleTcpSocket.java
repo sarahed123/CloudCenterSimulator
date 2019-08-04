@@ -766,6 +766,7 @@ public class SimpleTcpSocket extends Socket {
 //        System.out.println(resentPacket.getFlowId());
 //        System.out.println(resentPacket.toString());
         // Log statistic
+
         SimulationLogger.increaseStatisticCounter("TCP_RESEND_OCCURRED");
         resentPacket.markResent();
         // Halve congestion window as the congestion control action

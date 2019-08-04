@@ -1,9 +1,11 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.hybrid;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -39,7 +41,8 @@ public class ConversionUnit {
      * gets the paramets from the target optic device
      */
     protected void initPortParams() {
-        mLinkBandwidth = mOptic.getConfiguration().getLongPropertyOrFail("link_bandwidth_bit_per_ns");
+        long bw = mOptic.getConfiguration().getLongPropertyOrFail("link_bandwidth_bit_per_ns");
+        mLinkBandwidth = mConf.getLongPropertyWithDefault("conversion_link_bandwidth_bit_per_ns",bw);
         mEcnThreshold = mOptic.getConfiguration().getLongPropertyOrFail("output_port_ecn_threshold_k_bytes");
         mMaxQueueSize = mOptic.getConfiguration().getLongPropertyOrFail("output_port_max_queue_size_bytes");
     }
@@ -72,6 +75,7 @@ public class ConversionUnit {
             mPortMap.put(new ImmutablePair<>(src,dst),port);
         }
         port.enqueue(packet);
+
     }
 
     /**
