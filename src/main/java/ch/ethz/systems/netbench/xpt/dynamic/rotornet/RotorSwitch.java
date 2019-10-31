@@ -123,8 +123,9 @@ public class RotorSwitch extends DynamicSwitch {
             try{
                 forwardToNextSwitch(p, p.getDestinationId());
                 if(p.getSourceId()==this.identifier)
-                    SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_DIRECT_FORWARD");
-
+                    SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_DIRECT_FORWARD_FROM_BUFFER");
+                else
+                    SimulationLogger.increaseStatisticCounter("ROTOR_PACKET_INDIRECT_FORWARD_FROM_BUFFER");
             }catch (ReconfigurationDeadlineException e){
 //                addToBuffer(p);
             }
