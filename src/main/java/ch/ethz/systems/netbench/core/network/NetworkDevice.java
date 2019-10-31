@@ -35,6 +35,7 @@ public abstract class NetworkDevice {
     private final boolean hasTransportLayer;
     protected final int identifier;
     protected final List<Integer> connectedTo;
+    private final long mSwitchTimeNs;
     protected Map<Integer, OutputPort> targetIdToOutputPort;
     protected final Intermediary intermediary;
     protected final NBProperties configuration;
@@ -66,6 +67,8 @@ public abstract class NetworkDevice {
         // Add intermediary
         this.intermediary = intermediary;
         this.intermediary.setNetworkDevice(this);
+        this.mSwitchTimeNs = configuration == null ? 0 : configuration.getLongPropertyWithDefault("switching_time_ns",0);
+
 
     }
 
@@ -240,14 +243,20 @@ public abstract class NetworkDevice {
     }
 
 	public void receiveFromEncapsulating(Packet packet) {
-		/**
-		 * check first if we need pass the packet back to the encapsulating device
-		 */
-		if(((IpPacket)packet).getDestinationId()==this.identifier) {
-			passToEncapsulatingDevice(packet);
-			return;
-		}
-		receive(packet);
+        Simulator.registerEvent(new Event(mSwitchTimeNs) {
+            @Override
+            public void trigger() {
+                /**
+                 * check first if we need pass the packet back to the encapsulating device
+                 */
+                if(((IpPacket)packet).getDestinationId()==NetworkDevice.this.identifier) {
+                    passToEncapsulatingDevice(packet);
+                    return;
+                }
+                receive(packet);
+            }
+        });
+
 	}
 
 
