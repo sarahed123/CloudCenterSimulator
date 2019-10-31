@@ -36,8 +36,10 @@ public class BaseAllowedProperties {
             "network_device_intermediary",
             "output_port",
             "link",
-            
-            // Routing
+			"switching_time_ns",
+
+
+			// Routing
             "network_device_routing",
 
             // Traffic
@@ -101,7 +103,6 @@ public class BaseAllowedProperties {
     		"conversion_link_bandwidth_bit_per_ns",
     		"fluid_flow_num_flows_for_pair",
     		"modulation_frequency",
-    		"electric_switching_time_ns",
     		"use_dummy_servers",
     		"enable_distributed_transport_layer",
     		"prioritize_acks_on_circuit",
