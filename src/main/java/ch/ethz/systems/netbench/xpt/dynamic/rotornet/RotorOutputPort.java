@@ -5,12 +5,14 @@ import ch.ethz.systems.netbench.core.network.InputPort;
 import ch.ethz.systems.netbench.core.network.Link;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicOutuptPort;
 
 public class RotorOutputPort extends DynamicOutuptPort {
+	private final long mMaxBitsPerInterval;
 	RotorSwitch mOriginalDevice;
 	RotorMap mRotorMap;
+	private long mBitsEnqueued;
 	private long mDispatchTime;
 	int mPacketSentCounter;
 
@@ -20,6 +22,8 @@ public class RotorOutputPort extends DynamicOutuptPort {
 		mOriginalDevice = (RotorSwitch) ownNetworkDevice;
 		this.ownNetworkDevice = ownNetworkDevice;
 		mPacketSentCounter = 0;
+		mBitsEnqueued = 0;
+		mMaxBitsPerInterval = ((RotorNetController) RemoteRoutingController.getInstance()).mReconfigurationInterval * link.getBandwidthBitPerNs();
 	}
 
 	public RotorSwitch getOriginalDevice(){
@@ -41,17 +45,11 @@ public class RotorOutputPort extends DynamicOutuptPort {
 	 */
 	@Override
 	public void enqueue(Packet packet) {
-		IpPacket ipPacket = (IpPacket) packet;
-		long totalBits = getBufferOccupiedBits() + ipPacket.getSizeBit();
-		long time = totalBits/link.getBandwidthBitPerNs() +link.getDelayNs();
-		if(isSending){
-			time += (mDispatchTime - Simulator.getCurrentTime()); // mDispatchTime already includes current time
-		}
-
-		if(Simulator.getCurrentTime() + time > RotorNetController.sNextReconfigurationTime){
+		if(mBitsEnqueued + packet.getSizeBit() > mMaxBitsPerInterval){
 			onConfigurationTimeExceeded();
 		}
 		mPacketSentCounter++;
+		mBitsEnqueued +=packet.getSizeBit();
 		super.enqueue(packet);
 	}
 
