@@ -182,6 +182,13 @@ class TrafficSelector {
                                             PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL : PoissonArrivalPlanner.PairDistribution.ALL_TO_ALL_FRACTION,
                                     configuration
                             );
+                        case "fluid_flow_perm":
+                            return new FluidFlowTrafficPlanner(idToTransportLayer,
+                                    configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
+                                    flowSizeDistribution,
+                                    PoissonArrivalPlanner.PairDistribution.PAIRINGS_FRACTION,
+                                    configuration
+                            );
 
                         default:
                             throw new PropertyValueInvalidException(configuration, "traffic_probabilities_generator");
