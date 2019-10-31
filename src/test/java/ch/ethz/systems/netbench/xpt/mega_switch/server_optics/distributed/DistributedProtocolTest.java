@@ -39,7 +39,7 @@ public class DistributedProtocolTest {
         BufferedWriter runConfigWriter = new BufferedWriter(new FileWriter(tempRunConfig));
         //runConfigWriter.write("network_device=hybrid_optic_electronic\n");
         runConfigWriter.write("scenario_topology_file=example/topologies/simple/simple_n2x2_v1.topology\n");
-        runConfigWriter.write("electric_switching_time_ns=0\n");
+        runConfigWriter.write("switching_time_ns=0\n");
         runConfigWriter.write("hybrid_circuit_threshold_byte=5000\n");
         runConfigWriter.write("run_folder_base_dir=/cs/usr/inonkp/distributed_protocol_testing\n");
         runConfigWriter.write("run_folder_name=results\n");

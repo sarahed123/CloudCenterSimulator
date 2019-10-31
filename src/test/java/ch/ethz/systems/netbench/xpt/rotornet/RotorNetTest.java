@@ -9,6 +9,7 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.core.run.infrastructure.NetworkDeviceGenerator;
+import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.xpt.sourcerouting.exceptions.NoPathException;
 import org.junit.After;
 import org.junit.Before;
@@ -86,6 +87,7 @@ public class RotorNetTest {
         controller = new MockRotorController(hm,conf2);
         MockRotorMap.setRouter(controller);
         MockReconfigurationEvent.setController(controller);
+        RemoteRoutingController.setRemoteRouter(controller);
         BaseInitializer.getInstance().finalize();
         tempRunConfig2.delete();
     }
