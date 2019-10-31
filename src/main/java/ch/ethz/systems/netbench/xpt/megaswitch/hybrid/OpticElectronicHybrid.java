@@ -19,7 +19,6 @@ import java.util.HashMap;
 
 public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
 
-    private final long mElectricSwitchTimeNs;
     private boolean useDummyServers;
     protected long circuitThreshold;
     protected NetworkDevice electronic;
@@ -35,7 +34,6 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         mNumAllocatedFlows = 0;
         useDummyServers = configuration.getBooleanPropertyWithDefault("use_dummy_servers",false);
         mNumDeAllocatedFlows = 0;
-        mElectricSwitchTimeNs = configuration.getLongPropertyWithDefault("electric_switching_time_ns",200);
 
     }
     @Override
@@ -123,12 +121,8 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     }
 
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
-        Simulator.registerEvent(new Event(mElectricSwitchTimeNs /* switching time*/) {
-            @Override
-            public void trigger() {
-                electronic.receiveFromEncapsulating(packet);
-            }
-        });
+
+        electronic.receiveFromEncapsulating(packet);
 
 	}
 
