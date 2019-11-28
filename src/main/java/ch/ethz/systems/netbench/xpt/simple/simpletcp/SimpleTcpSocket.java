@@ -575,7 +575,7 @@ public class SimpleTcpSocket extends Socket {
 
         // Handle the action if it is marked with ECE
         if (packet.isECE()) {
-            handleECEMarkedPacket();
+            handleECEMarkedPacket(packet);
         }
 
         // Increment window for every packet acknowledged by this acknowledgement
@@ -626,7 +626,7 @@ public class SimpleTcpSocket extends Socket {
      * Handle that an acknowledgment packet was marked with the ECE flag,
      * indicating that on the way there the packet had encountered congestion.
      */
-    protected void handleECEMarkedPacket() {
+    protected void handleECEMarkedPacket(TcpPacket packet) {
         //halveCongestionWindow();
     }
 

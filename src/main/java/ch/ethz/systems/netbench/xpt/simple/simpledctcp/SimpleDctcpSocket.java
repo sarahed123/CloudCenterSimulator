@@ -83,7 +83,7 @@ public class SimpleDctcpSocket extends SimpleTcpSocket {
      * cwnd = cwnd * (1 - alpha / 2)
      */
     @Override
-    protected void handleECEMarkedPacket() {
+    protected void handleECEMarkedPacket(TcpPacket packet) {
         congestionWindow = Math.max(LOSS_WINDOW_SIZE, (1 - alphaFraction / 2.0) * congestionWindow);
         slowStartThreshold = congestionWindow;
     }
