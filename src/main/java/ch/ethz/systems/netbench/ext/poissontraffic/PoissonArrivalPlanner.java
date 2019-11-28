@@ -23,7 +23,8 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         PARETO_SKEW_DISTRIBUTION,
         PAIRINGS_FRACTION,
         DUAL_ALL_TO_ALL_FRACTION,
-        DUAL_ALL_TO_ALL_SERVER_FRACTION
+        DUAL_ALL_TO_ALL_SERVER_FRACTION,
+        DENSITY_MATRIX
     }
     private NBProperties configuration;
     private final double lambdaFlowStartsPerSecond;
@@ -93,12 +94,50 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
             case DUAL_ALL_TO_ALL_SERVER_FRACTION:
                 this.setPairProbabilitiesDualAllToAllServerFraction();
                 break;
-
+            case DENSITY_MATRIX:
+                this.setPairProbabilitiesFromDesity();
+                break;
             default:
                 throw new IllegalArgumentException("Invalid pair distribution given: " + pairDistribution + ".");
 
         }
         SimulationLogger.logInfo("Flow planner", "POISSON_ARRIVAL(lambda=" + lambdaFlowStartsPerSecond + ", pairDistribution=" + pairDistribution + ")");
+    }
+
+    private void setPairProbabilitiesFromDesity(){
+        double activeFractionX = configuration.getDoublePropertyOrFail("traffic_probabilities_active_fraction");
+        int nodesNum =  configuration.getGraphDetails().getNumTors();
+        int totalNumOfPairs = nodesNum * (nodesNum - 1);
+        double torPairProb = 1 / (double) totalNumOfPairs;
+        LinkedList<ImmutablePair<Integer,Integer>> allPairs = new LinkedList<>();
+        for (int i = 0; i < nodesNum; i++) {
+            for (int j = 0; j < nodesNum; j++) {
+                if(i==j) continue;
+                    allPairs.add(new ImmutablePair<>(i,j));
+            }
+        }
+        Set<Integer> sources = new HashSet<>();
+        Set<Integer> dests = new HashSet<>();
+        Collections.shuffle(allPairs);
+        double activeFraction = activeFractionX*allPairs.size();
+        double servProb = activeFraction * configuration.getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
+        for(int i = 0; i<activeFraction;i++){
+            Pair<Integer,Integer> pair = allPairs.get(i);
+            Set<Integer> sourceServers = configuration.getGraphDetails().getServersOfTor(pair.getLeft());
+            Set<Integer> destServers = configuration.getGraphDetails().getServersOfTor(pair.getRight());
+            sources.add(pair.getLeft());
+            dests.add(pair.getRight());
+            for(int s: sourceServers){
+                for(int d: destServers){
+                    addToPool(1d/servProb,new ImmutablePair<>(s,d));
+
+                }
+            }
+
+        }
+        SimulationLogger.logInfo("NUM_TOR_SOURCE_DEST_PAIRS", Integer.toString((int)activeFraction));
+        SimulationLogger.logInfo("NUM_TOR_SOURCES_PARTICIPATING", Integer.toString(sources.size()));
+        SimulationLogger.logInfo("NUM_TOR_DESTS_PARTICIPATING", Integer.toString(dests.size()));
     }
     
     /**
