@@ -172,7 +172,7 @@ public class Path implements BaseElementWithWeight, Serializable {
 
     @Override
 	public String toString() {
-		return vertexList.toString() + ":" + weight + ":" + this.id + ":" + this.issueTime;
+		return vertexList.toString() + ":" + weight + ":" + this.id + ":" + getColor() + ":" + this.issueTime;
 	}
 
 	public boolean endsWith(Vertex endVertex) {
