@@ -216,6 +216,8 @@ public class RotorSwitch extends DynamicSwitch {
      * @param rotortMap
      */
     public void setRotortMap(RotorMap rotortMap) {
+//        rotortMap.printPortOccupancy();
+
         rotortMap.clearOutputPorts(); // first clear the new map ports.
         this.mRotorMap = rotortMap;
         mRotorMap.setCurrentDevice(this);
