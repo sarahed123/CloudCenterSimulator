@@ -25,10 +25,10 @@ public class DistributedTransportLayer extends SimpleDctcpTransportLayer {
     }
 
 
-    public void onCircuitEntrance(long flowId) {
-        SimpleDistributedSocket socket = (SimpleDistributedSocket) this.flowIdToSocket.get(flowId);
-        socket.markOnCircuit();
-    }
+//    public void onCircuitEntrance(long flowId) {
+//        SimpleDistributedSocket socket = (SimpleDistributedSocket) this.flowIdToSocket.get(flowId);
+//        socket.markOnCircuit();
+//    }
 
     public SimpleDistributedSocket getSocket(long flowId){
         return (SimpleDistributedSocket) flowIdToSocket.get(flowId);
