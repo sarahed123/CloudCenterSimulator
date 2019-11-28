@@ -189,7 +189,13 @@ class TrafficSelector {
                                     PoissonArrivalPlanner.PairDistribution.PAIRINGS_FRACTION,
                                     configuration
                             );
-
+                        case "fluid_flow_density_matrix":
+                            return new FluidFlowTrafficPlanner(idToTransportLayer,
+                                configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
+                                flowSizeDistribution,
+                                PoissonArrivalPlanner.PairDistribution.DENSITY_MATRIX,
+                                configuration
+                        );
                         default:
                             throw new PropertyValueInvalidException(configuration, "traffic_probabilities_generator");
 
