@@ -89,19 +89,19 @@ def analyze_flow_completion():
             'general_flow_size_bytes_std': np.std(total_size_bytes)
         }
 
-        range_low =                     [-1,            -1,            -1,      -1,          100000,    1000000,      30000000,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              200000,    100000]
-        range_high =                    [-1,            100000,        200000,  100000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  -1,  200000]
-        range_name =                    ["all",         "less_100KB",  "leq_200KB", "leq_100KB", "geq_100KB","geq_1MB", "geq_30MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "geq_200KB", "leq_200KB_geq_100KB"]
+        range_low =                     [-1, -1, -1, -1,           -1,            -1,      -1,          100000,    1000000,      30000000,        2000000,      1000000,  5000000,  10000000, -1,             -1,         -1,              200000,    100000]
+        range_high =                    [-1, 1000, 10000, 50000,           100000,        200000,  100000,       -1,          -1,           -1,             -1,         -1,              -1,    -1,  1000000,          2000000,      1000000,  -1,  200000]
+        range_name =                    ["all", "leq_1KB", "leq_10KB", "leq_50KB",         "less_100KB",  "leq_200KB", "leq_100KB", "geq_100KB","geq_1MB", "geq_30MB", "geq_2MB",   "geq_1MB",        "geq_5MB", "geq_10MB","leq_1MB",  "leq_2MB",   "leq_1MB",        "geq_200KB", "leq_200KB_geq_100KB"]
 
         for flow_on_circuit in [True,False,'both']:
-            range_completed_duration =      [[],            [],            [],              [],  [],         [],           [],              [],            [],         [],          [],[],              [],            [],         [],          []]
-            range_completed_throughput =    [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
-            range_all_throughput =          [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
-            range_flow_size =               [[],            [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
-            range_num_finished_flows =      [0,             0,             0,               0,    0,       0,            0,                0,             0,        0,         0, 0,                0,             0,        0,         0]
-            range_num_unfinished_flows =    [0,             0,             0,               0,    0,       0,            0,                0,             0,         0,          0,0,                0,             0,         0,          0]
-            range_low_eq =                  [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1,1,                1,             1,         1,         1]
-            range_high_eq =                 [0,             0,             0,               1,    1,       1,            1,                1,             1,         1,         1, 1,                1,             1,         1,         1]
+            range_completed_duration =      [[],[],[], [],           [],            [],              [],  [],         [],           [],              [],            [],         [],          [],[],              [],            [],         [],          []]
+            range_completed_throughput =    [[],[], [], [],        [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
+            range_all_throughput =          [[],[], [], [],          [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
+            range_flow_size =               [[],[], [],[],          [],            [],              [],   [],        [],           [],              [],            [],         [],         [],[],              [],            [],         [],         []]
+            range_num_finished_flows =      [0,0,   0,0,          0,             0,               0,    0,       0,            0,                0,             0,        0,         0, 0,                0,             0,        0,         0]
+            range_num_unfinished_flows =    [0,0,   0,0,          0,             0,               0,    0,       0,            0,                0,             0,         0,          0,0,                0,             0,         0,          0]
+            range_low_eq =                  [0,0,   0,0,          0,             0,               1,    1,       1,            1,                1,             1,         1,         1,1,                1,             1,         1,         1]
+            range_high_eq =                 [0,1,   1,1,          0,             0,               1,    1,       1,            1,                1,             1,         1,         1, 1,                1,             1,         1,         1]
 
         # Go over all flows
             for i in range(0, len(flow_ids)):
