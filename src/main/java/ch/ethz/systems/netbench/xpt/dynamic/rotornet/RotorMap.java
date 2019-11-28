@@ -42,7 +42,7 @@ public class RotorMap extends LinkedList<Integer> {
         if(!this.contains(dest)){
             throw new NoPathException();
         }
-        dest = maybeAddOne(dest);
+//        dest = maybeAddOne(dest);
         RotorOutputPort port = mOutputPortMap.get(dest);
         if(port == null) { // create the port
             RotorNetController controller = (RotorNetController) getController();
@@ -72,11 +72,11 @@ public class RotorMap extends LinkedList<Integer> {
      */
     @Override
     public boolean contains(Object var1) {
-        int dest = (Integer) var1;
-        if(super.contains(mCurrentDevice.getIdentifier())){
-
-            if(dest == ((mCurrentDevice.getIdentifier()+1) % sNumOfNodes)) return true;
-        }
+//        int dest = (Integer) var1;
+//        if(super.contains(mCurrentDevice.getIdentifier())){
+//
+//            if(dest == ((mCurrentDevice.getIdentifier()+1) % sNumOfNodes)) return true;
+//        }
         return super.contains(var1);
     }
 
@@ -103,4 +103,10 @@ public class RotorMap extends LinkedList<Integer> {
     }
 
 
+    public void printPortOccupancy() {
+        System.out.println("rotor map occupancy for " + this.mCurrentDevice.getIdentifier());
+        for(int dest: this){
+            System.out.println("to " + dest + " = " + getOutpurPort(dest).mPacketSentCounter);
+        }
+    }
 }
