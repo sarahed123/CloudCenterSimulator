@@ -552,7 +552,7 @@ public class SimulationLogger {
 	 * Print a human-readable summary of all the port utilization.
 	 */
 	private static void logPortUtilization() {
-
+		if(writerPortUtilizationFile == null) return;
 		try {
 
 			// Header
@@ -748,7 +748,10 @@ public class SimulationLogger {
 	
 	public static void printOldestDistProtocolStates() {
 		for(Long id: oldestDistProtocolStates) {
-			System.out.println(id.toString() + " = " + activeDistProtocolStates.get(id).getState() + " " + activeDistProtocolStates.get(id).getSizeByte()  + "\n");
+			System.out.println(id.toString() + " = " + activeDistProtocolStates.get(id).getState() + " size byte:"
+					+ activeDistProtocolStates.get(id).getSizeByte()  +
+					" flow num " +  activeDistProtocolStates.get(id).getFlows().size() +
+					"\n");
 		}
 		
 	}
