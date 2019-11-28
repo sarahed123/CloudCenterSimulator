@@ -140,18 +140,19 @@ public class ReservationPacket extends TcpPacket {
 
     @Override
     public long getDataSizeByte() {
-        return 10;
+        return 120;
     }
     
     @Override
     public long getSizeBit() {
-        return 80;
+        return 960;
     }
 
     @Override
     public String toString(){
         return "Reservation packet " + " server dest " + mServerDest + " serverSource " + mServerSource + " isSuccess " + isSuccess() +
-                " isFailure " + mFailure + " isDeallocation " + mDealocation +" color " + getColor() + " reversed " + reversed + " path " + mPath.toString();
+                " isFailure " + mFailure + " isDeallocation " + mDealocation +" color " + getColor() + " reversed " + reversed
+                + "path id " + getId() + " path " + mPath.toString();
     }
 
     public int getSourceToR() {
