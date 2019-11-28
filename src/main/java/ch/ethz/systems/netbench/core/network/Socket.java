@@ -13,8 +13,8 @@ public abstract class Socket {
     protected final int destinationId;
     protected final long flowSizeByte;
     private long remainderToConfirmFlowSizeByte;
-    private boolean isReceiver;
-    private FlowLogger privateLogger;
+    protected boolean isReceiver;
+    protected FlowLogger privateLogger;
 
     /**
      * Create a socket. By default, it should be the receiver.
@@ -27,7 +27,6 @@ public abstract class Socket {
      * @param flowSizeByte      Size of the flow in bytes
      */
     public Socket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
-
         // Initialize higher variables
         this.transportLayer = transportLayer;
         this.flowId = flowId;
@@ -36,10 +35,13 @@ public abstract class Socket {
         this.sourceId = sourceId;
         this.destinationId = destinationId;
         this.isReceiver = true;
+        initLogger();
 
+    }
+
+    protected void initLogger() {
         // Initialize logger
         this.privateLogger = new FlowLogger(flowId, sourceId, destinationId, flowSizeByte);
-
     }
 
     /**
@@ -51,7 +53,8 @@ public abstract class Socket {
     	
         assert(!this.isReceiver && this.remainderToConfirmFlowSizeByte >= newlyConfirmedFlowByte && newlyConfirmedFlowByte > 0);
         this.remainderToConfirmFlowSizeByte -= newlyConfirmedFlowByte;
-        this.privateLogger.logFlowAcknowledged(newlyConfirmedFlowByte);
+        logSender(newlyConfirmedFlowByte);
+
 
         // Remove references to the socket after finish
         if (isAllFlowConfirmed()) {
@@ -60,6 +63,10 @@ public abstract class Socket {
             
         }
 
+    }
+
+    protected void logSender(long newlyConfirmedFlowByte) {
+        this.privateLogger.logFlowAcknowledged(newlyConfirmedFlowByte);
     }
 
     protected void onAllFlowConfirmed() {
@@ -138,5 +145,6 @@ public abstract class Socket {
     protected boolean isReceiver() {
         return isReceiver;
     }
+
 
 }
