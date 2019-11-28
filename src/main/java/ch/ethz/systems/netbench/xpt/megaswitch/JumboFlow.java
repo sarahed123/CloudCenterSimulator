@@ -189,4 +189,11 @@ public class JumboFlow {
     public String getState(){
         return mState;
     }
+
+    public void reset() {
+        flowsOnCircuit.clear();
+        flows.clear();
+        mFlowIdToSize.clear();
+        this.mSizeByte = 0;
+    }
 }
