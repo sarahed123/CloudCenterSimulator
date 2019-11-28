@@ -28,17 +28,17 @@ public class SimpleDistributedSocket extends SimpleDctcpSocket {
      */
     SimpleDistributedSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte, NBProperties configuration) {
         super(transportLayer, flowId, sourceId, destinationId, flowSizeByte, configuration);
-        mOnCircuit = false;
-        DistributedOpticServer dos  = (DistributedOpticServer) transportLayer.getNetworkDevice();
-        if(dos.hasCircuitTo(destinationId)){
-            mOnCircuit = true;
-        }
+//        mOnCircuit = false;
+//        DistributedOpticServer dos  = (DistributedOpticServer) transportLayer.getNetworkDevice();
+//        if(dos.hasCircuitTo(destinationId)){
+//            mOnCircuit = true;
+//        }
     }
 
-    @Override
-    protected void registerResendEvent(TcpPacket tcpPacket) {
-        if(!mOnCircuit) super.registerResendEvent(tcpPacket);
-    }
+//    @Override
+//    protected void registerResendEvent(TcpPacket tcpPacket) {
+//        if(!mOnCircuit) super.registerResendEvent(tcpPacket);
+//    }
 
 //    @Override
 //    protected void handleECEMarkedPacket() {
@@ -65,49 +65,68 @@ public class SimpleDistributedSocket extends SimpleDctcpSocket {
 //
 //    }
 
+//    @Override
+//    protected void sendPendingData() {
+//        if(!mOnCircuit) super.sendPendingData();
+//    }
+//
+//    public void markOnCircuit() {
+//        mOnCircuit = true;
+//    }
+
+//    public void sendNextDataPacket() {
+//        long amountToSendByte = getFlowSizeByte(sendNextNumber);;
+//        while (acknowledgedSegStartSeqNumbers.contains(sendNextNumber)) {
+//            amountToSendByte = getFlowSizeByte(sendNextNumber);
+//            sendNextNumber += amountToSendByte;
+//        }
+//        if(!finSent) super.sendOutDataPacket(sendNextNumber,amountToSendByte);
+//    }
+
+//    @Override
+//    protected void sendAcknowledgment(TcpPacket packet) {
+//
+//        if(!packet.isOnCircuit() || finReceived){
+//            super.sendAcknowledgment(packet);
+//        }
+//
+//    }
+
+//    @Override
+//    protected void onEstablishedHandle() {
+//        if(mOnCircuit) {
+//            sendNextDataPacket();
+//        }else{
+//            super.onEstablishedHandle();
+//        }
+//    }
+
+//    @Override
+//    protected void cancelResendEvent(long seq) {
+//        try{
+//            super.cancelResendEvent(seq);
+//        }catch(IllegalStateException e){
+//
+//        }
+//    }
+
     @Override
-    protected void sendPendingData() {
-        if(!mOnCircuit) super.sendPendingData();
-    }
-
-    public void markOnCircuit() {
-        mOnCircuit = true;
-    }
-
-    public void sendNextDataPacket() {
-        long amountToSendByte = getFlowSizeByte(sendNextNumber);;
-        while (acknowledgedSegStartSeqNumbers.contains(sendNextNumber)) {
-            amountToSendByte = getFlowSizeByte(sendNextNumber);
-            sendNextNumber += amountToSendByte;
-        }
-        if(!finSent) super.sendOutDataPacket(sendNextNumber,amountToSendByte);
+    protected void handleECEMarkedPacket(TcpPacket packet) {
+       if(!packet.isOnCircuit()) super.handleECEMarkedPacket(packet);
     }
 
     @Override
-    protected void sendAcknowledgment(TcpPacket packet) {
-
-        if(!packet.isOnCircuit() || finReceived){
-            super.sendAcknowledgment(packet);
-        }
-
+    protected void incrementCongestionWindow(int newPacketsAcked) {
+        if(mOnCircuit) return;
+        super.incrementCongestionWindow(newPacketsAcked);
     }
 
     @Override
-    protected void onEstablishedHandle() {
-        if(mOnCircuit) {
-            sendNextDataPacket();
-        }else{
-            super.onEstablishedHandle();
+    protected void handleAcknowledgment(FullExtTcpPacket packet) {
+        if(packet.isOnCircuit()){
+            mOnCircuit = true;
+            congestionWindow = 3000000;
         }
+        super.handleAcknowledgment(packet);
     }
-
-    @Override
-    protected void cancelResendEvent(long seq) {
-        try{
-            super.cancelResendEvent(seq);
-        }catch(IllegalStateException e){
-
-        }
-    }
-
 }
