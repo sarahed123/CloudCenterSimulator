@@ -103,14 +103,17 @@ public class DistributedOpticServer extends OpticServer {
 		case HAS_CIRCUIT:
 			TcpPacket tcpPacket = (TcpPacket) packet;
 			ReservationPacket rp = mFlowReservation.get(packet.getDestinationId()); // get the underline reservation packet
+
 			tcpPacket.color(rp.getColor()); // paint all packets with the reserved color
 			tcpPacket.setPrevHop(this.identifier);
 			JumboFlow jumbo = getJumboFlow(packet.getSourceId(),packet.getDestinationId());
+
 			assert(hasColor(tcpPacket.getColor(), false));
 			tcpPacket.markOnCircuit(true);
 			this.conversionUnit.enqueue(this.identifier,packet.getDestinationId(),packet);
 			this.mTeardownEventsMap.get(rp.getOriginalServerDest()).reset(mCircuitTeardowTimeout);
 //			jumbo.onCircuitEntrance(packet.getFlowId());
+
 			onCircuitEntrance(packet.getFlowId());
 //			SimulationLogger.increaseStatisticCounter("PACKET_ROUTED_THROUGH_CIRCUIT");
 			break;
@@ -252,15 +255,19 @@ public class DistributedOpticServer extends OpticServer {
 	public void receive(Packet genericPacket) {
 //		long flowSize = getTransportLayer().getFlowSize(genericPacket.getFlowId()); // for debugging
 //		long flowSize = -1;
+
 		try{
 			ReservationPacket ep = (ReservationPacket) genericPacket;
+
 			if(ep.getOriginalServerDest()==this.identifier) { //we are receiver
+
 
 				if(ep.idDeAllocation()) {
 					assert(ep.isSuccess()); // this is a tear down of an existing circuit
 					deallocateServerColor(ep.getColor(), true);
 					Path p = new Path(ep.getPath(),ep.getColor(),ep.getId());
 //					p.setFlowSize(flowSize);
+
 					SimulationLogger.regiserPathActive(p,false);
 					ep.onFinishDeallocation();
 	                ((DistributedController) getRemoteRouter()).onDeallocation();
@@ -270,8 +277,10 @@ public class DistributedOpticServer extends OpticServer {
 	                reserveServerColor(ep.getColor(),true); // reserve end color
 					ep.markSuccess();
 					Path p = new Path(ep.getPath(),ep.getColor());
+
 //					p.setFlowSize(flowSize);
 					ep.setId(p.getId());
+
 					SimulationLogger.regiserPathActive(p,true);
 					((DistributedController) getRemoteRouter()).onAallocation();
 					Simulator.registerEvent(new Event(mConfigurationTime) {
@@ -297,6 +306,8 @@ public class DistributedOpticServer extends OpticServer {
 			JumboFlow jumbo = getJumboFlow(ep.getSourceId(), ep.getOriginalServerDest());
 			int pendingRequests = mPendingRequests.get(ep.getOriginalServerDest());
 			pendingRequests--;
+
+
 			mPendingRequests.put(ep.getOriginalServerDest(),pendingRequests);
 			if(ep.isSuccess()){
 				// if the relevant flows have finsihed, or there already is a circuit, release resources.
@@ -364,15 +375,15 @@ public class DistributedOpticServer extends OpticServer {
 		Simulator.registerEvent(tearDownEvent);
 		JumboFlow jumbo = getJumboFlow(this.identifier,ep.getOriginalServerDest());
 		Set<Long> flows = jumbo.getFlows();
-		try{
-			DistributedTransportLayer tl = (DistributedTransportLayer) this.getTransportLayer();
-			for(Long flowId: flows){
-				tl.onCircuitEntrance(flowId);
-				tl.getSocket(flowId).sendNextDataPacket();
-			}
-		}catch (ClassCastException e){
-
-		}
+//		try{
+//			DistributedTransportLayer tl = (DistributedTransportLayer) this.getTransportLayer();
+//			for(Long flowId: flows){
+//				tl.onCircuitEntrance(flowId);
+//				tl.getSocket(flowId).sendNextDataPacket();
+//			}
+//		}catch (ClassCastException e){
+//
+//		}
 
 
 		
@@ -400,6 +411,7 @@ public class DistributedOpticServer extends OpticServer {
 		if(mFlowState.get(jFlow.getDest()) != State.HAS_CIRCUIT){
 			return;
 		}
+
 		teardownCircuit(rp);
 		int pendingRequests = mPendingRequests.get(rp.getOriginalServerDest());
 		changeState(rp.getOriginalServerDest(), pendingRequests==0 ? State.NO_CIRCUIT : State.IN_PROCESS);

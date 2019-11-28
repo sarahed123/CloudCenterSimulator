@@ -89,16 +89,16 @@ public class ConversionPort extends EcnTailDropOutputPort{
     protected void dispatch(Packet packet) {
 
         super.dispatch(packet);
-        try{
-            TcpPacket tcpPacket = (TcpPacket) packet;
-            DistributedOpticServer dos = (DistributedOpticServer) getOwnDevice();
-            DistributedTransportLayer tl = (DistributedTransportLayer) dos.getTransportLayer();
-            SimpleDistributedSocket socket = tl.getSocket(tcpPacket.getFlowId());
-            if(!tcpPacket.isSYN()) socket.sendNextDataPacket();
-
-        }catch (ClassCastException e){
-
-        }
+//        try{
+//            TcpPacket tcpPacket = (TcpPacket) packet;
+//            DistributedOpticServer dos = (DistributedOpticServer) getOwnDevice();
+//            DistributedTransportLayer tl = (DistributedTransportLayer) dos.getTransportLayer();
+//            SimpleDistributedSocket socket = tl.getSocket(tcpPacket.getFlowId());
+//            if(!tcpPacket.isSYN()) socket.sendNextDataPacket();
+//
+//        }catch (ClassCastException e){
+//
+//        }
     }
 
     protected PortLogger createNewPortLogger() {
