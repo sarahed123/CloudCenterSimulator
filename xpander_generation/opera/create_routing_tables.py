@@ -1,45 +1,8 @@
 import sys
 import math
 import os
+from rotor import *
 
-class Rotor:
-    def __init__(self, matchings):
-        self.curr_cycle = 0
-        self.matchings = matchings
-
-    def advance(self):
-        self.curr_cycle = (self.curr_cycle+1) % len(self.matchings)
-
-    def get_current_matching(self):
-        return self.matchings[self.curr_cycle]
-
-    def __repr__(self):
-        return str(self.matchings[self.curr_cycle])
-
-def load_rotors(rotors_dir,rotor_num):
-    rotors = []
-    for r in range(rotor_num):
-        with open(rotors_dir + "/rotor_" + str(r)) as f:
-            lines = f.readlines()
-            matchings = []
-            for line in lines:
-                matching = line.split(" ")
-                matching = list(map(lambda x: int(x), matching))
-                matchings.append(matching)
-            rotors.append(Rotor(matchings))   
-    return rotors 
-
-def rotor_neighbours(i,j):
-    for rotor in rotors:
-        if j==rotor.get_current_matching()[i]:
-            return True
-    return False
-
-def get_rotor_neighbours(k):
-    neighbours = []
-    for rotor in rotors:
-        neighbours.append(rotor.get_current_matching()[k])
-    return neighbours
 
 def paths_exists(i,j,l):
     if l==N:
@@ -48,7 +11,7 @@ def paths_exists(i,j,l):
         return True
     exists = True
     for n in paths[i][j]:
-        exists = paths_exists(n,j,l+1)
+        exists = paths_exists(n[1],j,l+1)
         if not exists:
             break
     return exists
@@ -75,7 +38,7 @@ while cycle < cycle_num:
 #     print(f"rotor {i} {rotor}")
 
 
-matrix = [[0 if i==j else (1 if rotor_neighbours(j,i) else math.inf) for i in range(N)] for j in range(N)]
+matrix = [[0 if i==j else (1 if rotor_neighbours(j,i,rotors) else math.inf) for i in range(N)] for j in range(N)]
 
 
 for k in range(0,N):
@@ -90,8 +53,8 @@ for k in range(0,N):
     for i in range(0,N):
         if i==k:
             continue
-        for j in get_rotor_neighbours(k):
-            if matrix[k][i] == matrix[j][i] + 1:
+        for j in get_rotor_neighbours(k,rotors):
+            if matrix[k][i] == matrix[j[1]][i] + 1:
                 paths[k][i].append(j)
 
 for i in range(N):
@@ -111,5 +74,5 @@ for i in range(N):
         for j in range(N):
             f.write(str(j) + ":")
             for k,p in enumerate(paths[i][j]):
-                f.write(str(p) + ("," if k!=len(paths[i][j])-1 else ""))
+                f.write(str(p[0]) + "-" + str(p[1]) + ("," if k!=len(paths[i][j])-1 else ""))
             f.write("\n")
