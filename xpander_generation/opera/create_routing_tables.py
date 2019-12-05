@@ -69,9 +69,9 @@ if not os.path.exists(output_dir + "/" + "cycle_" + str(cycle_num)):
 
 for i in range(N):
     with open(output_dir + "/" + "cycle_" + str(cycle_num) + "/" + "n" + str(i), "w") as f:
-        if i==j:
-            continue
         for j in range(N):
+            if i==j:
+                continue
             f.write(str(j) + ":")
             for k,p in enumerate(paths[i][j]):
                 f.write(str(p[0]) + "-" + str(p[1]) + ("," if k!=len(paths[i][j])-1 else ""))
