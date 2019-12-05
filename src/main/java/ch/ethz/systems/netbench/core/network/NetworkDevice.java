@@ -66,7 +66,7 @@ public abstract class NetworkDevice {
 
         // Add intermediary
         this.intermediary = intermediary;
-        this.intermediary.setNetworkDevice(this);
+        if(intermediary!=null) this.intermediary.setNetworkDevice(this);
         this.mSwitchTimeNs = configuration == null ? 0 : configuration.getLongPropertyWithDefault("switching_time_ns",0);
 
 
