@@ -1,4 +1,4 @@
 package ch.ethz.systems.netbench.xpt.dynamic.opera;
 
-public class OperaNoDirectPathException {
+public class OperaNoPathException extends Exception {
 }
