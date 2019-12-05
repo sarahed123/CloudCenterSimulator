@@ -100,6 +100,14 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+    		"opera_direct_circuit_threshold_byte",
+    		"opera_rotor_guard_time",
+    		"opera_direct_circuit_threshold",
+    		"opera_reconfiguration_execution_time",
+			"opera_reconfiguration_time_ns",
+    		"opera_parallel_rotors_to_config",
+    		"opera_rotors_dir_path",
+			"opera_routing_tables_dir_path",
     		"conversion_link_bandwidth_bit_per_ns",
     		"fluid_flow_num_flows_for_pair",
     		"modulation_frequency",
