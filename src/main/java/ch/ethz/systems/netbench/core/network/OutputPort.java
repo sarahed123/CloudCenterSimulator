@@ -17,6 +17,7 @@ import java.util.Queue;
  */
 public abstract class OutputPort extends Port{
 
+    protected long nextDispatchIn;
     // Internal state
     protected boolean isSending;          // True iff the output port is using the medium to send a packet
     protected final Queue<Packet> queue;  // Current queue of packets to send
@@ -41,7 +42,7 @@ public abstract class OutputPort extends Port{
      * @param queue                 Queue that governs how packet are stored queued in the buffer
      */
     protected OutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue) {
-
+        this.nextDispatchIn = 0;
         // State
         this.queue = queue;
         this.isSending = false;
@@ -70,6 +71,7 @@ public abstract class OutputPort extends Port{
 	}
 
 	protected void registerPacketDispatchedEvent(Packet packet) {
+        nextDispatchIn = getDispatchTime(packet);
     	Simulator.registerEvent(new PacketDispatchedEvent(
                 getDispatchTime(packet),
                 packet,
@@ -153,7 +155,7 @@ public abstract class OutputPort extends Port{
 
         // Again free to send other packets
         isSending = false;
-
+        nextDispatchIn = 0;
         // Check if there are more in the queue to send
         if (!queue.isEmpty()) {
 

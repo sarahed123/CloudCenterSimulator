@@ -13,8 +13,8 @@ import java.util.List;
 
 public class OperaSwitch extends NetworkDevice {
 
-    private List<Packet> directCircuitBuffers;
-    private List<Packet> inDirectCircuitBuffers;
+    private LinkedList<Packet> directCircuitBuffers;
+    private LinkedList<Packet> inDirectCircuitBuffers;
 
     private HashMap<Long,Long> flowSizeMapBit;
     private long directCircuitThresholdBit;
@@ -40,8 +40,9 @@ public class OperaSwitch extends NetworkDevice {
         OperaController controller = OperaController.getInstance();
 
         try {
-            controller.getOutpuPort(this.identifier,header.getDestinationId()).enqueue(genericPacket);
+            controller.getOutpuPort(this.identifier,header.getDestinationId(),header.getHash(this.identifier)).enqueue(genericPacket);
         } catch (OperaNoPathException  | ReconfigurationDeadlineException e) {
+
                 directCircuitBuffers.add(genericPacket);
         }
     }
@@ -50,9 +51,11 @@ public class OperaSwitch extends NetworkDevice {
     public void receive(Packet genericPacket) {
         TcpHeader header = (TcpHeader) genericPacket;
         if(this.identifier==header.getDestinationId() && this.intermediary!=null){
+
             this.passToIntermediary(genericPacket);
             return;
         }
+
         if(flowExceedsThreshold(genericPacket) && header.getSourceId() == this.identifier){
             routeDirectly(genericPacket);
             return;
@@ -74,11 +77,14 @@ public class OperaSwitch extends NetworkDevice {
         ArrayList<ImmutablePair<Integer,Integer>> possibilities = controller.getPossiblities(this.identifier,header.getDestinationId());
 
         ImmutablePair<Integer,Integer> nextHopPair = possibilities.get(header.getHash(this.identifier) % possibilities.size());
+
         try {
             if(header.getSourceId()==this.identifier && !controller.hasPacketPath(header)){
                 throw new ReconfigurationDeadlineException();
             }
-            controller.getOutpuPort(this.identifier,nextHopPair.getRight()).enqueue(genericPacket);
+            controller.getOutpuPort(this.identifier,nextHopPair.getRight(), header.getHash(this.identifier)).enqueue(genericPacket);
+
+
         } catch (OperaNoPathException e) {
             throw new RuntimeException();
         }catch(ReconfigurationDeadlineException e){
@@ -90,22 +96,30 @@ public class OperaSwitch extends NetworkDevice {
     private boolean flowExceedsThreshold(Packet genericPacket) {
 
         long flowSize = flowSizeMapBit.getOrDefault(genericPacket.getFlowId(),0L);
-        flowSize = flowSize + genericPacket.getSizeBit();
-        flowSizeMapBit.put(genericPacket.getFlowId(),flowSize);
         return flowSize > directCircuitThresholdBit;
     }
 
     @Override
     protected void receiveFromIntermediary(Packet genericPacket) {
+        // TcpHeader header = (TcpHeader) genericPacket;
+
+        long flowSize = flowSizeMapBit.getOrDefault(genericPacket.getFlowId(),0L);
+        flowSize = flowSize + genericPacket.getSizeBit();
+        flowSizeMapBit.put(genericPacket.getFlowId(),flowSize);
         receive(genericPacket);
     }
 
     public void sendPending() {
-        for(Packet p: directCircuitBuffers){
+        int size = directCircuitBuffers.size();
+
+        for(int i = 0; i < size; i++){
+            receive(directCircuitBuffers.pop());
+        }
+        size = inDirectCircuitBuffers.size();
+        for(int i = 0; i < size; i++){
+            Packet p = inDirectCircuitBuffers.pop();
             receive(p);
         }
-        for(Packet p: inDirectCircuitBuffers){
-            receive(p);
-        }
+
     }
 }

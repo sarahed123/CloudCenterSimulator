@@ -15,7 +15,8 @@ import java.util.Queue;
 public class OperaOutputPort extends EcnTailDropOutputPort {
     private long mBitsEnqueued;
     private final long mMaxBitsPerInterval;
-
+    private long nextReconfigurationTime;
+    private OperaRotorSwitch rotor;
     /**
      * Constructor.
      *
@@ -23,18 +24,28 @@ public class OperaOutputPort extends EcnTailDropOutputPort {
      * @param targetNetworkDevice Target network device that is on the other side of the link
      * @param link                Link that this output ports solely governs
      * @param queue               Queue that governs how packet are stored queued in the buffer
+     * @param rotor
      */
-    protected OperaOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue) {
+    protected OperaOutputPort(NetworkDevice ownNetworkDevice, NetworkDevice targetNetworkDevice, Link link, Queue<Packet> queue, OperaRotorSwitch rotor) {
         super(ownNetworkDevice, targetNetworkDevice, link, Long.MAX_VALUE/8, Long.MAX_VALUE/8, queue);
         mBitsEnqueued = 0;
+        this.rotor = rotor;
         mMaxBitsPerInterval = OperaController.getInstance().getRemainingTimeToReconfigure() * link.getBandwidthBitPerNs();
+        nextReconfigurationTime = OperaController.getInstance().getRemainingTimeToReconfigure();
     }
 
     public void enqueue(Packet packet) {
-        if(mBitsEnqueued + packet.getSizeBit() > mMaxBitsPerInterval){
+        if (rotor.isReconfiguring()) {
             onConfigurationTimeExceeded();
+
         }
-        mBitsEnqueued += packet.getSizeBit();
+        long finish = (getBufferOccupiedBits() + packet.getSizeBit())/link.getBandwidthBitPerNs();
+
+        if(Simulator.getTimeFromNow(nextDispatchIn + finish) > OperaController.getInstance().getNextReconfigurationTIme() ){
+            onConfigurationTimeExceeded();
+
+        }
+        
         super.enqueue(packet);
     }
 
@@ -44,7 +55,20 @@ public class OperaOutputPort extends EcnTailDropOutputPort {
 
 
     @Override
+    protected void dispatch(Packet packet) {
+
+        super.dispatch(packet);
+    }
+
+
+    @Override
     protected void log(Packet packet) {
 
+    }
+
+    @Override
+    public String toString(){
+        long finish = (getBufferOccupiedBits() )/link.getBandwidthBitPerNs();
+        return super.toString() + "\n" + Simulator.getTimeFromNow(nextDispatchIn + finish) + " " + OperaController.getInstance().getNextReconfigurationTIme();
     }
 }

@@ -22,6 +22,8 @@ public class PerfectSimpleLinkGenerator extends LinkGenerator {
         super();
         delayNs = configuration.getLongPropertyOrFail("link_delay_ns");
         bandwidthBitPerNs = configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns");
+        SimulationLogger.logInfo("Link", "PERFECT_SIMPLE_LINK(delayNs=" + delayNs + ", bandwidthBitPerNs=" + bandwidthBitPerNs + ")");
+
     }
 
     @Override

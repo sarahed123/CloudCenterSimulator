@@ -9,6 +9,7 @@ import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,7 +38,7 @@ public class OperaController  extends RoutingPopulator {
         this.idToNetworkDevice =idToNetworkDevice;
         rotorParallelConfiguration = configuration.getIntegerPropertyWithDefault("opera_parallel_rotors_to_config",1);
         reconfigurationInterval = configuration.getLongPropertyOrFail("opera_reconfiguration_time_ns");
-        reconfigurationExecutionTime = configuration.getLongPropertyWithDefault("opera_reconfiguration_execution_time",0);
+        reconfigurationExecutionTime = configuration.getLongPropertyWithDefault("opera_reconfiguration_execution_time",0L);
         //rotorGuardTime = configuration.getLongPropertyOrFail("opera_rotor_guard_time");
         routingTables = new ArrayList<>();
         rotors = new ArrayList<>();
@@ -114,9 +115,9 @@ public class OperaController  extends RoutingPopulator {
     }
 
     private ArrayList<ArrayList<ArrayList<ImmutablePair<Integer,Integer>>>> loadRoutingTablesFromCycleDir(File cycleDir, int N) throws FileNotFoundException {
-        File[] nodesFiles = cycleDir.listFiles();
         ArrayList<ArrayList<ArrayList<ImmutablePair<Integer,Integer>>>> cycleRoutingTable = new ArrayList<>();
-        for (File nodeFile : nodesFiles) {
+        for (int j = 0; j < ToRNum; j++) {
+            File nodeFile = new File(cycleDir.getAbsolutePath() + "/n" + j);
             Scanner reader = new Scanner(nodeFile);
             int currNode = Integer.parseInt(nodeFile.getName().substring(1));
             ArrayList<ArrayList<ImmutablePair<Integer,Integer>>> nodeTable = new ArrayList<>();
@@ -131,6 +132,7 @@ public class OperaController  extends RoutingPopulator {
                 nodeTable.add(destNode,table);
             }
             cycleRoutingTable.add(currNode,nodeTable);
+            reader.close();
         }
         return cycleRoutingTable;
     }
@@ -160,40 +162,46 @@ public class OperaController  extends RoutingPopulator {
     }
 
     private void registerReconfigurationEndEvent() {
-        Simulator.registerEvent(new OperaReconfigurationEndEvent(reconfigurationExecutionTime));
+        OperaReconfigurationEndEvent oree = new OperaReconfigurationEndEvent(reconfigurationExecutionTime);
+        Simulator.registerEvent(oree);
     }
 
     public void onReconfigurationEnd(){
+        portMap.clear();
         ArrayList<OperaRotorSwitch> nextReconfiguringRotors = getNextRotors();
+
         for(OperaRotorSwitch ors: nextReconfiguringRotors){
             ors.start();
         }
         currCycle = (currCycle + nextReconfiguringRotors.size()) % (ToRNum - 1);
         currTable = routingTables.get(currCycle);
 
+        registerReconfigurationEvent();
         for(int id: idToNetworkDevice.keySet()){
             OperaSwitch sw = (OperaSwitch) idToNetworkDevice.get(id);
             sw.sendPending();
         }
-        registerReconfigurationEvent();
     }
 
     public boolean hasDirectConnection(int source, int dest) {
         return currTable.get(source).get(dest).get(0).getRight() == dest;
     }
 
-    public OperaOutputPort getOutpuPort(int source, int dest) throws OperaNoPathException {
+    public OperaOutputPort getOutpuPort(int source, int dest, long hash) throws OperaNoPathException {
         if(!hasDirectConnection(source,dest)){
             throw new OperaNoPathException();
         }
+
         ImmutablePair<Integer, Integer> pairKey = new ImmutablePair<Integer, Integer>(source,dest);
         OperaOutputPort port = portMap.get(pairKey);
         if(port == null){
+            ArrayList<ImmutablePair<Integer,Integer>> possibilities = currTable.get(source).get(dest);
+            OperaRotorSwitch rotor  = rotors.get(possibilities.get((int) hash % possibilities.size()).getLeft());
             NetworkDevice sourceDevice = idToNetworkDevice.get(source);
             NetworkDevice destDevice = idToNetworkDevice.get(dest);
             port = new OperaOutputPort(sourceDevice,destDevice,
                                         linkGenerator.generate(sourceDevice,destDevice),
-                                        new LinkedList<>());
+                                        new LinkedList<>(), rotor);
 
             portMap.put(pairKey,port);
         }
@@ -241,7 +249,7 @@ public class OperaController  extends RoutingPopulator {
             OperaRotorSwitch rotor = rotors.get(nextHopPair.getLeft());
             assert rotor.contains(nextHopPair.getRight());
             if(rotor.isReconfiguring()) return false;
-            if(nextReconfiguringRotors.contains(rotor.getId())) return false;
+            // if(nextReconfiguringRotors.contains(rotors.get(rotor.getId()))) return false;
             source = nextHopPair.getRight();
         }
 
@@ -260,5 +268,9 @@ public class OperaController  extends RoutingPopulator {
 
     public long getRemainingTimeToReconfigure() {
         return nextReconfigurationTime - Simulator.getCurrentTime();
+    }
+
+    public long getNextReconfigurationTIme(){
+        return nextReconfigurationTime;
     }
 }
