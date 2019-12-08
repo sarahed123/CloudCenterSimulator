@@ -70,4 +70,10 @@ public class OperaRotorSwitch {
     public boolean contains(Integer dest) {
         return matchings.get(currMatching).contains(dest);
     }
+
+    @Override
+    public boolean equals(Object o){
+        OperaRotorSwitch ors = (OperaRotorSwitch) o;
+        return ors.id == this.id;
+    }
 }
