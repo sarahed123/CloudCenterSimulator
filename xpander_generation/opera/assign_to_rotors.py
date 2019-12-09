@@ -20,7 +20,7 @@ with open(matching_file_path, "r") as f:
             break #last line might be blank
         matchings.append(line)
 
-matchings_per_rotor = (1 + len(matchings)) // rotor_num
+matchings_per_rotor = (len(matchings)) // rotor_num
 for j,rotor_matchings in enumerate(split_matchings(matchings)):
     with open(rotor_output_dir + "/" + "rotor_" + str(j), "w") as f:
         f.write("\n".join(rotor_matchings))
