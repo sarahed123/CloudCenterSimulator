@@ -177,7 +177,7 @@ public class OperaController  extends RoutingPopulator {
         currTable = routingTables.get(currCycle);
 
         registerReconfigurationEvent();
-        for(int id: idToNetworkDevice.keySet()){
+        for(int id: configuration.getGraphDetails().getTorNodeIds()){
             OperaSwitch sw = (OperaSwitch) idToNetworkDevice.get(id);
             sw.sendPending();
         }
@@ -237,15 +237,14 @@ public class OperaController  extends RoutingPopulator {
         return nextReconfiguringRotors;
     }
 
-    public boolean hasPacketPath(TcpHeader header) {
+    public boolean hasPacketPath(int source, int dest, long hash) {
         ArrayList<OperaRotorSwitch> nextReconfiguringRotors = getNextRotors();
-        int source = header.getSourceId();
         while(true){
-            if(source==header.getDestinationId()){
+            if(source==dest){
                 break;
             }
-            ArrayList<ImmutablePair<Integer,Integer>> possibilities = getPossiblities(source,header.getDestinationId());
-            ImmutablePair<Integer,Integer> nextHopPair = possibilities.get(header.getHash(source) % possibilities.size());
+            ArrayList<ImmutablePair<Integer,Integer>> possibilities = getPossiblities(source,dest);
+            ImmutablePair<Integer,Integer> nextHopPair = possibilities.get((int) hash % possibilities.size());
             OperaRotorSwitch rotor = rotors.get(nextHopPair.getLeft());
             assert rotor.contains(nextHopPair.getRight());
             if(rotor.isReconfiguring()) return false;

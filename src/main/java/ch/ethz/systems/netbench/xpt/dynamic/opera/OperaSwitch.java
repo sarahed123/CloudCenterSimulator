@@ -6,10 +6,7 @@ import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.ReconfigurationDeadlineException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class OperaSwitch extends NetworkDevice {
 
@@ -38,9 +35,9 @@ public class OperaSwitch extends NetworkDevice {
     private void routeDirectly(Packet genericPacket)  {
         TcpHeader header = (TcpHeader) genericPacket;
         OperaController controller = OperaController.getInstance();
-
+        int dest = configuration.getGraphDetails().getTorIdOfServer(header.getDestinationId());
         try {
-            controller.getOutpuPort(this.identifier,header.getDestinationId(),header.getHash(this.identifier)).enqueue(genericPacket);
+            controller.getOutpuPort(this.identifier,dest,header.getHash(this.identifier)).enqueue(genericPacket);
         } catch (OperaNoPathException  | ReconfigurationDeadlineException e) {
 
                 directCircuitBuffers.add(genericPacket);
@@ -49,13 +46,24 @@ public class OperaSwitch extends NetworkDevice {
 
     @Override
     public void receive(Packet genericPacket) {
+        Set<Integer> servers = configuration.getGraphDetails().getServersOfTor(this.identifier);
         TcpHeader header = (TcpHeader) genericPacket;
-        if(this.identifier==header.getDestinationId() && this.intermediary!=null){
+
+        boolean destToR = servers.contains(header.getDestinationId());
+        if(destToR){
+            getTargetOuputPort(header.getDestinationId()).enqueue(genericPacket);
+            return;
+        }
+
+        if(this.identifier==header.getDestinationId()){
 
             this.passToIntermediary(genericPacket);
             return;
         }
 
+        if(servers.contains(header.getSourceId()) || this.identifier==header.getSourceId()){
+            updateFlowSize(genericPacket);
+        }
         if(flowExceedsThreshold(genericPacket) && header.getSourceId() == this.identifier){
             routeDirectly(genericPacket);
             return;
@@ -73,13 +81,14 @@ public class OperaSwitch extends NetworkDevice {
 
         OperaController controller = OperaController.getInstance();
         TcpHeader header = (TcpHeader) genericPacket;
+        int dest = configuration.getGraphDetails().getTorIdOfServer(header.getDestinationId());
 
-        ArrayList<ImmutablePair<Integer,Integer>> possibilities = controller.getPossiblities(this.identifier,header.getDestinationId());
+        ArrayList<ImmutablePair<Integer,Integer>> possibilities = controller.getPossiblities(this.identifier,dest);
 
         ImmutablePair<Integer,Integer> nextHopPair = possibilities.get(header.getHash(this.identifier) % possibilities.size());
 
         try {
-            if(header.getSourceId()==this.identifier && !controller.hasPacketPath(header)){
+            if(header.getSourceId()==this.identifier && !controller.hasPacketPath(this.identifier, dest, header.getHash(identifier))){
                 throw new ReconfigurationDeadlineException();
             }
             controller.getOutpuPort(this.identifier,nextHopPair.getRight(), header.getHash(this.identifier)).enqueue(genericPacket);
@@ -102,11 +111,14 @@ public class OperaSwitch extends NetworkDevice {
     @Override
     protected void receiveFromIntermediary(Packet genericPacket) {
         // TcpHeader header = (TcpHeader) genericPacket;
-
-        long flowSize = flowSizeMapBit.getOrDefault(genericPacket.getFlowId(),0L);
-        flowSize = flowSize + genericPacket.getSizeBit();
-        flowSizeMapBit.put(genericPacket.getFlowId(),flowSize);
         receive(genericPacket);
+    }
+
+    private void updateFlowSize(Packet packet){
+
+        long flowSize = flowSizeMapBit.getOrDefault(packet.getFlowId(),0L);
+        flowSize = flowSize + packet.getSizeBit();
+        flowSizeMapBit.put(packet.getFlowId(),flowSize);
     }
 
     public void sendPending() {
