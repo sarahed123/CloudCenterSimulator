@@ -103,16 +103,18 @@ public abstract class TransportLayer {
      * @param destination       Destination network device identifier
      * @param flowSizeByte      Byte size of the flow
      */
-    public void startFlow(int destination, long flowSizeByte) {
+    public long startFlow(int destination, long flowSizeByte) {
 
         // Create new outgoing socket
+        long flowId = flowIdCounter;
         Socket socket = createSocket(flowIdCounter, destination, flowSizeByte);
         flowIdToSocket.put(flowIdCounter, socket);
-        flowIdCounter++;
 
+        flowIdCounter++;
         // Start the socket off as initiator
         socket.markAsSender();
         socket.start();
+        return flowId;
 
     }
 
