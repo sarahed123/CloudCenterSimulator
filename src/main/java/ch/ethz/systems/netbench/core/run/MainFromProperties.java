@@ -33,7 +33,8 @@ public class MainFromProperties {
      * @param args  Command line arguments
      */
     public static void main(String args[]) {
-
+        System.out.println("Free memory (bytes): " +
+                Runtime.getRuntime().freeMemory());
         // Load in the configuration properties
         List<NBProperties> runConfigurations = generateRunConfigurationFromArgs(args);
 
