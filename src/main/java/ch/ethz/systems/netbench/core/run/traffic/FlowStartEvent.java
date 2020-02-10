@@ -14,6 +14,7 @@ public class FlowStartEvent extends Event {
     protected final long flowSizeByte;
     protected int networkDeviceId; 
     protected TransportLayer transportLayer;
+    protected TransportLayer dstTransportLayer;
     /**
      * Create event which will happen the given amount of nanoseconds later.
      *
@@ -38,7 +39,11 @@ public class FlowStartEvent extends Event {
     @Override
     public void trigger() {
     	//TransportLayer tl = BaseInitializer.getInstance().getNetworkDeviceById(networkDeviceId).getTransportLayer();
-    	transportLayer.startFlow(targetId, flowSizeByte);
+    	long flowId = transportLayer.startFlow(targetId, flowSizeByte);
+    	dstTransportLayer.registerAsDest(flowId,flowSizeByte);
     }
 
+    public void registerDstTransport(TransportLayer dstTransportLayer) {
+        this.dstTransportLayer = dstTransportLayer;
+    }
 }
