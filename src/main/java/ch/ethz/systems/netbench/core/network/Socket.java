@@ -84,7 +84,8 @@ public abstract class Socket {
         if(exendedTopology){
             try{
                 MegaSwitch ms = (MegaSwitch) BaseInitializer.getInstance().getIdToNetworkDevice().get(sourceToRId);
-                ms.onFlowFinished(sourceToRId,destToRId,sourceId,destinationId,flowId);
+                if(ms != null)
+                    ms.onFlowFinished(sourceToRId,destToRId,sourceId,destinationId,flowId);
             }catch (ClassCastException e){
 
             }
@@ -147,4 +148,7 @@ public abstract class Socket {
     }
 
 
+    public void markAsReceiver() {
+
+    }
 }
