@@ -248,6 +248,7 @@ public class DistributedOpticServer extends OpticServer {
 		ReservationPacket rp = new  ReservationPacket(packet,path.get(0),path.get(0),path,color,true);
 		rp.setPrevHop(this.identifier);
 		routeThroughtPacketSwitch(rp);
+		SimulationLogger.increaseStatisticCounter("CIRCUIT_RESERVATION_PACKET_SENT");
 		return rp;
 	}
 
