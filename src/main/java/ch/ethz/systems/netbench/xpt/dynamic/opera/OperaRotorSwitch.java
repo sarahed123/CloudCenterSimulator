@@ -60,20 +60,28 @@ public class OperaRotorSwitch {
 
     @Override
     public String toString(){
-        return Integer.toString(id);
+        return this.matchings.get(currMatching).toString();
     }
 
     public boolean hasNextMatching() {
         return currMatching < matchings.size() - 1;
     }
 
-    public boolean contains(Integer dest) {
+    public boolean contains(int dest) {
         return matchings.get(currMatching).contains(dest);
+    }
+
+    public boolean containsAt(int source ,int dest) {
+        return matchings.get(currMatching).get(source) == dest;
     }
 
     @Override
     public boolean equals(Object o){
         OperaRotorSwitch ors = (OperaRotorSwitch) o;
         return ors.id == this.id;
+    }
+
+    public int getAt(int source) {
+        return matchings.get(currMatching).get(source);
     }
 }

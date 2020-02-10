@@ -21,6 +21,6 @@ public class OperaSwitchGenerator extends NetworkDeviceGenerator {
 
     @Override
     public NetworkDevice generate(int identifier, TransportLayer server) {
-        return new SimpleServer(identifier,server,intermediaryGenerator.generate(identifier),configuration);
+        return new OperaServer(identifier,server,intermediaryGenerator.generate(identifier),configuration);
     }
 }
