@@ -1,18 +1,22 @@
 package ch.ethz.systems.netbench.xpt.dynamic.opera;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.*;
+import ch.ethz.systems.netbench.ext.bare.BarePacket;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.ReconfigurationDeadlineException;
+import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.*;
 
 public class OperaSwitch extends NetworkDevice {
 
-    private LinkedList<Packet> directCircuitBuffers;
-    private LinkedList<Packet> inDirectCircuitBuffers;
-
+    private LinkedList<OperaPacket> directCircuitBuffers;
+    private LinkedList<OperaPacket> inDirectCircuitBuffers;
+    private HashSet<Long> flowFinishedSet;
     private HashMap<Long,Long> flowSizeMapBit;
     private long directCircuitThresholdBit;
     /**
@@ -29,46 +33,119 @@ public class OperaSwitch extends NetworkDevice {
         directCircuitBuffers = new LinkedList<>();
         inDirectCircuitBuffers = new LinkedList<>();
         flowSizeMapBit = new HashMap<>();
+        flowFinishedSet = new HashSet<>();
 
     }
 
-    private void routeDirectly(Packet genericPacket)  {
-        TcpHeader header = (TcpHeader) genericPacket;
+    private void routeDirectly(OperaPacket op) throws OperaNoPathException {
         OperaController controller = OperaController.getInstance();
-        int dest = configuration.getGraphDetails().getTorIdOfServer(header.getDestinationId());
+        int dest = configuration.getGraphDetails().getTorIdOfServer(op.getDestinationId());
+        OperaOutputPort outputPort = null;
         try {
-            controller.getOutpuPort(this.identifier,dest,header.getHash(this.identifier)).enqueue(genericPacket);
-        } catch (OperaNoPathException  | ReconfigurationDeadlineException e) {
 
-                directCircuitBuffers.add(genericPacket);
+            outputPort = controller.getOutpuPort(this.identifier,dest);
+            outputPort.enqueue(op);
+            SimulationLogger.increaseStatisticCounter("OPERA_PACKET_DIRECT_FORWARD_SUCCESS");
+            return;
+        } catch (OperaNoPathException  e) {
+//            System.out.println("trying to directly pass from " + this.identifier + " to " + dest);
+//            System.out.println(controller);
+            assert(controller.hasDirectConnection(this.identifier,dest)==null);
+            SimulationLogger.increaseStatisticCounter("OPERA_PACKET_DIRECT_FORWARD_NO_PATH");
+            throw e;
+
+        }catch ( ReconfigurationDeadlineException e){
+            SimulationLogger.increaseStatisticCounter("OPERA_PACKET_DIRECT_FORWARD_DEADLINE");
+            assert(outputPort.configurationTimeExceeded(op));
+            throw new OperaNoPathException();
         }
     }
 
     @Override
-    public void receive(Packet genericPacket) {
-        Set<Integer> servers = configuration.getGraphDetails().getServersOfTor(this.identifier);
-        TcpHeader header = (TcpHeader) genericPacket;
+    public void receive(Packet genericPacket){
+        if(genericPacket instanceof OperaPacket){
+            receive((OperaPacket) genericPacket);
+            return;
+        }
+        receive(new OperaPacket((FullExtTcpPacket) genericPacket));
+    }
 
-        boolean destToR = servers.contains(header.getDestinationId());
-        if(destToR){
-            getTargetOuputPort(header.getDestinationId()).enqueue(genericPacket);
+    public void receive(OperaPacket op) {
+        Set<Integer> servers = configuration.getGraphDetails().getServersOfTor(this.identifier);
+        TcpHeader header = (TcpHeader) op;
+        boolean isSourceTor = servers.contains(header.getSourceId());
+        boolean isDestToR = servers.contains(header.getDestinationId());
+        if(isDestToR){
+            if(op.isFIN() && op.isACK()){
+
+                flowSizeMapBit.remove(op.getFlowId());
+//                flowFinishedSet.add(op.getFlowId());
+            }
+            getTargetOuputPort(header.getDestinationId()).enqueue(op);
             return;
         }
 
         if(this.identifier==header.getDestinationId()){
 
-            this.passToIntermediary(genericPacket);
+            this.passToIntermediary(op);
             return;
         }
 
-        if(servers.contains(header.getSourceId()) || this.identifier==header.getSourceId()){
-            updateFlowSize(genericPacket);
-        }
-        if(flowExceedsThreshold(genericPacket) && header.getSourceId() == this.identifier){
-            routeDirectly(genericPacket);
+        if(op.isSecondHop()){
+            try {
+                routeDirectly(op);
+            } catch (OperaNoPathException e) {
+                directCircuitBuffers.addLast(op);
+            }
             return;
         }
-        routeInDirectly(genericPacket);
+
+        OperaController controller = OperaController.getInstance();
+        if(isSourceTor){
+
+
+            try {
+
+                int destToR = configuration.getGraphDetails().getTorIdOfServer(header.getDestinationId());
+                ArrayList<ImmutablePair<Integer,Integer>> path = null;
+                path = controller.getRandomPath(this.identifier,destToR);
+                op.setPath(path);
+                if(op.isACK()){
+
+                    routeInDirectly(op);
+                    return;
+                }
+
+                updateFlowSize(op);
+            } catch (OperaNoPathException e) {
+                inDirectCircuitBuffers.addLast(op);
+                return;
+            }
+
+
+        }
+        if(flowExceedsThreshold(op) && isSourceTor){
+            try {
+                routeDirectly(op);
+            } catch (OperaNoPathException e) {
+                try {
+                    routeToRandomHop(op);
+                } catch (OperaNoPathException e1) {
+                    directCircuitBuffers.addLast(op);
+                }
+            }
+            return;
+        }
+        routeInDirectly(op);
+
+    }
+
+    private void routeToRandomHop(OperaPacket op) throws OperaNoPathException {
+
+
+        OperaController.getInstance().getRandomOutputPort(this.identifier,op.getSizeBit()).enqueue(op);
+        op.markSecondHop();
+        SimulationLogger.increaseStatisticCounter("OPERA_RANDOM_FORWARD");
 
     }
 
@@ -77,28 +154,23 @@ public class OperaSwitch extends NetworkDevice {
         return OperaController.getInstance().getInputPort(this.identifier,sourceNetworkDeviceId);
     }
 
-    private void routeInDirectly(Packet genericPacket) {
+    private void routeInDirectly(OperaPacket op) {
 
         OperaController controller = OperaController.getInstance();
-        TcpHeader header = (TcpHeader) genericPacket;
-        int dest = configuration.getGraphDetails().getTorIdOfServer(header.getDestinationId());
+        TcpHeader header = (TcpHeader) op;
 
-        ArrayList<ImmutablePair<Integer,Integer>> possibilities = controller.getPossiblities(this.identifier,dest);
-
-        ImmutablePair<Integer,Integer> nextHopPair = possibilities.get(header.getHash(this.identifier) % possibilities.size());
 
         try {
-            if(header.getSourceId()==this.identifier && !controller.hasPacketPath(this.identifier, dest, header.getHash(identifier))){
-                throw new ReconfigurationDeadlineException();
-            }
-            controller.getOutpuPort(this.identifier,nextHopPair.getRight(), header.getHash(this.identifier)).enqueue(genericPacket);
+
+            ImmutablePair<Integer, Integer> nextHop = op.getNextHop();
+            controller.getOutpuPort(this.identifier,nextHop.getRight(), nextHop).enqueue(op);
 
 
         } catch (OperaNoPathException e) {
             throw new RuntimeException();
         }catch(ReconfigurationDeadlineException e){
 
-            inDirectCircuitBuffers.add(genericPacket);
+            inDirectCircuitBuffers.addLast(op);
         }
     }
 
@@ -122,16 +194,31 @@ public class OperaSwitch extends NetworkDevice {
     }
 
     public void sendPending() {
-        int size = directCircuitBuffers.size();
 
+
+        int size = inDirectCircuitBuffers.size();
         for(int i = 0; i < size; i++){
-            receive(directCircuitBuffers.pop());
-        }
-        size = inDirectCircuitBuffers.size();
-        for(int i = 0; i < size; i++){
-            Packet p = inDirectCircuitBuffers.pop();
+            OperaPacket p = inDirectCircuitBuffers.pollFirst();
+            int destToR = configuration.getGraphDetails().getTorIdOfServer(((TcpHeader) p).getDestinationId());
+            try {
+                ((OperaPacket) p).setPath(OperaController.getInstance().getRandomPath(this.identifier,destToR));
+            } catch (OperaNoPathException e) {
+                System.out.println("Oh no!");
+                throw new RuntimeException();
+            }
             receive(p);
         }
 
+        size = directCircuitBuffers.size();
+        for(int i = 0; i < size; i++){
+            OperaPacket op = directCircuitBuffers.pollFirst();
+            receive(op);
+        }
+
+
+    }
+
+    public boolean flowExceedsThreshold(long flowId) {
+        return this.flowSizeMapBit.getOrDefault(flowId,0l) >= directCircuitThresholdBit;
     }
 }
