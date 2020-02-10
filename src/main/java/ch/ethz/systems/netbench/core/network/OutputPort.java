@@ -54,7 +54,7 @@ public abstract class OutputPort extends Port{
         this.ownId = this.ownNetworkDevice.getIdentifier();
         this.targetNetworkDevice = targetNetworkDevice;
         this.targetId = this.targetNetworkDevice.getIdentifier();
-        if(ownNetworkDevice.configuration!=null && ownNetworkDevice.configuration.getBooleanPropertyWithDefault("log_port_utilization",true)){
+        if(ownNetworkDevice.configuration!=null && ownNetworkDevice.configuration.getBooleanPropertyWithDefault("log_port_utilization",false)){
             // Logging
             this.logger = createNewPortLogger();
         }
@@ -131,7 +131,7 @@ public abstract class OutputPort extends Port{
     }
 
     protected void registerPacketArrivalEvent(Packet packet) {
-    	getTargetInputPort().registerPacketArrivalEvent(packet);
+        getTargetInputPort().registerPacketArrivalEvent(packet);
 
     }
     
