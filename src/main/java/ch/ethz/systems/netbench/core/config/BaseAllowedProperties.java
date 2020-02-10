@@ -100,6 +100,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+		"enable_fair_udp",
     		"opera_direct_circuit_threshold_byte",
     		"opera_rotor_guard_time",
     		"opera_direct_circuit_threshold",
