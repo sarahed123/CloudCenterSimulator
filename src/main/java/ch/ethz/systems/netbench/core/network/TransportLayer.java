@@ -185,4 +185,12 @@ public abstract class TransportLayer {
     public long getFlowSize(long flowId) {
         return flowIdToSocket.get(flowId).flowSizeByte;
     }
+
+    public void registerAsDest(long flowId, long flowSizeByte) {
+
+    }
+
+    public long getNumOpenSockets() {
+        return flowIdToSocket.size();
+    }
 }
