@@ -64,6 +64,7 @@ public class DistributedOpticServerToR extends OpticServerToR {
 
         try{
             handleReservationPacket(genericPacket);
+            SimulationLogger.increaseStatisticCounter("CIRCUIT_RESERVATION_PACKET_PROCESSED");
             return;
         }catch (ClassCastException e){
 
