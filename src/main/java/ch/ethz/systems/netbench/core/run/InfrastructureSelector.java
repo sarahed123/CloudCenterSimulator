@@ -22,6 +22,7 @@ import ch.ethz.systems.netbench.ext.hybrid.EcmpThenValiantSwitchGenerator;
 import ch.ethz.systems.netbench.ext.valiant.RangeValiantSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.asaf.routing.priority.PriorityFlowletIntermediaryGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.device.DynamicSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.dynamic.opera.OperaSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
@@ -136,7 +137,8 @@ class InfrastructureSelector {
                 return new SemiRemoteRoutingSwitchGenerator(intermediaryGenerator,configuration);
             case "optic_server":
                 return new OpticServerGenerator(intermediaryGenerator,configuration);
-
+            case "opera_switch":
+                return new OperaSwitchGenerator(intermediaryGenerator,configuration);
             default:
                 throw new PropertyValueInvalidException(
                         configuration,
