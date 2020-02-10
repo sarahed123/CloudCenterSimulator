@@ -33,13 +33,14 @@ public class RemoteRoutingTransportLayer extends TransportLayer {
 	}
 	
 	@Override
-	public void startFlow(int destination, long flowSizeByte) {
-		super.startFlow(destination, flowSizeByte);
+	public long startFlow(int destination, long flowSizeByte) {
+		return super.startFlow(destination, flowSizeByte);
 		/*if(flowIdToSocket.size()==0) {
 			super.startFlow(destination, flowSizeByte);
 		}else {
 			flowsQueue.add(new Flow(destination,flowSizeByte));
 		}*/
+
 	}
 
 	public void continueFlow(RemoteRoutingPacket packet) {
