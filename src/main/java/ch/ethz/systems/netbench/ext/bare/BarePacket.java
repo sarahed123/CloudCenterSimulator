@@ -4,7 +4,7 @@ import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
 
-class BarePacket extends TcpPacket {
+public class BarePacket extends TcpPacket {
 
     /**
 	 * 
