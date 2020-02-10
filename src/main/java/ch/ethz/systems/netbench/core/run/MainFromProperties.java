@@ -305,7 +305,8 @@ public class MainFromProperties {
         // 3.1) Create flow plan for the simulator
         TrafficPlanner planner = TrafficSelector.selectPlanner(idToTransportLayer,Simulator.getConfiguration());
         planner.createPlan(runtimeNs);
-
+        SimulationLogger.logInfo("TOTAL_BYTEST_IN_PLAN", Long.toString(planner.getTotalBytes()));
+        System.out.println("Total bytes in traffic plan " + Long.toString(planner.getTotalBytes()));
         // Finish traffic generation
         System.out.println("Finished generating traffic flow starts.\n");
 
