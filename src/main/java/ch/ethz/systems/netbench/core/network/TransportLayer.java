@@ -88,6 +88,7 @@ public abstract class TransportLayer {
             socket = createSocket(packet.getFlowId(), packet.getSourceId(), -1);
 //            flowIdToReceiver.put(packet.getFlowId(), this);
             flowIdToSocket.put(packet.getFlowId(), socket);
+            socket.markAsReceiver();
         }
 
         // Give packet to socket (we do not care about stray packets)
