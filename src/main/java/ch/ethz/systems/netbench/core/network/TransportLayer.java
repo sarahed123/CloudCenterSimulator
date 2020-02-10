@@ -32,7 +32,7 @@ public abstract class TransportLayer {
 
     // Generator for unique flow identifiers amongst all transport layers
     private static long flowIdCounter = 0;
-    private static Map<Long, TransportLayer> flowIdToReceiver = new HashMap<>();
+//    private static Map<Long, TransportLayer> flowIdToReceiver = new HashMap<>();
     protected NBProperties configuration;
     // Map the flow identifier to the responsible socket
     protected Map<Long, Socket> flowIdToSocket;
@@ -86,7 +86,7 @@ public abstract class TransportLayer {
         // If the socket does not yet exist, it is an incoming socket
         if (socket == null && !finishedFlowIds.contains(packet.getFlowId())) {
             socket = createSocket(packet.getFlowId(), packet.getSourceId(), -1);
-            flowIdToReceiver.put(packet.getFlowId(), this);
+//            flowIdToReceiver.put(packet.getFlowId(), this);
             flowIdToSocket.put(packet.getFlowId(), socket);
         }
 
@@ -147,7 +147,7 @@ public abstract class TransportLayer {
      */
     public void cleanupSockets(long flowId) {
         this.removeSocket(flowId);
-        flowIdToReceiver.get(flowId).removeSocket(flowId);
+//        flowIdToReceiver.get(flowId).removeSocket(flowId);
     }
 
     /**
@@ -155,7 +155,7 @@ public abstract class TransportLayer {
      */
     public static void staticReset() {
         flowIdCounter = 0;
-        flowIdToReceiver.clear();
+//        flowIdToReceiver.clear();
     }
 
 	public static void dumpState(String dumpFolderName) throws IOException {
