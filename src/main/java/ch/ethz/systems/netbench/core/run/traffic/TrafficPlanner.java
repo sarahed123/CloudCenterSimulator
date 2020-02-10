@@ -55,6 +55,7 @@ public abstract class TrafficPlanner {
         FlowStartEvent event = new FlowStartEvent(time, idToTransportLayerMap.get(srcId), dstId, flowSizeByte);
         // Register event
         Simulator.registerEvent(event);
+        event.registerDstTransport(idToTransportLayerMap.get(dstId));
 
     }
 
