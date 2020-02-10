@@ -1,7 +1,6 @@
 package ch.ethz.systems.netbench.core.log;
 
 import ch.ethz.systems.netbench.core.Simulator;
-import ch.ethz.systems.netbench.core.config.NBProperties;
 
 
 public class FlowLogger {
@@ -19,8 +18,8 @@ public class FlowLogger {
     // Statistic tracking variables
     private long totalBytesReceived;
     private long receivedBytes;
-    private long flowStartTime;
-    private long measureStartTime;
+    protected long flowStartTime;
+    protected long measureStartTime;
     private long flowEndTime;
 
     // Logging
