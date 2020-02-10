@@ -5,10 +5,11 @@ import ch.ethz.systems.netbench.core.config.GraphDetails;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class TrafficPlanner {
-
+    protected long totalBytesInPlan;
     protected final Map<Integer, TransportLayer> idToTransportLayerMap;
     protected final GraphDetails graphDetails;
     protected final NBProperties configuration;
@@ -22,7 +23,7 @@ public abstract class TrafficPlanner {
         // Create mappings
         this.idToTransportLayerMap = idToTransportLayerMap;
         this.graphDetails = configuration.getGraphDetails();
-
+        totalBytesInPlan = 0;
     }
 
     public abstract void createPlan(long durationNs);
@@ -36,7 +37,7 @@ public abstract class TrafficPlanner {
      * @param flowSizeByte  Flow size in bytes
      */
     protected void registerFlow(long time, int srcId, int dstId, long flowSizeByte) {
-
+        totalBytesInPlan+=flowSizeByte;
         // Some checking
         if (srcId == dstId) {
             throw new RuntimeException("Invalid traffic pair; source (" + srcId + ") and destination (" + dstId + ") are the same.");
@@ -57,4 +58,7 @@ public abstract class TrafficPlanner {
 
     }
 
+    public long getTotalBytes() {
+        return totalBytesInPlan;
+    }
 }
