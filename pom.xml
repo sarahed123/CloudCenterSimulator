@@ -255,6 +255,24 @@
                 <enable_jumbo_flows>true</enable_jumbo_flows>
             </properties>
         </profile>
+        <profile>
+            <!-- http://www.yourkit.com/docs/80/help/agent.jsp -->
+            <id>yourkit</id>
+            <properties>
+                <yourkit.home>~yourkit/YourKit-JavaProfiler-2019.8</yourkit.home>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>-agentpath:"${yourkit.home}/bin/linux-x86-64/libyjpagent.so"</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <properties>
         <jdk.version>1.8</jdk.version>
