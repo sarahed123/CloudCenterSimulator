@@ -763,8 +763,7 @@ public class SimpleTcpSocket extends Socket {
                 tcpPacket.isECE(),
                 tcpPacket.isFIN()
         );
-//        System.out.println(resentPacket.getFlowId());
-//        System.out.println(resentPacket.toString());
+
         // Log statistic
 
         SimulationLogger.increaseStatisticCounter("TCP_RESEND_OCCURRED");
