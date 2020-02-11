@@ -34,6 +34,9 @@ def switch_prev(matching, curr_row_index):
 
 output_file = sys.argv[1]
 matchings_num = int(sys.argv[2])
+odd = True
+if matchings_num%2==0:
+	odd = False
 sys.setrecursionlimit(15000)
 def find_matchings_row_recursive(row_num):
     if row_num >= len(matrix):
@@ -77,41 +80,39 @@ def find_matchings_row_recursive(row_num):
         else:
             return True
     
-
-def find_matchings_element_recursive(row_num):
+#this works best for odd number of requested matchings
+def find_matchings_element_recursive(row_num,row_successes):
     if row_num >= len(matrix):
         return True
     elem_from_choices = [i for i in range(len(matrix[row_num])) if matrix[row_num][i]==-1]
-    while elem_from_choices:
-        elem_from = random.choice(elem_from_choices)
-        elem_to_choices = [i for i in range(len(matrix[row_num])) if matrix[row_num][i]==-1]
-        while elem_to_choices:
-            elem_to = random.choice(elem_to_choices)
-            colunm = [matrix[i][elem_to] for i in range(len(matrix))]
+    elem_from = random.choice(elem_from_choices)
 
-            if elem_from in colunm:
-                elem_to_choices.remove(elem_to)
-                continue
-            matrix[row_num][elem_to] = elem_from
-            matrix[row_num][elem_from] = elem_to
+    colunm = [matrix[i][elem_from] for i in range(0, row_num)]
+    elem_to_choices = list(filter(lambda x: x not in colunm and x not in matrix[row_num], range(len(matrix))))
+    if odd and elem_from in elem_to_choices:
+        elem_to_choices.remove(elem_from)
+    while elem_to_choices:
+        elem_to = random.choice(elem_to_choices)
+        matrix[row_num][elem_to] = elem_from
+        matrix[row_num][elem_from] = elem_to
+        next_row_successes = row_successes +  (1 if elem_from == elem_to else 2)
+        new_row_num = row_num if next_row_successes < len(matrix) else row_num + 1
+        ret = find_matchings_element_recursive(new_row_num,next_row_successes if new_row_num == row_num else (1 if odd else 0))
+        if not ret:
             elem_to_choices.remove(elem_to)
-            new_row_num = row_num if -1 in matrix[row_num] else row_num+1
-            ret = find_matchings_element_recursive(new_row_num)
-            if not ret:
-                matrix[row_num][elem_to] = -1
-                matrix[row_num][elem_from] = -1
-                continue
-            return True
-        return False
+            matrix[row_num][elem_to] = -1
+            matrix[row_num][elem_from] = -1
+            continue
+        return True
     return False    
     
 
 
 
-matrix = [[-1 for i in range(matchings_num)] for j in range(matchings_num) ]
+matrix = [[-1 if i!=j else (i if odd else -1) for i in range(matchings_num)] for j in range(matchings_num) ]
 
 matchings = []
-print(find_matchings_element_recursive(0))
+print(find_matchings_element_recursive(0,1 if odd else 0))
 
 print(matrix)
 edges = {}
@@ -123,8 +124,8 @@ for j,m in enumerate(matrix):
     for i in range(len(m)):
 
         assert i == m[m[i]], str(m) + " " + str(i)
-        if(i!=m[i]):
-            assert not m[i] in edges[i]
+        assert len(set(m)) == len(list(m))
+        assert not m[i] in edges[i]
         edges[i].append(m[i])
 
 with open(output_file, "w") as f:

@@ -43,3 +43,7 @@ def get_rotor_neighbours(k,rotors):
 def advance_to_cycle(cycle_num, rotors):
     curr_rotor_index = 0
     cycle = 0
+    while cycle < cycle_num:
+        rotors[curr_rotor_index].advance()
+        curr_rotor_index = (curr_rotor_index + 1) % len(rotors)
+        cycle+=1
