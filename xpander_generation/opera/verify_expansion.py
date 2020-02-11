@@ -10,10 +10,12 @@ N = int(sys.argv[4])
 rotors = load_rotors(rotors_dir,rotor_num)
 advance_to_cycle(cycle_num,rotors)
 
-matrix = [[1 if rotor_neighbours(j,i,rotors) and j!=i else 0 for i in range(N)] for j in range(N)]
+matrix = [[1 if rotor_neighbours(j,i,rotors) else 0 for i in range(N)] for j in range(N)]
 eigs, eigv = np.linalg.eig(matrix)
 eigs = np.abs(eigs)
 eigs.sort()
 print(eigs[-2])
 print(eigs)
-print(eigs[-2] < 2*np.sqrt(rotor_num - 1))
+
+#assert eigs[-2] < eigs[-1]
+assert eigs[-2] < 2*np.sqrt(rotor_num - 1), eigs[-2]
