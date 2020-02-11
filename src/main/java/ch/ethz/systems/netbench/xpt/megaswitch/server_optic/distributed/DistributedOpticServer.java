@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
+import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.CircuitTimeoutEvent;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServer;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.metrics.Evaluation;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.semi.SemiRemoteRoutingSwitch;
@@ -129,6 +130,16 @@ public class DistributedOpticServer extends OpticServer {
 	public boolean hasColor(int color, boolean receiving) {
 		HashSet colorSet = receiving ?  mReceveingColors : mTransmittingColors ;
 		return colorSet.contains(color);
+	}
+
+	@Override
+	protected void cancelCircuitTimeout(JumboFlow jFlow){
+		// the distributed optic server has its own mechanism for circuit timeouts
+	}
+
+	@Override
+	protected void setupCircuitTimeout(JumboFlow jFlow){
+		// the distributed optic server has its own mechanism for circuit timeouts
 	}
 
 	/**

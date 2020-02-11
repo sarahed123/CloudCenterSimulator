@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.megaswitch.server_optic;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
@@ -11,7 +12,9 @@ import ch.ethz.systems.netbench.core.run.routing.remote.LightOutputPortGenerator
 import ch.ethz.systems.netbench.ext.basic.PerfectSimpleLinkGenerator;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
+import ch.ethz.systems.netbench.xpt.megaswitch.JumboFlow;
 import ch.ethz.systems.netbench.xpt.megaswitch.MegaSwitch;
+import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.CircuitTimeoutEvent;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 
 /**
@@ -62,6 +65,16 @@ public class OpticServerToR extends OpticElectronicHybrid {
 
         }
 
+    }
+
+    @Override
+    protected void cancelCircuitTimeout(JumboFlow jFlow){
+        // let the server handle it
+    }
+
+    @Override
+    protected void setupCircuitTimeout(JumboFlow jFlow){
+        // let the server handle it
     }
 
 
