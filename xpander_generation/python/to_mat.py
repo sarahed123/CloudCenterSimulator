@@ -10,7 +10,6 @@ if __name__ == "__main__":
             A[int(nodes[0])].append(int(nodes[1]))
     with open(sys.argv[1]+'_mat','w') as f:
         for i in range(N):
-            assert(len(A[i])==8)
             for j in range(N):
                 if j in A[i]:
                     f.write("1 ")
