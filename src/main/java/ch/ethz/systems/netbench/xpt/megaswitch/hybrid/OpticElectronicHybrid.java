@@ -18,7 +18,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.HashMap;
 
 public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
-
+    private HashMap<Long,CircuitTimeoutEvent> tearDownMap;
+    private long circiutTimeout;
     private boolean useDummyServers;
     protected long circuitThreshold;
     protected NetworkDevice electronic;
@@ -32,8 +33,10 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         circuitThreshold = configuration.getLongPropertyOrFail("hybrid_circuit_threshold_byte");
         mJumboFlowMap = new HashMap<>();
         mNumAllocatedFlows = 0;
+	    circiutTimeout =  configuration.getLongPropertyWithDefault("circuit_teardown_timeout_ns", 30000);
         useDummyServers = configuration.getBooleanPropertyWithDefault("use_dummy_servers",false);
         mNumDeAllocatedFlows = 0;
+        tearDownMap = new HashMap();
 
     }
     @Override
@@ -140,10 +143,22 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         }
 
         this.conversionUnit.enqueue(jFlow.getSource(),jFlow.getDest(),packet);
-
-
+		cancelCircuitTimeout(jFlow);
+        setupCircuitTimeout(jFlow);
 		
 	}
+
+	protected void cancelCircuitTimeout(JumboFlow jFlow){
+        CircuitTimeoutEvent prevEvent = tearDownMap.get(jFlow.getId());
+        if(prevEvent != null) prevEvent.cancel();
+    }
+
+	protected void setupCircuitTimeout(JumboFlow jFlow){
+
+        CircuitTimeoutEvent e =  new CircuitTimeoutEvent(circiutTimeout, this, jFlow);
+        Simulator.registerEvent(e);
+        tearDownMap.put(jFlow.getId(),e);
+    }
 
 	/**
 	 * get the receiving destination by this class's aggregation scheme
@@ -339,11 +354,13 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
         resetJumboFlow(jumboFlow);
     }
 
-    private void resetJumboFlow(JumboFlow jumboFlow){
+    void resetJumboFlow(JumboFlow jumboFlow){
         if(hasOpticConnection()){
             conversionUnitRecover(jumboFlow);
             recoverPath(jumboFlow);
         }
+	
+        cancelCircuitTimeout(jumboFlow);
         jumboFlow.reset();
     }
 }
