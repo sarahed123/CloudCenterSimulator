@@ -1,0 +1,5 @@
+function []=eigs(arg1)
+B = load(arg1, "-ascii")
+eigenvalues = eig(B)
+save(strcat(arg1,".eigs"), 'eigenvalues', "-ascii")
+quit()
