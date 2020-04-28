@@ -1,28 +1,19 @@
 import sys
+import os
+from shutil import copyfile
+import errno
+sys.path.insert(0, '/cs/labs/schapiram/inonkp/netbench_runs/python/')
+from import_topology import import_topology
+print("usage: python import_topology.py topology_path N d server_num?\n")
 
 
-edges_list = []
-nodes = set()
-topology_path = sys.argv[1]
-run_dir = "runs/" + sys.argv[2]
-topology_dir = "/cs/labs/schapiram/inonkp/smallgraphs/" + run_dir + "/topologies/"
-with open(topology_path, "r") as f:
-    edges_list += f.readlines()
 
-    for edge in edges_list:
-        edge_split = edge.strip().split(" ")
-        nodes.add(edge_split[0])
-        nodes.add(edge_split[1])
+N = int(sys.argv[2])
+d = int(sys.argv[3])
+s = int(sys.argv[4]) if len(sys.argv) > 4 else 0
+lanes = int(sys.argv[5]) if len(sys.argv) > 5 else 1
 
-topology_path_split = topology_path.strip().split("/")
-properties = topology_path_split[-1].split("\\.")[0] + ".properties"
-with open(topology_dir + properties, "w") as f:
-    f.write("num_edges=" + str(len(edges_list))+ "\n")
-    f.write("num_nodes=" + str(len(nodes)) + "\n")
-    f.write("switches_which_are_tors=" + "incl_range" + "(" + "0" + "," +  str(len(nodes)-1) + ")" + "\n")
-    f.write("servers="+"set()"+"\n")
-    f.write("switches=" + "incl_range"+ "("+ "0"+"," + str(len(nodes)-1) + ")" + "\n")
-    f.write("edges=\\" + "\n")
-    for i,edge in enumerate(edges_list):
-        f.write(edge.strip())
-        f.write(",\\\n" if i<len(edges_list)-1 else "")
+#logs_dir = "n" + str(N) + "/d" + str(d)
+properties_dir = "/cs/labs/schapiram/inonkp/small_graphs/runs/" + f"n{N}/d{d}" + "/netbench/"
+import_topology(properties_dir,sys.argv[1],N,d,s,lanes)
+
