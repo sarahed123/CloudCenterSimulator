@@ -3,6 +3,7 @@ import random
 
 N = int(sys.argv[1])
 d = int(sys.argv[2])
+out_file = sys.argv[3]
 
 edges = {}
 for i in range(N):
@@ -60,7 +61,7 @@ for k in edges:
 	#print str(index) + " " + str(k) + " " + str(edges[k])
 	index+=1
 
-with open("topologies/jellyfish_n" + str(len(edges)) + "_d" + str(d) + ".topology", "w") as f:
+with open("topologies/" + out_file + ".topology", "w") as f:
 	for k in edges:
 		for v in edges[k]:
 			f.write(str(indices[k]) + " " + str(indices[v]) + "\n")
