@@ -1,4 +1,5 @@
 from tor import ToR
+from server import Server
 
 class MetaNode:
 	
@@ -6,26 +7,35 @@ class MetaNode:
 		self.ToRs = []
 		self.id = MN_id
 		for i in range(ToR_num):
-			self.ToRs.append(ToR(ToR_num*MN_id + i))
+			self.ToRs.append(ToR())
 	
 	def make_connections(self, dest_MN, conn_num):
 		conns_to_make = conn_num
 		while conns_to_make > 0:
-			source = self.get_least_connected_ToR()
-			target = dest_MN.get_least_connected_ToR()
+			source = self.get_least_connected_ToR(dest_MN)
+			target = dest_MN.get_least_connected_ToR(self)
+			if source==None or target == None:
+				raise Exception
 			source.connect(target)
 			target.connect(source)
 			conns_to_make-=1
 	
-	def get_least_connected_ToR(self):
-		max_conns = 0
-		ToR = None
+	def get_least_connected_ToR(self, dest_MN):
+		max_conns = ToR.out_deg
+		ret = None
+		edges = self.get_edges_to(dest_MN)
+		sorted_ToRs = sorted(self.ToRs, key=lambda T: T.get_available_conns(), reverse=True)
+		for T in sorted_ToRs:
+			if len(edges[T.id]) < max_conns and T.get_available_conns():
+				max_conns = len(edges[T.id])
+				ret = T
+		return ret
+	
+	def get_num_avilable_conns(self):
+		res = 0
 		for T in self.ToRs:
-			conns = T.get_available_conns()
-			if conns > max_conns:
-				max_conns = conns
-				ToR = T
-		return ToR
+			res += T.get_available_conns()
+		return res
 	
 	def __str__(self):
 		rep = f"Meta Node with {len(self.ToRs)} num ToRs:\n"
@@ -36,13 +46,13 @@ class MetaNode:
 	def get_edges(self):
 		edges = dict()
 		for ToR in self.ToRs:
-			print(f"getting edges from {ToR.id}")
 			edges[ToR.id] = ToR.get_edges()
 		return edges
 	
 	def verify_edges(self):
 		for ToR in self.ToRs:
-			ToR.verify_edges()
+			if(ToR.get_available_conns()):
+				print(f"ToR {ToR.id} has {ToR.get_available_conns()} available conns")
 
 	def get_edges_to(self, MN):
 		edges_to_dest = {}
@@ -51,10 +61,20 @@ class MetaNode:
 			ToR_edges = ToR.get_edges()
 			edges_to_dest[ToR.id] = [dest for dest in ToR_edges if dest in MN_ToR_ids]
 		return edges_to_dest
-
-	def add_servers(self, serv_num, lane_num):
+	
+	def get_server_edges(self):
+		ret = dict()
+		for ToR in self.ToRs:
+			servers = ToR.get_servers()
+			edges = []
+			for s in servers:
+				edges.append(s.id)
+			ret[ToR.id] = edges
+		return ret
+		
+	def add_servers(self, serv_num):
 		servers = []
 		for s in range(serv_num):
-			servers.append(Server(lane_num))
+			servers.append(Server())
 		for ToR in self.ToRs:
 			ToR.add_servers(servers)
