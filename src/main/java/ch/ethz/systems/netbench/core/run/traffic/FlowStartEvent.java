@@ -40,7 +40,7 @@ public class FlowStartEvent extends Event {
     public void trigger() {
     	//TransportLayer tl = BaseInitializer.getInstance().getNetworkDeviceById(networkDeviceId).getTransportLayer();
     	long flowId = transportLayer.startFlow(targetId, flowSizeByte);
-    	dstTransportLayer.registerAsDest(flowId,flowSizeByte);
+    	if(dstTransportLayer!=null) dstTransportLayer.registerAsDest(flowId,flowSizeByte);
     }
 
     public void registerDstTransport(TransportLayer dstTransportLayer) {
