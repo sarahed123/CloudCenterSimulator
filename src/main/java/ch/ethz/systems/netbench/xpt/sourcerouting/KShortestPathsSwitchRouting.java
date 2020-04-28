@@ -41,7 +41,8 @@ public class KShortestPathsSwitchRouting extends RoutingPopulator {
         try {
             String fileName = getKspCacheFilename(details);
             File f = new File(fileName);
-            if (f.exists()) {
+            System.out.println(fileName);
+            if (f.exists() && f.length() > 0) {
                 BufferedReader br = new BufferedReader(new FileReader(fileName));
                 String kLine = br.readLine();
                 String spl[] = kLine.split("=");
