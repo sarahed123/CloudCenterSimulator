@@ -11,24 +11,30 @@ public class PerfectSimpleLinkGenerator extends LinkGenerator {
 
     private final long delayNs;
     private final long bandwidthBitPerNs;
-
+    private int serverLanes = 1;
     public PerfectSimpleLinkGenerator(long delayNs, long bandwidthBitPerNs) {
+        super();
         this.delayNs = delayNs;
         this.bandwidthBitPerNs = bandwidthBitPerNs;
         SimulationLogger.logInfo("Link", "PERFECT_SIMPLE_LINK(delayNs=" + delayNs + ", bandwidthBitPerNs=" + bandwidthBitPerNs + ")");
     }
+    
+    public PerfectSimpleLinkGenerator(long delayNs, long bandwidthBitPerNs, int serverLanes) {
+	this(delayNs, bandwidthBitPerNs);
+	this.serverLanes = serverLanes;	
+	SimulationLogger.logInfo("Link", "PERFECT_SIMPLE_LINK(serverLanes=" + serverLanes + ")");
+
+    }
 
     public PerfectSimpleLinkGenerator(NBProperties configuration) {
-        super();
-        delayNs = configuration.getLongPropertyOrFail("link_delay_ns");
-        bandwidthBitPerNs = configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns");
-        SimulationLogger.logInfo("Link", "PERFECT_SIMPLE_LINK(delayNs=" + delayNs + ", bandwidthBitPerNs=" + bandwidthBitPerNs + ")");
-
+	this(configuration.getLongPropertyOrFail("link_delay_ns"), configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns"),configuration.getGraphDetails().getServerLanesNum());
     }
 
     @Override
     public Link generate(NetworkDevice fromNetworkDevice, NetworkDevice toNetworkDevice) {
-        return new PerfectSimpleLink(delayNs, bandwidthBitPerNs);
+	long deviceBW = bandwidthBitPerNs;
+	if(fromNetworkDevice.isServer() || toNetworkDevice.isServer()) deviceBW /= serverLanes;
+        return new PerfectSimpleLink(delayNs, deviceBW);
     }
 
 }
