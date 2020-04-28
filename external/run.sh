@@ -1,2 +1,2 @@
 #!/bin/sh
-java -jar -ea FS.jar $1
+java -jar -ea NetBench.jar $1

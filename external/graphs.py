@@ -19,16 +19,13 @@ def init_label(data,label):
 def parse_lable(label):
     return label.split("_")[0]
 
-def graph(run_list):
-
+def graph(run_list,args,fix,i,fig):
     labels = get_labels()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--label", help="where to draw the label from", dest="label", required=True)
-    parser.add_argument("--x_data", help="where to draw x data from", dest="x_data", required=True)
-    parser.add_argument("--y_data", help="where to draw y data from", dest="y_data", required=True)
-    args = parser.parse_known_args()[0]
+
     data = dict()
     for res in run_list:
+        if not all(item in res.items() for item in fix.items()):
+            continue
         if args.label in res:
             init_label(data, res[args.label])
             x = res[args.x_data]
@@ -37,17 +34,24 @@ def graph(run_list):
             except:
                 pass
             data[res[args.label]]['x'][x] = res[args.y_data]
+
+    ax1 = fig.add_subplot(2,2,i+1)
     for label in data:
         x_data = []
         y_data = []
         for x in sorted(data[label]['x'].keys()):
             x_data.append(x)
             y_data.append(float(data[label]['x'][x]))
+        ax1.plot(x_data,y_data,label=label)
+    title = ""
+    for k in fix:
+        title+= f"{fix[k]} "
+    title = title.strip()
+    ax1.set_title(title)
+    ax1.legend()
+    #plt.show()
+    #plt.savefig(args.output_dir + "/" + title.replace(" ", "_") + ".png")
 
-        plt.plot(x_data,y_data,label=labels[parse_lable(label)])
-    plt.legend()
-    plt.show()
-
-
+    return plt
 
 
