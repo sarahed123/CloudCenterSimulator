@@ -127,7 +127,7 @@ public class Graph implements BaseGraph, Serializable {
         this.inEdges.putAll(graph.inEdges);
         this.outEdges.putAll(graph.outEdges);
         this.edgeWeights.putAll(graph.edgeWeights);
-
+	this.edgeCapacities.putAll(graph.edgeCapacities);
 	}
 
 	protected void verifyNewEdge(int startVertexId, int endVertexId, long weight){
@@ -251,7 +251,6 @@ public class Graph implements BaseGraph, Serializable {
 
 	@Override
 	public long getEdgeCapacity(Vertex v1, Vertex v2) {
-		
 		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
 	}
 
