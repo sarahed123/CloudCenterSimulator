@@ -16,7 +16,7 @@ public class GraphDetails {
     private HashMap<Integer, Set<Integer>> torToServerIds;
     private HashMap<Integer, Integer> serverToTorId;
     private boolean autoExtended;
-
+    private int serverLanes;
     GraphDetails(String idHash) {
         this.idHash = idHash;
         this.numNodes = -1;
@@ -25,6 +25,7 @@ public class GraphDetails {
         this.switchNodeIds = null;
         this.torNodeIds = null;
         this.autoExtended = false;
+	this.serverLanes = 1;
     }
 
     /**
@@ -216,6 +217,14 @@ public class GraphDetails {
      */
     public int getNumServers() {
         return serverNodeIds.size();
+    }
+	
+    public int getServerLanesNum(){
+	return serverLanes;
+    }
+
+    public void setServerLanes(int lanes){
+	this.serverLanes = lanes;
     }
 
 }
