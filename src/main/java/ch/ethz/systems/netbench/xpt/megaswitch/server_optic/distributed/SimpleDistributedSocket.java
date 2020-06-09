@@ -125,7 +125,7 @@ public class SimpleDistributedSocket extends SimpleDctcpSocket {
     protected void handleAcknowledgment(FullExtTcpPacket packet) {
         if(packet.isOnCircuit()){
             mOnCircuit = true;
-            congestionWindow = 3000000;
+            congestionWindow = 75000;
         }
         super.handleAcknowledgment(packet);
     }
