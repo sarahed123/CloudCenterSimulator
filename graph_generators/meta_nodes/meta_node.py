@@ -10,15 +10,16 @@ class MetaNode:
 			self.ToRs.append(ToR())
 	
 	def make_connections(self, dest_MN, conn_num):
+		assert conn_num%len(self.ToRs) == 0
+		assert len(self.ToRs) == len(dest_MN.ToRs)
+		matching_num = int(conn_num/len(self.ToRs))
 		conns_to_make = conn_num
-		while conns_to_make > 0:
-			source = self.get_least_connected_ToR(dest_MN)
-			target = dest_MN.get_least_connected_ToR(self)
-			if source==None or target == None:
-				raise Exception
-			source.connect(target)
-			target.connect(source)
-			conns_to_make-=1
+		for i in range(matching_num):
+			for j in range(len(self.ToRs)):
+				s = self.ToRs[j]
+				t = dest_MN.ToRs[(i+j) % len(self.ToRs)]
+				s.connect(t)
+				t.connect(s)
 	
 	def get_least_connected_ToR(self, dest_MN):
 		max_conns = ToR.out_deg
