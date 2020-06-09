@@ -553,7 +553,10 @@ public class NBProperties extends Properties {
 						&& !key.equals("network_type")){
 					if(key.equals("scenario_topology_file") || key.equals("csv_size_dist_file_bytes")){
 						String[] path = value.split("/");
-						baseDir += "/" + key + "/" + path[path.length - 1].split("[.]")[0];
+						String graphName = path[path.length - 1];
+						int extensionIndex = graphName.lastIndexOf(".");
+						graphName = graphName.substring(0,extensionIndex+1);
+						baseDir += "/" + key + "/" + graphName;
 						continue;
 					}
 					baseDir += "/" + key + "/" + value;
