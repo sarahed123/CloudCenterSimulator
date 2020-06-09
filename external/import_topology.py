@@ -4,7 +4,7 @@ from shutil import copyfile
 import errno
 sys.path.insert(0, '/cs/labs/schapiram/inonkp/netbench_runs/python/')
 from import_topology import import_topology
-print("usage: python import_topology.py topology_path N d server_num?\n")
+print("usage: python import_topology.py topology_path N d server_num? lanes?\n")
 
 
 
