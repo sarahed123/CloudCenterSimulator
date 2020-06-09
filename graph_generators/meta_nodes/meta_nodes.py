@@ -10,6 +10,8 @@ def create_meta_node(meta_nodes_num, ToRs_per_meta_node):
 	servers_in_meta_node = math.ceil(args.S/meta_nodes_num)
 	s_deg = math.ceil(servers_in_meta_node/args.L)
 	out_degree = args.D - s_deg
+	if out_degree%(meta_nodes_num - 1) != 0:
+		return False
 	overs = ((out_degree*ToRs_per_meta_node)/servers_in_meta_node)/(meta_nodes_num - 1)
 	print(f"Trying with meta node num {meta_nodes_num} with {args.L} lanes")
 	if overs >= args.O:
@@ -32,14 +34,14 @@ def verify_edges(sMN, tMN):
 	edges_to_dest = sMN.get_edges_to(tMN)
 	max_edges = max([len(edges_to_dest[n]) for n in edges_to_dest])
 	min_edges = max([len(edges_to_dest[n]) for n in edges_to_dest])
-	assert max_edges - min_edges <= 1
+	assert min_edges == max_edges
 	sum_edges = 0
 	for edge_list in edges_to_dest.values():
-		assert len(set(edge_list)) == len(edge_list)
+		#assert len(set(edge_list)) == len(edge_list)
 		print((edge_list), end=" ")
 		sum_edges+=len(edge_list)
 	print()
-	assert sum_edges >= conns_between_mns - 1
+	assert sum_edges == conns_between_mns
 
 
 def create_file(output_file, edges):
@@ -67,6 +69,7 @@ def create_graph(meta_nodes_num, ToRs):
 		print(MNs[i].get_edges())
 	while True:
 		try:
+			print("should only be printed once")
 			sorted_MNs = sorted(MNs, key=lambda M: M.get_num_avilable_conns(), reverse=True)
 			for i in range(1,len(sorted_MNs)):
 				edges_as_list = sum(sorted_MNs[0].get_edges_to(sorted_MNs[i]).values(), [])
