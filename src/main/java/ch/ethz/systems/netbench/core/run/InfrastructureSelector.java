@@ -165,9 +165,8 @@ class InfrastructureSelector {
 
             case "perfect_simple":
                 return new PerfectSimpleLinkGenerator(
-                        configuration.getLongPropertyOrFail("link_delay_ns"),
-                        configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns")
-                );
+                	configuration
+		);
 
             default:
                 throw new PropertyValueInvalidException(
