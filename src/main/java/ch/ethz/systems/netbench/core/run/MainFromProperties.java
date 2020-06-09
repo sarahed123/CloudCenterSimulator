@@ -344,7 +344,9 @@ public class MainFromProperties {
                 SimulationLogger.logInfo("OVERRODE_TOPOLOGY_FILE_WITH_SERVER_EXTENSION", "servers/node=" + serversPerNodeToExtendWith);
                 configuration.markExtended();
             } else {
-                throw new PropertyValueInvalidException(configuration, "scenario_topology_extend_with_servers");
+		if(!configuration.getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("none"))
+	                throw new PropertyValueInvalidException(configuration, "scenario_topology_extend_with_servers");
+		return;
             }
 
             // Override configuration property
