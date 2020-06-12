@@ -46,14 +46,18 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
             }
 
         } else {
-            // Convert to TCP packet
-            TcpHeader tcpHeader = (TcpHeader) genericPacket;
-            // Forward to the next switch
-            List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
-            this.targetIdToOutputPort.get(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
+            forwardToNextSwitch(genericPacket);
 
         }
 
+    }
+
+    protected void  forwardToNextSwitch(Packet genericPacket){
+        // Convert to TCP packet
+        TcpHeader tcpHeader = (TcpHeader) genericPacket;
+        // Forward to the next switch
+        List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
+        this.targetIdToOutputPort.get(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
     }
 
     @Override
