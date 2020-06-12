@@ -17,6 +17,7 @@ public class GraphDetails {
     private HashMap<Integer, Integer> serverToTorId;
     private boolean autoExtended;
     private int serverLanes;
+    private int metaNodeNum;
     GraphDetails(String idHash) {
         this.idHash = idHash;
         this.numNodes = -1;
@@ -25,6 +26,7 @@ public class GraphDetails {
         this.switchNodeIds = null;
         this.torNodeIds = null;
         this.autoExtended = false;
+        this.metaNodeNum = -1;
 	this.serverLanes = 1;
     }
 
@@ -224,7 +226,15 @@ public class GraphDetails {
     }
 
     public void setServerLanes(int lanes){
-	this.serverLanes = lanes;
+	    this.serverLanes = lanes;
+    }
+
+    public void setMetaNodeNum(int num){
+        this.metaNodeNum = num;
+    }
+
+    public int getMetaNodeNum(){
+        return this.metaNodeNum;
     }
 
 }
