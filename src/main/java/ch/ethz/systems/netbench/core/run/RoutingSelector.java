@@ -9,6 +9,7 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchRouting;
 import ch.ethz.systems.netbench.ext.ecmp.ForwarderSwitchRouting;
 import ch.ethz.systems.netbench.xpt.dynamic.opera.OperaController;
+import ch.ethz.systems.netbench.xpt.meta_node.MNController;
 import ch.ethz.systems.netbench.xpt.sourcerouting.EcmpThenKspNoShortestRouting;
 import ch.ethz.systems.netbench.xpt.sourcerouting.EcmpThenKspRouting;
 import ch.ethz.systems.netbench.xpt.sourcerouting.KShortestPathsSwitchRouting;
@@ -72,6 +73,10 @@ public class RoutingSelector {
                 RemoteRoutingController.initRemoteRouting(remoteRoutingType,idToNetworkDevice,headerSize,configuration);
                 
                 return RemoteRoutingController.getInstance();
+            }
+
+            case "meta_node_router":{
+                return MNController.getInstance(configuration,idToNetworkDevice);
             }
 
             case "empty_routing_populator":
