@@ -111,9 +111,12 @@ public class GraphReader {
                             details.setTorNodeIds(convertCollectionOfIds(val));
                             break;
 
-			case "Lanes":
-				details.setServerLanes(Integer.valueOf(val));
-				break;
+			            case "Lanes":
+				            details.setServerLanes(Integer.valueOf(val));
+				            break;
+                        case "MetaNodeSize":
+                            details.setMetaNodeNum(Integer.valueOf(val));
+                            break;
                         default:
                             throw new IllegalArgumentException("Unauthorized key in file: " + key);
                     }
