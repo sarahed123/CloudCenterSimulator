@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.meta_node;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.Intermediary;
 import ch.ethz.systems.netbench.core.network.Packet;
@@ -12,9 +13,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class MetaNodeSwitch extends EcmpSwitch {
     Map<Pair<Integer,Integer>, MetaNodeToken> tokenMap;
+    private Random rand;
     private int MNId;
     /**
      * Constructor for ECMP switch.
@@ -29,6 +32,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
         super(identifier, transportLayer, n, intermediary, configuration);
         MNId = -1;
         tokenMap = new HashMap<>();
+        this.rand = Simulator.selectIndependentRandom("mn_switch_randomizer");
     }
 
     protected void  forwardToNextSwitch(Packet genericPacket){
@@ -50,7 +54,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
 
     private MetaNodeToken getToken(int destinationId) {
         MNController controller = MNController.getInstance();
-        int MNSource = controller.getMetaNodeId(this.identifier);
+        int MNSource = this.MNId;
         int MNDest = controller.getMetaNodeId(destinationToNextSwitch.get(destinationId).get(0));
         MetaNodeToken currToken = tokenMap.get(new ImmutablePair<>(MNSource,MNDest));
         if(currToken==null){
