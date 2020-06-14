@@ -3,10 +3,14 @@ package ch.ethz.systems.netbench.xpt.meta_node;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
+import ch.ethz.systems.netbench.ext.ecmp.EcmpRoutingUtility;
+import edu.asu.emit.algorithm.graph.Vertex;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MNController extends RoutingPopulator {
@@ -18,6 +22,7 @@ public class MNController extends RoutingPopulator {
     private int metaNodeSize;
     private long initialTokenSizeKB;
     private long tokenTimeout;
+    private int matchingsNum;
     private MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
         super(configuration);
         this.idToNetworkDevice = idToNetworkDevice;
@@ -32,6 +37,22 @@ public class MNController extends RoutingPopulator {
         tokenTimeout = configuration.getLongPropertyWithDefault("meta_node_token_timeout_ns", 30000);
         initMetaNodes();
         initDevices();
+        matchingsNum = calcMatchingNum();
+    }
+
+    /**
+     * relies on perfect symmetry
+     * @return
+     */
+    private int calcMatchingNum(){
+       List<Vertex> vertices = configuration.getGraph().getAdjacentVertices(new Vertex(0));
+       int ToRVertices = 0;
+       for(Vertex u: vertices){
+           if(!idToNetworkDevice.get(u.getId()).isServer()){
+                ToRVertices++;
+           }
+       }
+       return ToRVertices/(metaNodeNum-1);
     }
 
     private void initDevices() {
@@ -54,7 +75,7 @@ public class MNController extends RoutingPopulator {
 
     @Override
     public void populateRoutingTables() {
-
+        EcmpRoutingUtility.populateShortestPathRoutingTables(this.idToNetworkDevice, true, this.configuration);
     }
 
     public static MNController getInstance(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice){
@@ -99,7 +120,7 @@ public class MNController extends RoutingPopulator {
 
     private long calcTransferTimeNS(long KBytes) {
 
-        return (KBytes*1000000*8) / linkSpeedBpns;
+        return ((KBytes*1000000*8) / linkSpeedBpns)/matchingsNum;
     }
 
 
