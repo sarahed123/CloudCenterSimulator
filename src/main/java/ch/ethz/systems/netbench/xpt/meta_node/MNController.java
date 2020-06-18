@@ -1,6 +1,8 @@
 package ch.ethz.systems.netbench.xpt.meta_node;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpRoutingUtility;
@@ -12,32 +14,38 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class MNController extends RoutingPopulator {
-    Map<Integer, NetworkDevice> idToNetworkDevice;
-    Map<Pair<Integer,Integer>, Long> loadMap;
+    protected Map<Integer, NetworkDevice> idToNetworkDevice;
+    protected Map<Pair<Integer,Integer>, Long> loadMap;
     static MNController sInstance = null;
     private int metaNodeNum;
     private long linkSpeedBpns;
     private int metaNodeSize;
-    private long initialTokenSizeKB;
+    private long initialTokenSizeBytes;
     private long tokenTimeout;
     private int matchingsNum;
-    private MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
+    private Random rand;
+    protected MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
         super(configuration);
         this.idToNetworkDevice = idToNetworkDevice;
         loadMap = new HashMap<>();
+        int ToRnum = configuration.getGraphDetails().getNumTors();
         metaNodeNum = configuration.getGraphDetails().getMetaNodeNum();
-        if(metaNodeNum%idToNetworkDevice.size() != 0){
+
+        if(ToRnum%metaNodeNum != 0){
             throw new IllegalStateException("MetaNode num must perfectly divide network switch num");
         }
-        metaNodeSize = idToNetworkDevice.size() / metaNodeNum;
+        metaNodeSize = ToRnum / metaNodeNum;
         linkSpeedBpns = configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns");
-        initialTokenSizeKB = configuration.getLongPropertyWithDefault("meta_node_default_token_size_kilo_bytes", 10);
+        initialTokenSizeBytes = configuration.getLongPropertyWithDefault("meta_node_default_token_size_bytes", 15000);
         tokenTimeout = configuration.getLongPropertyWithDefault("meta_node_token_timeout_ns", 30000);
+        rand = Simulator.selectIndependentRandom("mn_switch_randomizer");
         initMetaNodes();
         initDevices();
         matchingsNum = calcMatchingNum();
+
     }
 
     /**
@@ -52,14 +60,17 @@ public class MNController extends RoutingPopulator {
                 ToRVertices++;
            }
        }
+        SimulationLogger.logInfo("META_NODE_MATCHING_NUM", Integer.toString(matchingsNum));
        return ToRVertices/(metaNodeNum-1);
     }
 
     private void initDevices() {
-        for(NetworkDevice nd: idToNetworkDevice.values()){
-            MetaNodeSwitch mnsw = (MetaNodeSwitch) nd;
+
+        for(int i=0; i<configuration.getGraphDetails().getNumTors(); i++)   {
+            MetaNodeSwitch mnsw = (MetaNodeSwitch) idToNetworkDevice.get(i);
             int MN = mnsw.getIdentifier()/metaNodeSize;
             mnsw.setMetaNodeId(MN);
+            mnsw.setRandomizer(this.rand);
         }
     }
 
@@ -80,7 +91,8 @@ public class MNController extends RoutingPopulator {
 
     public static MNController getInstance(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice){
         if(sInstance == null){
-            return new MNController(configuration,idToNetworkDevice);
+            sInstance = new MNController(configuration,idToNetworkDevice);
+            return sInstance;
         }
         throw new IllegalStateException("Controller already initialized");
     }
@@ -92,35 +104,53 @@ public class MNController extends RoutingPopulator {
         return sInstance;
     }
 
-    public MetaNodeToken getToken(int MNSource, int MNDest, long KBytes){
+    private long calcTransferTimeNS(int MNSource, int MNDest, long bytes){
+        assert MNSource!=MNDest;
         Pair p = new ImmutablePair(MNSource,MNDest);
         long directBuffer = loadMap.get(p);
-        long directTransferTime = calcTransferTimeNS(KBytes + directBuffer);
-        long minTransferTime = directTransferTime;
+        long directTransferTime = calcTransferTimeNS(bytes + directBuffer);
+        long transferTime = directTransferTime;
+        return transferTime;
+    }
+
+    private long calcTransferTimeNS(int MNSource, int middleHop, int MNDest, long bytes){
+        return calcTransferTimeNS(MNSource, middleHop, bytes) + calcTransferTimeNS(middleHop,MNDest,bytes);
+    }
+
+    protected int getNextMNDest(int MNSource, int MNDest, long bytes){
+
+        long minTransferTime = calcTransferTimeNS(MNSource,MNDest,bytes);
         int dest = MNDest;
         for(int i=0; i<metaNodeNum; i++){
-            if(i==MNDest) continue;
-            Pair<Integer,Integer> firstHop = new ImmutablePair<>(MNSource,i);
-            Pair<Integer,Integer> secondHop = new ImmutablePair<>(i,MNDest);
-            long indirectTransferTime = calcTransferTimeNS(loadMap.get(firstHop) + loadMap.get(secondHop) + KBytes);
+            if(i==MNDest || i==MNSource) continue;
+            long indirectTransferTime = calcTransferTimeNS(MNSource, i, MNDest, bytes);
             if(indirectTransferTime<minTransferTime){
                 minTransferTime = indirectTransferTime;
                 dest = i;
             }
         }
-
-        Pair<Integer,Integer> firstHop = new ImmutablePair<>(MNSource,dest);
-        loadMap.put(firstHop,loadMap.get(firstHop)+KBytes);
-        if(dest!=MNDest){
-            Pair<Integer,Integer> secondHop = new ImmutablePair<>(dest,MNDest);
-            loadMap.put(secondHop,loadMap.get(secondHop)+KBytes);
-        }
-        return new MetaNodeToken(KBytes, dest, tokenTimeout);
+        return dest;
     }
 
-    private long calcTransferTimeNS(long KBytes) {
+    public MetaNodeToken getToken(int MNSource, int MNDest, long bytes){
+        int dest = getNextMNDest(MNSource, MNDest, bytes);
+        return getToken(MNSource, MNDest, dest, bytes);
 
-        return ((KBytes*1000000*8) / linkSpeedBpns)/matchingsNum;
+    }
+
+    private MetaNodeToken getToken(int MNSource, int MNDest, int middleHop, long bytes) {
+        Pair<Integer,Integer> firstHop = new ImmutablePair<>(MNSource,middleHop);
+        loadMap.put(firstHop,loadMap.get(firstHop)+bytes);
+        if(middleHop!=MNDest){
+            Pair<Integer,Integer> secondHop = new ImmutablePair<>(middleHop,MNDest);
+            loadMap.put(secondHop,loadMap.get(secondHop)+bytes);
+        }
+        return new MetaNodeToken(bytes, middleHop, tokenTimeout);
+    }
+
+    private long calcTransferTimeNS(long bytes) {
+
+        return ((bytes*8) / linkSpeedBpns)/matchingsNum;
     }
 
 
@@ -128,7 +158,11 @@ public class MNController extends RoutingPopulator {
         return identifier/metaNodeNum;
     }
 
-    public MetaNodeToken getToken(int mnSource, int mnDest) {
-        return getToken(mnSource,mnDest,initialTokenSizeKB);
+    public MetaNodeToken getToken(int MNSource, int MNDest) {
+        return getToken(MNSource,MNDest,initialTokenSizeBytes);
+    }
+
+    public int getMatchingsNum(){
+        return this.matchingsNum;
     }
 }
