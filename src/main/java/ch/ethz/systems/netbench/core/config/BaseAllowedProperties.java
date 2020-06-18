@@ -100,8 +100,10 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
-		"disable_ecmp_path_hashing",
-		"enable_fair_udp",
+    		"meta_node_default_token_size_bytes",
+			"meta_node_token_timeout_ns",
+			"disable_ecmp_path_hashing",
+			"enable_fair_udp",
     		"opera_direct_circuit_threshold_byte",
     		"opera_rotor_guard_time",
     		"opera_direct_circuit_threshold",
