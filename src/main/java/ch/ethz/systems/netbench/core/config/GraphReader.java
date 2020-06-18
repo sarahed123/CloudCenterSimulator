@@ -114,7 +114,7 @@ public class GraphReader {
 			            case "Lanes":
 				            details.setServerLanes(Integer.valueOf(val));
 				            break;
-                        case "MetaNodeSize":
+                        case "MetaNodeNum":
                             details.setMetaNodeNum(Integer.valueOf(val));
                             break;
                         default:
