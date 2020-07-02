@@ -32,9 +32,10 @@ def make_graph():
 		indices[u] = index
 		index += 1
 	pprint(edges)
-	with open("SLZ_n" + str(len(edges)) + "_d" + str(4) + ".topology", "w") as out:
+	d = 4 if not args.psl else 3
+	with open("SLZ_n" + str(len(edges)) + "_d" + str(d) + ".topology", "w") as out:
 		for v in edges:
-			assert len(edges[v])==4
+			assert len(edges[v])==d
 			for u in edges[v]:
 				assert v in edges[u]
 				out.write(str(indices[v]) + " " + str(indices[u]) + "\n")
