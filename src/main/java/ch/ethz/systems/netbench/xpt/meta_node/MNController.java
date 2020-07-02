@@ -23,10 +23,12 @@ public class MNController extends RoutingPopulator {
     private int metaNodeNum;
     private long linkSpeedBpns;
     private int metaNodeSize;
-    private long initialTokenSizeBytes;
-    private long tokenTimeout;
+    private int ToRNum;
+    protected long initialTokenSizeBytes;
+    protected long tokenTimeout;
     private int matchingsNum;
     private Random rand;
+    private int serverPerMetaNode;
     protected MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
         super(configuration);
         this.idToNetworkDevice = idToNetworkDevice;
@@ -37,7 +39,9 @@ public class MNController extends RoutingPopulator {
         if(ToRnum%metaNodeNum != 0){
             throw new IllegalStateException("MetaNode num must perfectly divide network switch num");
         }
+        this.ToRNum = ToRnum;
         metaNodeSize = ToRnum / metaNodeNum;
+        serverPerMetaNode = configuration.getGraphDetails().getNumServers()/metaNodeNum;
         linkSpeedBpns = configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns");
         initialTokenSizeBytes = configuration.getLongPropertyWithDefault("meta_node_default_token_size_bytes", 15000);
         tokenTimeout = configuration.getLongPropertyWithDefault("meta_node_token_timeout_ns", 30000);
@@ -133,19 +137,35 @@ public class MNController extends RoutingPopulator {
     }
 
     public MetaNodeToken getToken(int MNSource, int MNDest, long bytes){
-        int dest = getNextMNDest(MNSource, MNDest, bytes);
-        return getToken(MNSource, MNDest, dest, bytes);
+        long newBytes = Math.max(initialTokenSizeBytes,bytes);
+        int dest = getNextMNDest(MNSource, MNDest, newBytes);
+        return getToken(MNSource, MNDest, dest, newBytes);
 
     }
 
     private MetaNodeToken getToken(int MNSource, int MNDest, int middleHop, long bytes) {
         Pair<Integer,Integer> firstHop = new ImmutablePair<>(MNSource,middleHop);
-        loadMap.put(firstHop,loadMap.get(firstHop)+bytes);
+        updateLoadMap(firstHop,bytes);
         if(middleHop!=MNDest){
             Pair<Integer,Integer> secondHop = new ImmutablePair<>(middleHop,MNDest);
-            loadMap.put(secondHop,loadMap.get(secondHop)+bytes);
+            updateLoadMap(secondHop,bytes);
         }
-        return new MetaNodeToken(bytes, middleHop, tokenTimeout);
+
+        return getMetaNodeToken(bytes, MNSource, middleHop, MNDest);
+    }
+
+    protected void updateLoadMap(Pair pair, long bytes){
+
+        loadMap.put(pair,loadMap.get(pair)+bytes);
+    }
+
+    protected MetaNodeToken getMetaNodeToken(long bytes, int MNSource, int middleHop, int MNDest){
+
+        return new MetaNodeToken(bytes, MNSource, middleHop, MNDest, tokenTimeout);
+    }
+
+    public int getMetaNodeNum() {
+        return metaNodeNum;
     }
 
     private long calcTransferTimeNS(long bytes) {
@@ -155,6 +175,7 @@ public class MNController extends RoutingPopulator {
 
 
     public int getMetaNodeId(int identifier) {
+
         return identifier/metaNodeNum;
     }
 
@@ -164,5 +185,33 @@ public class MNController extends RoutingPopulator {
 
     public int getMatchingsNum(){
         return this.matchingsNum;
+    }
+
+    public int getServerMetaNodeNum(int identifier){
+        assert identifier >= ToRNum;
+
+        int serverPlace = identifier - ToRNum;
+        return serverPlace/serverPerMetaNode;
+    }
+
+    public int getServerPerMetaNode(){
+        return serverPerMetaNode;
+    }
+
+    public void releaseToken(MetaNodeToken metaNodeToken) {
+        releaseLoad(metaNodeToken.getSource(), metaNodeToken.getMiddleHop(), metaNodeToken.getOriginalBytesAllocated());
+        if(metaNodeToken.getMiddleHop()!=metaNodeToken.getDest()){
+            releaseLoad(metaNodeToken.getMiddleHop(), metaNodeToken.getDest(), metaNodeToken.getOriginalBytesAllocated());
+        }
+    }
+
+    private void releaseLoad(int source, int dest, long originalBytesAllocated) {
+        Pair<Integer, Integer> pair = new ImmutablePair<>(source,dest);
+        long currBytes = loadMap.get(pair);
+
+
+
+        assert currBytes>=originalBytesAllocated;
+        loadMap.put(pair,currBytes-originalBytesAllocated);
     }
 }

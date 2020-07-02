@@ -24,7 +24,7 @@ public class MetaNodeTokeTimeoutEvent extends Event {
 
     @Override
     public void trigger() {
-        if(token.active()) return;
+        if(token.active() || token.expired()) return;
         token.setExpired();
     }
 

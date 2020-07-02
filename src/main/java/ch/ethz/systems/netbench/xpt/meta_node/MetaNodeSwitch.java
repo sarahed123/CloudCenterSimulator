@@ -1,19 +1,14 @@
 package ch.ethz.systems.netbench.xpt.meta_node;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
-import ch.ethz.systems.netbench.core.network.Intermediary;
-import ch.ethz.systems.netbench.core.network.NetworkDevice;
-import ch.ethz.systems.netbench.core.network.Packet;
-import ch.ethz.systems.netbench.core.network.TransportLayer;
+import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitch;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
 public class MetaNodeSwitch extends EcmpSwitch {
-    Map<Integer, MetaNodeToken> tokenMap;
+    protected Map<Integer, MetaNodeToken> tokenMap;
     private Random rand;
     private int MNId;
     private int currToRDest;
@@ -39,6 +34,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
         // Convert to TCP packet
         TcpHeader tcpHeader = (TcpHeader) genericPacket;
         boolean isSecondHop = !targetIdToOutputPort.containsKey(tcpHeader.getSourceId());
+        boolean localPacket = targetIdToOutputPort.containsKey(tcpHeader.getDestinationId());
 
         if(this.isServer()){
             forwardFromserver(genericPacket);
@@ -48,12 +44,26 @@ public class MetaNodeSwitch extends EcmpSwitch {
             forwardFromSecondHop(genericPacket);
             return;
         }
+        if(localPacket){
+            if(tcpHeader.isFIN() && tcpHeader.isACK()){
+                releaseToken(tcpHeader.getSourceId());
+            }
+            targetIdToOutputPort.get(tcpHeader.getDestinationId()).enqueue(genericPacket);
+            return;
+        }
+
 
         MetaNodeToken token = getToken(tcpHeader.getDestinationId());
-        List<Integer> possibilities = getDestinationToMN(token.getMNDest());
+        List<Integer> possibilities = getDestinationToMN(token.getMiddleHop());
         int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
-        this.targetIdToOutputPort.get(randomNext).enqueue(genericPacket);
+        OutputPort out = this.targetIdToOutputPort.get(randomNext);
+        out.enqueue(genericPacket);
         token.nextBytes(tcpHeader.getSizeBit()/(8));
+        int MNDest = getController().getServerMetaNodeNum(tcpHeader.getDestinationId());
+        tokenMap.put(MNDest, token);
+    }
+
+    private void releaseToken(int sourceId) {
 
     }
 
@@ -89,19 +99,23 @@ public class MetaNodeSwitch extends EcmpSwitch {
         return possiblilities;
     }
 
-    private MetaNodeToken getToken(int destinationId) {
-        MNController controller = MNController.getInstance();
+    protected MetaNodeToken getToken(int destinationId) {
+        MNController controller = getController();
         int MNSource = this.MNId;
         int MNDest = controller.getMetaNodeId(destinationToNextSwitch.get(destinationId).get(0));
         MetaNodeToken currToken = tokenMap.get(MNDest);
         if(currToken==null){
-            currToken = MNController.getInstance().getToken(MNSource, MNDest);
+            currToken = getController().getToken(MNSource, MNDest);
         }
         if(currToken.expired()){
-            currToken = MNController.getInstance().getToken(MNSource, MNDest, currToken.bytes);
+            currToken = getController().getToken(MNSource, MNDest, currToken.getOriginalBytesAllocated());
         }
 
         return currToken;
+    }
+
+    protected MNController getController() {
+        return MNController.getInstance();
     }
 
     public void setMetaNodeId(int mn) {
