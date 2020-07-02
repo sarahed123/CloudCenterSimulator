@@ -308,7 +308,25 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         int numChosenTors = (int) Math.floor(numTors * activeFractionX);
 
         // Probability between each server pair
-        double serverPairProb = 1.0 / (numChosenTors * (numChosenTors - 1) * serversPerNodeToExtendWith * serversPerNodeToExtendWith);
+        //double serverPairProb = 1.0 / (numChosenTors * (numChosenTors - 1) * serversPerNodeToExtendWith * serversPerNodeToExtendWith);
+	double serverPairs = 0.0;
+        for (int i = 0; i < numChosenTors; i++) {
+            for (int j = 0; j < numChosenTors; j++) {
+
+                    int torA = tors.get(i);
+                    int torB = tors.get(j);
+                    for (Integer svrA : configuration.getGraphDetails().getServersOfTor(torA)) {
+                        for (Integer svrB : configuration.getGraphDetails().getServersOfTor(torB)) {
+                            // Add to random pair generator
+		    	    if(svrA.equals(svrB)) continue;
+                            serverPairs++;
+                        }
+                    }
+
+
+            }
+        }
+	double serverPairProb = 1.0/ serverPairs;
 
         System.out.print("Generating all-to-all pair probabilities in " + (activeFractionX * 100) + "% fraction " + tors.size() + " ToRs between their servers...");
 
@@ -317,7 +335,6 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         for (int i = 0; i < numChosenTors; i++) {
             chosen.add(tors.get(i));
             for (int j = 0; j < numChosenTors; j++) {
-                if (i != j) {
 
                     int torA = tors.get(i);
                     int torB = tors.get(j);
@@ -325,11 +342,11 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
                     for (Integer svrA : configuration.getGraphDetails().getServersOfTor(torA)) {
                         for (Integer svrB : configuration.getGraphDetails().getServersOfTor(torB)) {
                             // Add to random pair generator
+		    	    if(svrA.equals(svrB)) continue;
                             addToPool(serverPairProb, new ImmutablePair<>(svrA, svrB));
                         }
                     }
 
-                }
 
             }
         }
