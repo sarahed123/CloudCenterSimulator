@@ -12,6 +12,7 @@ import ch.ethz.systems.netbench.ext.trafficpair.TrafficPairPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.flowsize.*;
 import ch.ethz.systems.netbench.xpt.fluidflow.FluidFlowTrafficPlanner;
 import ch.ethz.systems.netbench.xpt.meta_node.MetaNodePermutationTrafficPlanner;
+import ch.ethz.systems.netbench.xpt.meta_node.MockMetaNodePermutationTrafficPlanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -205,6 +206,13 @@ class TrafficSelector {
                                     flowSizeDistribution,
                                     configuration
                             );
+                        case "mock_meta_node_premutation_traffic":
+                            return new MockMetaNodePermutationTrafficPlanner(
+                                    idToTransportLayer,
+                                    configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
+                                    flowSizeDistribution,
+                                    configuration
+                                );
                         default:
                             throw new PropertyValueInvalidException(configuration, "traffic_probabilities_generator");
 
