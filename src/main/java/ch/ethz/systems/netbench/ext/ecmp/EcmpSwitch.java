@@ -4,12 +4,13 @@ import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
+import java.util.Random; 
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterface {
-
+    protected Random rand;
     // Routing table
     protected final List<List<Integer>> destinationToNextSwitch;
 
@@ -27,6 +28,7 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
         for (int i = 0; i < n; i++) {
             this.destinationToNextSwitch.add(new ArrayList<>());
         }
+	this.rand = new Random();
     }
 
     @Override
@@ -57,7 +59,12 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
         TcpHeader tcpHeader = (TcpHeader) genericPacket;
         // Forward to the next switch
         List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
-        this.targetIdToOutputPort.get(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
+        if(!configuration.getBooleanPropertyWithDefault("disable_ecmp_path_hashing", false)){
+            this.targetIdToOutputPort.get(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
+        }else{
+            int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
+            this.targetIdToOutputPort.get(randomNext).enqueue(genericPacket);
+        }
     }
 
     @Override
