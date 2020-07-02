@@ -68,7 +68,7 @@ public class MetaNodePermutationTrafficPlanner extends PoissonArrivalPlanner {
         return configuration.getGraphDetails().getMetaNodeNum();
     }
 
-    List<Integer> getServesPerMNList(int MNId){
+    protected List<Integer> getServesPerMNList(int MNId){
         int numToRs = configuration.getGraphDetails().getNumTors();
         List<Integer> servers = new LinkedList<>();
         int serversPerMN = getNumServersPerMN();
