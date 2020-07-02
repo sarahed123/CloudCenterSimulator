@@ -5,18 +5,13 @@ import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
-import ch.ethz.systems.netbench.ext.bare.BarePacket;
-import ch.ethz.systems.netbench.ext.basic.TcpPacket;
-import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
-import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
-import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.BufferedWriter;
@@ -172,8 +167,86 @@ public class MetaNodeSwitchTest {
 
     }
 
+    @Test
+    public void forwardDirectNoSecondHop(){
+        MockMetaNodeSwitch mnsw = (MockMetaNodeSwitch) instance.getDevice(0);
+        Mockito.doReturn(1000l).when(tcpPacket).getSizeBit();
+        Mockito.doReturn(35).when(tcpPacket).getDestinationId();
+        Mockito.doReturn(25).when(tcpPacket).getSourceId();
+        mnsw.receive(tcpPacket);
+        assert mnsw.getTargetOuputPort(5).getQueueSize() == 1;
+
+    }
+
+    @Test
+    public void forwardInsideMetaNode(){
+        MockMetaNodeSwitch mnsw = (MockMetaNodeSwitch) instance.getDevice(0);
+        Mockito.doReturn(1000l).when(tcpPacket).getSizeBit();
+        Mockito.doReturn(26).when(tcpPacket).getDestinationId();
+        Mockito.doReturn(25).when(tcpPacket).getSourceId();
+        mnsw.receive(tcpPacket);
+        assert mnsw.getTargetOuputPort(26).getQueueSize() == 1;
+
+    }
+
+    @Test
+    public void forwardToSecondHop(){
+        MockMetaNodeSwitch mnsw = (MockMetaNodeSwitch) instance.getDevice(0);
+        Mockito.doReturn(1000l).when(tcpPacket).getSizeBit();
+        Mockito.doReturn(35).when(tcpPacket).getDestinationId();
+        Mockito.doReturn(25).when(tcpPacket).getSourceId();
+        instance.getLoadMap().put(new ImmutablePair<>(0,1), 50000l);
+        mnsw.receive(tcpPacket);
+        assert mnsw.getTargetOuputPort(10).getQueueSize() == 1;
+    }
+
+    @Test
+    public void getTokentest(){
+        MockMetaNodeSwitch mnsw = (MockMetaNodeSwitch) instance.getDevice(0);
+        Mockito.doReturn(8000l).when(tcpPacket).getSizeBit();
+        Mockito.doReturn(35).when(tcpPacket).getDestinationId();
+        Mockito.doReturn(25).when(tcpPacket).getSourceId();
+        mnsw.receive(tcpPacket);
+        MetaNodeToken token = mnsw.getTokenMap().get(1);
+        assert token.getBytes() == instance.getInitialTokenBytes() - 1000l; // check the token new value
+        assert token.getTimeout() == instance.getTokenTimeout();
+        mnsw = (MockMetaNodeSwitch) instance.getDevice(1);
+        mnsw.receive(tcpPacket);
+        mnsw = (MockMetaNodeSwitch) instance.getDevice(2);
+        mnsw.receive(tcpPacket);
+        MetaNodeToken newToken = mnsw.getTokenMap().get(1);
+
+        assert newToken != token;
+        assert newToken.getMiddleHop() == 2;
+        assert newToken.getBytes() == instance.getInitialTokenBytes() - 1000l; // check the token new value
+        assert newToken.getTimeout() == instance.getTokenTimeout();
+
+    }
+
+    @Test
+    public void expireTokenTest(){
+        MockMetaNodeSwitch mnsw = (MockMetaNodeSwitch) instance.getDevice(0);
+        Mockito.doReturn(8000l).when(tcpPacket).getSizeBit();
+        Mockito.doReturn(35).when(tcpPacket).getDestinationId();
+        Mockito.doReturn(25).when(tcpPacket).getSourceId();
+        mnsw.receive(tcpPacket);
+        MetaNodeToken token = mnsw.getTokenMap().get(1);
+        for(int i = 0; i < 14; i++){
+            mnsw.receive(tcpPacket);
+        }
+
+        assert token.expired();
+        mnsw.receive(tcpPacket);
+        MetaNodeToken newToken = mnsw.getTokenMap().get(1);
+        assert newToken != token;
+    }
+
+
     @After
     public void clear(){
         Simulator.reset(true);
+        instance.clear();
+        BaseInitializer initializer = BaseInitializer.getInstance();
+        initializer.reset();
     }
 }

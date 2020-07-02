@@ -6,10 +6,7 @@ import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.core.run.infrastructure.*;
-import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.OpticElectronicHybrid;
 import ch.ethz.systems.netbench.xpt.simple.simpleserver.SimpleServer;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -129,14 +126,14 @@ public class MetaNodeControllerTest {
     public void getTokenTest(){
         MockMNController controller = MockMNController.getInstance();
         MetaNodeToken token = controller.getToken(0,1);
-        assert token.getMNDest() == 1;
+        assert token.getMiddleHop() == 1;
         token = controller.getToken(0,1);
-        assert token.getMNDest() == 1;
+        assert token.getMiddleHop() == 1;
         token = controller.getToken(0,1);
-        int remoteDest = token.getMNDest();
+        int remoteDest = token.getMiddleHop();
         assert remoteDest != 1;
         token = controller.getToken(0,1);
-        assert token.getMNDest() != remoteDest;
+        assert token.getMiddleHop() != remoteDest;
 
     }
 
