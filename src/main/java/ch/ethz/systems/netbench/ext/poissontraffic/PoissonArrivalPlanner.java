@@ -26,13 +26,13 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         DUAL_ALL_TO_ALL_SERVER_FRACTION,
         DENSITY_MATRIX
     }
-    private NBProperties configuration;
+    protected NBProperties configuration;
     private final double lambdaFlowStartsPerSecond;
     protected final FlowSizeDistribution flowSizeDistribution;
     private final Random ownIndependentRng;
-    private final RandomCollection<Pair<Integer, Integer>> randomPairGenerator;
+    protected final RandomCollection<Pair<Integer, Integer>> randomPairGenerator;
 
-    private PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution,NBProperties configuration) {
+    protected PoissonArrivalPlanner(Map<Integer, TransportLayer> idToTransportLayerMap, double lambdaFlowStartsPerSecond, FlowSizeDistribution flowSizeDistribution,NBProperties configuration) {
         super(idToTransportLayerMap,configuration);
         this.lambdaFlowStartsPerSecond = lambdaFlowStartsPerSecond;
         this.flowSizeDistribution = flowSizeDistribution;
