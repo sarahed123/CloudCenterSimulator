@@ -26,6 +26,7 @@ import ch.ethz.systems.netbench.xpt.dynamic.opera.OperaSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
+import ch.ethz.systems.netbench.xpt.meta_node.MetaNodeSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenodctcp.NewRenoDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
@@ -139,6 +140,8 @@ class InfrastructureSelector {
                 return new OpticServerGenerator(intermediaryGenerator,configuration);
             case "opera_switch":
                 return new OperaSwitchGenerator(intermediaryGenerator,configuration);
+            case "meta_node_switch":
+                return new MetaNodeSwitchGenerator(intermediaryGenerator,configuration.getGraphDetails().getNumNodes(),configuration);
             default:
                 throw new PropertyValueInvalidException(
                         configuration,
