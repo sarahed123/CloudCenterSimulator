@@ -30,7 +30,28 @@ public class MockMNController extends MNController {
         return loadMap;
     }
 
+    protected MetaNodeToken getMetaNodeToken(long bytes, int MNSource, int middleHop, int MNDest){
+        return new MockMetaNodeToken(bytes, MNSource, middleHop, MNDest, tokenTimeout);
+    }
+
+
     public MetaNodeSwitch getDevice(int id){
         return (MetaNodeSwitch) idToNetworkDevice.get(id);
     }
+
+    public long getInitialTokenBytes(){
+        return initialTokenSizeBytes;
+    }
+
+    public long getTokenTimeout(){
+        return tokenTimeout;
+    }
+
+
+    public void clear() {
+        loadMap.clear();
+
+    }
+
+
 }

@@ -36,7 +36,7 @@ import java.util.Random;
 public class OperaTest {
     MockOperaController operaController;
     NBProperties configuration;
-    long simulationDuration = 1000000000;
+    long simulationDuration = 1000000;
     @Before
     public void setup() throws IOException {
         configuration = new NBProperties(BaseAllowedProperties.EXPERIMENTAL,BaseAllowedProperties.PROPERTIES_RUN,

@@ -7,6 +7,7 @@ import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 
 import java.util.List;
+import java.util.Map;
 
 public class MockMetaNodeSwitch extends MetaNodeSwitch {
     /**
@@ -27,6 +28,16 @@ public class MockMetaNodeSwitch extends MetaNodeSwitch {
         return super.getDestinationToMN(MNId);
     }
 
+    @Override
+    protected MNController getController() {
+        return MockMNController.getInstance();
+    }
 
+    public  MetaNodeToken mockGetToken(int destinationId){
+        return super.getToken(destinationId);
+    }
 
+    public Map<Integer, MetaNodeToken> getTokenMap(){
+        return tokenMap;
+    }
 }
