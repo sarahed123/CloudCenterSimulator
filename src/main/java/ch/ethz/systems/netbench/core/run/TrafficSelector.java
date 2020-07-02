@@ -11,6 +11,7 @@ import ch.ethz.systems.netbench.ext.simpletraffic.SimpleTrafficPlanner;
 import ch.ethz.systems.netbench.ext.trafficpair.TrafficPairPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.flowsize.*;
 import ch.ethz.systems.netbench.xpt.fluidflow.FluidFlowTrafficPlanner;
+import ch.ethz.systems.netbench.xpt.meta_node.MetaNodePermutationTrafficPlanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +107,8 @@ class TrafficSelector {
                             configuration
 	                );
 
-                } else {
+                }
+                else {
 
                     // If we don't supply the pair probability file we fallback to all-to-all
                     String generativePairProbabilities = configuration.getPropertyWithDefault("traffic_probabilities_generator", "all_to_all");
@@ -196,6 +198,13 @@ class TrafficSelector {
                                 PoissonArrivalPlanner.PairDistribution.DENSITY_MATRIX,
                                 configuration
                         );
+                        case "meta_node_premutation_traffic":
+                            return new MetaNodePermutationTrafficPlanner(
+                                    idToTransportLayer,
+                                    configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
+                                    flowSizeDistribution,
+                                    configuration
+                            );
                         default:
                             throw new PropertyValueInvalidException(configuration, "traffic_probabilities_generator");
 
