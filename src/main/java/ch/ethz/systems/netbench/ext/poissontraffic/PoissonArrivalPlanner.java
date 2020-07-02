@@ -510,7 +510,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         int numChosenTors = (int) Math.floor(numTors * activeFractionX);
 
         // Probability between each server pair
-        double serverPairProb = 1.0 / (Math.floor((double) numChosenTors / 2) * serversPerNodeToExtendWith * serversPerNodeToExtendWith * 2);
+        //double serverPairProb = 1.0 / (Math.floor((double) numChosenTors / 2) * serversPerNodeToExtendWith * serversPerNodeToExtendWith * 2);
 
         System.out.print("Generating pairings pair probabilities in " + (activeFractionX * 100) + "% fraction " + tors.size() + " ToRs between their servers...");
 
@@ -520,7 +520,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         }
 
         Random pairingsRandom = Simulator.selectIndependentRandom("pairings_fraction");
-
+	double serverPairs = 0.0;
         // Go over every ToR pair
         List<org.apache.commons.lang3.tuple.Pair<Integer, Integer>> chosen = new ArrayList<>();
         while (remaining.size() >= 2 ) {
@@ -538,9 +538,9 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
             // Add to random pair generator
             for (Integer svrA : configuration.getGraphDetails().getServersOfTor(first)) {
                 for (Integer svrB : configuration.getGraphDetails().getServersOfTor(second)) {
-                    addToPool(serverPairProb, new ImmutablePair<>(svrA, svrB));
-                    addToPool(serverPairProb, new ImmutablePair<>(svrB, svrA));
-                }
+		    if(svrA.equals(svrB)) continue;
+                    serverPairs+=2;
+		}
             }
             chosen.add(new ImmutablePair<>(first, second));
 
@@ -552,8 +552,17 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
             remaining.remove(idxSecond);
 
         }
-
-        // Log chosen fraction
+	double serverPairProb = 1.0/serverPairs;
+        for(Pair<Integer,Integer> p: chosen){
+		for (Integer svrA : configuration.getGraphDetails().getServersOfTor(p.getLeft())) {
+                	for (Integer svrB : configuration.getGraphDetails().getServersOfTor(p.getRight())) {
+                    		if(svrA.equals(svrB)) continue;
+                    		addToPool(serverPairProb, new ImmutablePair<>(svrA, svrB));
+	                   	addToPool(serverPairProb, new ImmutablePair<>(svrB, svrA));
+        	        }
+            	}
+	}
+	// Log chosen fraction
         Collections.sort(chosen);
         SimulationLogger.logInfo("PAIRING_NUM_CHOSEN_TORS", String.valueOf(numChosenTors));
         SimulationLogger.logInfo("PAIRINGS_FRACTION_CHOSEN_TORS", chosen.toString());
