@@ -38,7 +38,7 @@ while leftover:
 	while x==leftover or x in edges[leftover]:
 		x = random.randint(0,N-1)
 	while (y==leftover or y==x) or y in edges[leftover]:
-		y = random.randint(0,N-1)
+		y = random.sample(edges[x],1)[0]
 	#sample an edge from y
 	#sample an edge from x
 	#remove them and attach them to leftover
