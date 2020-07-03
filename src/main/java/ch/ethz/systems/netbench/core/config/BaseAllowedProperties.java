@@ -100,6 +100,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+		"mock_meta_node_num",
     		"num_pairs_in_meta_node_permutation",
     		"meta_node_default_token_size_bytes",
 			"meta_node_token_timeout_ns",
