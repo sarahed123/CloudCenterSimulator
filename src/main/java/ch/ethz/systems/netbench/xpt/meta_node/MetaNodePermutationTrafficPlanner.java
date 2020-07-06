@@ -37,20 +37,25 @@ public class MetaNodePermutationTrafficPlanner extends PoissonArrivalPlanner {
         double serverPairNum = 0.0;
         while(p<pairNum){
             List<Integer> serversA = getServesPerMNList(2*p);
-            for(int serverA: serversA){
-                for(int serverB: serversA){
-                    if(serverA == serverB) continue;
-                    serverPairNum+=1d;
-                }
-            }
+            
 
             List<Integer> serversB = getServesPerMNList(2*p+1);
-            for(int serverA: serversB){
-                for(int serverB: serversB){
-                    if(serverA == serverB) continue;
-                    serverPairNum+=1d;
+            if(configuration.getBooleanPropertyWithDefault("meta_node_same_rack_traffic",false)){
+                for(int serverA: serversA){
+                    for(int serverB: serversA){
+                        if(serverA == serverB) continue;
+                        serverPairNum+=1d;
+                    }
+                }
+    
+                for(int serverA: serversB){
+                    for(int serverB: serversB){
+                        if(serverA == serverB) continue;
+                        serverPairNum+=1d;
+                    }
                 }
             }
+            
 
             for(int serverA: serversA){
                 for(int serverB: serversB){
