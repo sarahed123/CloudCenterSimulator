@@ -69,21 +69,26 @@ public class MetaNodePermutationTrafficPlanner extends PoissonArrivalPlanner {
 
         p = 0;
         while(p<pairNum){
-            List<Integer> serversA = getServesPerMNList(2*p);
-            for(int serverA: serversA){
-                for(int serverB: serversA){
-                    if(serverA == serverB) continue;
-                    addToPool(serverPairProb, new ImmutablePair<Integer,Integer>(serverA,serverB));
-                }
-            }
+            List<Integer> serversA = getServesPerMNList(MNs.get(2*p));
+            List<Integer> serversB = getServesPerMNList(MNs.get(2*p+1));
 
-            List<Integer> serversB = getServesPerMNList(2*p+1);
-            for(int serverA: serversB){
-                for(int serverB: serversB){
-                    if(serverA == serverB) continue;
-                    addToPool(serverPairProb, new ImmutablePair<Integer,Integer>(serverA,serverB));
+            if(configuration.getBooleanPropertyWithDefault("meta_node_same_rack_traffic",false)){
+                for(int serverA: serversA){
+                    for(int serverB: serversA){
+                        if(serverA == serverB) continue;
+                        addToPool(serverPairProb, new ImmutablePair<Integer,Integer>(serverA,serverB));
+                    }
                 }
+    
+                for(int serverA: serversB){
+                    for(int serverB: serversB){
+                        if(serverA == serverB) continue;
+                        addToPool(serverPairProb, new ImmutablePair<Integer,Integer>(serverA,serverB));
+                    }
+                }
+            
             }
+           
 
             for(int serverA: serversA){
                 for(int serverB: serversB){
