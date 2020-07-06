@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.meta_node;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.run.traffic.TrafficPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.PoissonArrivalPlanner;
@@ -38,6 +39,8 @@ public class MetaNodePermutationTrafficPlanner extends PoissonArrivalPlanner {
         while(p<pairNum){
             List<Integer> serversA = getServesPerMNList(MNs.get(2*p));
             List<Integer> serversB = getServesPerMNList(MNs.get(2*p+1));
+            SimulationLogger.logInfo("Traffic from " + MNs.get(2*p) + " To " + MNs.get(2*p+1),
+                "Servers " + serversA + " To " + serversB);
             if(configuration.getBooleanPropertyWithDefault("meta_node_same_rack_traffic",false)){
                 for(int serverA: serversA){
                     for(int serverB: serversA){
