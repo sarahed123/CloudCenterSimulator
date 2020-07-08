@@ -35,7 +35,9 @@ public class MNController extends RoutingPopulator {
         loadMap = new HashMap<>();
         int ToRnum = configuration.getGraphDetails().getNumTors();
         metaNodeNum = configuration.getGraphDetails().getMetaNodeNum();
-
+        if(metaNodeNum==-1){
+            throw new IllegalStateException("MetaNode num must be set in graph details");
+        }
         if(ToRnum%metaNodeNum != 0){
             throw new IllegalStateException("MetaNode num must perfectly divide network switch num");
         }
