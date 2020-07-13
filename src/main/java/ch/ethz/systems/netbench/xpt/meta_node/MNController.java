@@ -162,7 +162,7 @@ public class MNController extends RoutingPopulator {
     }
 
     protected MetaNodeToken getMetaNodeToken(long bytes, int MNSource, int middleHop, int MNDest){
-
+        SimulationLogger.increaseStatisticCounter("MetaNodeToken " + MNSource + "->" + MNDest + (middleHop==MNDest ? " DIRECT" : (" via " + middleHop)));
         return new MetaNodeToken(bytes, MNSource, middleHop, MNDest, tokenTimeout);
     }
 
