@@ -49,6 +49,7 @@ public class EcnTailDropOutputPort extends OutputPort {
         // Mark congestion flag if size of the queue is too big
         if (getBufferOccupiedBits() >= ecnThresholdKBits) {
             SimulationLogger.increaseStatisticCounter("MARK_CONGESTION_ECN_THRESHOLD");
+            logger.logECNMark();
             ipHeader.markCongestionEncountered();
         }
 
