@@ -21,6 +21,7 @@ public class PortLogger {
     private static final long STATISTIC_SAMPLE_RATE = 30;
     private final boolean logQueueStateEnabled;
     private long iterator = 0;
+    private long ecnMarks;
 
     /**
      * Create logger for the given port.
@@ -32,7 +33,7 @@ public class PortLogger {
         this.targetId = port.getTargetId();
         this.attachedToServer = port.getOwnDevice().isServer() || port.getTargetDevice().isServer();
         this.registerSelf();
-
+        this.ecnMarks = 0;
         if(port.getOwnDevice().getConfiguration()!= null){
             this.logQueueStateEnabled = port.getOwnDevice().getConfiguration().getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
 
@@ -110,5 +111,13 @@ public class PortLogger {
     long getUtilizedNs() {
         return utilizedNs + (currentlyBeingUtilized ? Simulator.getCurrentTime() - lastUtilizedChange : 0);
     }
+
+    public void logECNMark(){
+        this.ecnMarks++;
+    }
+
+	public long getECNMarks() {
+		return this.ecnMarks;
+	}
 
 }
