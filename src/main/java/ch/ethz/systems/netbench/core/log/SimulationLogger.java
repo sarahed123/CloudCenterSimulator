@@ -47,7 +47,7 @@ public class SimulationLogger {
 	private static BufferedWriter writerFlowsOnCircuitEntranceTime;
 	private static BufferedWriter writerRemoteRouterStateLogCSV;
 	private static BufferedWriter writerRemoteRouterDropStatisticsCSV;
-
+	private static BufferedWriter writerECNStatistics;
 	private static BufferedWriter commonDropStatisticsWriter;
 
 
@@ -192,7 +192,7 @@ public class SimulationLogger {
 			writerFlowCompletionCsvFile = openWriter("flow_completion.csv.log");
 			writerFlowCompletionFile = openWriter("flow_completion.log");
 
-
+			writerECNStatistics = openWriter("ecn_statistics.log");
 			// Writer out the final properties' values
 			if (tempRunConfiguration != null) {
 				BufferedWriter finalPropertiesInfoFile = openWriter("final_properties.info");
@@ -318,7 +318,7 @@ public class SimulationLogger {
 		logFlowSummary();
 		logPortUtilization();
 		logCircuitFlows();
-
+		logECNStatistics();
 		try {
 			SortedSet<Long> keys = new TreeSet<>(activePathMap.keySet());
 			for(Long key: keys) {
@@ -355,6 +355,7 @@ public class SimulationLogger {
 			writerFlowsOnCircuitEntranceTime.close();
 			flowRequestLogWriter.close();
 			writerRemainingPaths.close();
+			writerECNStatistics.close();
 			// Also added ones are closed automatically at the end
 			for (BufferedWriter writer : writersAdded.values()) {
 				writer.close();
@@ -376,6 +377,50 @@ public class SimulationLogger {
 			throw new LogFailureException(e);
 		}
 
+	}
+
+	private static void logECNStatistics() {
+		try{
+			// Header
+			writerECNStatistics.write(
+				String.format(
+							"%-6s%-6s%-9s%-16s\n",
+							"Src",
+							"Dst",
+							"Srvport",
+							"ECN Marks"
+						)
+				);
+
+			Collections.sort(portLoggers, new Comparator<PortLogger>() {
+				@Override
+				public int compare(PortLogger o1, PortLogger o2) {
+					long delta = o2.getECNMarks() - o1.getECNMarks();
+					if (delta < 0) {
+						return -1;
+					} else if (delta > 0) {
+						return 1;
+					} else {
+						return 0;
+					}
+				}
+			});
+
+			for (PortLogger logger : portLoggers) {
+				writerECNStatistics.write(
+						String.format(
+									"%-6d%-6d%-9s%-16d\n",
+									logger.getOwnId(),
+									logger.getTargetId(),
+									(logger.isAttachedToServer() ? "YES" : "NO"),
+									logger.getECNMarks()
+								)
+						);
+			}
+		}catch(IOException e){
+			throw new LogFailureException(e);
+		}
+		
 	}
 
 	private static void logCircuitFlows() {
