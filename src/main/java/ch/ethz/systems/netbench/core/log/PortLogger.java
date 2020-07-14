@@ -11,7 +11,7 @@ public class PortLogger {
     private final int ownId;
     private final int targetId;
     private final boolean attachedToServer;
-
+    private long packetsDispatched;
     // Utilization logging variables
     private long lastUtilizedChange = 0;
     private long utilizedNs = 0;
@@ -34,6 +34,7 @@ public class PortLogger {
         this.attachedToServer = port.getOwnDevice().isServer() || port.getTargetDevice().isServer();
         this.registerSelf();
         this.ecnMarks = 0;
+        this.packetsDispatched = 0;
         if(port.getOwnDevice().getConfiguration()!= null){
             this.logQueueStateEnabled = port.getOwnDevice().getConfiguration().getBooleanPropertyWithDefault("enable_log_port_queue_state", false);
 
@@ -119,5 +120,13 @@ public class PortLogger {
 	public long getECNMarks() {
 		return this.ecnMarks;
 	}
+
+	public void logPacketDispatch(Packet packet) {
+        packetsDispatched++;
+    }
+    
+    public long getPacketsDispatched(){
+        return packetsDispatched;
+    }
 
 }

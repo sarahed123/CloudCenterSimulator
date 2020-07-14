@@ -147,6 +147,7 @@ public abstract class OutputPort extends Port{
      * @param packet    Packet instance that was being sent
      */
     protected void dispatch(Packet packet) {
+        logger.logPacketDispatch(packet);
         // Finished sending packet, the last bit of the packet should arrive the link-delay later
         if (!link.doesNextTransmissionFail(packet.getSizeBit())) {
             registerPacketArrivalEvent(packet);
