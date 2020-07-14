@@ -48,6 +48,8 @@ public class SimulationLogger {
 	private static BufferedWriter writerRemoteRouterStateLogCSV;
 	private static BufferedWriter writerRemoteRouterDropStatisticsCSV;
 	private static BufferedWriter writerECNStatistics;
+	private static BufferedWriter writerPacketsDispatchedStatistics;
+
 	private static BufferedWriter commonDropStatisticsWriter;
 
 
@@ -193,6 +195,7 @@ public class SimulationLogger {
 			writerFlowCompletionFile = openWriter("flow_completion.log");
 
 			writerECNStatistics = openWriter("ecn_statistics.log");
+			writerPacketsDispatchedStatistics = openWriter("packets_dispatched.log");
 			// Writer out the final properties' values
 			if (tempRunConfiguration != null) {
 				BufferedWriter finalPropertiesInfoFile = openWriter("final_properties.info");
@@ -319,6 +322,7 @@ public class SimulationLogger {
 		logPortUtilization();
 		logCircuitFlows();
 		logECNStatistics();
+		logPacektsDispatched();
 		try {
 			SortedSet<Long> keys = new TreeSet<>(activePathMap.keySet());
 			for(Long key: keys) {
@@ -356,6 +360,7 @@ public class SimulationLogger {
 			flowRequestLogWriter.close();
 			writerRemainingPaths.close();
 			writerECNStatistics.close();
+			writerPacketsDispatchedStatistics.close();
 			// Also added ones are closed automatically at the end
 			for (BufferedWriter writer : writersAdded.values()) {
 				writer.close();
@@ -377,6 +382,47 @@ public class SimulationLogger {
 			throw new LogFailureException(e);
 		}
 
+	}
+
+	private static void logPacektsDispatched() {
+		try{
+			// Header
+			writerPacketsDispatchedStatistics.write(
+				String.format(
+							"%-6s%-6s%-9s%-16s\n",
+							"Src",
+							"Dst",
+							"Srvport",
+							"Packets Dispatched"
+						)
+				);
+
+			Collections.sort(portLoggers, new Comparator<PortLogger>() {
+				@Override
+				public int compare(PortLogger o1, PortLogger o2) {
+					int delta = Integer.compare(o1.getOwnId(), o2.getOwnId());
+					if (delta != 0) {
+						return delta;
+					} else {
+						return Integer.compare(o1.getTargetId(), o2.getTargetId());
+					}
+				}
+			});
+
+			for (PortLogger logger : portLoggers) {
+				writerPacketsDispatchedStatistics.write(
+						String.format(
+									"%-6d%-6d%-9s%-16d\n",
+									logger.getOwnId(),
+									logger.getTargetId(),
+									(logger.isAttachedToServer() ? "YES" : "NO"),
+									logger.getPacketsDispatched()
+								)
+						);
+			}
+		}catch(IOException e){
+			throw new LogFailureException(e);
+		}
 	}
 
 	private static void logECNStatistics() {
