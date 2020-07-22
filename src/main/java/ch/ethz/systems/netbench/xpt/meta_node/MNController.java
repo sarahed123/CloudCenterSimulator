@@ -178,7 +178,7 @@ public class MNController extends RoutingPopulator {
 
     public int getMetaNodeId(int identifier) {
 
-        return identifier/metaNodeNum;
+        return identifier/metaNodeSize;
     }
 
     public MetaNodeToken getToken(int MNSource, int MNDest) {
