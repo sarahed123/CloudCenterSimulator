@@ -100,6 +100,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
+            "meta_node_calc_trasfer_time_by",
             "meta_node_same_rack_traffic",
 		    "mock_meta_node_num",
     		"num_pairs_in_meta_node_permutation",
