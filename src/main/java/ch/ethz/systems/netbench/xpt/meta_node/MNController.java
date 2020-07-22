@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.meta_node;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
@@ -27,6 +28,7 @@ public class MNController extends RoutingPopulator {
     protected long initialTokenSizeBytes;
     protected long tokenTimeout;
     private int matchingsNum;
+    private String calcTransferTimeBy;
     private Random rand;
     private int serverPerMetaNode;
     protected MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
@@ -41,6 +43,8 @@ public class MNController extends RoutingPopulator {
         if(ToRnum%metaNodeNum != 0){
             throw new IllegalStateException("MetaNode num must perfectly divide network switch num");
         }
+
+        calcTransferTimeBy = configuration.getPropertyWithDefault("meta_node_calc_trasfer_time_by", "addition");
         this.ToRNum = ToRnum;
         metaNodeSize = ToRnum / metaNodeNum;
         serverPerMetaNode = configuration.getGraphDetails().getNumServers()/metaNodeNum;
@@ -120,7 +124,14 @@ public class MNController extends RoutingPopulator {
     }
 
     private long calcTransferTimeNS(int MNSource, int middleHop, int MNDest, long bytes){
-        return calcTransferTimeNS(MNSource, middleHop, bytes) + calcTransferTimeNS(middleHop,MNDest,bytes);
+        switch(calcTransferTimeBy){
+            case "addition":
+                return calcTransferTimeNS(MNSource, middleHop, bytes) + calcTransferTimeNS(middleHop,MNDest,bytes); 
+            case "max":
+                return Math.max(calcTransferTimeNS(MNSource, middleHop, bytes), calcTransferTimeNS(middleHop,MNDest,bytes));
+        }
+        throw new PropertyValueInvalidException(this.configuration, "meta_node_calc_trasfer_time_by");
+        
     }
 
     protected int getNextMNDest(int MNSource, int MNDest, long bytes){
