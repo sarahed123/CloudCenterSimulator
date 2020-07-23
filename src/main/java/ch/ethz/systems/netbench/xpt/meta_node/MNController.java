@@ -44,7 +44,7 @@ public class MNController extends RoutingPopulator {
             throw new IllegalStateException("MetaNode num must perfectly divide network switch num");
         }
 
-        calcTransferTimeBy = configuration.getPropertyWithDefault("meta_node_calc_trasfer_time_by", "addition");
+        calcTransferTimeBy = configuration.getPropertyWithDefault("meta_node_calc_trasfer_time_by", "max");
         this.ToRNum = ToRnum;
         metaNodeSize = ToRnum / metaNodeNum;
         serverPerMetaNode = configuration.getGraphDetails().getNumServers()/metaNodeNum;
