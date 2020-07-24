@@ -27,7 +27,7 @@ public class GraphDetails {
         this.torNodeIds = null;
         this.autoExtended = false;
         this.metaNodeNum = -1;
-	this.serverLanes = 1;
+	    this.serverLanes = 1;
     }
 
     /**

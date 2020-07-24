@@ -69,8 +69,9 @@ public class TopologyServerExtender {
             outputWriter.write("AutoExtended=true\n");
             outputWriter.write("Servers=incl_range(" + originalN + ", " + (newN - 1) + ")\n");
             outputWriter.write("Switches=set(" + StringUtils.join(details.getSwitchNodeIds(), ",") + ")\n");
-            outputWriter.write("ToRs=set(" + StringUtils.join(details.getTorNodeIds(), ",") + ")\n\n");
-
+            outputWriter.write("ToRs=set(" + StringUtils.join(details.getTorNodeIds(), ",") + ")\n");
+            outputWriter.write("MetaNodeNum=" + details.getMetaNodeNum() + "\n");
+            outputWriter.write("Lanes=" + details.getServerLanesNum() + "\n\n");
             // Links section
             outputWriter.write("# Original " + details.getNumEdges() + " links:\n");
             for (Vertex v : graph.getVertexList()) {
