@@ -1,8 +1,10 @@
 import numpy as np
 import sys
 
-def to_mat(graph_file, n):
+def to_mat(graph_file, n, self_loops=False):
 	mat = np.zeros((n,n))
+	if self_loops:
+		np.fill_diagonal(mat,1)
 	with open(graph_file, "r") as f:
 		line = f.readline()
 		while(line):
