@@ -18,5 +18,18 @@ def calc_eigs(graph_file, N, self_loops = False):
 	eig,vecs = LA.eig(graph)
 	eig = np.abs(eig)
 	eig.sort()
-	print(os.path.basename(graph_file) ,eig[-2],eig[-1]-eig[-2], sep=",")
+	return eig
+
+if __name__=="__main__":
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--gs", help="graphs", nargs="+", required=True, dest="graphs")
+	parser.add_argument("-N", help="vertex num", type=int, required=True, dest="N")
+	parser.add_argument("--self-loops", action='store_true', dest="self_loops", help="Add self loops to graphs")
+	args = parser.parse_args()
+
+	#graph_file = sys.argv[1]
+	N = args.N
+	for graph_file in args.graphs:
+		eig = calc_eigs(graph_file, N, args.self_loops)
+		print(os.path.basename(graph_file) ,eig[-2],eig[-1]-eig[-2], sep=",")
 
