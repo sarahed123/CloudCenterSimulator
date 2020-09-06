@@ -17,7 +17,7 @@ for v in vertices:
 	queue.append(v)
 	distances[v] = 0
 	visited.append(v)
-	while len(queue) is not 0:
+	while len(queue):
 		u = queue.pop(0)
 		for w in edges[u]:
 			if w not in visited:
