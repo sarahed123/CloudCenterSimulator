@@ -30,10 +30,10 @@ def all_to_all(N):
     return a2a
 
 
-def skew(N, nodes_skew = 0.04, traffic_skew = 0.77):
+def skew(N,  traffic_pairs = None, nodes_skew = 0.04, traffic_skew = 0.77):
     nodes = [i for i in range(N)]
     random.shuffle(nodes)
-    nodesA = nodes[:int(nodes_skew*N)]
+    nodesA = nodes[:int(nodes_skew*N)] if not traffic_pairs else traffic_pairs
     print(nodesA)
     nodesBCount = N - len(nodesA)
     probA = traffic_skew/len(nodesA)
@@ -54,14 +54,14 @@ def skew(N, nodes_skew = 0.04, traffic_skew = 0.77):
             probabilities.append(probU*probV/(1-wastedProb)) 
     return pairs, probabilities
 
-def get_traffic_matrix(N, traffic_type, random_traffic_pairs):
+def get_traffic_matrix(N, traffic_type, random_traffic_pairs, traffic_pairs = None):
     pairs = []
     if traffic_type=="perm":
         pairs = permutation_traffic(N)
     elif traffic_type=="a2a":
         pairs = all_to_all(N)
     elif traffic_type=="skew":
-        pairs, probablities = skew(N)
+        pairs, probablities = skew(N, traffic_pairs)
         return randomize_traffic(pairs, random_traffic_pairs, probablities)
     else:
         raise ValueError(traffic_type)
@@ -102,14 +102,21 @@ def main():
     parser.add_argument("--path-db", required=True, help="The paths DB", dest="path_db")
     parser.add_argument("--seed", help="seed", required=True, dest="seed", type=int)
     parser.add_argument("--traffic-random-count", help="how many pairs to take from the traffic pairs", dest="random_traffic_pairs", type=int)
+    parser.add_argument("--traffic-file", help="traffic file", dest="traffic_file")
 
     args = parser.parse_args()
     random.seed(args.seed)
     nprand.seed(args.seed)
 
+    file_traffic = None
+    if args.traffic_file:
+        with open(args.traffic_file) as f:
+            traffic_lines = f.readlines()
+            file_traffic = list(map(int,traffic_lines[0].split(" ")))
+    
     vertices, edges = createGraphFromFile(args.graph)
     db = PathDB(args.path_db, args.N)
-    traffic_pairs = get_traffic_matrix(args.N, args.traffic, args.random_traffic_pairs)
+    traffic_pairs = get_traffic_matrix(args.N, args.traffic, args.random_traffic_pairs, file_traffic)
     used_edges = {}
     success_count = 0
     test_count = 0
