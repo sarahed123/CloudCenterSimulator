@@ -9,7 +9,7 @@ import argparse
 import os
 import random
 import sys
-sys.path.insert(1, '..\..\graph_generators')
+sys.path.insert(1, '../../graph_generators')
 from create_graph import createGraphFromFile
 
 def get_shortest_path(source, target, edges):
