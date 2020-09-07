@@ -2,7 +2,7 @@ import argparse
 import random
 import sys
 import os
-sys.path.insert(1, os.path.dirname(__file__) + '\..\..\graph_generators')
+sys.path.insert(1, os.path.dirname(__file__) + '/../../graph_generators')
 from create_graph import createGraphFromFile
 
 

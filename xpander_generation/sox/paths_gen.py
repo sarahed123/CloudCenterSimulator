@@ -3,7 +3,7 @@ import random
 import math
 import sys
 import os
-sys.path.insert(1, '..\..\graph_generators')
+sys.path.insert(1, '../../graph_generators')
 from print_lambda import calc_eigs
 from create_graph import createGraphFromFile
 
@@ -36,8 +36,8 @@ def no_circles(path):
 def do_random_walk_from(node, edges, distance):
     path = [node]
     while distance:
-        while node in path:
-            node = random.choice(list(edges[node]))
+        #while node in path:
+        node = random.choice(list(edges[node]))	
         path.append(node)
         distance-=1
     return no_circles(path)

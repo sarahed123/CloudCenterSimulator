@@ -3,7 +3,7 @@ import argparse
 import random
 import sys
 import os
-sys.path.insert(1, os.path.dirname(__file__) + '\..\..\graph_generators')
+sys.path.insert(1, os.path.dirname(__file__) + '/../../graph_generators')
 from create_graph import createGraphFromFile
 import numpy.random as nprand
 
@@ -116,7 +116,7 @@ def main():
     for pair in traffic_pairs:
         source = pair[0]
         target = pair[1]
-        paths = db.get_random_paths(source, target, 2, nprand)
+        paths = db.get_random_paths(source, target, 10, nprand)
         random.shuffle(paths)
         for path in paths:
 
