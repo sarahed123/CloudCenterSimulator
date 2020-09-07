@@ -7,7 +7,12 @@ sys.path.insert(1, os.path.dirname(__file__) + '/../../graph_generators')
 from create_graph import createGraphFromFile
 import numpy.random as nprand
 
-def permutation_traffic(N):
+def permutation_traffic(N, traffic_pairs):
+    if traffic_pairs:
+        pairs = []
+        for i in range(0, len(traffic_pairs) ,2):
+            pairs.append((traffic_pairs[i],traffic_pairs[i+1]))
+        return pairs
     nodes = [i for i in range(N)]
     perm = []
     while len(nodes) > 1:
@@ -57,7 +62,7 @@ def skew(N,  traffic_pairs = None, nodes_skew = 0.04, traffic_skew = 0.77):
 def get_traffic_matrix(N, traffic_type, random_traffic_pairs, traffic_pairs = None):
     pairs = []
     if traffic_type=="perm":
-        pairs = permutation_traffic(N)
+        pairs = permutation_traffic(N, traffic_pairs)
     elif traffic_type=="a2a":
         pairs = all_to_all(N)
     elif traffic_type=="skew":
