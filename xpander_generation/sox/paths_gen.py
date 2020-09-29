@@ -4,6 +4,7 @@ import math
 import sys
 import os
 sys.path.insert(1, '../../graph_generators')
+from path_db import PathDB
 from print_lambda import calc_eigs
 from create_graph import createGraphFromFile
 
@@ -23,16 +24,6 @@ def get_nodes_from(node, edges, distance):
 
     return visited
 
-def no_circles(path):
-    no_circle = []
-    for n in path:
-        if not n in no_circle:
-            no_circle.append(n)
-        else:
-            while no_circle[-1] != n:
-                no_circle.pop()
-    return no_circle
-
 def do_random_walk_from(node, edges, distance):
     path = [node]
     while distance:
@@ -40,7 +31,7 @@ def do_random_walk_from(node, edges, distance):
         node = random.choice(list(edges[node]))	
         path.append(node)
         distance-=1
-    return no_circles(path)
+    return PathDB.no_circles(path)
 
 def write_walks_to_file(file_name, walks):
     with open(f"{file_name}", "w") as f:

@@ -11,6 +11,8 @@ class PathDB:
             return []
 
     def get_random_path(self, source, target, chooser):
+        if source==target:
+            return []
         return chooser.choice(self.db[source][target])
 
     def get_random_paths(self, source, target, num_paths, chooser):
@@ -45,3 +47,13 @@ class PathDB:
             if len(self.db[v][t][0]) <= dv and len(self.db[u][t][0]) <= du:
                 nodes.append(t)
         return nodes
+
+    def no_circles(path):
+        no_circle = []
+        for n in path:
+            if not n in no_circle:
+                no_circle.append(n)
+            else:
+                while no_circle[-1] != n:
+                     no_circle.pop()
+        return no_circle
