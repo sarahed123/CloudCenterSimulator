@@ -49,7 +49,7 @@ for i in range(N):
                 pathsB = db.get_paths(intermediate, j)
             pathA = random.choice(pathsA)[:-1]
             pathB = random.choice(pathsB)
-            paths.append(pathA+pathB)
+            paths.append(PathDB.no_circles(pathA+pathB))
 
     with open (f"{output_path}/{i}", "w") as f:
         for path in paths:
