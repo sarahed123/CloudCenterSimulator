@@ -108,7 +108,8 @@ def main():
     parser.add_argument("--seed", help="seed", required=True, dest="seed", type=int)
     parser.add_argument("--traffic-random-count", help="how many pairs to take from the traffic pairs", dest="random_traffic_pairs", type=int)
     parser.add_argument("--traffic-file", help="traffic file", dest="traffic_file")
-
+    parser.add_argument("--num-random-paths", help="Number of random paths to try per commodity", dest="num_rand_paths", type=int, default=2)
+    
     args = parser.parse_args()
     random.seed(args.seed)
     nprand.seed(args.seed)
@@ -128,7 +129,7 @@ def main():
     for pair in traffic_pairs:
         source = pair[0]
         target = pair[1]
-        paths = db.get_random_paths(source, target, 10, nprand)
+        paths = db.get_random_paths(source, target, args.num_rand_paths, nprand)
         random.shuffle(paths)
         for path in paths:
 
