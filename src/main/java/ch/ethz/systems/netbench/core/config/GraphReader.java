@@ -60,7 +60,6 @@ public class GraphReader {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-
                 // Skip empty or commented lines
                 if (line.length() == 0 || line.startsWith("#")) {
                     continue;

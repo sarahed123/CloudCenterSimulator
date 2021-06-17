@@ -12,7 +12,7 @@ public abstract class Socket {
     protected final int sourceId;
     protected final int destinationId;
     protected final long flowSizeByte;
-    private long remainderToConfirmFlowSizeByte;
+    protected long remainderToConfirmFlowSizeByte;
     protected boolean isReceiver;
     protected FlowLogger privateLogger;
 

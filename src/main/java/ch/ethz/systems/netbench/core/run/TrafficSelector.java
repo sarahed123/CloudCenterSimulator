@@ -1,6 +1,5 @@
 package ch.ethz.systems.netbench.core.run;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
@@ -11,8 +10,9 @@ import ch.ethz.systems.netbench.ext.simpletraffic.SimpleTrafficPlanner;
 import ch.ethz.systems.netbench.ext.trafficpair.TrafficPairPlanner;
 import ch.ethz.systems.netbench.ext.poissontraffic.flowsize.*;
 import ch.ethz.systems.netbench.xpt.fluidflow.FluidFlowTrafficPlanner;
+import ch.ethz.systems.netbench.xpt.meta_node.MetaNodeA2ATrafficPlanner;
 import ch.ethz.systems.netbench.xpt.meta_node.MetaNodePermutationTrafficPlanner;
-import ch.ethz.systems.netbench.xpt.meta_node.MockMetaNodePermutationTrafficPlanner;
+import ch.ethz.systems.netbench.xpt.meta_node.v1.MockMetaNodePermutationTrafficPlanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,6 +201,13 @@ class TrafficSelector {
                         );
                         case "meta_node_premutation_traffic":
                             return new MetaNodePermutationTrafficPlanner(
+                                    idToTransportLayer,
+                                    configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
+                                    flowSizeDistribution,
+                                    configuration
+                            );
+                        case "meta_node_a2a_traffic":
+                            return new MetaNodeA2ATrafficPlanner(
                                     idToTransportLayer,
                                     configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
                                     flowSizeDistribution,

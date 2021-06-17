@@ -1,6 +1,5 @@
 package ch.ethz.systems.netbench.core.run;
 
-import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
@@ -9,7 +8,8 @@ import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitchRouting;
 import ch.ethz.systems.netbench.ext.ecmp.ForwarderSwitchRouting;
 import ch.ethz.systems.netbench.xpt.dynamic.opera.OperaController;
-import ch.ethz.systems.netbench.xpt.meta_node.MNController;
+import ch.ethz.systems.netbench.xpt.meta_node.v1.MNController;
+import ch.ethz.systems.netbench.xpt.meta_node.v2.MNEpochController;
 import ch.ethz.systems.netbench.xpt.sourcerouting.EcmpThenKspNoShortestRouting;
 import ch.ethz.systems.netbench.xpt.sourcerouting.EcmpThenKspRouting;
 import ch.ethz.systems.netbench.xpt.sourcerouting.KShortestPathsSwitchRouting;
@@ -78,6 +78,9 @@ public class RoutingSelector {
             case "meta_node_router":{
                 return MNController.getInstance(configuration,idToNetworkDevice);
             }
+
+            case "epoch_meta_node_router":
+                return MNEpochController.getInstance(configuration,idToNetworkDevice);
 
             case "empty_routing_populator":
                 return new EmptyRoutingPopulator(configuration);
