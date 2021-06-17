@@ -26,7 +26,10 @@ import ch.ethz.systems.netbench.xpt.dynamic.opera.OperaSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
-import ch.ethz.systems.netbench.xpt.meta_node.MetaNodeSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.meta_node.v1.MetaNodeSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.meta_node.v2.EpochMNTransportLayerGenerator;
+import ch.ethz.systems.netbench.xpt.meta_node.v2.EpochMetaNodeSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.meta_node.v2.EpochOutputPortGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenodctcp.NewRenoDctcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.newreno.newrenotcp.NewRenoTcpTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.remotesourcerouting.RemoteSourceRoutingSwitchGenerator;
@@ -142,6 +145,8 @@ class InfrastructureSelector {
                 return new OperaSwitchGenerator(intermediaryGenerator,configuration);
             case "meta_node_switch":
                 return new MetaNodeSwitchGenerator(intermediaryGenerator,configuration.getGraphDetails().getNumNodes(),configuration);
+            case "epoch_meta_node_switch":
+                return new EpochMetaNodeSwitchGenerator(intermediaryGenerator,configuration.getGraphDetails().getNumNodes(),configuration);
             default:
                 throw new PropertyValueInvalidException(
                         configuration,
@@ -198,6 +203,13 @@ class InfrastructureSelector {
             case "ecn_tail_drop":
 
                 return new EcnTailDropOutputPortGenerator(
+                        configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes"),
+                        configuration.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes"),
+                        configuration
+                );
+            case "meta_node_epoch":
+
+                return new EpochOutputPortGenerator(
                         configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes"),
                         configuration.getLongPropertyOrFail("output_port_ecn_threshold_k_bytes"),
                         configuration
@@ -291,6 +303,8 @@ class InfrastructureSelector {
             case "simple_udp":
                 return new SimpleUdpTransportLayerGenerator(configuration);
 
+            case "meta_node_epoch":
+                return new EpochMNTransportLayerGenerator(configuration);
             default:
                 throw new PropertyValueInvalidException(
                         configuration,
