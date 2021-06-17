@@ -12,8 +12,8 @@ import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.Distribu
 
 public class EcnTailDropOutputPortGenerator extends OutputPortGenerator {
 
-    private final long maxQueueSizeBytes;
-    private final long ecnThresholdKBytes;
+    protected final long maxQueueSizeBytes;
+    protected final long ecnThresholdKBytes;
 
     public EcnTailDropOutputPortGenerator(long maxQueueSizeBytes, long ecnThresholdKBytes, NBProperties configuration) {
     	super(configuration);
