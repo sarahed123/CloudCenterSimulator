@@ -3,13 +3,9 @@ package ch.ethz.systems.netbench.xpt.meta_node.v2;
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
-import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
-import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitch;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class MetaNodeServer extends MetaNodeSwitch {
@@ -43,18 +39,12 @@ public class MetaNodeServer extends MetaNodeSwitch {
         initPacketMetaRouting(packet);
 
         assert currToRDest >= 0;
+
         List<Integer> possibilities = destinationToNextSwitch.get(packet.getDestinationId());
+        currToRDest = rand.nextInt(possibilities.size());
         int next = possibilities.get(currToRDest);
         this.targetIdToOutputPort.get(next).enqueue(genericPacket);
-        currToRDest++;
-        currToRDest%=possibilities.size();
-//        Simulator.registerEvent(new Event(480l) {
-//            @Override
-//            public void trigger() {
-//                MetaNodeTransport transport = (MetaNodeTransport) getTransportLayer();
-//                transport.pullPacket(genericPacket.getFlowId());
-//            }
-//        });
+
 
         return;
     }
@@ -71,9 +61,9 @@ public class MetaNodeServer extends MetaNodeSwitch {
         this.receive(genericPacket);
     }
 
-    public void sendPackets(long flowId, long bytesToSend){
+    public void startEpoch(long flowId, long bytesToSend){
         MetaNodeTransport transport = (MetaNodeTransport) this.getTransportLayer();
-        transport.pullPackets(flowId,bytesToSend);
+        transport.startEpoch(flowId,bytesToSend);
     }
 
     @Override
@@ -97,5 +87,15 @@ public class MetaNodeServer extends MetaNodeSwitch {
     }
 
 
+    public void pullPacket(MNEpochPacket packet) {
+        MetaNodeTransport transport = (MetaNodeTransport) getTransportLayer();
+        transport.pullPacket(packet.getFlowId());
 
+    }
+
+    public void startEpoch() {
+        MetaNodeTransport transport = (MetaNodeTransport) this.getTransportLayer();
+        transport.startEpoch();
+
+    }
 }

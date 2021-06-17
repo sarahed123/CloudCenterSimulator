@@ -9,7 +9,6 @@ import ch.ethz.systems.netbench.ext.ecmp.EcmpRoutingUtility;
 import edu.asu.emit.algorithm.graph.Vertex;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import sun.nio.ch.Net;
 
 import java.util.*;
 
@@ -194,14 +193,22 @@ public class MNEpochController extends RoutingPopulator {
     }
 
     public void startEpoch(List<CongestionAlg.TransportRule> transportRules) {
+
+        for(NetworkDevice device: idToNetworkDevice.values()){
+            if(!device.isServer()) continue;
+            MetaNodeServer metaNodeSwitch = (MetaNodeServer) device;
+            metaNodeSwitch.startEpoch();
+        }
+
         for(CongestionAlg.TransportRule rule: transportRules){
             MetaNodeServer server = (MetaNodeServer) idToNetworkDevice.get(rule.source);
-            server.sendPackets(rule.flowId,rule.bytesToSend);
+            server.startEpoch(rule.flowId,rule.bytesToSend);
         }
     }
 
     public long getEpochBits() {
-        return Math.min(epochTime*linkSpeedbpns, configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes") * 8)*serverDegree;
+//        return Math.min(epochTime*linkSpeedbpns, configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes") * 8)*serverDegree;
+        return epochTime*linkSpeedbpns*serverDegree;
     }
 
     public MetaNodeSwitch getDevice(int id) {
