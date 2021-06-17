@@ -12,11 +12,14 @@ import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpSocket;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class MetaNodeTransport extends TransportLayer {
+    HashSet<Long> flowsInEpoch;
     public MetaNodeTransport(int identifier, NBProperties configuration) {
         super(identifier, configuration);
+        flowsInEpoch = new HashSet<>();
     }
 
     @Override
@@ -29,7 +32,12 @@ public class MetaNodeTransport extends TransportLayer {
         return new MetaNodeSocket(this, flowId, sourceId, destinationId, flowSizeByte, configuration);
     }
 
-    public void pullPackets(long flowId, long dataSizeByte){
+    public void startEpoch(){
+        flowsInEpoch.clear();
+    }
+
+    public void startEpoch(long flowId, long dataSizeByte){
+        flowsInEpoch.add(flowId);
         MetaNodeSocket socket = (MetaNodeSocket) flowIdToSocket.get(flowId);
         socket.sendPackets(dataSizeByte);
     }
@@ -54,11 +62,9 @@ public class MetaNodeTransport extends TransportLayer {
     }
 
     public void pullPacket(long flowId) {
+        if(!flowsInEpoch.contains(flowId)) return;
         MetaNodeSocket socket = (MetaNodeSocket) flowIdToSocket.get(flowId);
-        if(socket!=null){
-            socket.pullPacket();
-
-        }
+        socket.pullPacket();
     }
 
     private class MetaNodeSocket extends SimpleTcpSocket {
@@ -117,39 +123,43 @@ public class MetaNodeTransport extends TransportLayer {
 
 
         public void sendPackets(long dataSizeByte){
-
             while(dataSizeByte > 0) {
                 if (remainderToConfirmFlowSizeByte <= 0) break;
 
                 long bytesToSend = Math.min(dataSizeByte, MAX_SEGMENT_SIZE);
                 bytesToSend = Math.min(bytesToSend, remainderToConfirmFlowSizeByte);
-                queue.add(new MNEpochPacket(
-                        flowId, bytesToSend, sourceId, destinationId,
-                        remainderToConfirmFlowSizeByte, serverSource.getMNID() ,serverDest.getMNID()
-                ));
+
 //                this.remainderToConfirmFlowSizeByte -= bytesToSend;
 //                if(remainderToConfirmFlowSizeByte <= 0){
 //                    transportLayer.cleanupSockets(flowId);
 //                }
                 dataSizeByte -= bytesToSend;
-                transportLayer.send(queue.pollFirst());
-                SimulationLogger.increaseStatisticCounter("SENT_OUT_BYTES");
-                this.remainderToConfirmFlowSizeByte -= bytesToSend;
-                if(remainderToConfirmFlowSizeByte <= 0){
-                    transportLayer.cleanupSockets(flowId);
-                }
+//                transportLayer.send(queue.pollFirst());
+//                SimulationLogger.increaseStatisticCounter("SENT_OUT_BYTES");
+                remainderToConfirmFlowSizeByte -= bytesToSend;
+//                if(remainderToConfirmFlowSizeByte <= 0){
+//                    transportLayer.cleanupSockets(flowId);
+//                }
+                queue.add(new MNEpochPacket(
+                        flowId, bytesToSend, sourceId, destinationId,
+                        remainderToConfirmFlowSizeByte, serverSource.getMNID() ,serverDest.getMNID()
+                ));
             }
 
-//            pullPacket();
+            pullPacket();
 
         }
 
         private void pullPacket() {
             TcpPacket packet = (TcpPacket) queue.pollFirst();
-            if(packet==null) return;
+            if(packet==null) {
+                return;
+            }
             transportLayer.send(packet);
-            this.remainderToConfirmFlowSizeByte -= packet.getDataSizeByte();
-            if(remainderToConfirmFlowSizeByte <= 0){
+            SimulationLogger.increaseStatisticCounter("SENT_OUT_BYTES");
+
+//            this.remainderToConfirmFlowSizeByte -= packet.getDataSizeByte();
+            if(packet.getSequenceNumber() <= 0){
                 transportLayer.cleanupSockets(flowId);
             }
         }
