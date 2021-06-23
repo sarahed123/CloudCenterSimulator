@@ -105,6 +105,7 @@ public class BaseAllowedProperties {
             "meta_node_same_rack_traffic",
 		    "mock_meta_node_num",
     		"num_pairs_in_meta_node_permutation",
+			"meta_node_default_server_token_size_bytes",
     		"meta_node_default_token_size_bytes",
 			"meta_node_token_timeout_ns",
 			"disable_ecmp_path_hashing",
