@@ -27,6 +27,7 @@ import ch.ethz.systems.netbench.xpt.dynamic.rotornet.RotorSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.hybrid.ElectronicOpticHybridGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.OpticServerGenerator;
 import ch.ethz.systems.netbench.xpt.meta_node.v1.MetaNodeSwitchGenerator;
+import ch.ethz.systems.netbench.xpt.meta_node.v1.MetaNodeTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.meta_node.v2.EpochMNTransportLayerGenerator;
 import ch.ethz.systems.netbench.xpt.meta_node.v2.EpochMetaNodeSwitchGenerator;
 import ch.ethz.systems.netbench.xpt.meta_node.v2.EpochOutputPortGenerator;
@@ -302,7 +303,8 @@ class InfrastructureSelector {
 
             case "simple_udp":
                 return new SimpleUdpTransportLayerGenerator(configuration);
-
+            case "meta_node":
+                return new MetaNodeTransportLayerGenerator(configuration);
             case "meta_node_epoch":
                 return new EpochMNTransportLayerGenerator(configuration);
             default:
