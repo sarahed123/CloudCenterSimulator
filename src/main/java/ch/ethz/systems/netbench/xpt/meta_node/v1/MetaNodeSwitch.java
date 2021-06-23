@@ -123,6 +123,10 @@ public class MetaNodeSwitch extends EcmpSwitch {
         MNId = mn;
     }
 
+    public int getMNId(){
+        return MNId;
+    }
+
     public void setRandomizer(Random rand) {
         this.rand = rand;
     }
