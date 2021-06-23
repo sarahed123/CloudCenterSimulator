@@ -4,9 +4,12 @@ import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.config.exceptions.PropertyValueInvalidException;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
+import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
+import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.run.routing.RoutingPopulator;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpRoutingUtility;
+import ch.ethz.systems.netbench.xpt.meta_node.v2.MetaNodeServer;
 import edu.asu.emit.algorithm.graph.Vertex;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -18,8 +21,12 @@ import java.util.Map;
 import java.util.Random;
 
 public class MNController extends RoutingPopulator {
+    private final int serverDegree;
     protected Map<Integer, NetworkDevice> idToNetworkDevice;
     protected Map<Pair<Integer,Integer>, Long> loadMap;
+    protected Map<Integer, Long> serversOutgoingLoadMap;
+    protected Map<Integer, Long> serversIncommingLoadMap;
+
     static MNController sInstance = null;
     private int metaNodeNum;
     private long linkSpeedBpns;
@@ -31,10 +38,16 @@ public class MNController extends RoutingPopulator {
     private String calcTransferTimeBy;
     private Random rand;
     private int serverPerMetaNode;
+    private long maxServerLoad;
+    private long serverTokenSizeByte;
+    public final long linkSpeedbpns;
+
     protected MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
         super(configuration);
         this.idToNetworkDevice = idToNetworkDevice;
         loadMap = new HashMap<>();
+        serversIncommingLoadMap = new HashMap<>();
+        serversOutgoingLoadMap = new HashMap<>();
         int ToRnum = configuration.getGraphDetails().getNumTors();
         metaNodeNum = configuration.getGraphDetails().getMetaNodeNum();
         if(metaNodeNum==-1){
@@ -43,6 +56,7 @@ public class MNController extends RoutingPopulator {
         if(ToRnum%metaNodeNum != 0){
             throw new IllegalStateException("MetaNode num must perfectly divide network switch num");
         }
+        linkSpeedbpns = configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns");
 
         calcTransferTimeBy = configuration.getPropertyWithDefault("meta_node_calc_trasfer_time_by", "max");
         this.ToRNum = ToRnum;
@@ -50,12 +64,14 @@ public class MNController extends RoutingPopulator {
         serverPerMetaNode = configuration.getGraphDetails().getNumServers()/metaNodeNum;
         linkSpeedBpns = configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns");
         initialTokenSizeBytes = configuration.getLongPropertyWithDefault("meta_node_default_token_size_bytes", 15000);
+        serverTokenSizeByte = configuration.getLongPropertyWithDefault("meta_node_default_server_token_size_bytes", initialTokenSizeBytes);
         tokenTimeout = configuration.getLongPropertyWithDefault("meta_node_token_timeout_ns", 30000);
         rand = Simulator.selectIndependentRandom("mn_switch_randomizer");
         initMetaNodes();
         initDevices();
         matchingsNum = calcMatchingNum();
-
+        serverDegree = serverPerMetaNode/metaNodeSize;
+        maxServerLoad =  5 *  serverTokenSizeByte * serverPerMetaNode;
     }
 
     /**
@@ -81,6 +97,14 @@ public class MNController extends RoutingPopulator {
             int MN = mnsw.getIdentifier()/metaNodeSize;
             mnsw.setMetaNodeId(MN);
             mnsw.setRandomizer(this.rand);
+            for(int serverId: configuration.getGraphDetails().getServersOfTor(i)){
+
+                MetaNodeSwitch server = (MetaNodeSwitch) idToNetworkDevice.get(serverId);
+                if(server.getMNId()==-1){
+                    server.setMetaNodeId(MN);
+
+                }
+            }
         }
     }
 
@@ -226,5 +250,56 @@ public class MNController extends RoutingPopulator {
 
         assert currBytes>=originalBytesAllocated;
         loadMap.put(pair,currBytes-originalBytesAllocated);
+    }
+
+    public ServerToken getServerToken(int sourceId, int destinationId, long flowId) throws ServerOverloadedException {
+        long incommingLoad = serversIncommingLoadMap.getOrDefault(destinationId, 0l);
+        long outgoingLoad = serversOutgoingLoadMap.getOrDefault(sourceId, 0l);
+        long maxLoad = maxServerLoad - serverTokenSizeByte;
+
+        if(incommingLoad >= maxLoad || outgoingLoad >= maxLoad){
+            throw new ServerOverloadedException();
+        }
+
+
+
+        serversOutgoingLoadMap.put(sourceId, outgoingLoad + serverTokenSizeByte);
+
+        long expiryTime = getServerTokenExpiryTime(outgoingLoad + serverTokenSizeByte);
+        final ServerToken serverToken = new ServerToken(flowId, serverTokenSizeByte, sourceId, destinationId, expiryTime);
+
+        serversIncommingLoadMap.put(destinationId, incommingLoad + serverTokenSizeByte);
+        Simulator.registerEvent(new Event(getServerTokenExpiryTime(incommingLoad + serverTokenSizeByte)) {
+            @Override
+            public void trigger() {
+                releaseServerTokenIncomming(serverToken);
+            }
+        });
+        return serverToken;
+    }
+
+    public void releaseServerTokenIncomming(ServerToken serverToken){
+        long currentIncomming = serversIncommingLoadMap.get(serverToken.destinationId);
+        serversIncommingLoadMap.put(serverToken.destinationId, currentIncomming - serverToken.bytes);
+
+    }
+
+    public void releaseServerTokenOutgoing(ServerToken serverToken){
+        if(serverToken.isExpired()) throw new IllegalStateException("cant release expired token");
+//        long currentIncomming = serversIncommingLoadMap.get(serverToken.destinationId);
+//        serversIncommingLoadMap.put(serverToken.destinationId, currentIncomming - serverToken.bytes);
+
+        long currentOutgoing = serversOutgoingLoadMap.get(serverToken.sourceId);
+        serversOutgoingLoadMap.put(serverToken.sourceId, currentOutgoing - serverToken.bytes);
+    }
+
+    public long getServerTokenExpiryTime(long tokenBytes){
+            return (8*tokenBytes)/(linkSpeedbpns*serverDegree);
+    }
+
+    public void createReceiverSocket(long flowId, int identifier, int destinationId, long flowSizeByte) {
+
+        MetaNodeSwitch serverDest = (MetaNodeSwitch) idToNetworkDevice.get(destinationId);
+        ((MetaNodeTransport) serverDest.getTransportLayer()).createReceiverSocket(flowId,identifier,destinationId,flowSizeByte);
     }
 }
