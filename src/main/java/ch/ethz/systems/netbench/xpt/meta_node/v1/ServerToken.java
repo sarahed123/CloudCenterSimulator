@@ -7,6 +7,7 @@ public class ServerToken {
     public final int destinationId;
     public boolean expired;
     public final long expiryTime;
+    private MetaNodeToken metaNodeToken;
     public ServerToken(long flowId, long bytes, int sourceId, int destinationId, long expiryTime) {
         this.flowId = flowId;
         this.bytes = bytes;
@@ -26,5 +27,13 @@ public class ServerToken {
 
     public static ServerToken dummyToken(){
         return new ServerToken(-1,-1,-1,-1, -1);
+    }
+
+    public void setMetaNodeToken(MetaNodeToken token){
+        this.metaNodeToken = token;
+    }
+
+    public MetaNodeToken getMetaNodeToken(){
+        return metaNodeToken;
     }
 }

@@ -52,8 +52,14 @@ public class MetaNodeSwitch extends EcmpSwitch {
             return;
         }
 
+        MetaNodeToken token = null;
+        try{
+            MetaNodePacket metaNodePacket = (MetaNodePacket) genericPacket;
+            token = metaNodePacket.token;
+        }catch(ClassCastException e){
+            token = getToken(tcpHeader.getDestinationId());
 
-        MetaNodeToken token = getToken(tcpHeader.getDestinationId());
+        }
         List<Integer> possibilities = getDestinationToMN(token.getMiddleHop());
         int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
         OutputPort out = this.targetIdToOutputPort.get(randomNext);
