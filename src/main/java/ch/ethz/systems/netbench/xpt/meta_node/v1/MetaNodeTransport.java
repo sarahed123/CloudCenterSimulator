@@ -74,11 +74,12 @@ public class MetaNodeTransport extends TransportLayer {
                     packetSize = Math.min(packetSize, remainderToConfirmFlowSizeByte);
                     remainderToConfirmFlowSizeByte-=packetSize;
 
-                    TcpPacket tcpPacket = new FullExtTcpPacket(flowId,packetSize,
+                    MetaNodePacket mnPacket = new MetaNodePacket(flowId,packetSize,
                             sourceId,destinationId,100,-1,-1,
                             remainderToConfirmFlowSizeByte,-1,
                             false,false,false,false,false,false,false,false, false, 0l, 0l);
-                    transportLayer.send(tcpPacket);
+                    mnPacket.setMetaNodeToken(serverToken.getMetaNodeToken());
+                    transportLayer.send(mnPacket);
 //                    System.out.println("sending");
 //                    System.out.println(tcpPacket);
                     tokenSize -= (packetSize + headers);

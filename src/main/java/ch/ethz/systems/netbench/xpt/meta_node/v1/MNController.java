@@ -41,6 +41,7 @@ public class MNController extends RoutingPopulator {
     private long maxServerLoad;
     private long serverTokenSizeByte;
     public final long linkSpeedbpns;
+    private long metaNodeMaxLoad;
 
     protected MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
         super(configuration);
@@ -72,6 +73,7 @@ public class MNController extends RoutingPopulator {
         matchingsNum = calcMatchingNum();
         serverDegree = serverPerMetaNode/metaNodeSize;
         maxServerLoad =  5 *  serverTokenSizeByte * serverPerMetaNode;
+        metaNodeMaxLoad = 10 * initialTokenSizeBytes * metaNodeSize;
     }
 
     /**
@@ -212,8 +214,9 @@ public class MNController extends RoutingPopulator {
 
 
     public int getMetaNodeId(int identifier) {
+        MetaNodeSwitch switch1 = (MetaNodeSwitch) idToNetworkDevice.get(identifier);
 
-        return identifier/metaNodeSize;
+        return switch1.getMNId();
     }
 
     public MetaNodeToken getToken(int MNSource, int MNDest) {
@@ -245,9 +248,7 @@ public class MNController extends RoutingPopulator {
     private void releaseLoad(int source, int dest, long originalBytesAllocated) {
         Pair<Integer, Integer> pair = new ImmutablePair<>(source,dest);
         long currBytes = loadMap.get(pair);
-
-
-
+        // System.out.println(currBytes + " " + originalBytesAllocated);
         assert currBytes>=originalBytesAllocated;
         loadMap.put(pair,currBytes-originalBytesAllocated);
     }
@@ -260,22 +261,50 @@ public class MNController extends RoutingPopulator {
         if(incommingLoad >= maxLoad || outgoingLoad >= maxLoad){
             throw new ServerOverloadedException();
         }
+        int sourceMN = getMetaNodeId(sourceId);
+        int destMN = getMetaNodeId(destinationId);
+        MetaNodeToken token = null;
+        
+        token = getToken(sourceMN, destMN);
+    
+        boolean MNLoadOK = false;
+        if(token.getMiddleHop()==destMN){
+            MNLoadOK = verifyLoad(token.getSource(),token.getDest());
+        }else{
+            MNLoadOK = verifyLoad(token.getSource(),token.getMiddleHop());
+            MNLoadOK = MNLoadOK && verifyLoad(token.getMiddleHop(),token.getDest());
+        }
 
 
+        if(!MNLoadOK){
+            token.setExpired();
+            // releaseToken(token);
+            throw new ServerOverloadedException();
+        }
+    
+        
 
         serversOutgoingLoadMap.put(sourceId, outgoingLoad + serverTokenSizeByte);
 
         long expiryTime = getServerTokenExpiryTime(outgoingLoad + serverTokenSizeByte);
         final ServerToken serverToken = new ServerToken(flowId, serverTokenSizeByte, sourceId, destinationId, expiryTime);
-
+        serverToken.setMetaNodeToken(token);
         serversIncommingLoadMap.put(destinationId, incommingLoad + serverTokenSizeByte);
-        Simulator.registerEvent(new Event(getServerTokenExpiryTime(incommingLoad + serverTokenSizeByte)) {
+        long MNLoad = loadMap.get(new ImmutablePair<>(token.getSource(), token.getMiddleHop()));
+        Simulator.registerEvent(new Event(getServerTokenExpiryTime(MNLoad + incommingLoad + serverTokenSizeByte)) {
             @Override
             public void trigger() {
                 releaseServerTokenIncomming(serverToken);
             }
         });
         return serverToken;
+    }
+
+    private boolean verifyLoad(int source, int dest) {
+        if(loadMap.get(new ImmutablePair<>(source, dest)) > metaNodeMaxLoad){
+            return false;
+        }
+        return true;
     }
 
     public void releaseServerTokenIncomming(ServerToken serverToken){
@@ -294,7 +323,7 @@ public class MNController extends RoutingPopulator {
     }
 
     public long getServerTokenExpiryTime(long tokenBytes){
-            return (8*tokenBytes)/(linkSpeedbpns*serverDegree);
+        return (8*tokenBytes)/(linkSpeedbpns*serverDegree);
     }
 
     public void createReceiverSocket(long flowId, int identifier, int destinationId, long flowSizeByte) {
