@@ -5,8 +5,10 @@ public class ServerToken {
     public final long bytes;
     public final int sourceId;
     public final int destinationId;
-    public boolean expired;
+    private boolean expired;
     public final long expiryTime;
+    private long sentBytes;
+    private long receivedBytes;
     private MetaNodeToken metaNodeToken;
     public ServerToken(long flowId, long bytes, int sourceId, int destinationId, long expiryTime) {
         this.flowId = flowId;
@@ -15,10 +17,29 @@ public class ServerToken {
         this.destinationId = destinationId;
         expired = false;
         this.expiryTime = expiryTime;
+        sentBytes = 0;
+        receivedBytes = 0;
+
     }
 
     public void invalidate(){
         expired = true;
+    }
+
+    public void onSend(long bytes){
+        sentBytes+=bytes;
+
+        if(sentBytes>=this.bytes){
+            MNController.getInstance().releaseServerTokenOutgoing(this);
+
+        }
+    }
+
+    public void onReceive(long bytes){
+        receivedBytes+=bytes;
+        if(receivedBytes>=this.bytes){
+            MNController.getInstance().releaseServerTokenIncomming(this);
+        }
     }
 
     public boolean isExpired(){
