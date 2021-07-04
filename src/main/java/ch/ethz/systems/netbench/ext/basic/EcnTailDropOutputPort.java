@@ -7,6 +7,8 @@ import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.xpt.megaswitch.Encapsulatable;
+import ch.ethz.systems.netbench.xpt.meta_node.v2.MNEpochPacket;
+import ch.ethz.systems.netbench.xpt.meta_node.v2.MetaNodeSwitch;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -43,29 +45,35 @@ public class EcnTailDropOutputPort extends OutputPort {
      */
     @Override
     public void enqueue(Packet packet) {
-        // Convert to IP packet
-        IpHeader ipHeader = (IpHeader) packet;
+
 
         // Mark congestion flag if size of the queue is too big
         if (getBufferOccupiedBits() >= ecnThresholdKBits) {
             SimulationLogger.increaseStatisticCounter("MARK_CONGESTION_ECN_THRESHOLD");
-            if(!ipHeader.getECN()) logger.logECNMark();
-            ipHeader.markCongestionEncountered();
+            markECN(packet);
         }
 
         // Tail-drop enqueue
-        if (hasBufferSpace(ipHeader)) {
+        if (hasBufferSpace(packet)) {
 
             guaranteedEnqueue(packet);
         } else {
-            onPacketDropped(ipHeader);
+            onPacketDropped(packet);
 
         }
 
     }
 
+    protected void markECN(Packet packet){
+        // Convert to IP packet
+        IpHeader ipHeader = (IpHeader) packet;
+        if(!ipHeader.getECN()) logger.logECNMark();
+        ipHeader.markCongestionEncountered();
+    }
+
     @Override
     protected void addPacketToQueue(Packet packet){
+
         try{
             TcpPacket tcpPacket = (TcpPacket) packet;
             if(mPrioritizeAcksOnCircuit && tcpPacket.isOnCircuit() && tcpPacket.isACK()){
@@ -79,8 +87,9 @@ public class EcnTailDropOutputPort extends OutputPort {
         super.addPacketToQueue(packet);
     }
 
-    protected void onPacketDropped(IpHeader ipHeader) {
+    protected void onPacketDropped(Packet packet) {
     	String suffix = "";
+        IpHeader ipHeader = (IpHeader) packet;
 
         try {
         	TcpPacket tcpPacket = (TcpPacket) ipHeader;
@@ -97,9 +106,14 @@ public class EcnTailDropOutputPort extends OutputPort {
         if (ipHeader.getSourceId() == this.getOwnId()) {
             SimulationLogger.increaseStatisticCounter(suffix + "PACKETS_DROPPED_AT_SOURCE");
         }
+
+        if (ipHeader.getDestinationId() == this.getTargetId()) {
+
+            SimulationLogger.increaseStatisticCounter(suffix + "PACKETS_DROPPED_AT_DESTINATION");
+        }
     }
     
-    protected boolean hasBufferSpace(IpHeader packet) {
+    protected boolean hasBufferSpace(Packet packet) {
     	return (getBufferOccupiedBits() + packet.getSizeBit() <= maxQueueSizeBits);
     }
     

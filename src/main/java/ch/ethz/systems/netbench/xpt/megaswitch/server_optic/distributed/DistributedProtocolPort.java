@@ -68,7 +68,7 @@ public class DistributedProtocolPort extends EcnTailDropOutputPort {
      * @return
      */
     @Override
-    protected boolean hasBufferSpace(IpHeader packet) {
+    protected boolean hasBufferSpace(Packet packet) {
     	 try{
              ReservationPacket rp = (ReservationPacket) packet;
              return true;

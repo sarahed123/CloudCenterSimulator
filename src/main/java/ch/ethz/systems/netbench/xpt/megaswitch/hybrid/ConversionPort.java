@@ -107,9 +107,9 @@ public class ConversionPort extends EcnTailDropOutputPort{
 	}
 
     @Override
-    protected void onPacketDropped(IpHeader ipHeader) {
+    protected void onPacketDropped(Packet packet) {
         SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_ON_CONVERSION");
-        super.onPacketDropped(ipHeader);
+        super.onPacketDropped(packet);
     }
     
 

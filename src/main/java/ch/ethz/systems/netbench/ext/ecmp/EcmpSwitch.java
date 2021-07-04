@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.ext.ecmp;
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
@@ -28,7 +29,7 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
         for (int i = 0; i < n; i++) {
             this.destinationToNextSwitch.add(new ArrayList<>());
         }
-	this.rand = new Random();
+	    this.rand = new Random();
     }
 
     @Override
