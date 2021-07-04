@@ -134,7 +134,8 @@ public class MainFromProperties {
                 BaseAllowedProperties.PROPERTIES_RUN,
                 BaseAllowedProperties.EXTENSION,
                 BaseAllowedProperties.EXPERIMENTAL,
-                BaseAllowedProperties.BASE_DIR_VARIANTS
+                BaseAllowedProperties.BASE_DIR_VARIANTS,
+                BaseAllowedProperties.META_NODE
         );
         propertiesList.add(runConfiguration);
         BufferedReader reader;
