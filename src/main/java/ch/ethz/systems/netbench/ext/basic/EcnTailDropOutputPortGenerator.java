@@ -9,6 +9,7 @@ import ch.ethz.systems.netbench.core.network.OutputPort;
 import ch.ethz.systems.netbench.core.run.infrastructure.OutputPortGenerator;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedOpticServerToR;
 import ch.ethz.systems.netbench.xpt.megaswitch.server_optic.distributed.DistributedProtocolPort;
+import ch.ethz.systems.netbench.xpt.meta_node.v1.MetaNodeOutputPort;
 
 public class EcnTailDropOutputPortGenerator extends OutputPortGenerator {
 
@@ -26,6 +27,9 @@ public class EcnTailDropOutputPortGenerator extends OutputPortGenerator {
     public OutputPort generate(NetworkDevice ownNetworkDevice, NetworkDevice towardsNetworkDevice, Link link) {
         if(Simulator.getConfiguration().getBooleanPropertyWithDefault("distributed_protocol_enabled",false)){
             return new DistributedProtocolPort(ownNetworkDevice, towardsNetworkDevice, link, maxQueueSizeBytes, ecnThresholdKBytes);
+        }
+        if(configuration.getPropertyWithDefault("network_device_routing", "").equals("meta_node_router")){
+            return new MetaNodeOutputPort(ownNetworkDevice,towardsNetworkDevice,link,maxQueueSizeBytes,ecnThresholdKBytes);
         }
         return new EcnTailDropOutputPort(ownNetworkDevice, towardsNetworkDevice, link, maxQueueSizeBytes, ecnThresholdKBytes);
     }
