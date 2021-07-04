@@ -149,6 +149,6 @@ public abstract class Socket {
 
 
     public void markAsReceiver() {
-
+        this.isReceiver = true;
     }
 }

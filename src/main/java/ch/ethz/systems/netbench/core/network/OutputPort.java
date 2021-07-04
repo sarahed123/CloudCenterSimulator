@@ -71,6 +71,7 @@ public abstract class OutputPort extends Port{
 	}
 
 	protected void registerPacketDispatchedEvent(Packet packet) {
+
         nextDispatchIn = getDispatchTime(packet);
     	Simulator.registerEvent(new PacketDispatchedEvent(
                 getDispatchTime(packet),
@@ -227,6 +228,15 @@ public abstract class OutputPort extends Port{
      */
     public int getQueueSize() {
         return queue.size();
+    }
+
+    /**
+     * Retrieve size of the queue in packets.
+     *
+     * @return  Queue size in packets
+     */
+    public long getQueueSizeBit() {
+        return bufferOccupiedBits;
     }
 
     /**
