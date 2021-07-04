@@ -36,7 +36,7 @@ public abstract class TransportLayer {
     protected NBProperties configuration;
     // Map the flow identifier to the responsible socket
     protected Map<Long, Socket> flowIdToSocket;
-    private Set<Long> finishedFlowIds;
+    protected Set<Long> finishedFlowIds;
 
     protected NetworkDevice networkDevice;
     protected final int identifier;
@@ -80,7 +80,6 @@ public abstract class TransportLayer {
      * @param genericPacket    Packet instance
      */
     public void receive(Packet genericPacket) {
-	    
         IpPacket packet = (IpPacket) genericPacket;
         Socket socket = flowIdToSocket.get(packet.getFlowId());
         // If the socket does not yet exist, it is an incoming socket
