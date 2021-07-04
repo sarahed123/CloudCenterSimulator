@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.meta_node.v1;
 
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.network.*;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpHeader;
 import ch.ethz.systems.netbench.ext.ecmp.EcmpSwitch;
 
@@ -27,6 +28,22 @@ public class MetaNodeSwitch extends EcmpSwitch {
         tokenMap = new HashMap<>();
         currToRDest = 0;
         if(!isServer()) currToRDest = -1;
+
+    }
+
+    @Override
+    public void receive(Packet genericPacket) {
+        super.receive(genericPacket);
+        try{
+            MetaNodePacket mnPacket = (MetaNodePacket) genericPacket;
+            // Check if it has arrived
+            if (mnPacket.getDestinationId() == this.identifier) {
+                mnPacket.serverToken.onReceive(mnPacket.getSizeBit()/8);
+            }
+        }catch (ClassCastException e){
+
+        }
+
 
     }
 
@@ -135,5 +152,13 @@ public class MetaNodeSwitch extends EcmpSwitch {
 
     public void setRandomizer(Random rand) {
         this.rand = rand;
+    }
+
+    public long getLoadByte(){
+        long load = 0l;
+        for(OutputPort outputPort: targetIdToOutputPort.values()){
+            load += (outputPort.getQueueSizeBit()/8);
+        }
+        return load;
     }
 }
