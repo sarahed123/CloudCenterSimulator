@@ -40,8 +40,8 @@ public class LightOutputPort extends EcnTailDropOutputPort{
 		));
 	}
 
-	protected void onPacketDropped(IpHeader ipHeader) {
-		super.onPacketDropped(ipHeader);
+	protected void onPacketDropped(Packet packet) {
+		super.onPacketDropped(packet);
 		SimulationLogger.increaseStatisticCounter("PACKETS_DROPPED_ON_CIRCUIT");
 	}
 
