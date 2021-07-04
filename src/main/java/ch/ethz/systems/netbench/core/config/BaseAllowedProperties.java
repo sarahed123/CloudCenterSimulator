@@ -100,14 +100,7 @@ public class BaseAllowedProperties {
     };
 
     public static final String[] EXPERIMENTAL = new String[]{
-    		"meta_node_epoch_time",
-            "meta_node_calc_trasfer_time_by",
-            "meta_node_same_rack_traffic",
-		    "mock_meta_node_num",
-    		"num_pairs_in_meta_node_permutation",
-			"meta_node_default_server_token_size_bytes",
-    		"meta_node_default_token_size_bytes",
-			"meta_node_token_timeout_ns",
+
 			"disable_ecmp_path_hashing",
 			"enable_fair_udp",
     		"opera_direct_circuit_threshold_byte",
@@ -186,6 +179,19 @@ public class BaseAllowedProperties {
             "routing_ecmp_then_source_routing_switch_threshold_bytes"
 
     };
+
+    public static final String[] META_NODE = new String[]{
+    		"meta_node_epoch_time",
+			"meta_node_calc_trasfer_time_by",
+			"meta_node_same_rack_traffic",
+			"mock_meta_node_num",
+			"num_pairs_in_meta_node_permutation",
+			"meta_node_default_server_token_size_bytes",
+			"meta_node_default_token_size_bytes",
+			"meta_node_token_timeout_ns",
+			"meta_node_transport_backoff_time_ns",
+            "meta_node_server_max_load_bytes"
+	};
     
     public static final String[] BASE_DIR_VARIANTS = new String[] {
             "base_lambda_flow_starts_per_s",
