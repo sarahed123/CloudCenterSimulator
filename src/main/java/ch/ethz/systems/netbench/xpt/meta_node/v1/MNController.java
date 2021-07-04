@@ -38,10 +38,9 @@ public class MNController extends RoutingPopulator {
     private String calcTransferTimeBy;
     private Random rand;
     private int serverPerMetaNode;
-    private long maxServerLoad;
+    private final long maxServerLoad;
     private long serverTokenSizeByte;
     public final long linkSpeedbpns;
-    private long metaNodeMaxLoad;
 
     protected MNController(NBProperties configuration, Map<Integer, NetworkDevice> idToNetworkDevice) {
         super(configuration);
@@ -72,8 +71,8 @@ public class MNController extends RoutingPopulator {
         initDevices();
         matchingsNum = calcMatchingNum();
         serverDegree = serverPerMetaNode/metaNodeSize;
-        maxServerLoad =  5 *  serverTokenSizeByte * serverPerMetaNode;
-        metaNodeMaxLoad = 10 * initialTokenSizeBytes * metaNodeSize;
+        long outputPortMaxBytes = configuration.getLongPropertyOrFail("output_port_max_queue_size_bytes");
+        maxServerLoad =  configuration.getLongPropertyWithDefault("meta_node_server_max_load_bytes", serverDegree*outputPortMaxBytes);
     }
 
     /**
@@ -176,7 +175,7 @@ public class MNController extends RoutingPopulator {
     }
 
     public MetaNodeToken getToken(int MNSource, int MNDest, long bytes){
-        long newBytes = Math.max(initialTokenSizeBytes,bytes);
+        long newBytes = bytes;
         int dest = getNextMNDest(MNSource, MNDest, newBytes);
         return getToken(MNSource, MNDest, dest, newBytes);
 
@@ -253,59 +252,46 @@ public class MNController extends RoutingPopulator {
         loadMap.put(pair,currBytes-originalBytesAllocated);
     }
 
-    public ServerToken getServerToken(int sourceId, int destinationId, long flowId) throws ServerOverloadedException {
+
+    public ServerToken getServerToken(int sourceId, int destinationId, long flowId, long bytesRequest) throws ServerOverloadedException {
         long incommingLoad = serversIncommingLoadMap.getOrDefault(destinationId, 0l);
         long outgoingLoad = serversOutgoingLoadMap.getOrDefault(sourceId, 0l);
-        long maxLoad = maxServerLoad - serverTokenSizeByte;
+        long bytesToAlloacte = Math.min(serverTokenSizeByte, bytesRequest);
+
+        long maxLoad = maxServerLoad - bytesToAlloacte;
 
         if(incommingLoad >= maxLoad || outgoingLoad >= maxLoad){
+            SimulationLogger.increaseStatisticCounter("SERVER_OVERLOADED");
             throw new ServerOverloadedException();
         }
+
+        int tor = configuration.getGraphDetails().getTorIdOfServer(sourceId);
+        long mnLoad = 0;
+        for(int serverId : configuration.getGraphDetails().getServersOfTor(tor)){
+            MetaNodeSwitch metaNodeSwitch = (MetaNodeSwitch) idToNetworkDevice.get(serverId);
+            mnLoad+=metaNodeSwitch.getLoadByte();
+        }
+
+
+
         int sourceMN = getMetaNodeId(sourceId);
         int destMN = getMetaNodeId(destinationId);
         MetaNodeToken token = null;
-        
-        token = getToken(sourceMN, destMN);
+
+        token = getToken(sourceMN, destMN, bytesToAlloacte);
     
-        boolean MNLoadOK = false;
-        if(token.getMiddleHop()==destMN){
-            MNLoadOK = verifyLoad(token.getSource(),token.getDest());
-        }else{
-            MNLoadOK = verifyLoad(token.getSource(),token.getMiddleHop());
-            MNLoadOK = MNLoadOK && verifyLoad(token.getMiddleHop(),token.getDest());
-        }
+
+        serversOutgoingLoadMap.put(sourceId, outgoingLoad + bytesToAlloacte);
 
 
-        if(!MNLoadOK){
-            token.setExpired();
-            // releaseToken(token);
-            throw new ServerOverloadedException();
-        }
-    
-        
-
-        serversOutgoingLoadMap.put(sourceId, outgoingLoad + serverTokenSizeByte);
-
-        long expiryTime = getServerTokenExpiryTime(outgoingLoad + serverTokenSizeByte);
-        final ServerToken serverToken = new ServerToken(flowId, serverTokenSizeByte, sourceId, destinationId, expiryTime);
+        final ServerToken serverToken = new ServerToken(flowId, bytesToAlloacte, sourceId, destinationId, getServerTokenExpiryTime(outgoingLoad+bytesToAlloacte));
         serverToken.setMetaNodeToken(token);
-        serversIncommingLoadMap.put(destinationId, incommingLoad + serverTokenSizeByte);
-        long MNLoad = loadMap.get(new ImmutablePair<>(token.getSource(), token.getMiddleHop()));
-        Simulator.registerEvent(new Event(getServerTokenExpiryTime(MNLoad + incommingLoad + serverTokenSizeByte)) {
-            @Override
-            public void trigger() {
-                releaseServerTokenIncomming(serverToken);
-            }
-        });
+        serversIncommingLoadMap.put(destinationId, incommingLoad + bytesToAlloacte);
+
+
         return serverToken;
     }
 
-    private boolean verifyLoad(int source, int dest) {
-        if(loadMap.get(new ImmutablePair<>(source, dest)) > metaNodeMaxLoad){
-            return false;
-        }
-        return true;
-    }
 
     public void releaseServerTokenIncomming(ServerToken serverToken){
         long currentIncomming = serversIncommingLoadMap.get(serverToken.destinationId);
@@ -315,14 +301,19 @@ public class MNController extends RoutingPopulator {
 
     public void releaseServerTokenOutgoing(ServerToken serverToken){
         if(serverToken.isExpired()) throw new IllegalStateException("cant release expired token");
-//        long currentIncomming = serversIncommingLoadMap.get(serverToken.destinationId);
-//        serversIncommingLoadMap.put(serverToken.destinationId, currentIncomming - serverToken.bytes);
+        serverToken.invalidate();
 
         long currentOutgoing = serversOutgoingLoadMap.get(serverToken.sourceId);
         serversOutgoingLoadMap.put(serverToken.sourceId, currentOutgoing - serverToken.bytes);
+
     }
 
+
     public long getServerTokenExpiryTime(long tokenBytes){
+        return (8*tokenBytes)/(linkSpeedbpns*serverDegree);
+    }
+
+    public long getMNTokenExpiryTime(long tokenBytes){
         return (8*tokenBytes)/(linkSpeedbpns*serverDegree);
     }
 

@@ -30,7 +30,7 @@ public class MetaNodeTransport extends TransportLayer {
     public class MetaNodeSocket extends Socket{
         ServerToken serverToken;
         long tokenBytes = 0;
-        public final long backoffTime = 5000l;
+        public final long backoffTime;
         /**
          * Create a socket. By default, it should be the receiver.
          * Use the {@link #start() start} method to make the socket a
@@ -45,6 +45,7 @@ public class MetaNodeTransport extends TransportLayer {
         public MetaNodeSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
             super(transportLayer, flowId, sourceId, destinationId, flowSizeByte);
             serverToken = ServerToken.dummyToken();
+            backoffTime = configuration.getLongPropertyOrFail("meta_node_transport_backoff_time_ns");
         }
 
 
@@ -62,10 +63,11 @@ public class MetaNodeTransport extends TransportLayer {
         }
 
         private void sendData() {
-            serverToken.invalidate();
+            long backoffTime = this.backoffTime;
             try {
-                serverToken = MNController.getInstance().getServerToken(sourceId, destinationId, flowId);
+                serverToken = MNController.getInstance().getServerToken(sourceId, destinationId, flowId, remainderToConfirmFlowSizeByte);
                 tokenBytes = serverToken.bytes;
+                backoffTime = MNController.getInstance().getMNTokenExpiryTime(tokenBytes);
                 long tokenSize = tokenBytes;
                 while(tokenSize > 0){
                     long tcpPacketSize = 1380l;
@@ -79,27 +81,23 @@ public class MetaNodeTransport extends TransportLayer {
                             remainderToConfirmFlowSizeByte,-1,
                             false,false,false,false,false,false,false,false, false, 0l, 0l);
                     mnPacket.setMetaNodeToken(serverToken.getMetaNodeToken());
+                    mnPacket.setServerToken(serverToken);
                     transportLayer.send(mnPacket);
-//                    System.out.println("sending");
-//                    System.out.println(tcpPacket);
-                    tokenSize -= (packetSize + headers);
+
                     if(remainderToConfirmFlowSizeByte==0){
-                        MNController.getInstance().releaseServerTokenOutgoing(serverToken);
                         transportLayer.cleanupSockets(flowId);
                         return;
                     }
                 }
             } catch (ServerOverloadedException e) {
-//                System.out.println("server overloaded");
+                
             }finally {
 
             }
 
-            Simulator.registerEvent(new Event(!serverToken.isExpired() ? serverToken.expiryTime : backoffTime) {
+            Simulator.registerEvent(new Event(backoffTime) {
                 @Override
                 public void trigger() {
-                    if(!serverToken.isExpired())
-                        MNController.getInstance().releaseServerTokenOutgoing(serverToken);
                     sendData();
                 }
             });
