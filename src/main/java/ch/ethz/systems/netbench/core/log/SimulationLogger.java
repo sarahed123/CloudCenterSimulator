@@ -89,6 +89,14 @@ public class SimulationLogger {
 		}
 	}
 
+	public static void increaseStatisticCounterBy(String name, long increaseBy) {
+		Long val = statisticCounters.get(name);
+		if (val == null) {
+			val = 0l;
+		}
+		statisticCounters.put(name, val + increaseBy);
+	}
+
 	/**
 	 * Register a port logger so that it can be
 	 * later called after the run is over to collect

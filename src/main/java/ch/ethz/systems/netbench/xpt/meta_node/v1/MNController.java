@@ -278,8 +278,10 @@ public class MNController extends RoutingPopulator {
         int destMN = getMetaNodeId(destinationId);
         MetaNodeToken token = null;
 
-        token = getToken(sourceMN, destMN, bytesToAlloacte);
-    
+        if(sourceMN!=destMN){
+            token = getToken(sourceMN, destMN, bytesToAlloacte);
+        }
+
 
         serversOutgoingLoadMap.put(sourceId, outgoingLoad + bytesToAlloacte);
 
