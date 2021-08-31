@@ -2,6 +2,7 @@ package ch.ethz.systems.netbench.xpt.meta_node.v1;
 
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.NBProperties;
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.Socket;
@@ -66,6 +67,7 @@ public class MetaNodeTransport extends TransportLayer {
             long backoffTime = this.backoffTime;
             try {
                 serverToken = MNController.getInstance().getServerToken(sourceId, destinationId, flowId, remainderToConfirmFlowSizeByte);
+                SimulationLogger.increaseStatisticCounter("CONTROLLER_REQUESTS");
                 tokenBytes = serverToken.bytes;
                 backoffTime = MNController.getInstance().getMNTokenExpiryTime(tokenBytes);
                 long tokenSize = tokenBytes;
@@ -83,7 +85,9 @@ public class MetaNodeTransport extends TransportLayer {
                     mnPacket.setMetaNodeToken(serverToken.getMetaNodeToken());
                     mnPacket.setServerToken(serverToken);
                     transportLayer.send(mnPacket);
+                    SimulationLogger.increaseStatisticCounterBy("BYTES_SENT", mnPacket.getSizeBit()/8);
 
+                    tokenSize -= (packetSize + headers);
                     if(remainderToConfirmFlowSizeByte==0){
                         transportLayer.cleanupSockets(flowId);
                         return;
@@ -98,6 +102,7 @@ public class MetaNodeTransport extends TransportLayer {
             Simulator.registerEvent(new Event(backoffTime) {
                 @Override
                 public void trigger() {
+
                     sendData();
                 }
             });
@@ -107,7 +112,7 @@ public class MetaNodeTransport extends TransportLayer {
         @Override
         public void handle(Packet genericPacket) {
             TcpPacket tcpPacket = (TcpPacket) genericPacket;
-
+            SimulationLogger.increaseStatisticCounterBy("BYTES_RECEIVED", genericPacket.getSizeBit()/8);
             logSender(tcpPacket.getDataSizeByte());
             remainderToConfirmFlowSizeByte-=tcpPacket.getDataSizeByte();
             if(isAllFlowConfirmed()){
