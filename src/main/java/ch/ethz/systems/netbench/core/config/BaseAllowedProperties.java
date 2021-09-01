@@ -74,6 +74,7 @@ public class BaseAllowedProperties {
             "output_port_ecn_threshold_k_bytes",
             "link_delay_ns",
             "link_bandwidth_bit_per_ns",
+            "server_link_bandwidth_bit_per_ns",
 
             // Poisson traffic
             "traffic_pair_type",

@@ -12,6 +12,7 @@ public class PerfectSimpleLinkGenerator extends LinkGenerator {
     private final long delayNs;
     private final long bandwidthBitPerNs;
     private int serverLanes = 1;
+    private NBProperties configuration;
     public PerfectSimpleLinkGenerator(long delayNs, long bandwidthBitPerNs) {
         super();
         this.delayNs = delayNs;
@@ -28,12 +29,16 @@ public class PerfectSimpleLinkGenerator extends LinkGenerator {
 
     public PerfectSimpleLinkGenerator(NBProperties configuration) {
 	this(configuration.getLongPropertyOrFail("link_delay_ns"), configuration.getLongPropertyOrFail("link_bandwidth_bit_per_ns"),configuration.getGraphDetails().getServerLanesNum());
+    this.configuration = configuration;
     }
 
     @Override
     public Link generate(NetworkDevice fromNetworkDevice, NetworkDevice toNetworkDevice) {
-	long deviceBW = bandwidthBitPerNs;
-	if(fromNetworkDevice.isServer() || toNetworkDevice.isServer()) deviceBW /= serverLanes;
+	    long deviceBW = bandwidthBitPerNs;
+	    if(fromNetworkDevice.isServer() || toNetworkDevice.isServer()) {
+            deviceBW = this.configuration.getLongPropertyWithDefault("server_link_bandwidth_bit_per_ns", deviceBW);
+            deviceBW /= serverLanes;
+        }
         return new PerfectSimpleLink(delayNs, deviceBW);
     }
 
