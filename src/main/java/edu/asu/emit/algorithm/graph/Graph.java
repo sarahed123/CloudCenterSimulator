@@ -32,6 +32,7 @@
 package edu.asu.emit.algorithm.graph;
 
 
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -77,7 +78,7 @@ public class Graph implements BaseGraph, Serializable {
      * @param n                     Number of nodes
      * @param linkDirectedPairs     List of directed pairs representing edges
      */
-    public Graph(int n, List<Pair<Integer, Integer>> linkDirectedPairs) {
+    public Graph(int n, List<Pair<Integer, Integer>> linkDirectedPairs, HashMap<Pair<Integer, Integer>, Long> capacityMap) {
 
         // Initialize default data structures
         this.idVertexIndex = new HashMap<>();
@@ -98,12 +99,11 @@ public class Graph implements BaseGraph, Serializable {
         // Add edge presence to data structures
         for (Pair<Integer, Integer> linkDirPair : linkDirectedPairs) {
             addEdge(linkDirPair.getLeft(), linkDirPair.getRight(), 1);
-            edgeCapacities.put(linkDirPair,1l);
-             
+            edgeCapacities.put(linkDirPair,capacityMap.getOrDefault(linkDirPair, 1l));
             
         }
-        
-        
+
+        SimulationLogger.logInfo("Graph", "Dummy Log");
 
     }
 
@@ -251,8 +251,12 @@ public class Graph implements BaseGraph, Serializable {
 
 	@Override
 	public long getEdgeCapacity(Vertex v1, Vertex v2) {
-		return edgeCapacities.get(new ImmutablePair<Integer, Integer>(v1.getId(), v2.getId()));
+		return getEdgeCapacity(v1.getId(), v2.getId());
 	}
+
+    public long getEdgeCapacity(int v1 , int v2) {
+        return edgeCapacities.get(new ImmutablePair<>(v1, v2));
+    }
 
 	public void resetCapcities(boolean serverInfiniteCapacity, Map<Integer, NetworkDevice> idToNetworkDevice, int edge_capacity) {
 		edgeCapacities.replaceAll((k, v) -> initCapcity(k,serverInfiniteCapacity,idToNetworkDevice,edge_capacity));
