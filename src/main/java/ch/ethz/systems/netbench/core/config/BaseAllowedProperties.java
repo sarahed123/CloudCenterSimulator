@@ -72,6 +72,8 @@ public class BaseAllowedProperties {
             // Basic
             "output_port_max_queue_size_bytes",
             "output_port_ecn_threshold_k_bytes",
+            "server_output_port_max_queue_size_bytes",
+            "server_output_port_ecn_threshold_k_bytes",
             "link_delay_ns",
             "link_bandwidth_bit_per_ns",
             "server_link_bandwidth_bit_per_ns",
