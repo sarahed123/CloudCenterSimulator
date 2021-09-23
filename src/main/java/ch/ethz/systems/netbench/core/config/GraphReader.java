@@ -6,10 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GraphReader {
 
@@ -172,6 +169,7 @@ public class GraphReader {
             input = new FileReader(fileName);
             br = new BufferedReader(input);
             List<Pair<Integer, Integer>> linkDirectedPairs = new ArrayList<>();
+            HashMap<Pair<Integer, Integer>, Long> capacityMap = new HashMap<>();
             while ((line = br.readLine()) != null) {
                 line = line.trim();
 
@@ -187,6 +185,10 @@ public class GraphReader {
                     int srcId = Integer.valueOf(spl[0]);
                     int dstId = Integer.valueOf(spl[1]);
                     linkDirectedPairs.add(new ImmutablePair<>(srcId, dstId));
+
+                    if(spl.length > 2){
+                        capacityMap.put(new ImmutablePair<>(srcId,dstId), Long.valueOf(spl[2]));
+                    }
 
                     // Save the coupling of ToR to its servers
                     if (details.getTorNodeIds().contains(srcId)
@@ -208,7 +210,7 @@ public class GraphReader {
             }
 
             // Create graph
-            Graph graph = new Graph(details.getNumNodes(), linkDirectedPairs);
+            Graph graph = new Graph(details.getNumNodes(), linkDirectedPairs, capacityMap);
             
             // Return final instantiated network
             return new ImmutablePair<>(graph, details);
