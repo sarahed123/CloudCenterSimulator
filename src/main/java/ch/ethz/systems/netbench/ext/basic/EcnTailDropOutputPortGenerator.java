@@ -25,6 +25,15 @@ public class EcnTailDropOutputPortGenerator extends OutputPortGenerator {
 
     @Override
     public OutputPort generate(NetworkDevice ownNetworkDevice, NetworkDevice towardsNetworkDevice, Link link) {
+        long maxQueueSizeBytes = this.maxQueueSizeBytes * 
+            configuration.getGraph().getEdgeCapacity(ownNetworkDevice.getIdentifier(), towardsNetworkDevice.getIdentifier());
+        long ecnThresholdKBytes = this.ecnThresholdKBytes * 
+            configuration.getGraph().getEdgeCapacity(ownNetworkDevice.getIdentifier(), towardsNetworkDevice.getIdentifier());;
+        if(ownNetworkDevice.isServer() || towardsNetworkDevice.isServer()){
+            maxQueueSizeBytes = configuration.getLongPropertyWithDefault("server_output_port_max_queue_size_bytes", maxQueueSizeBytes);
+            ecnThresholdKBytes = configuration.getLongPropertyWithDefault("server_output_port_ecn_threshold_k_bytes", ecnThresholdKBytes);
+        }
+        
         if(Simulator.getConfiguration().getBooleanPropertyWithDefault("distributed_protocol_enabled",false)){
             return new DistributedProtocolPort(ownNetworkDevice, towardsNetworkDevice, link, maxQueueSizeBytes, ecnThresholdKBytes);
         }
