@@ -104,7 +104,7 @@ public class RemoteSourceRoutingSwitch extends NetworkDevice {
 	 * @param nextHop
 	 */
 	public void updateForwardingTable(long jumboFlowId, int nextHop) {
-		forwardingTable.put(jumboFlowId, targetIdToOutputPort.get(nextHop));
+		forwardingTable.put(jumboFlowId, getTargetOuputPort(nextHop));
 		
 	}
 

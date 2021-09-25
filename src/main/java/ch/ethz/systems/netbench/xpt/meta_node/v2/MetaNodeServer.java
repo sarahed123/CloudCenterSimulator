@@ -43,7 +43,7 @@ public class MetaNodeServer extends MetaNodeSwitch {
         List<Integer> possibilities = destinationToNextSwitch.get(packet.getDestinationId());
         currToRDest = rand.nextInt(possibilities.size());
         int next = possibilities.get(currToRDest);
-        this.targetIdToOutputPort.get(next).enqueue(genericPacket);
+        this.getTargetOuputPort(next).enqueue(genericPacket);
 
 
         return;

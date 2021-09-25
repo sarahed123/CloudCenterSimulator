@@ -224,10 +224,10 @@ public class OpticElectronicHybrid extends NetworkDevice implements MegaSwitch {
     protected void sendToServer(Packet packet,int serverId){
         if(useDummyServers){
             //treat as the server.
-            targetIdToOutputPort.get(serverId).getTargetDevice().getSourceInputPort(identifier).receive(packet);
+            getTargetOuputPort(serverId).getTargetDevice().getSourceInputPort(identifier).receive(packet);
             return;
         }
-        targetIdToOutputPort.get(serverId).enqueue(packet);
+        getTargetOuputPort(serverId).enqueue(packet);
     }
 
     /**

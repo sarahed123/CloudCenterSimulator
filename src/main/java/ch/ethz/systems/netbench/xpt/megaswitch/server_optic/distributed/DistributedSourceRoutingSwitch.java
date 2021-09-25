@@ -31,7 +31,7 @@ public class DistributedSourceRoutingSwitch extends SemiRemoteRoutingSwitch {
 	 * @param color
 	 */
 	public void updateForwardingTable(int prevHop, int nextHop, int color) {
-		forwardingTable.put(new ImmutablePair<>(prevHop, color), targetIdToOutputPort.get(nextHop));
+		forwardingTable.put(new ImmutablePair<>(prevHop, color), getTargetOuputPort(nextHop));
 		
 	}
 	

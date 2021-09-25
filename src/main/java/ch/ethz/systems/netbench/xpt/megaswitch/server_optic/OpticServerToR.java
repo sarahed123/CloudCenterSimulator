@@ -56,7 +56,7 @@ public class OpticServerToR extends OpticElectronicHybrid {
             LinkGenerator gl = new PerfectSimpleLinkGenerator(networkConf);
 
                 for(int server : configuration.getGraphDetails().getServersOfTor(this.identifier)){
-                    OpticServer serverDevice = (OpticServer) this.targetIdToOutputPort.get(server).getTargetDevice();
+                    OpticServer serverDevice = (OpticServer) this.getTargetOuputPort(server).getTargetDevice();
                     this.optic.addConnection(g.generate(this.optic,serverDevice,gl.generate(this.optic,serverDevice)));
                     serverDevice.createOpticConnection(this.optic);
                 }
@@ -90,6 +90,6 @@ public class OpticServerToR extends OpticElectronicHybrid {
     @Override
     public void onFlowFinished(int source, int dest,int serverSource,int serverDest, long flowId) {
 
-        ((MegaSwitch)targetIdToOutputPort.get(serverSource).getTargetDevice()).onFlowFinished(source, dest, serverSource, serverDest, flowId);
+        ((MegaSwitch)getTargetOuputPort(serverSource).getTargetDevice()).onFlowFinished(source, dest, serverSource, serverDest, flowId);
     }
 }

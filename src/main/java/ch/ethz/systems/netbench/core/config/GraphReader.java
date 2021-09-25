@@ -184,10 +184,13 @@ public class GraphReader {
                     String[] spl = line.split(" ");
                     int srcId = Integer.valueOf(spl[0]);
                     int dstId = Integer.valueOf(spl[1]);
-                    linkDirectedPairs.add(new ImmutablePair<>(srcId, dstId));
+                    long edgesDupNum = 1l;
 
                     if(spl.length > 2){
-                        capacityMap.put(new ImmutablePair<>(srcId,dstId), Long.valueOf(spl[2]));
+                        edgesDupNum = Long.valueOf(spl[2]);
+                    }
+                    for(int i = 0; i < edgesDupNum; i++){
+                        linkDirectedPairs.add(new ImmutablePair<>(srcId, dstId));
                     }
 
                     // Save the coupling of ToR to its servers
@@ -210,7 +213,7 @@ public class GraphReader {
             }
 
             // Create graph
-            Graph graph = new Graph(details.getNumNodes(), linkDirectedPairs, capacityMap);
+            Graph graph = new Graph(details.getNumNodes(), linkDirectedPairs);
             
             // Return final instantiated network
             return new ImmutablePair<>(graph, details);
