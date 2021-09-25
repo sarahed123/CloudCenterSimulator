@@ -46,7 +46,7 @@ public class ForwarderSwitch extends NetworkDevice {
         } else { // Else, it has not arrived
 
             // Forward to the next switch
-            this.targetIdToOutputPort.get(destinationToNextSwitch[ipHeader.getDestinationId()]).enqueue(genericPacket);
+            this.getTargetOuputPort(destinationToNextSwitch[ipHeader.getDestinationId()]).enqueue(genericPacket);
 
         }
 

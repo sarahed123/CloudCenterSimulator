@@ -28,9 +28,9 @@ public class MetaNodeSwitch extends EcmpSwitch {
     @Override
     public void receive(Packet genericPacket) {
         MNEpochPacket packet = (MNEpochPacket) genericPacket;
-        boolean arrivedAtDest = targetIdToOutputPort.containsKey(packet.getDestinationId());
+        boolean arrivedAtDest = getOuputPortsMap().containsKey(packet.getDestinationId());
         if(arrivedAtDest){
-            targetIdToOutputPort.get(packet.getDestinationId()).enqueue(genericPacket);
+            getTargetOuputPort(packet.getDestinationId()).enqueue(genericPacket);
             return;
         }
 
@@ -40,7 +40,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
 
         List<Integer> possibilities = getDestinationToMN(desinationMN);
         int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
-        OutputPort out = this.targetIdToOutputPort.get(randomNext);
+        OutputPort out = this.getTargetOuputPort(randomNext);
         out.enqueue(genericPacket);
     }
 
@@ -52,8 +52,8 @@ public class MetaNodeSwitch extends EcmpSwitch {
 
     protected List<Integer> getDestinationToMN(int mnDest) {
         List<Integer> possiblilities = new LinkedList<>();
-        for(int i : this.targetIdToOutputPort.keySet()){
-            NetworkDevice nd = targetIdToOutputPort.get(i).getTargetDevice();
+        for(int i : getOuputPortsMap().keySet()){
+            NetworkDevice nd = getTargetOuputPort(i).getTargetDevice();
             if(nd.isServer()) continue;
             MetaNodeSwitch mnsw = (MetaNodeSwitch) nd;
             if(mnsw.MNId == mnDest) possiblilities.add(mnsw.identifier);

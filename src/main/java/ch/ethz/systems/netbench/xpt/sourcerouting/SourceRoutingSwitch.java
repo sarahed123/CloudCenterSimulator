@@ -61,7 +61,7 @@ public class SourceRoutingSwitch extends NetworkDevice {
 
 
 	protected void forwardToNextSwitch(SourceRoutingEncapsulation encapsulation) {
-		this.targetIdToOutputPort.get(encapsulation.nextHop()).enqueue(encapsulation);
+		this.getTargetOuputPort(encapsulation.nextHop()).enqueue(encapsulation);
 		
 	}
 
@@ -104,7 +104,7 @@ public class SourceRoutingSwitch extends NetworkDevice {
 			if (sourceTor != destinationTor) {
 
 				// Retrieve ToR to which it is attached
-				SourceRoutingSwitch sourceTorDevice = (SourceRoutingSwitch) this.targetIdToOutputPort.get(sourceTor).getTargetDevice();
+				SourceRoutingSwitch sourceTorDevice = (SourceRoutingSwitch) this.getTargetOuputPort(sourceTor).getTargetDevice();
 
 				// Retrieve the src-ToR to dst-ToR path possibilities
 				//possibilities = sourceTorDevice.getPathsList().get(destinationTor);
