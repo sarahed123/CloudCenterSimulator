@@ -105,6 +105,7 @@ public class MNEpochController extends RoutingPopulator {
     }
 
     public void updateRules(List<RoutingAlg.RoutingRule> rules){
+        if(currentRules != null ) System.out.println(currentRules);
         currentRules = rules;
         for(NetworkDevice device: idToNetworkDevice.values()){
             if(!device.isServer()) continue;
@@ -144,11 +145,11 @@ public class MNEpochController extends RoutingPopulator {
         return sInstance;
     }
 
-    public void registerDemand(int sourceServier, int destServer, long bits, long flowId){
+    public void registerDemand(int sourceServier, int destServer, long bits, long flowId, long startTime){
         int MNSource = getMetaNodeId(sourceServier);
         int MNDest = getMetaNodeId(destServer);
 
-        Demand demand = new Demand(sourceServier, destServer, bits, flowId, MNSource, MNDest);
+        Demand demand = new Demand(sourceServier, destServer, bits, flowId, MNSource, MNDest, startTime);
         demands.add(demand);
 
     }

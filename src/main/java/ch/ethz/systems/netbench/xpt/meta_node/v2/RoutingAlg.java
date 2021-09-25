@@ -178,10 +178,15 @@ public class RoutingAlg {
         public final int MNSource;
         public final int MNDest;
         public final int intermediate;
+        HashMap<Pair<Integer,Integer>, Long> MNutilization;
+        HashMap<Integer, Long> deviceUtilization;
+
         private RoutingRule(int source, int intermediate, int dest){
             this.MNSource = source;
             this.MNDest = dest;
             this.intermediate = intermediate;
+            this.MNutilization = new HashMap<>();
+            this.deviceUtilization = new HashMap<>();
         }
 
         private RoutingRule(int source, int dest){
@@ -201,8 +206,9 @@ public class RoutingAlg {
 
         @Override
         public String toString(){
-            if(intermediate==-1) return MNSource + " -> " + MNDest;
-            return  MNSource + " -> " + intermediate + " -> " + MNDest;
+            String suffix =  " Devices Utilization " + deviceUtilization + " MN Utilization " + MNutilization + "\n";
+            if(intermediate==-1) return MNSource + " -> " + MNDest + suffix;
+            return  MNSource + " -> " + intermediate + " -> " + MNDest + suffix;
         }
 
         public boolean hasIntermidiate() {
@@ -218,6 +224,19 @@ public class RoutingAlg {
 
             return MNDest;
         }
+
+        public void onUtilization(int networkDeviceId, int sourceMNId, int desinationMNId) {
+            long deviceUtil = this.deviceUtilization.getOrDefault(networkDeviceId, 0l);
+            deviceUtil++;
+            this.deviceUtilization.put(networkDeviceId, deviceUtil);
+
+            Pair p = new ImmutablePair(sourceMNId,desinationMNId);
+            long MNUtil = this.MNutilization.getOrDefault(p, 0l);
+            MNUtil++;
+            this.MNutilization.put(p, MNUtil);
+        }
+
+
     }
 
     private class EdgeOccupiedException extends Exception{

@@ -16,7 +16,6 @@ public class EpochOutputPortGenerator extends EcnTailDropOutputPortGenerator {
 
     @Override
     public OutputPort generate(NetworkDevice ownNetworkDevice, NetworkDevice towardsNetworkDevice, Link link) {
-        if(ownNetworkDevice.isServer()) return new EpochOutputPort(ownNetworkDevice,towardsNetworkDevice,link,maxQueueSizeBytes,ecnThresholdKBytes);
-        return super.generate(ownNetworkDevice,towardsNetworkDevice,link);
+        return new EpochOutputPort(ownNetworkDevice,towardsNetworkDevice,link,maxQueueSizeBytes,ecnThresholdKBytes);
     }
 }

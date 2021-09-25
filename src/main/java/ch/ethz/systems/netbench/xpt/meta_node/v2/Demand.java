@@ -12,8 +12,8 @@ public class Demand {
     public final int MNSource;
     public final int MNDest;
     private CongestionAlg.TransportRule trasportRule;
-
-    public Demand(int sourceServer, int destServer, long bits, long flowId, int MNSource, int MNDest) {
+    public final long priority;
+    public Demand(int sourceServer, int destServer, long bits, long flowId, int MNSource, int MNDest, long priority) {
         this.sourceServer = sourceServer;
         this.destServer = destServer;
         this.bits = bits;
@@ -22,6 +22,7 @@ public class Demand {
         this.MNDest = MNDest;
         this.routeAllocated = false;
         this.trasportRule = null;
+        this.priority = priority;
     }
 
     public int getSourceServer(){
@@ -101,4 +102,8 @@ public class Demand {
     }
 
 
+    @Override
+    public String toString(){
+        return "Demand " + bits + " flowId " + flowId  + " MNSource " + MNSource + " MNDest " + MNDest + " priority "+ priority + "\n";
+    }
 }

@@ -42,6 +42,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
         int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
         OutputPort out = this.targetIdToOutputPort.get(randomNext);
         out.enqueue(genericPacket);
+        routingRule.onUtilization(this.identifier, this.getMNID(), desinationMN);
     }
 
     @Override
