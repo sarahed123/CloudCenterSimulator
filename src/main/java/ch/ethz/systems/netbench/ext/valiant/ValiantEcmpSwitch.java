@@ -69,7 +69,7 @@ abstract class ValiantEcmpSwitch extends EcmpSwitch {
 
             // Forward to the next switch
             List<Integer> possibilities = destinationToNextSwitch.get(destinationToGoTo);
-            this.targetIdToOutputPort.get(possibilities.get(encapsulation.getPacket().getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
+            this.getTargetOuputPort(possibilities.get(encapsulation.getPacket().getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
 
         }
 

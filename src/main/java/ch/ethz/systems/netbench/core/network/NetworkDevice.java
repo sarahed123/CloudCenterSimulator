@@ -36,7 +36,7 @@ public abstract class NetworkDevice {
     protected final int identifier;
     protected final List<Integer> connectedTo;
     private final long mSwitchTimeNs;
-    protected Map<Integer, OutputPort> targetIdToOutputPort;
+    private Map<Integer, List<OutputPort>> targetIdToOutputPort;
     protected final Intermediary intermediary;
     protected final NBProperties configuration;
     protected MegaSwitch encapsulatingDevice;
@@ -106,14 +106,19 @@ public abstract class NetworkDevice {
             throw new IllegalArgumentException("Impossible to add output port not originating from " + getIdentifier() + " (origin given: " + outputPort.getOwnId() + ")");
         }
 
+        boolean allowDuplicateEdges = configuration.getBooleanPropertyWithDefault("allow_duplicate_edges", false);
         // Port going there already exists
-        if (connectedTo.contains(outputPort.getTargetId())) {
+        if (connectedTo.contains(outputPort.getTargetId()) && !allowDuplicateEdges) {
             throw new IllegalArgumentException("Impossible to add a duplicate port from " + outputPort.getOwnId() + " to " + outputPort.getTargetId() + ".");
         }
 
         // Add to mappings
-        connectedTo.add(outputPort.getTargetId());
-        targetIdToOutputPort.put(outputPort.getTargetId(), outputPort);
+        if(!connectedTo.contains(outputPort.getTargetId()))
+            connectedTo.add(outputPort.getTargetId());
+        
+        List<OutputPort> outputPorts = targetIdToOutputPort.getOrDefault(outputPort.getTargetId(), new ArrayList<>());
+        outputPorts.add(outputPort);
+        targetIdToOutputPort.put(outputPort.getTargetId(), outputPorts);
 
     }
 
@@ -226,8 +231,20 @@ public abstract class NetworkDevice {
 	}
 
 	public OutputPort getTargetOuputPort(int targetId) {
-		
-		return targetIdToOutputPort.get(targetId);
+		return targetIdToOutputPort.get(targetId).get(0);
+	}
+
+    public OutputPort getTargetOuputPort(int targetId, int hash) {
+        List<OutputPort> outputPorts = targetIdToOutputPort.get(targetId);
+        return outputPorts.get(hash % outputPorts.size());
+    }
+
+    public Map<Integer, OutputPort> getOuputPortsMap() {
+        Map<Integer, OutputPort> portMap = new HashMap<>();
+		for(int p: targetIdToOutputPort.keySet()){
+            portMap.put(p, getTargetOuputPort(p));
+        }
+		return portMap;
 	}
 
     public void addIncomingConnection(InputPort inputPort) {

@@ -61,10 +61,11 @@ public class EcmpSwitch extends NetworkDevice implements EcmpSwitchRoutingInterf
         // Forward to the next switch
         List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
         if(!configuration.getBooleanPropertyWithDefault("disable_ecmp_path_hashing", false)){
-            this.targetIdToOutputPort.get(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
+            int hash = tcpHeader.getHash(this.identifier);
+            this.getTargetOuputPort(possibilities.get(hash % possibilities.size()), hash).enqueue(genericPacket);
         }else{
             int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
-            this.targetIdToOutputPort.get(randomNext).enqueue(genericPacket);
+            this.getTargetOuputPort(randomNext).enqueue(genericPacket);
         }
     }
 

@@ -34,7 +34,7 @@ public class PerfectSimpleLinkGenerator extends LinkGenerator {
 
     @Override
     public Link generate(NetworkDevice fromNetworkDevice, NetworkDevice toNetworkDevice) {
-	    long deviceBW = bandwidthBitPerNs * configuration.getGraph().getEdgeCapacity(fromNetworkDevice.getIdentifier(), toNetworkDevice.getIdentifier());
+	    long deviceBW = bandwidthBitPerNs;
 	    if(fromNetworkDevice.isServer() || toNetworkDevice.isServer()) {
             deviceBW = this.configuration.getLongPropertyWithDefault("server_link_bandwidth_bit_per_ns", deviceBW);
             deviceBW /= serverLanes;
