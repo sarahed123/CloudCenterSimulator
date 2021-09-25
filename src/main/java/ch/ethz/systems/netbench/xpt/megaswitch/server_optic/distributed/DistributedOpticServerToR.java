@@ -85,8 +85,8 @@ public class DistributedOpticServerToR extends OpticServerToR {
         }
 
         int nextHop = rp.getNextHop(this.getIdentifier());
-        if(this.targetIdToOutputPort.containsKey(nextHop)){//if this is true then we must be at the final stage
-            this.targetIdToOutputPort.get(nextHop).enqueue(rp);
+        if(getTargetOuputPort(nextHop) != null){//if this is true then we must be at the final stage
+            getTargetOuputPort(nextHop).enqueue(rp);
             return;
         }
         rp.setPrevHop(this.identifier);

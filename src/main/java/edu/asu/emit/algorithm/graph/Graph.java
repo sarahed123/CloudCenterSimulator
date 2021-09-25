@@ -32,6 +32,7 @@
 package edu.asu.emit.algorithm.graph;
 
 
+import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -78,7 +79,7 @@ public class Graph implements BaseGraph, Serializable {
      * @param n                     Number of nodes
      * @param linkDirectedPairs     List of directed pairs representing edges
      */
-    public Graph(int n, List<Pair<Integer, Integer>> linkDirectedPairs, HashMap<Pair<Integer, Integer>, Long> capacityMap) {
+    public Graph(int n, List<Pair<Integer, Integer>> linkDirectedPairs) {
 
         // Initialize default data structures
         this.idVertexIndex = new HashMap<>();
@@ -99,7 +100,7 @@ public class Graph implements BaseGraph, Serializable {
         // Add edge presence to data structures
         for (Pair<Integer, Integer> linkDirPair : linkDirectedPairs) {
             addEdge(linkDirPair.getLeft(), linkDirPair.getRight(), 1);
-            edgeCapacities.put(linkDirPair,capacityMap.getOrDefault(linkDirPair, 1l));
+            edgeCapacities.put(linkDirPair, 1l);
             
         }
 
@@ -138,8 +139,9 @@ public class Graph implements BaseGraph, Serializable {
 
         // Check that the edge does not already exist
         if (edgeWeights.containsKey(new ImmutablePair<>(startVertexId, endVertexId))) {
-
-            throw new DuplicateEdgeException("Graph: addEdge: the edge (" + startVertexId + ", " + endVertexId + ") already exists.");
+            if(!Simulator.getConfiguration().getBooleanPropertyWithDefault("allow_duplicate_edges", false)){
+                throw new DuplicateEdgeException("Graph: addEdge: the edge (" + startVertexId + ", " + endVertexId + ") already exists.");
+            }
         }
     }
 

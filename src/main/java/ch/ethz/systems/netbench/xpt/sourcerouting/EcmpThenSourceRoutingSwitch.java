@@ -62,7 +62,7 @@ public class EcmpThenSourceRoutingSwitch extends SourceRoutingSwitch implements 
 
                 // Forward to the next switch
                 List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
-                this.targetIdToOutputPort.get(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
+                getTargetOuputPort(possibilities.get(tcpHeader.getHash(this.identifier) % possibilities.size())).enqueue(genericPacket);
 
             }
 

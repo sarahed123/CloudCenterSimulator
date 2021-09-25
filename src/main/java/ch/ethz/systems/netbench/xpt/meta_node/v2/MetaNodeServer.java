@@ -45,8 +45,8 @@ public class MetaNodeServer extends MetaNodeSwitch {
         currToRDest %= possibilities.size();
 
         int next = possibilities.get(currToRDest);
-        this.targetIdToOutputPort.get(next).enqueue(genericPacket);
         currToRDest += 1;
+        this.getTargetOuputPort(next).enqueue(genericPacket);
 
 
         return;
@@ -103,7 +103,7 @@ public class MetaNodeServer extends MetaNodeSwitch {
     }
 
     public void pullPackets(long flowId) {
-        for(OutputPort port: targetIdToOutputPort.values()){
+        for(OutputPort port: getOuputPortsMap().values()){
             pullPacket(flowId);
         }
     }

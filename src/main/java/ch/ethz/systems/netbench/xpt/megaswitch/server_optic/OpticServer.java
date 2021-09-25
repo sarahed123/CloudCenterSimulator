@@ -80,7 +80,7 @@ public class OpticServer extends OpticElectronicHybrid {
 
     @Override
     protected void routeThroughtPacketSwitch(TcpPacket packet) {
-        targetIdToOutputPort.get(ownToRId).enqueue(packet);
+        getTargetOuputPort(ownToRId).enqueue(packet);
     }
 
     @Override

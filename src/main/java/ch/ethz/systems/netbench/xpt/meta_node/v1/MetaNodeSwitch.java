@@ -50,8 +50,8 @@ public class MetaNodeSwitch extends EcmpSwitch {
     protected void  forwardToNextSwitch(Packet genericPacket){
         // Convert to TCP packet
         TcpHeader tcpHeader = (TcpHeader) genericPacket;
-        boolean isSecondHop = !targetIdToOutputPort.containsKey(tcpHeader.getSourceId());
-        boolean localPacket = targetIdToOutputPort.containsKey(tcpHeader.getDestinationId());
+        boolean isSecondHop = getTargetOuputPort(tcpHeader.getSourceId()) == null;
+        boolean localPacket = getTargetOuputPort(tcpHeader.getSourceId()) != null;
 
         if(this.isServer()){
             forwardFromserver(genericPacket);
@@ -65,7 +65,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
             if(tcpHeader.isFIN() && tcpHeader.isACK()){
                 releaseToken(tcpHeader.getSourceId());
             }
-            targetIdToOutputPort.get(tcpHeader.getDestinationId()).enqueue(genericPacket);
+            getTargetOuputPort(tcpHeader.getDestinationId()).enqueue(genericPacket);
             return;
         }
 
@@ -79,7 +79,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
         }
         List<Integer> possibilities = getDestinationToMN(token.getMiddleHop());
         int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
-        OutputPort out = this.targetIdToOutputPort.get(randomNext);
+        OutputPort out = this.getTargetOuputPort(randomNext);
         out.enqueue(genericPacket);
         token.nextBytes(tcpHeader.getSizeBit()/(8));
         int MNDest = getController().getServerMetaNodeNum(tcpHeader.getDestinationId());
@@ -95,7 +95,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
         assert currToRDest >= 0;
         List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
         int next = possibilities.get(currToRDest);
-        this.targetIdToOutputPort.get(next).enqueue(genericPacket);
+        this.getTargetOuputPort(next).enqueue(genericPacket);
         currToRDest++;
         currToRDest%=possibilities.size();
         return;
@@ -105,14 +105,14 @@ public class MetaNodeSwitch extends EcmpSwitch {
         TcpHeader tcpHeader = (TcpHeader) genericPacket;
         List<Integer> possibilities = destinationToNextSwitch.get(tcpHeader.getDestinationId());
         int randomNext = possibilities.get(rand.nextInt(possibilities.size()));
-        this.targetIdToOutputPort.get(randomNext).enqueue(genericPacket);
+        this.getTargetOuputPort(randomNext).enqueue(genericPacket);
         return;
 
     }
     protected List<Integer> getDestinationToMN(int mnDest) {
         List<Integer> possiblilities = new LinkedList<>();
-        for(int i : this.targetIdToOutputPort.keySet()){
-            NetworkDevice nd = targetIdToOutputPort.get(i).getTargetDevice();
+        for(int i : getOuputPortsMap().keySet()){
+            NetworkDevice nd = getTargetOuputPort(i).getTargetDevice();
             if(nd.isServer()) continue;
             MetaNodeSwitch mnsw = (MetaNodeSwitch) nd;
             if(mnsw.MNId == mnDest) possiblilities.add(mnsw.identifier);
@@ -156,7 +156,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
 
     public long getLoadByte(){
         long load = 0l;
-        for(OutputPort outputPort: targetIdToOutputPort.values()){
+        for(OutputPort outputPort: getOuputPortsMap().values()){
             load += (outputPort.getQueueSizeBit()/8);
         }
         return load;
