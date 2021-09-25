@@ -296,5 +296,10 @@ public class Graph implements BaseGraph, Serializable {
 		edgeCapacities.replace(immutablePair, edgeCapacities.get(immutablePair) - 1);
 		
 	}
+
+    public int getDuplicateEdgeNum(int v1, int v2){
+        List<Vertex> neighbours = outEdges.containsKey(v1) ? outEdges.get(v1) : new ArrayList<>();
+        return neighbours.stream().filter(a -> a.getId() == v2).collect(Collectors.toList()).size();
+    }
     
 }

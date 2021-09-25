@@ -76,7 +76,7 @@ public class TopologyServerExtender {
             outputWriter.write("# Original " + details.getNumEdges() + " links:\n");
             for (Vertex v : graph.getVertexList()) {
                 for (Vertex w : graph.getAdjacentVertices(v)) {
-                    outputWriter.write(v.getId() + " " + w.getId() + " " + graph.getEdgeCapacity(v.getId(), w.getId()) + "\n");
+                    outputWriter.write(v.getId() + " " + w.getId() + " " + graph.getDuplicateEdgeNum(v.getId(), w.getId()) + "\n");
                 }
             }
 
