@@ -39,6 +39,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import ch.ethz.systems.netbench.core.network.NetworkDevice;
 ;
@@ -178,7 +180,10 @@ public class Graph implements BaseGraph, Serializable {
      */
     @Override
     public List<Vertex> getAdjacentVertices(Vertex vertex) {
-        return outEdges.containsKey(vertex.getId()) ? outEdges.get(vertex.getId()) : new ArrayList<>();
+
+        Set<Vertex> vertices = new HashSet<>(outEdges.containsKey(vertex.getId()) 
+            ? outEdges.get(vertex.getId()) : new ArrayList<>());
+        return vertices.stream().collect(Collectors.toList());
     }
 
     /**
@@ -190,7 +195,9 @@ public class Graph implements BaseGraph, Serializable {
      */
     @Override
     public List<Vertex> getPrecedentVertices(Vertex vertex) {
-        return inEdges.containsKey(vertex.getId()) ? inEdges.get(vertex.getId()) : new ArrayList<>();
+        Set<Vertex> vertices = new HashSet<>(inEdges.containsKey(vertex.getId()) 
+            ? inEdges.get(vertex.getId()) : new ArrayList<>());
+        return vertices.stream().collect(Collectors.toList());
     }
 
     /**
