@@ -29,7 +29,7 @@ public class EpochEvent  extends Event {
     @Override
     public void trigger() {
         List<Demand> demandList = MNEpochController.getInstance().getDemandList();
-        Collections.shuffle(demandList);
+        Collections.sort(demandList, (a,b) ->  new Long(a.priority - b.priority).intValue());
         long bitsCapacity = MNEpochController.getInstance().getEpochBits();
 
 
@@ -47,6 +47,9 @@ public class EpochEvent  extends Event {
         }
 
         List<RoutingAlg.RoutingRule> routingRules = RoutingAlg.getInstance().getRules(aggregatedDemands);
+
+        System.out.println("Demand list before " + demandList);
+        System.out.println("Demand list after " + demandList.stream().filter(demand -> demand.isRouteAllocated()).collect(Collectors.toList()));
 
 
         MNEpochController.getInstance().updateRules(routingRules);

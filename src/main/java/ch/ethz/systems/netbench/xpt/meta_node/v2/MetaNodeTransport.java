@@ -8,6 +8,7 @@ import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.Socket;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.ext.bare.BareSocket;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.simple.simpletcp.SimpleTcpSocket;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
@@ -32,6 +33,25 @@ public class MetaNodeTransport extends TransportLayer {
         return new MetaNodeSocket(this, flowId, sourceId, destinationId, flowSizeByte, configuration);
     }
 
+    @Override
+    public void receive(Packet genericPacket) {
+
+        MNEpochPacket packet = (MNEpochPacket) genericPacket;
+        Socket socket = flowIdToSocket.get(packet.getFlowId());
+        // If the socket does not yet exist, it is an incoming socket
+        if (socket == null && !finishedFlowIds.contains(packet.getFlowId())) {
+            socket = createSocket(packet.getFlowId(), packet.getSourceId(), -1);
+//            flowIdToReceiver.put(packet.getFlowId(), this);
+            flowIdToSocket.put(packet.getFlowId(), socket);
+            socket.markAsReceiver();
+        }
+
+        // Give packet to socket (we do not care about stray packets)
+        if (socket != null) {
+            socket.handle(packet);
+        }
+    }
+
     public void startEpoch(){
         flowsInEpoch.clear();
     }
@@ -48,7 +68,7 @@ public class MetaNodeTransport extends TransportLayer {
             if(metaNodeSocket.isReceiver()) continue;
             long bits = Math.min(maxBits,metaNodeSocket.getRemainingFlowSize()*8);
             maxBits-=bits;
-            MNEpochController.getInstance().registerDemand(this.identifier,metaNodeSocket.getDestId(),bits,metaNodeSocket.getFlowId());
+            MNEpochController.getInstance().registerDemand(this.identifier,metaNodeSocket.getDestId(),bits,metaNodeSocket.getFlowId(), metaNodeSocket.startTime);
             if(maxBits <= 0) return;
         }
     }
@@ -71,6 +91,7 @@ public class MetaNodeTransport extends TransportLayer {
         private LinkedList<Packet> queue;
         MetaNodeServer serverDest;
         MetaNodeServer serverSource;
+        private final long startTime;
         /**
          * Create a socket. By default, it should be the receiver.
          * Use the {@link #start() start} method to make the socket a
@@ -85,6 +106,7 @@ public class MetaNodeTransport extends TransportLayer {
         public MetaNodeSocket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte, NBProperties configuration) {
             super(transportLayer, flowId, sourceId, destinationId, flowSizeByte, configuration);
             queue = new LinkedList<>();
+            startTime = Simulator.getCurrentTime();
         }
 
         protected void initLogger() {
@@ -110,8 +132,9 @@ public class MetaNodeTransport extends TransportLayer {
 
         @Override
         public void handle(Packet genericPacket) {
-            TcpPacket tcpPacket = (TcpPacket) genericPacket;
+            MNEpochPacket tcpPacket = (MNEpochPacket) genericPacket;
             remainderToConfirmFlowSizeByte -= tcpPacket.getDataSizeByte();
+
             SimulationLogger.increaseStatisticCounter("RECEIVED_BYTES");
 
             logSender(tcpPacket.getDataSizeByte());
@@ -121,12 +144,18 @@ public class MetaNodeTransport extends TransportLayer {
             }
         }
 
+        @Override
+        protected boolean isAllFlowConfirmed() {
+
+            return remainderToConfirmFlowSizeByte == 0;
+        }
+
 
         public void sendPackets(long dataSizeByte){
             while(dataSizeByte > 0) {
                 if (remainderToConfirmFlowSizeByte <= 0) break;
 
-                long bytesToSend = Math.min(dataSizeByte, MAX_SEGMENT_SIZE);
+                long bytesToSend = Math.min(dataSizeByte, 1500l);
                 bytesToSend = Math.min(bytesToSend, remainderToConfirmFlowSizeByte);
 
 //                this.remainderToConfirmFlowSizeByte -= bytesToSend;
@@ -145,22 +174,24 @@ public class MetaNodeTransport extends TransportLayer {
                         remainderToConfirmFlowSizeByte, serverSource.getMNID() ,serverDest.getMNID()
                 ));
             }
-
-            pullPacket();
+            serverSource.pullPackets(this.getFlowId());
 
         }
 
         private void pullPacket() {
-            TcpPacket packet = (TcpPacket) queue.pollFirst();
+            MNEpochPacket packet = (MNEpochPacket) queue.pollFirst();
             if(packet==null) {
                 return;
             }
+
             transportLayer.send(packet);
             SimulationLogger.increaseStatisticCounter("SENT_OUT_BYTES");
+
 
 //            this.remainderToConfirmFlowSizeByte -= packet.getDataSizeByte();
             if(packet.getSequenceNumber() <= 0){
                 transportLayer.cleanupSockets(flowId);
+                flowsInEpoch.remove(flowId);
             }
         }
 

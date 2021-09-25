@@ -21,11 +21,12 @@ public class MetaNodeServer extends MetaNodeSwitch {
     protected MetaNodeServer(int identifier, TransportLayer transportLayer,  int N, Intermediary intermediary, NBProperties configuration) {
         super(identifier, transportLayer,N, intermediary, configuration);
         MNId = -1;
+        currToRDest = identifier;
     }
 
     @Override
     public void receive(Packet genericPacket) {
-        TcpPacket tcpPacket = (TcpPacket) genericPacket;
+        MNEpochPacket tcpPacket = (MNEpochPacket) genericPacket;
         if(tcpPacket.getDestinationId() == this.identifier) {
             getTransportLayer().receive(tcpPacket);
         } else {
@@ -41,9 +42,11 @@ public class MetaNodeServer extends MetaNodeSwitch {
         assert currToRDest >= 0;
 
         List<Integer> possibilities = destinationToNextSwitch.get(packet.getDestinationId());
-        currToRDest = rand.nextInt(possibilities.size());
+        currToRDest %= possibilities.size();
+
         int next = possibilities.get(currToRDest);
         this.targetIdToOutputPort.get(next).enqueue(genericPacket);
+        currToRDest += 1;
 
 
         return;
@@ -87,9 +90,9 @@ public class MetaNodeServer extends MetaNodeSwitch {
     }
 
 
-    public void pullPacket(MNEpochPacket packet) {
+    public void pullPacket(long flowid) {
         MetaNodeTransport transport = (MetaNodeTransport) getTransportLayer();
-        transport.pullPacket(packet.getFlowId());
+        transport.pullPacket(flowid);
 
     }
 
@@ -97,5 +100,11 @@ public class MetaNodeServer extends MetaNodeSwitch {
         MetaNodeTransport transport = (MetaNodeTransport) this.getTransportLayer();
         transport.startEpoch();
 
+    }
+
+    public void pullPackets(long flowId) {
+        for(OutputPort port: targetIdToOutputPort.values()){
+            pullPacket(flowId);
+        }
     }
 }
