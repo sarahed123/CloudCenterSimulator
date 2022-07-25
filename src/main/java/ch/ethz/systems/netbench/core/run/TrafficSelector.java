@@ -150,6 +150,15 @@ class TrafficSelector {
                                     PoissonArrivalPlanner.PairDistribution.PAIRINGS_FRACTION,
                                     configuration
                             );
+
+                        case "server_pairings_fraction":
+                            return new PoissonArrivalPlanner(
+                                    idToTransportLayer,
+                                    configuration.getIntegerPropertyOrFail("traffic_lambda_flow_starts_per_s"),
+                                    flowSizeDistribution,
+                                    PoissonArrivalPlanner.PairDistribution.SERVER_PAIRINGS_FRACTION,
+                                    configuration
+                            );
                             
                         case "skew_pareto_distribution":
                             return new PoissonArrivalPlanner(

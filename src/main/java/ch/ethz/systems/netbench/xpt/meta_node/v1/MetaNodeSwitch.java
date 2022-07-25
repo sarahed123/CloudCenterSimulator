@@ -51,7 +51,7 @@ public class MetaNodeSwitch extends EcmpSwitch {
         // Convert to TCP packet
         TcpHeader tcpHeader = (TcpHeader) genericPacket;
         boolean isSecondHop = getTargetOuputPort(tcpHeader.getSourceId()) == null;
-        boolean localPacket = getTargetOuputPort(tcpHeader.getSourceId()) != null;
+        boolean localPacket = getTargetOuputPort(tcpHeader.getDestinationId()) != null;
 
         if(this.isServer()){
             forwardFromserver(genericPacket);

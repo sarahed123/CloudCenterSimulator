@@ -136,7 +136,10 @@ public class BaseInitializer {
         // Create edges
         for (Vertex v : graph.getVertexList()) {
             for (Vertex w : graph.getAdjacentVertices(v)) {
-                createEdge(v.getId(), + w.getId(),partialMap,verifyLinks);
+                int dups = graph.getDuplicateEdgeNum(v.getId(),w.getId());
+                for(int i = 0; i < dups; i++){
+                    createEdge(v.getId(), w.getId(),partialMap,verifyLinks);
+                }
             }
         }
         System.out.println("finished creating nodes and edges");
