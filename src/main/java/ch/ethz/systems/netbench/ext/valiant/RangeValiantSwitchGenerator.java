@@ -22,10 +22,11 @@ public class RangeValiantSwitchGenerator extends NetworkDeviceGenerator {
         // Standard fields
         this.numNodes = numNodes;
         this.intermediaryGenerator = intermediaryGenerator;
-
+        int numToRs = configuration.getGraphDetails().getNumTors();
         // Range of [lower, upper] for which nodes are eligible to be chosen as valiant node
-        this.nodeRangeLower = configuration.getIntegerPropertyOrFail("routing_random_valiant_node_range_lower_incl");
-        this.nodeRangeUpper = configuration.getIntegerPropertyOrFail("routing_random_valiant_node_range_upper_incl");
+        this.nodeRangeLower = configuration.getIntegerPropertyWithDefault("routing_random_valiant_node_range_lower_incl", 0);
+        this.nodeRangeUpper = configuration.getIntegerPropertyWithDefault("routing_random_valiant_node_range_upper_incl", numToRs - 1);
+        SimulationLogger.logInfo("VLB Upper bound", "" + numToRs);
 
         // Check range
         if (nodeRangeLower < 0 || nodeRangeUpper < 0 || nodeRangeLower > numNodes - 1 || nodeRangeUpper > numNodes - 1 || nodeRangeLower > nodeRangeUpper) {

@@ -231,11 +231,17 @@ public abstract class NetworkDevice {
 	}
 
 	public OutputPort getTargetOuputPort(int targetId) {
+        if(targetIdToOutputPort.get(targetId) == null) {
+            return null;
+        }
 		return targetIdToOutputPort.get(targetId).get(0);
 	}
 
     public OutputPort getTargetOuputPort(int targetId, int hash) {
         List<OutputPort> outputPorts = targetIdToOutputPort.get(targetId);
+        if(outputPorts == null) {
+            return null;
+        }
         return outputPorts.get(hash % outputPorts.size());
     }
 

@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PoissonArrivalPlanner extends TrafficPlanner {
 
@@ -22,6 +23,7 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
         ALL_TO_ALL_SERVER_FRACTION,
         PARETO_SKEW_DISTRIBUTION,
         PAIRINGS_FRACTION,
+        SERVER_PAIRINGS_FRACTION,
         DUAL_ALL_TO_ALL_FRACTION,
         DUAL_ALL_TO_ALL_SERVER_FRACTION,
         DENSITY_MATRIX
@@ -81,6 +83,10 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
 
             case PAIRINGS_FRACTION:
                 this.setPairProbabilitiesPairingsInFraction();
+                break;
+
+            case SERVER_PAIRINGS_FRACTION:
+                this.setPairProbabilitiesServerPairingsInFraction();
                 break;
                 
             case PARETO_SKEW_DISTRIBUTION:
@@ -485,6 +491,43 @@ public class PoissonArrivalPlanner extends TrafficPlanner {
 
         System.out.println(" done.");
 
+    }
+
+    private void setPairProbabilitiesServerPairingsInFraction() {
+        double activeFractionX = configuration.getDoublePropertyOrFail("traffic_probabilities_active_fraction");
+        List<Integer> serverIds = configuration.getGraphDetails().getServerNodeIds().stream().collect(Collectors.toList());
+        Random pairingsRandom = Simulator.selectIndependentRandom("server_parings_fraction");
+        Collections.shuffle(serverIds, pairingsRandom);
+        int numTors = configuration.getGraphDetails().getNumTors();
+
+        double serverPairs = 0.0;
+        // Go over every ToR pair
+        List<org.apache.commons.lang3.tuple.Pair<Integer, Integer>> chosen = new ArrayList<>();
+        while (serverIds.size() >= 2 ) {
+
+            // Choose two at random
+            int idxFirst = Math.abs(pairingsRandom.nextInt()) % serverIds.size();
+            int first = serverIds.get(idxFirst);
+            int idxSecond = Math.abs(pairingsRandom.nextInt()) % serverIds.size();
+            int second = serverIds.get(idxSecond);
+            while (first == second) {
+                idxSecond = Math.abs(pairingsRandom.nextInt()) % serverIds.size();
+                second = serverIds.get(idxSecond);
+            }
+            serverPairs += 2;
+            chosen.add(new ImmutablePair<>(first, second));
+            serverIds.remove(Integer.valueOf(first));
+            serverIds.remove(Integer.valueOf(second));
+
+        }
+        double serverPairProb = 1.0/serverPairs;
+        for(Pair<Integer,Integer> p: chosen){
+            int svrA = p.getLeft();
+            int svrB = p.getRight();
+            addToPool(serverPairProb, new ImmutablePair<>(svrA, svrB));
+            addToPool(serverPairProb, new ImmutablePair<>(svrB, svrA));
+        }
+        SimulationLogger.logInfo("PAIRINGS_FRACTION_CHOSEN_SERVERS", chosen.toString());
     }
 
     /**
