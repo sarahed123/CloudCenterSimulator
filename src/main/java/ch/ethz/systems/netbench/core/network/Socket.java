@@ -21,10 +21,10 @@ public abstract class Socket {
      * Use the {@link #start() start} method to make the socket a
      * sender and initiate the communication handshake.
      *
-     * @param transportLayer    Transport layer
-     * @param sourceId          Source network device identifier
-     * @param destinationId     Target network device identifier
-     * @param flowSizeByte      Size of the flow in bytes
+     * @param transportLayer Transport layer
+     * @param sourceId       Source network device identifier
+     * @param destinationId  Target network device identifier
+     * @param flowSizeByte   Size of the flow in bytes
      */
     public Socket(TransportLayer transportLayer, long flowId, int sourceId, int destinationId, long flowSizeByte) {
         // Initialize higher variables
@@ -47,20 +47,20 @@ public abstract class Socket {
     /**
      * Confirm the amount of flow given as argument.
      *
-     * @param newlyConfirmedFlowByte     Amount of flow (> 0) newly confirmed
+     * @param newlyConfirmedFlowByte Amount of flow (> 0) newly confirmed
      */
     protected void confirmFlow(long newlyConfirmedFlowByte) {
-    	
-        assert(!this.isReceiver && this.remainderToConfirmFlowSizeByte >= newlyConfirmedFlowByte && newlyConfirmedFlowByte > 0);
+        // check the packet not recieve and there is flow byte
+        assert (!this.isReceiver && this.remainderToConfirmFlowSizeByte >= newlyConfirmedFlowByte
+                && newlyConfirmedFlowByte > 0);
         this.remainderToConfirmFlowSizeByte -= newlyConfirmedFlowByte;
         logSender(newlyConfirmedFlowByte);
 
-
         // Remove references to the socket after finish
         if (isAllFlowConfirmed()) {
-        	
-        	onAllFlowConfirmed();
-            
+
+            onAllFlowConfirmed();
+
         }
 
     }
@@ -75,41 +75,44 @@ public abstract class Socket {
         boolean exendedTopology = true;
         int destToRId = -1;
         int sourceToRId = -1;
-        try{
-            sourceToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(sourceId);
-            destToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails().getTorIdOfServer(destinationId);
-        }catch (NullPointerException e){
+        try {
+            sourceToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails()
+                    .getTorIdOfServer(sourceId);
+            destToRId = transportLayer.getNetworkDevice().getConfiguration().getGraphDetails()
+                    .getTorIdOfServer(destinationId);
+        } catch (NullPointerException e) {
             exendedTopology = false;
         }
-        if(exendedTopology){
-            try{
+        if (exendedTopology) {
+            try {
                 MegaSwitch ms = (MegaSwitch) BaseInitializer.getInstance().getIdToNetworkDevice().get(sourceToRId);
-                if(ms != null)
-                    ms.onFlowFinished(sourceToRId,destToRId,sourceId,destinationId,flowId);
-            }catch (ClassCastException e){
+                if (ms != null)
+                    ms.onFlowFinished(sourceToRId, destToRId, sourceId, destinationId, flowId);
+            } catch (ClassCastException e) {
 
             }
         }
 
-    	transportLayer.cleanupSockets(flowId);
+        transportLayer.cleanupSockets(flowId);
         Simulator.registerFlowFinished(flowId);
-		
-	}
 
-	/**
-     * Check whether all flow has been confirmed via {@link #confirmFlow(long) confirmFlow}.
+    }
+
+    /**
+     * Check whether all flow has been confirmed via {@link #confirmFlow(long)
+     * confirmFlow}.
      *
-     * @return  True iff all flow has been confirmed
+     * @return True iff all flow has been confirmed
      */
     protected boolean isAllFlowConfirmed() {
-    	
+
         return remainderToConfirmFlowSizeByte == 0;
     }
 
     /**
      * Get the remaining amount of flow to be confirmed.
      *
-     * @return  Remainder of flow not yet confirmed in bytes
+     * @return Remainder of flow not yet confirmed in bytes
      */
     protected long getRemainderToConfirmFlowSizeByte() {
         return remainderToConfirmFlowSizeByte;
@@ -122,9 +125,10 @@ public abstract class Socket {
 
     /**
      * Handle the reception of packet, passed on by the transport layer
-     * to which this socket belongs.
+     * to which this socket belongs- handle when the packet pass(which socket
+     * belong)
      *
-     * @param genericPacket    Packet instance
+     * @param genericPacket Packet instance
      */
     public abstract void handle(Packet genericPacket);
 
@@ -141,12 +145,11 @@ public abstract class Socket {
      * Check whether the socket is the receiver (or not, the sender).
      * Do not override.
      *
-     * @return  True iff the socket is a receiver
+     * @return True iff the socket is a receiver
      */
     protected boolean isReceiver() {
         return isReceiver;
     }
-
 
     public void markAsReceiver() {
         this.isReceiver = true;
