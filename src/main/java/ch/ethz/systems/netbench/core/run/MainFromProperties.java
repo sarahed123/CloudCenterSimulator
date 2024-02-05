@@ -1,6 +1,5 @@
 package ch.ethz.systems.netbench.core.run;
 
-
 import ch.ethz.systems.netbench.core.Simulator;
 import ch.ethz.systems.netbench.core.config.BaseAllowedProperties;
 import ch.ethz.systems.netbench.core.config.NBProperties;
@@ -30,7 +29,7 @@ public class MainFromProperties {
     /**
      * Main from properties file.
      *
-     * @param args  Command line arguments
+     * @param args Command line arguments
      */
     public static void main(String args[]) {
         System.out.println("Free memory (bytes): " +
@@ -38,11 +37,10 @@ public class MainFromProperties {
         // Load in the configuration properties
         List<NBProperties> runConfigurations = generateRunConfigurationFromArgs(args);
 
-    	SimulationLogger.openCommon(runConfigurations.get(0));
+        SimulationLogger.openCommon(runConfigurations.get(0));
 
-        
         do {
-        	// General property: random seed
+            // General property: random seed
             long seed = runConfigurations.get(0).getLongPropertyOrFail("seed");
 
             // General property: running time in nanoseconds
@@ -52,26 +50,23 @@ public class MainFromProperties {
             Simulator.setup(seed, runConfigurations.get(0));
             manageTopology(runConfigurations.get(0));
 
-            for(int j = 0;j<runConfigurations.size();j++){
-            	SimulationLogger.copyRunConfiguration(runConfigurations.get(j));
-            	HashMap<Integer, NetworkDevice> map = extendInfrastructure(runConfigurations.get(j),j);
-            	populateRoutingState(map,runConfigurations.get(j));
+            for (int j = 0; j < runConfigurations.size(); j++) {
+                SimulationLogger.copyRunConfiguration(runConfigurations.get(j));
+                HashMap<Integer, NetworkDevice> map = extendInfrastructure(runConfigurations.get(j), j);
+                populateRoutingState(map, runConfigurations.get(j));
             }
             BaseInitializer.getInstance().finalize();
             // Copy configuration files for reproducibility
-            
 
             // Manage topology (e.g. extend with servers if said by configuration)
-            
 
             // Initialization of the three components
-            
-            if(runConfigurations.get(0).getPropertyWithDefault("from_state",null)==null) {
-            	planTraffic(runtimeNs, BaseInitializer.getInstance().getIdToTransportLayer());
-            }else {
-            	
+
+            if (runConfigurations.get(0).getPropertyWithDefault("from_state", null) == null) {
+                planTraffic(runtimeNs, BaseInitializer.getInstance().getIdToTransportLayer());
+            } else {
+
             }
-            
 
             // Save analysis command
             String analysisCommand = Simulator.getConfiguration().getPropertyWithDefault("analysis_command", null);
@@ -79,11 +74,12 @@ public class MainFromProperties {
             // Perform run
             System.out.println("ACTUAL RUN\n==================");
             try {
-            	Simulator.runNs(runtimeNs, Simulator.getConfiguration().getLongPropertyWithDefault("finish_when_first_flows_finish", -1));
-            }catch(Exception e) {
-            	e.printStackTrace();
+                Simulator.runNs(runtimeNs,
+                        Simulator.getConfiguration().getLongPropertyWithDefault("finish_when_first_flows_finish", -1));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            
+
             Simulator.reset(false);
             System.out.println("Finished run.\n");
 
@@ -96,13 +92,13 @@ public class MainFromProperties {
                 System.out.println("No analysis command given; analysis is skipped.");
             }
             try {
-				SimulationLogger.logCommon(runConfigurations.get(0));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        	runConfigurations.get(0).nextSubConfiguration();
-        }while(runConfigurations.get(0).hasSubConfiguration());
+                SimulationLogger.logCommon(runConfigurations.get(0));
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            runConfigurations.get(0).nextSubConfiguration();
+        } while (runConfigurations.get(0).hasSubConfiguration());
         SimulationLogger.closeCommon();
 
     }
@@ -113,7 +109,7 @@ public class MainFromProperties {
      * Command-line template:
      * java -jar NetBench.jar /path/to/run_config.properties param1=val1 param2=val2
      *
-     * @param args  Command-line arguments
+     * @param args Command-line arguments
      *
      * @return Final run configuration
      */
@@ -126,7 +122,6 @@ public class MainFromProperties {
 
         List<NBProperties> propertiesList = new LinkedList<NBProperties>();
 
-
         // Load in the configuration properties
         NBProperties runConfiguration = new NBProperties(
                 args[0],
@@ -135,22 +130,19 @@ public class MainFromProperties {
                 BaseAllowedProperties.EXTENSION,
                 BaseAllowedProperties.EXPERIMENTAL,
                 BaseAllowedProperties.BASE_DIR_VARIANTS,
-                BaseAllowedProperties.META_NODE
-        );
+                BaseAllowedProperties.META_NODE);
         propertiesList.add(runConfiguration);
         BufferedReader reader;
-        //load properties from environment
+        // load properties from environment
         try {
             ClassLoader classloader = Thread.currentThread().getContextClassLoader();
             InputStream is = classloader.getResourceAsStream("env.properties");
-            reader = new BufferedReader(new InputStreamReader(is
-            ));
+            reader = new BufferedReader(new InputStreamReader(is));
             String line = reader.readLine();
             while (line != null) {
 
-
                 int index = line.indexOf('=');
-                if(index==-1){
+                if (index == -1) {
                     throw new InvalidPropertiesFormatException("arg " + line + " is not a valid property format");
                 }
                 String param = line.substring(0, index);
@@ -164,12 +156,11 @@ public class MainFromProperties {
             e.printStackTrace();
         }
 
-
         // Dynamic overwrite of temporary config using arguments given from command line
         for (int i = 1; i < args.length; i++) {
-            try{
+            try {
                 int index = args[i].indexOf('=');
-                if(index==-1){
+                if (index == -1) {
                     throw new InvalidPropertiesFormatException("arg " + i + " is not a valid property format");
                 }
                 String param = args[i].substring(0, index);
@@ -182,27 +173,26 @@ public class MainFromProperties {
                         BaseAllowedProperties.PROPERTIES_RUN,
                         BaseAllowedProperties.EXTENSION,
                         BaseAllowedProperties.EXPERIMENTAL,
-                        BaseAllowedProperties.BASE_DIR_VARIANTS
-                );
+                        BaseAllowedProperties.BASE_DIR_VARIANTS);
                 propertiesList.add(runConfiguration);
             }
 
         }
 
         propertiesList.get(0).loadSubConfigurtations();
-        NBProperties.constructBaseDir(propertiesList.get(0),propertiesList);
+        NBProperties.constructBaseDir(propertiesList.get(0), propertiesList);
         try {
             String commonBaseDir = propertiesList.get(0).getPropertyOrFail("common_base_dir");
-            if(propertiesList.get(0).getBooleanPropertyWithDefault("enable_jumbo_flows",false)){
-                commonBaseDir+="Jumbo";
+            if (propertiesList.get(0).getBooleanPropertyWithDefault("enable_jumbo_flows", false)) {
+                commonBaseDir += "Jumbo";
             }
 
             new File(commonBaseDir).mkdirs();
             BufferedWriter bw = new BufferedWriter(new FileWriter(commonBaseDir + "/" +
                     propertiesList.get(0).getPropertyOrFail("common_run_name")));
-            for(NBProperties properties: propertiesList){
+            for (NBProperties properties : propertiesList) {
                 String[] props = properties.toString().split(", ");
-                for (String prop: props){
+                for (String prop : props) {
                     bw.write(prop + "\n");
                 }
                 bw.write("\n");
@@ -211,7 +201,7 @@ public class MainFromProperties {
             bw.close();
         } catch (IOException e) {
             throw new RuntimeException("couldnt open common base folder");
-        }catch (PropertyMissingException e){
+        } catch (PropertyMissingException e) {
             System.out.println("no common run dir was given...");
         }
         return propertiesList;
@@ -221,7 +211,7 @@ public class MainFromProperties {
     /**
      * Determine the amount of running time in nanoseconds.
      *
-     * @param runConfiguration  Run configuration
+     * @param runConfiguration Run configuration
      *
      * @return Running time in nanoseconds
      */
@@ -246,9 +236,9 @@ public class MainFromProperties {
      * Generate the infrastructure (network devices, output ports,
      * links and transport layers) of the run.
      *
-     * @return  Initializer of the infrastructure
+     * @return Initializer of the infrastructure
      * @param configuration
-     * @param networkNum 
+     * @param networkNum
      */
     private static HashMap<Integer, NetworkDevice> extendInfrastructure(NBProperties configuration, int networkNum) {
 
@@ -257,15 +247,14 @@ public class MainFromProperties {
         BaseInitializer initializer = BaseInitializer.getInstance();
         // 1.1) Generate nodes
         initializer.extend(
-        		networkNum,
+                networkNum,
                 InfrastructureSelector.selectOutputPortGenerator(configuration),
                 InfrastructureSelector.selectNetworkDeviceGenerator(configuration),
                 InfrastructureSelector.selectLinkGenerator(configuration),
-                InfrastructureSelector.selectTransportLayerGenerator(configuration)
-        );
-        
+                InfrastructureSelector.selectTransportLayerGenerator(configuration));
+
         // Finished infrastructure
-        System.out.println("Finished creating infrastructure for network num " + networkNum +"\n");
+        System.out.println("Finished creating infrastructure for network num " + networkNum + "\n");
 
         return initializer.createInfrastructure(configuration);
 
@@ -274,10 +263,11 @@ public class MainFromProperties {
     /**
      * Populate the routing state.
      *
-     * @param idToNetworkDevice     Mapping of identifier to network device
-     * @param configuration 
+     * @param idToNetworkDevice Mapping of identifier to network device
+     * @param configuration
      */
-    private static void populateRoutingState(Map<Integer, NetworkDevice> idToNetworkDevice, NBProperties configuration) {
+    private static void populateRoutingState(Map<Integer, NetworkDevice> idToNetworkDevice,
+            NBProperties configuration) {
 
         // Start routing
         System.out.println("ROUTING STATE\n==================");
@@ -294,17 +284,16 @@ public class MainFromProperties {
     /**
      * Plan the traffic.
      *
-     * @param runtimeNs             Running time in nanoseconds
-     * @param idToTransportLayer    Mapping from node identifier to transport layer
+     * @param runtimeNs          Running time in nanoseconds
+     * @param idToTransportLayer Mapping from node identifier to transport layer
      */
     private static void planTraffic(long runtimeNs, Map<Integer, TransportLayer> idToTransportLayer) {
 
         // Start traffic generation
         System.out.println("TRAFFIC\n==================");
-        
-        
+
         // 3.1) Create flow plan for the simulator
-        TrafficPlanner planner = TrafficSelector.selectPlanner(idToTransportLayer,Simulator.getConfiguration());
+        TrafficPlanner planner = TrafficSelector.selectPlanner(idToTransportLayer, Simulator.getConfiguration());
         planner.createPlan(runtimeNs);
         SimulationLogger.logInfo("TOTAL_BYTEST_IN_PLAN", Long.toString(planner.getTotalBytes()));
         System.out.println("Total bytes in traffic plan " + Long.toString(planner.getTotalBytes()));
@@ -326,33 +315,38 @@ public class MainFromProperties {
     private static void manageTopology(NBProperties configuration) {
 
         // Copy of original topology to the run folder
-        SimulationLogger.copyFileToRunFolder(configuration.getPropertyOrFail("scenario_topology_file"), "original_topology.txt");
+        SimulationLogger.copyFileToRunFolder(configuration.getPropertyOrFail("scenario_topology_file"),
+                "original_topology.txt");
 
         // Topology extension
         if (configuration.isPropertyDefined("scenario_topology_extend_with_servers")) {
             if (configuration.getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("regular")) {
 
                 // Number of servers to add to each transport layer node
-                int serversPerNodeToExtendWith = configuration.getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
+                int serversPerNodeToExtendWith = configuration
+                        .getIntegerPropertyOrFail("scenario_topology_extend_servers_per_tl_node");
 
                 // Extend topology
                 new TopologyServerExtender(
                         configuration.getTopologyFileNameOrFail(),
-                        SimulationLogger.getRunFolderFull() + "/extended_topology.txt"
-                ).extendRegular(serversPerNodeToExtendWith);
+                        SimulationLogger.getRunFolderFull() + "/extended_topology.txt")
+                        .extendRegular(serversPerNodeToExtendWith);
 
                 // Log info about extension
-                SimulationLogger.logInfo("OVERRODE_TOPOLOGY_FILE_WITH_SERVER_EXTENSION", "servers/node=" + serversPerNodeToExtendWith);
+                SimulationLogger.logInfo("OVERRODE_TOPOLOGY_FILE_WITH_SERVER_EXTENSION",
+                        "servers/node=" + serversPerNodeToExtendWith);
                 configuration.markExtended();
             } else {
-		if(!configuration.getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("none"))
-	                throw new PropertyValueInvalidException(configuration, "scenario_topology_extend_with_servers");
-		return;
+                if (!configuration.getPropertyWithDefault("scenario_topology_extend_with_servers", "").equals("none"))
+                    throw new PropertyValueInvalidException(configuration, "scenario_topology_extend_with_servers");
+                return;
             }
 
             // Override configuration property
-            configuration.overrideProperty("scenario_topology_file", SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
-            SimulationLogger.logInfo("ARG_OVERRIDE_PARAM(scenario_topology_file)", SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
+            configuration.overrideProperty("scenario_topology_file",
+                    SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
+            SimulationLogger.logInfo("ARG_OVERRIDE_PARAM(scenario_topology_file)",
+                    SimulationLogger.getRunFolderFull() + "/extended_topology.txt");
 
         }
 
@@ -362,8 +356,9 @@ public class MainFromProperties {
      * Run a command in the prompt (e.g. to call a python script).
      * Error write output is always shown.
      *
-     * @param cmd           Command
-     * @param showOutput    Whether to show the normal write output from the command in the console
+     * @param cmd        Command
+     * @param showOutput Whether to show the normal write output from the command in
+     *                   the console
      */
     public static void runCommand(String cmd, boolean showOutput) {
 
