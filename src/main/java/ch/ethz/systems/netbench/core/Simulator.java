@@ -3,11 +3,18 @@ package ch.ethz.systems.netbench.core;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Event;
+import ch.ethz.systems.netbench.core.network.Packet;
+import ch.ethz.systems.netbench.core.network.PacketArrivalEvent;
+import ch.ethz.systems.netbench.core.network.PacketDispatchedEvent;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.random.RandomManager;
 import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
+import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
+import ch.ethz.systems.netbench.ext.basic.IpPacket;
+import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import org.json.simple.JSONObject;
 
@@ -22,6 +29,9 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The simulator is responsible for offering general
@@ -36,9 +46,15 @@ public class Simulator {
 
 	// Main ordered event queue (run variable)
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
+	// Event queues map according to servers(source_id)
+	final static int NUM_SERVER = 8;
+	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_SERVER];
+	private static final Lock lockThreshold = new ReentrantLock();
+	private static final Lock lockNow = new ReentrantLock();
 
 	// Current time in ns in the simulation (run variable)
 	private static long now;
+	private static boolean endedDueToFlowThreshold;
 
 	// Threshold to end
 	private static long finishFlowIdThreshold;
@@ -72,7 +88,7 @@ public class Simulator {
 	 * (B) Settings for the internal workings, e.g. TCP retransmission
 	 * time-out, flowlet gap, and model parameters in general.
 	 *
-	 * @return  Run configuration properties
+	 * @return Run configuration properties
 	 */
 	public static NBProperties getConfiguration() {
 		return configuration;
@@ -82,7 +98,7 @@ public class Simulator {
 	 * Setup the simulator with only a seed, leaving out
 	 * a run configuration specification.
 	 *
-	 * @param seed  Random seed (set 0 for random)
+	 * @param seed Random seed (set 0 for random)
 	 */
 	public static void setup(long seed) {
 		setup(seed, null);
@@ -94,14 +110,16 @@ public class Simulator {
 	 * and resetting the simulation epoch to zero.
 	 * Also, loads in the default internal configuration.
 	 *
-	 * @param seed           Random seed (set 0 for random)
-	 * @param configuration  Configuration instance (set null if there is no configuration (an empty one), e.g. in tests)
+	 * @param seed          Random seed (set 0 for random)
+	 * @param configuration Configuration instance (set null if there is no
+	 *                      configuration (an empty one), e.g. in tests)
 	 */
 	public static void setup(long seed, NBProperties configuration) {
 
 		// Prevent double setup
 		if (isSetup) {
-			throw new RuntimeException("The simulator can only be setup once. Call reset() before setting it up again.");
+			throw new RuntimeException(
+					"The simulator can only be setup once. Call reset() before setting it up again.");
 		}
 
 		// Open simulation logger
@@ -121,9 +139,14 @@ public class Simulator {
 		now = 0;
 		eventQueue.clear();
 
+		// Initialize the queues of servers
+		for (int i = 0; i < NUM_SERVER; i++) {
+			queuesServer[i] = new PriorityQueue<Event>();
+		}
+
 		// Configuration
 		Simulator.configuration = configuration;
-		
+
 		restoreState();
 
 		// It is now officially setup
@@ -132,19 +155,20 @@ public class Simulator {
 	}
 
 	private static void restoreState() {
-		if(configuration==null) {
-			//this can happen in tests.
+		if (configuration == null) {
+			// this can happen in tests.
 			return;
 		}
-		if(configuration.getPropertyWithDefault("from_state", null)!=null) {
+		if (configuration.getPropertyWithDefault("from_state", null) != null) {
 			String folderName = configuration.getPropertyWithDefault("from_state", null);
 			JSONObject json = SimulatorStateSaver.loadJson(folderName + "/" + "simulator_data.json");
 			now = (long) json.get("now");
-			eventQueue = (PriorityQueue<Event>) SimulatorStateSaver.readObjectFromFile(folderName + "/" + "simulator_queue.ser");
+			eventQueue = (PriorityQueue<Event>) SimulatorStateSaver
+					.readObjectFromFile(folderName + "/" + "simulator_queue.ser");
 			TransportLayer.restorState(configuration);
 			System.out.println("Done restoring simulator");
 		}
-		
+
 	}
 
 	/**
@@ -155,9 +179,9 @@ public class Simulator {
 	 * has come before it that may have used the universal random number generator.
 	 * An example is the flow generation.
 	 *
-	 * @param name  Name of the independent random number generator
+	 * @param name Name of the independent random number generator
 	 *
-	 * @return  Independent random number generator
+	 * @return Independent random number generator
 	 */
 	public static Random selectIndependentRandom(String name) {
 		return randomManager.getRandom(name);
@@ -166,7 +190,7 @@ public class Simulator {
 	/**
 	 * Run the simulator for the specified amount of time.
 	 *
-	 * @param runtimeNanoseconds        Running time in ns
+	 * @param runtimeNanoseconds Running time in ns
 	 */
 	public static void runNs(long runtimeNanoseconds) {
 		runNs(runtimeNanoseconds, -1);
@@ -180,83 +204,62 @@ public class Simulator {
 	 * Run the simulator for at most the specified amount of time, or
 	 * until the first N flows have been finished.
 	 *
-	 * @param runtimeNanoseconds        Running time in ns
-	 * @param flowsFromStartToFinish    Number of flows from start to finish (e.g. 40000 will make the simulation
-	 *                                  run until all flows with identifier < 40000 to finish, or until the runtime
-	 *                                  is exceeded)
+	 * @param runtimeNanoseconds     Running time in ns
+	 * @param flowsFromStartToFinish Number of flows from start to finish (e.g.
+	 *                               40000 will make the simulation
+	 *                               run until all flows with identifier < 40000 to
+	 *                               finish, or until the runtime
+	 *                               is exceeded)
 	 */
 	public static void runNs(long runtimeNanoseconds, long flowsFromStartToFinish) {
 
-		// Reset run variables (queue is not cleared because it has to start somewhere, e.g. flow start events)
-		//now = 0;
+		// Reset run variables (queue is not cleared because it has to start somewhere,
+		// e.g. flow start events)
+		// now = 0;
 		totalRuntimeNs = runtimeNanoseconds;
-		NonblockingBufferedReader reader = new NonblockingBufferedReader(System.in);
-		// Finish flow threshold, if it is negative the flow finish will be very far in the future
+
+		// Finish flow threshold, if it is negative the flow finish will be very far in
+		// the future
 		finishFlowIdThreshold = flowsFromStartToFinish;
 		if (flowsFromStartToFinish <= 0) {
 			flowsFromStartToFinish = Long.MAX_VALUE;
 		}
-		PROGRESS_SHOW_INTERVAL_NS = runtimeNanoseconds/50l;
-		
+
+		final long flowsFromStartToFinishFinal = flowsFromStartToFinish;
+		PROGRESS_SHOW_INTERVAL_NS = runtimeNanoseconds / 50l;
+
 		// Log start
 		System.out.println("Starting simulation (total time: " + runtimeNanoseconds + "ns);...");
 
 		// Time loop
 		long startTime = System.currentTimeMillis();
-		long realTime = System.currentTimeMillis();
-		long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
-		boolean endedDueToFlowThreshold = false;
-		while (!eventQueue.isEmpty() && now <= runtimeNanoseconds) {
-			while(reader.isPaused()) {
 
-				try {
-					System.out.println("Input command");
-					BufferedReader buffer=new BufferedReader(new InputStreamReader(System.in));
-					//System.out.println(buffer.readLine());
-					if(!handleUserInput(buffer.readLine())) {
-						reader.reset();
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					throw new RuntimeException(e);
-				}
+		endedDueToFlowThreshold = false;
 
+		ExecutorService executor = Executors.newFixedThreadPool(NUM_SERVER);
 
-			}
-			
-			// Go to next event
-			Event event = eventQueue.peek();
-//			System.out.println(event.toString());
-			now = event.getTime();
-			if (now <= runtimeNanoseconds) {
-				eventQueue.poll();
-				event.trigger();
-				if(event.retrigger()) {
-					registerEvent(event);
-				}
-
-			}
-
-			// Log elapsed time
-			if (now > nextProgressLog) {
-				nextProgressLog += PROGRESS_SHOW_INTERVAL_NS;
-				long realTimeNow = System.currentTimeMillis();
-				System.out.println("Elapsed " + (double)PROGRESS_SHOW_INTERVAL_NS/(double)1000000000 + "s simulation in " + ((realTimeNow - realTime) / 1000.0) + "s real (total progress: " + ((((double) now) / ((double) runtimeNanoseconds)) * 100) + "%).");
-				realTime = realTimeNow;
-
-				if(RemoteRoutingController.getInstance()!=null) {
-					System.out.print(RemoteRoutingController.getInstance().getCurrentState());
-				}
-			}
-
-
-
-			if (finishedFlows.size() >= flowsFromStartToFinish) {
-				endedDueToFlowThreshold = true;
+		// initialize the now variable to enable check the minimum
+		for (int i = 0; i < NUM_SERVER; i++) {
+			if (!queuesServer[i].isEmpty() && queuesServer[i].peek().getTime() <= totalRuntimeNs) {
+				now = queuesServer[i].peek().getTime();
 				break;
 			}
-
 		}
+
+		for (int i = 0; i < NUM_SERVER; i++) {
+			final int numServer = i; // Capturing the row index for each thread
+			executor.submit(() -> runThread(queuesServer[numServer], flowsFromStartToFinishFinal));
+		}
+
+		// wait for all the threads
+		executor.shutdown();
+		try {
+			// Wait indefinitely until all tasks have completed execution
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		// Make sure run ends at the final time if it ended because there were no
 		// more events or the runtime was exceeded
 		if (!endedDueToFlowThreshold) {
@@ -264,28 +267,78 @@ public class Simulator {
 		}
 
 		// Log end
-		System.out.println("Simulation finished (simulated " + (runtimeNanoseconds / 1e9) + "s in a real-world time of " + ((System.currentTimeMillis() - startTime) / 1000.0) + "s).");
+		System.out.println("Simulation finished (simulated " + (runtimeNanoseconds / 1e9) + "s in a real-world time of "
+				+ ((System.currentTimeMillis() - startTime) / 1000.0) + "s).");
+
+	}
+
+	private static void runThread(PriorityQueue<Event> queueServer, long flowsFromStartToFinish) {
+		long realTime = System.currentTimeMillis();
+		long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
+		NonblockingBufferedReader reader = new NonblockingBufferedReader(System.in);
+		long nowThread = 0;
+		while (!queueServer.isEmpty() && nowThread <= totalRuntimeNs) {
+
+			// Go to next event
+			Event event = queueServer.peek();
+			// System.out.println(event.toString());
+			nowThread = event.getTime();
+			if (nowThread < now) {
+				lockNow.lock();
+				now = nowThread;
+				lockNow.unlock();
+			}
+			if (nowThread <= totalRuntimeNs) {
+				queueServer.poll();
+				event.trigger();
+				if (event.retrigger()) {
+					registerEvent(event);
+				}
+
+			}
+
+			// Log elapsed time
+			if (nowThread > nextProgressLog) {
+				nextProgressLog += PROGRESS_SHOW_INTERVAL_NS;
+				long realTimeNow = System.currentTimeMillis();
+				System.out.println("Elapsed " + (double) PROGRESS_SHOW_INTERVAL_NS / (double) 1000000000
+						+ "s simulation in " + ((realTimeNow - realTime) / 1000.0) + "s real (total progress: "
+						+ ((((double) nowThread) / ((double) totalRuntimeNs)) * 100) + "%).");
+				realTime = realTimeNow;
+
+				if (RemoteRoutingController.getInstance() != null) {
+					System.out.print(RemoteRoutingController.getInstance().getCurrentState());
+				}
+			}
+
+			if (finishedFlows.size() >= flowsFromStartToFinish) {
+				lockThreshold.lock();
+				endedDueToFlowThreshold = true;
+				lockThreshold.unlock();
+				// break;
+			}
+
+		}
 
 	}
 
 	private static boolean handleUserInput(String input) {
-		switch(input) {
-		case "s":
-		case "start":
-			return false;
-		case "dump-state":
-			SimulatorStateSaver.save(configuration);
-			break;
+		switch (input) {
+			case "s":
+			case "start":
+				return false;
+			case "dump-state":
+				SimulatorStateSaver.save(configuration);
+				break;
 		}
 		return true;
 
 	}
 
-
 	/**
 	 * Register to the simulator that a flow has been finished.
 	 *
-	 * @param flowId    Flow identifier
+	 * @param flowId Flow identifier
 	 */
 	public static void registerFlowFinished(long flowId) {
 		if (flowId < finishFlowIdThreshold) {
@@ -296,19 +349,59 @@ public class Simulator {
 	/**
 	 * Register an event in the simulation.
 	 *
-	 * @param event     Event instance
+	 * @param event Event instance
 	 */
 	public static void registerEvent(Event event) {
 		eventQueue.add(event);
+		int source_id;
+		Packet packet;
+		if (event instanceof FlowStartEvent) {
+			source_id = ((FlowStartEvent) event).getNetWorkDeviceId();
+		} else if (event instanceof PacketArrivalEvent) {
+			packet = ((PacketArrivalEvent) event).getPacket();
+			source_id = (int) (((IpPacket) packet).getSourceId());
+		} else {
+			packet = ((PacketDispatchedEvent) event).getPacket();
+			source_id = (int) (((IpPacket) packet).getSourceId());
+		}
+		switch (source_id) {
+			case 0:
+				queuesServer[0].add(event);
+				break;
+			case 1:
+				queuesServer[1].add(event);
+				break;
+			case 2:
+				queuesServer[2].add(event);
+				break;
+			case 3:
+				queuesServer[3].add(event);
+				break;
+			case 4:
+				queuesServer[4].add(event);
+				break;
+			case 5:
+				queuesServer[5].add(event);
+				break;
+			case 6:
+				queuesServer[6].add(event);
+				break;
+			case 7:
+				queuesServer[7].add(event);
+				break;
+			default:
+				System.out.println("no such source server");
+				break;
+		}
 	}
 
 	/**
 	 * Retrieve the current time plus the amount of nanoseconds specified.
 	 * This is used to plan events in the future.
 	 *
-	 * @param nanoseconds   Amount of nanoseconds from now
+	 * @param nanoseconds Amount of nanoseconds from now
 	 *
-	 * @return  Time in nanoseconds
+	 * @return Time in nanoseconds
 	 */
 	public static long getTimeFromNow(long nanoseconds) {
 		return now + nanoseconds;
@@ -317,7 +410,7 @@ public class Simulator {
 	/**
 	 * Retrieve the current time in nanoseconds since simulation start.
 	 *
-	 * @return  Current time in nanoseconds
+	 * @return Current time in nanoseconds
 	 */
 	public static long getCurrentTime() {
 		return now;
@@ -326,10 +419,14 @@ public class Simulator {
 	/**
 	 * Retrieve the amount of events currently in the event queue.
 	 *
-	 * @return  Number of events
+	 * @return Number of events
 	 */
 	public static int getEventSize() {
-		return eventQueue.size();
+		int eventSize = 0;
+		for (int i = 0; i < NUM_SERVER; i++) {
+			eventSize += queuesServer[i].size();
+		}
+		return eventSize;
 	}
 
 	/**
@@ -342,7 +439,7 @@ public class Simulator {
 	/**
 	 * Clean up everything of the simulation.
 	 *
-	 * @param throwawayLogs     True iff the logs should be thrown out
+	 * @param throwawayLogs True iff the logs should be thrown out
 	 */
 	public static void reset(boolean throwawayLogs) {
 
@@ -363,6 +460,12 @@ public class Simulator {
 		TransportLayer.staticReset();
 		finishFlowIdThreshold = -1;
 
+		for (int i = 0; i < NUM_SERVER; i++) {
+			if (queuesServer[i] != null) {
+				queuesServer[i].clear(); // Clear the queue
+			}
+		}
+
 		// Reset configuration
 		configuration = null;
 		// No longer setup
@@ -371,7 +474,8 @@ public class Simulator {
 	}
 
 	public static void dumpState(String dumpFolderName) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dumpFolderName + "/" + "simulator_queue.ser")); 
+		ObjectOutputStream oos = new ObjectOutputStream(
+				new FileOutputStream(dumpFolderName + "/" + "simulator_queue.ser"));
 
 		oos.writeObject(eventQueue);
 		System.out.println("Done writing queue");
