@@ -344,6 +344,7 @@ public class Simulator {
 			countThreadFinish++;
 			lockCountThreadFinish.unlock();
 
+			// The first thread finish the iteration will update the now variable
 			lockNow.lock();
 			if (!nowChanged) {
 				nowChanged = true;
@@ -351,9 +352,10 @@ public class Simulator {
 			}
 			lockNow.unlock();
 
+			// All thread wait thus the now variable will be in the next iteration the same
 			while (countThreadFinish != numThreadRun)
 				;
-
+			// The if exists that only one thread make it
 			lockNow.lock();
 			if (nowChanged) {
 				nowChanged = false;
