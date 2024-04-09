@@ -48,13 +48,20 @@ public class Simulator {
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
 	// Event queues map according to servers(source_id)
 	final static int NUM_SERVER = 8;
+	private static boolean nowChanged = false;
+	private static int countThreadFinish = 0;
+
 	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_SERVER];
 	private static final Lock lockThreshold = new ReentrantLock();
 	private static final Lock lockNow = new ReentrantLock();
+	private static final Lock lockCountThreadFinish = new ReentrantLock();
+	private static final Lock locknumThreadRun = new ReentrantLock();
 
 	// Current time in ns in the simulation (run variable)
 	private static long now;
 	private static boolean endedDueToFlowThreshold;
+	private static final long offsetTime = 10;
+	private static int numThreadRun = 0;
 
 	// Threshold to end
 	private static long finishFlowIdThreshold;
@@ -238,17 +245,26 @@ public class Simulator {
 
 		ExecutorService executor = Executors.newFixedThreadPool(NUM_SERVER);
 
-		// initialize the now variable to enable check the minimum
+		// initialize the now variable to be the minimum
 		for (int i = 0; i < NUM_SERVER; i++) {
 			if (!queuesServer[i].isEmpty() && queuesServer[i].peek().getTime() <= totalRuntimeNs) {
 				now = queuesServer[i].peek().getTime();
 				break;
 			}
 		}
+		for (int i = 0; i < NUM_SERVER; i++) {
+			if (!queuesServer[i].isEmpty() && queuesServer[i].peek().getTime() < now) {
+				now = queuesServer[i].peek().getTime();
+			}
+		}
 
 		for (int i = 0; i < NUM_SERVER; i++) {
 			final int numServer = i; // Capturing the row index for each thread
-			executor.submit(() -> runThread(queuesServer[numServer], flowsFromStartToFinishFinal));
+			// check how many threads run(have events to trigger)
+			if (!queuesServer[numServer].isEmpty()) {
+				numThreadRun++;
+			}
+			executor.submit(() -> runThread(queuesServer[numServer], flowsFromStartToFinishFinal, numServer));
 		}
 
 		// wait for all the threads
@@ -272,52 +288,78 @@ public class Simulator {
 
 	}
 
-	private static void runThread(PriorityQueue<Event> queueServer, long flowsFromStartToFinish) {
+	private static void runThread(PriorityQueue<Event> queueServer, long flowsFromStartToFinish, int numServer) {
 		long realTime = System.currentTimeMillis();
 		long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
-		NonblockingBufferedReader reader = new NonblockingBufferedReader(System.in);
 		long nowThread = 0;
-		while (!queueServer.isEmpty() && nowThread <= totalRuntimeNs) {
+		Event event;
 
-			// Go to next event
-			Event event = queueServer.peek();
-			// System.out.println(event.toString());
-			nowThread = event.getTime();
-			if (nowThread < now) {
-				lockNow.lock();
-				now = nowThread;
-				lockNow.unlock();
-			}
-			if (nowThread <= totalRuntimeNs) {
-				queueServer.poll();
-				event.trigger();
-				if (event.retrigger()) {
-					registerEvent(event);
+		while (!queueServer.isEmpty()) {
+
+			while (!queueServer.isEmpty() && (nowThread = queueServer.peek().getTime()) <= now) {
+
+				event = queueServer.peek();
+				if (nowThread <= totalRuntimeNs) {
+					queueServer.poll();
+					event.trigger();
+					if (event.retrigger()) {
+						registerEvent(event);
+					}
+
+				} else {
+					break;
+				}
+
+				// Log elapsed time
+				if (nowThread > nextProgressLog) {
+					nextProgressLog += PROGRESS_SHOW_INTERVAL_NS;
+					long realTimeNow = System.currentTimeMillis();
+					System.out.println("Elapsed " + (double) PROGRESS_SHOW_INTERVAL_NS / (double) 1000000000
+							+ "s simulation in " + ((realTimeNow - realTime) / 1000.0) + "s real (total progress: "
+							+ ((((double) nowThread) / ((double) totalRuntimeNs)) * 100) + "%).");
+					realTime = realTimeNow;
+
+					if (RemoteRoutingController.getInstance() != null) {
+						System.out.print(RemoteRoutingController.getInstance().getCurrentState());
+					}
+				}
+
+				if (finishedFlows.size() >= flowsFromStartToFinish) {
+					lockThreshold.lock();
+					endedDueToFlowThreshold = true;
+					lockThreshold.unlock();
+					// break;
 				}
 
 			}
 
-			// Log elapsed time
-			if (nowThread > nextProgressLog) {
-				nextProgressLog += PROGRESS_SHOW_INTERVAL_NS;
-				long realTimeNow = System.currentTimeMillis();
-				System.out.println("Elapsed " + (double) PROGRESS_SHOW_INTERVAL_NS / (double) 1000000000
-						+ "s simulation in " + ((realTimeNow - realTime) / 1000.0) + "s real (total progress: "
-						+ ((((double) nowThread) / ((double) totalRuntimeNs)) * 100) + "%).");
-				realTime = realTimeNow;
-
-				if (RemoteRoutingController.getInstance() != null) {
-					System.out.print(RemoteRoutingController.getInstance().getCurrentState());
-				}
+			if (nowThread > totalRuntimeNs || queueServer.isEmpty()) {
+				locknumThreadRun.lock();
+				numThreadRun--;
+				locknumThreadRun.unlock();
+				break;
 			}
 
-			if (finishedFlows.size() >= flowsFromStartToFinish) {
-				lockThreshold.lock();
-				endedDueToFlowThreshold = true;
-				lockThreshold.unlock();
-				// break;
-			}
+			lockCountThreadFinish.lock();
+			countThreadFinish++;
+			lockCountThreadFinish.unlock();
 
+			lockNow.lock();
+			if (!nowChanged) {
+				nowChanged = true;
+				now += offsetTime;
+			}
+			lockNow.unlock();
+
+			while (countThreadFinish != numThreadRun)
+				;
+
+			lockNow.lock();
+			if (nowChanged) {
+				nowChanged = false;
+				countThreadFinish = 0;
+			}
+			lockNow.unlock();
 		}
 
 	}
@@ -364,35 +406,8 @@ public class Simulator {
 			packet = ((PacketDispatchedEvent) event).getPacket();
 			source_id = (int) (((IpPacket) packet).getSourceId());
 		}
-		switch (source_id) {
-			case 0:
-				queuesServer[0].add(event);
-				break;
-			case 1:
-				queuesServer[1].add(event);
-				break;
-			case 2:
-				queuesServer[2].add(event);
-				break;
-			case 3:
-				queuesServer[3].add(event);
-				break;
-			case 4:
-				queuesServer[4].add(event);
-				break;
-			case 5:
-				queuesServer[5].add(event);
-				break;
-			case 6:
-				queuesServer[6].add(event);
-				break;
-			case 7:
-				queuesServer[7].add(event);
-				break;
-			default:
-				System.out.println("no such source server");
-				break;
-		}
+		queuesServer[source_id].add(event);
+
 	}
 
 	/**
