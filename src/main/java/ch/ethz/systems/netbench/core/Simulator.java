@@ -245,16 +245,10 @@ public class Simulator {
 
 		ExecutorService executor = Executors.newFixedThreadPool(NUM_SERVER);
 
-		// initialize the now variable to be the minimum
+		now = Long.MAX_VALUE;
 		for (int i = 0; i < NUM_SERVER; i++) {
 			if (!queuesServer[i].isEmpty() && queuesServer[i].peek().getTime() <= totalRuntimeNs) {
-				now = queuesServer[i].peek().getTime();
-				break;
-			}
-		}
-		for (int i = 0; i < NUM_SERVER; i++) {
-			if (!queuesServer[i].isEmpty() && queuesServer[i].peek().getTime() < now) {
-				now = queuesServer[i].peek().getTime();
+				now = Math.min(now, queuesServer[i].peek().getTime());
 			}
 		}
 
