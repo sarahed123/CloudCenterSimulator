@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    
+
+        {
+            "type": "java",
+            "name": "Debug NetBench",
+            "request": "launch",
+            "mainClass": "ch.ethz.systems.netbench.core.run.MainFromProperties",
+            "projectName": "netbench",
+            "args": ["./example/runs/demo.properties"],
+            // "vmArgs": "-ea",
+            "console": "integratedTerminal",
+            // "preLaunchTask": "build",  
+            "cwd": "/root/CloudCenterSimulator"
+        }
+    ]
+}
+
+
