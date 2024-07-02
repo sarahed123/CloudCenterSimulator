@@ -251,6 +251,7 @@ public class Simulator {
 				now = Math.min(now, queuesServer[i].peek().getTime());
 			}
 		}
+		CountDownLatch latch = new CountDownLatch(NUM_SERVER);
 
 		for (int i = 0; i < NUM_SERVER; i++) {
 			final int numServer = i; // Capturing the row index for each thread
@@ -258,14 +259,18 @@ public class Simulator {
 			if (!queuesServer[numServer].isEmpty()) {
 				numThreadRun++;
 			}
-			executor.submit(() -> runThread(queuesServer[numServer], flowsFromStartToFinishFinal, numServer));
+			executor.submit(() -> {
+                runThread(queuesServer[numServer], flowsFromStartToFinishFinal, numServer);
+                latch.countDown(); 
+            });
 		}
 
 		// wait for all the threads
 		executor.shutdown();
 		try {
 			// Wait indefinitely until all tasks have completed execution
-			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			// executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			latch.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -360,6 +365,49 @@ public class Simulator {
 
 	}
 
+
+
+	
+	/**
+     * Register an event in the simulation.
+     *
+     * @param event Event instance
+     */
+    public static void registerEvent(Event event) {
+        eventQueue.add(event);
+        long flowId;
+        if (event instanceof FlowStartEvent) {
+            FlowStartEvent flowStartEvent = (FlowStartEvent) event;
+            int sourceId = flowStartEvent.getNetWorkDeviceId();
+            queuesServer[sourceId % NUM_SERVER].add(event);
+        } else if (event instanceof PacketArrivalEvent) {
+            PacketArrivalEvent packetArrivalEvent = (PacketArrivalEvent) event;
+            flowId = packetArrivalEvent.getPacket().getFlowId();
+            queuesServer[(int) flowId % NUM_SERVER].add(event);
+        } else {
+            PacketDispatchedEvent packetDispatchedEvent = (PacketDispatchedEvent) event;
+            flowId = packetDispatchedEvent.getPacket().getFlowId();
+            queuesServer[(int) flowId % NUM_SERVER].add(event);
+        }
+    }
+   
+	// public static void registerEvent(Event event) {
+	// 	eventQueue.add(event);
+	// 	int source_id;
+	// 	Packet packet;
+	// 	if (event instanceof FlowStartEvent) {
+	// 		source_id = ((FlowStartEvent) event).getNetWorkDeviceId();
+	// 	} else if (event instanceof PacketArrivalEvent) {
+	// 		packet = ((PacketArrivalEvent) event).getPacket();
+	// 		source_id = (int) (((IpPacket) packet).getSourceId());
+	// 	} else {
+	// 		packet = ((PacketDispatchedEvent) event).getPacket();
+	// 		source_id = (int) (((IpPacket) packet).getSourceId());
+	// 	}
+	// 	queuesServer[source_id].add(event);
+
+	// }
+
 	private static boolean handleUserInput(String input) {
 		switch (input) {
 			case "s":
@@ -384,27 +432,7 @@ public class Simulator {
 		}
 	}
 
-	/**
-	 * Register an event in the simulation.
-	 *
-	 * @param event Event instance
-	 */
-	public static void registerEvent(Event event) {
-		eventQueue.add(event);
-		int source_id;
-		Packet packet;
-		if (event instanceof FlowStartEvent) {
-			source_id = ((FlowStartEvent) event).getNetWorkDeviceId();
-		} else if (event instanceof PacketArrivalEvent) {
-			packet = ((PacketArrivalEvent) event).getPacket();
-			source_id = (int) (((IpPacket) packet).getSourceId());
-		} else {
-			packet = ((PacketDispatchedEvent) event).getPacket();
-			source_id = (int) (((IpPacket) packet).getSourceId());
-		}
-		queuesServer[source_id].add(event);
-
-	}
+	
 
 	/**
 	 * Retrieve the current time plus the amount of nanoseconds specified.
