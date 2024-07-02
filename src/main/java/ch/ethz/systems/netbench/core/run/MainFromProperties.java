@@ -86,7 +86,7 @@ public class MainFromProperties {
             // Perform analysis
             System.out.println("ANALYSIS\n==================");
             if (analysisCommand != null) {
-                runCommand(analysisCommand + " " + SimulationLogger.getRunFolderFull(), true);
+                // runCommand(analysisCommand + " " + SimulationLogger.getRunFolderFull(), true);
                 System.out.println("Finished analysis.");
             } else {
                 System.out.println("No analysis command given; analysis is skipped.");
