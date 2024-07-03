@@ -43,6 +43,10 @@ public class FlowStartEvent extends Event {
         return networkDeviceId;
     }
 
+    public int getTargetId() {
+        return targetId;
+    }
+
     public void run() {
 
     }
