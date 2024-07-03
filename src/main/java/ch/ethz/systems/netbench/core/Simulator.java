@@ -378,8 +378,8 @@ public class Simulator {
         long flowId;
         if (event instanceof FlowStartEvent) {
             FlowStartEvent flowStartEvent = (FlowStartEvent) event;
-            int sourceId = flowStartEvent.getNetWorkDeviceId();
-            queuesServer[sourceId % NUM_SERVER].add(event);
+            int targetId = flowStartEvent.getTargetId();
+            queuesServer[targetId % NUM_SERVER].add(event);
         } else if (event instanceof PacketArrivalEvent) {
             PacketArrivalEvent packetArrivalEvent = (PacketArrivalEvent) event;
             flowId = packetArrivalEvent.getPacket().getFlowId();
