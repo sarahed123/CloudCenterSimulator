@@ -61,7 +61,7 @@ public class Simulator {
 	// Current time in ns in the simulation (run variable)
 	private static long now;
 	private static boolean endedDueToFlowThreshold;
-	private static final long offsetTime = 10;
+	private static final long offsetTime = 30000;
 	private static int numThreadRun = 0;
 
 	// Threshold to end
@@ -253,15 +253,15 @@ public class Simulator {
 			}
 		}
 		CountDownLatch latch = new CountDownLatch(NUM_SERVER);
-		
-		for (int i = 0; i < NUM_SERVER; i++) {
-			System.out.println("Queue number " + i);
-			while(!queuesServer[i].isEmpty()){
-				System.out.println("event: " + queuesServer[i].peek().getTime());
-				queuesServer[i].poll();
+
+		// for (int i = 0; i < NUM_SERVER; i++) {
+		// 	System.out.println("Queue number " + i);
+		// 	while(!queuesServer[i].isEmpty()){
+		// 		System.out.println("event: " + queuesServer[i].peek().getTime());
+		// 		queuesServer[i].poll();
 				
-			}
-		}
+		// 	}
+		// }
 
 		for (int i = 0; i < NUM_SERVER; i++) {
 			final int numServer = i; // Capturing the row index for each thread
