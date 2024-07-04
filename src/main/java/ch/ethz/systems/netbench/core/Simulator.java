@@ -14,6 +14,7 @@ import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
 import ch.ethz.systems.netbench.ext.basic.IpPacket;
 import ch.ethz.systems.netbench.ext.basic.TcpPacket;
+import ch.ethz.systems.netbench.xpt.simple.TcpPacketResendEvent;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import org.json.simple.JSONObject;
@@ -252,6 +253,15 @@ public class Simulator {
 			}
 		}
 		CountDownLatch latch = new CountDownLatch(NUM_SERVER);
+		
+		for (int i = 0; i < NUM_SERVER; i++) {
+			System.out.println("Queue number " + i);
+			while(!queuesServer[i].isEmpty()){
+				System.out.println("event: " + queuesServer[i].peek().getTime());
+				queuesServer[i].poll();
+				
+			}
+		}
 
 		for (int i = 0; i < NUM_SERVER; i++) {
 			final int numServer = i; // Capturing the row index for each thread
@@ -294,9 +304,7 @@ public class Simulator {
 		Event event;
 
 		while (!queueServer.isEmpty()) {
-
-			while (!queueServer.isEmpty() && (nowThread = queueServer.peek().getTime()) <= now) {
-
+			while (!queueServer.isEmpty() && (nowThread = queueServer.peek().getTime()) <= (now+offsetTime)) {
 				event = queueServer.peek();
 				if (nowThread <= totalRuntimeNs) {
 					queueServer.poll();
@@ -304,7 +312,6 @@ public class Simulator {
 					if (event.retrigger()) {
 						registerEvent(event);
 					}
-
 				} else {
 					break;
 				}
@@ -384,11 +391,15 @@ public class Simulator {
             PacketArrivalEvent packetArrivalEvent = (PacketArrivalEvent) event;
             flowId = packetArrivalEvent.getPacket().getFlowId();
             queuesServer[(int) flowId % NUM_SERVER].add(event);
-        } else {
+        } else if (event instanceof PacketDispatchedEvent) {
             PacketDispatchedEvent packetDispatchedEvent = (PacketDispatchedEvent) event;
             flowId = packetDispatchedEvent.getPacket().getFlowId();
             queuesServer[(int) flowId % NUM_SERVER].add(event);
-        }
+        } else if (event instanceof TcpPacketResendEvent) {
+			TcpPacketResendEvent tcpPacketResendEvent = (TcpPacketResendEvent) event;
+			flowId = tcpPacketResendEvent.getFlowId();
+			queuesServer[(int) flowId % NUM_SERVER].add(event);
+		}
     }
    
 	// public static void registerEvent(Event event) {
