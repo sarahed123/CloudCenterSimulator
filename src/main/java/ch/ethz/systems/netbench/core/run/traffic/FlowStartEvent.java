@@ -2,7 +2,6 @@ package ch.ethz.systems.netbench.core.run.traffic;
 
 import ch.ethz.systems.netbench.core.network.Event;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
-import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 
 public class FlowStartEvent extends Event {
 

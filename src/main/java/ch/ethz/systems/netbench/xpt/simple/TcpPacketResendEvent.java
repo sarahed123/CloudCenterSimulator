@@ -41,4 +41,8 @@ public class TcpPacketResendEvent extends Event {
         this.active = false;
     }
 
+    public long getFlowId() {
+        return tcpPacket.getFlowId();
+    }
+
 }
