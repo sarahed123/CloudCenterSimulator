@@ -20,6 +20,9 @@ public class PacketArrivalEvent extends Event {
     private final Packet packet;
     private final InputPort inputPort;
 
+    private static final int MAX_TRIGGER_COUNT = 3; 
+    private int triggerCount = 0;
+
     /**
      * Packet arrival event constructor.
      *
@@ -42,10 +45,16 @@ public class PacketArrivalEvent extends Event {
         return packet;
     }
 
-    @Override
+    // @Override
+    // public void trigger() {
+    //     inputPort.receive(packet);
+    // }
     public void trigger() {
-        inputPort.receive(packet);
-    }
+        if (triggerCount < MAX_TRIGGER_COUNT) {
+            inputPort.receive(packet);
+            triggerCount++; // עדכון המונה לאחר הפעלת האירוע
+        }
+    }    
 
     /*
      * protected NetworkDevice getNetworkDevice() {

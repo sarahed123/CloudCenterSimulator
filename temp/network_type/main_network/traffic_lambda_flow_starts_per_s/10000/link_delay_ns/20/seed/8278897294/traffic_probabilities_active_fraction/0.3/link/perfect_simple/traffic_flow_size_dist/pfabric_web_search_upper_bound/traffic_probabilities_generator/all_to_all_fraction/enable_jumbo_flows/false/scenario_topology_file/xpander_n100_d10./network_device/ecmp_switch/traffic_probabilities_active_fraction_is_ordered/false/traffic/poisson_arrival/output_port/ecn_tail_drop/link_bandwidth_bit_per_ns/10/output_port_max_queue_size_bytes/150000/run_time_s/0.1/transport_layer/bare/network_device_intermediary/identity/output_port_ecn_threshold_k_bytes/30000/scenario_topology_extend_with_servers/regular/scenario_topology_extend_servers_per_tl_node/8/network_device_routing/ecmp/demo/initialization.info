@@ -1,0 +1,21 @@
+Seed randomly chosen: FALSE
+Seed: 8278897294
+Graph: Dummy Log
+OVERRODE_TOPOLOGY_FILE_WITH_SERVER_EXTENSION: servers/node=8
+ARG_OVERRIDE_PARAM(scenario_topology_file): temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/20/seed/8278897294/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/xpander_n100_d10./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/10/output_port_max_queue_size_bytes/150000/run_time_s/0.1/transport_layer/bare/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/demo/extended_topology.txt
+Port: ECN_TAIL_DROP(maxQueueSizeBytes=150000, ecnThresholdKBytes=30000)
+Network device flowlet intermediary: IDENTITY
+Graph: Dummy Log
+Network device: ECMP_SWITCH(numNodes=900)
+Link: PERFECT_SIMPLE_LINK(delayNs=20, bandwidthBitPerNs=10)
+Link: PERFECT_SIMPLE_LINK(serverLanes=1)
+Transport layer: BARE
+Routing: ECMP
+Flow planner flow size dist.: pFabric web search upper bound discrete
+A2A_FRACTION_CHOSEN_TORS: [5, 9, 10, 18, 20, 22, 23, 26, 34, 41, 44, 45, 46, 48, 49, 52, 55, 58, 60, 61, 64, 68, 76, 77, 81, 84, 85, 87, 88, 96]
+Flow planner: POISSON_ARRIVAL(lambda=10000.0, pairDistribution=ALL_TO_ALL_FRACTION)
+Flow planner number flows: 977
+Flow planner mean inter-arrival time: 102392
+Flow planner expected inter-arrival time: 99999.99999999999
+Flow planner poisson rate lambda (flow starts/s): 10000.0
+TOTAL_BYTEST_IN_PLAN: 2489860000

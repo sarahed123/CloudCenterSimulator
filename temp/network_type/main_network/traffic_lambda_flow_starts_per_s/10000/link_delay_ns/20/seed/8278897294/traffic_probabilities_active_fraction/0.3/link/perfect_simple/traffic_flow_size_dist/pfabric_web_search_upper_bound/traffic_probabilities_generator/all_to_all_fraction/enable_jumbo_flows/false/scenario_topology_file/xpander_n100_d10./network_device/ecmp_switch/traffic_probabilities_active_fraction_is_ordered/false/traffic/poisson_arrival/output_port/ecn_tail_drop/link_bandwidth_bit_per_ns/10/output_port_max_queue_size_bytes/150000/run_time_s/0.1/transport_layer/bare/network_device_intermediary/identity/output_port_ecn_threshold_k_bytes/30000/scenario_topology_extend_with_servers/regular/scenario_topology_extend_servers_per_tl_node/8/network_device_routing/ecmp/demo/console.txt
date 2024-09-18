@@ -1,0 +1,41 @@
+Copying file "example/topologies/xpander/xpander_n100_d10.topology" to run folder using new file name "original_topology.txt"...
+Running command "cp example/topologies/xpander/xpander_n100_d10.topology temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/20/seed/8278897294/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/xpander_n100_d10./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/10/output_port_max_queue_size_bytes/150000/run_time_s/0.1/transport_layer/bare/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/demo/original_topology.txt"...
+... command has been executed (any output is shown above).
+Extending topology file "example/topologies/xpander/xpander_n100_d10.topology" by adding 8 servers to each ToR.
+Writing to output topology file... done.
+Overriding property scenario_topology_file: "example/topologies/xpander/xpander_n100_d10.topology" (old) -> "temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/20/seed/8278897294/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/xpander_n100_d10./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/10/output_port_max_queue_size_bytes/150000/run_time_s/0.1/transport_layer/bare/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/demo/extended_topology.txt" (new).
+Copying file "./example/runs/demo.properties" to run folder...
+Running command "cp ./example/runs/demo.properties temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/20/seed/8278897294/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/xpander_n100_d10./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/10/output_port_max_queue_size_bytes/150000/run_time_s/0.1/transport_layer/bare/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/demo"...
+... command has been executed (any output is shown above).
+
+INFRASTRUCTURE
+==================
+Finished creating infrastructure for network num 0
+
+finished reading graph
+finished creating nodes
+finished creating nodes and edges
+ROUTING STATE
+==================
+Calculating shortest path lengths... done.
+Populating ECMP forward routing tables... 10.0%... 20.0%... 30.0%... 40.0%... 50.0%... 60.0%... 70.0%... 80.0%... 90.0%... 100.0%...ecmp num shortest paths average 1.2086318131256952
+ done.
+Finished routing state setup.
+
+TRAFFIC
+==================
+Generating all-to-all pair probabilities in 30.0% fraction 100 ToRs between their servers... done.
+Creating arrival plan... 10%... 20%... 30%... 40%... 50%... 60%... 70%... 80%... 90%... 100%... done.
+Poisson Arrival plan created.
+Number of flows created: 977.
+Mean inter-arrival time: 102392 (expectation: 99999.99999999999)
+Total bytes in traffic plan 2489860000
+Finished generating traffic flow starts.
+
+ACTUAL RUN
+==================
+Starting simulation (total time: 100000000ns);...
+Thread ID: 16 is processing server 0 start run in time: 1726591016518 ,size: 128
+---Thread ID 16, the window betweeen 0 to 200000 ,size: 128---
+Thread ID 16 ,Event peeked: 4 ,Event Type: FlowStartEvent ,time: 114685
+Thread ID 16 ,Event peeked: 978 ,Event Type: PacketDispatchedEvent ,time: 1200
