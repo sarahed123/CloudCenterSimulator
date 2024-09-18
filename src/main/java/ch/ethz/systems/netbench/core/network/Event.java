@@ -13,7 +13,7 @@ public abstract class Event implements Comparable<Event>, Serializable {
 	// Added for absolute determinism in the event priority queue
     private static long c = 0;
     private final long eid;
-
+    
     // Time to trigger
     protected long time;
 
@@ -52,5 +52,10 @@ public abstract class Event implements Comparable<Event>, Serializable {
     public boolean retrigger() {
     	return false;
     }
+    public long getEid() {
+        return eid;
+    }
+    
+    
 
 }
