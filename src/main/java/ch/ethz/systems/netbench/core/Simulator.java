@@ -26,13 +26,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
  * The simulator is responsible for offering general
@@ -49,20 +52,22 @@ public class Simulator {
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
 	// Event queues map according to servers(source_id)
 	final static int NUM_SERVER = 8;
-	private static boolean nowChanged = false;
-	private static int countThreadFinish = 0;
 
 	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_SERVER];
-	private static final Lock lockThreshold = new ReentrantLock();
-	private static final Lock lockNow = new ReentrantLock();
-	private static final Lock lockCountThreadFinish = new ReentrantLock();
-	private static final Lock locknumThreadRun = new ReentrantLock();
+
+	private static final Object lockThreshold = new Object();
+	private static final Object lockNow = new Object();
+	private static final Object lockBarrier = new Object();
+	private static final Object lockRemainThread = new Object();
+	private static AtomicInteger activeThreads = new AtomicInteger(NUM_SERVER);
+	private static volatile CyclicBarrier barrier = new CyclicBarrier(NUM_SERVER);
+	
 
 	// Current time in ns in the simulation (run variable)
 	private static long now;
 	private static boolean endedDueToFlowThreshold;
-	private static final long offsetTime = 30000;
-	private static int numThreadRun = 0;
+	private static final long offsetTime = 200000;
+	
 
 	// Threshold to end
 	private static long finishFlowIdThreshold;
@@ -83,6 +88,20 @@ public class Simulator {
 	private Simulator() {
 		// Static class only
 	}
+
+	private static Comparator<Event> eventComparator = new Comparator<Event>() {
+		@Override
+		public int compare(Event e1, Event e2) {
+			int timeCompare = Long.compare(e1.getTime(), e2.getTime());
+			if (timeCompare != 0) {
+				return timeCompare;
+			}
+			return Long.compare(e1.getEid(), e2.getEid());
+		}
+    };
+    
+	
+       
 
 	/**
 	 * Retrieve the configuration.
@@ -149,7 +168,7 @@ public class Simulator {
 
 		// Initialize the queues of servers
 		for (int i = 0; i < NUM_SERVER; i++) {
-			queuesServer[i] = new PriorityQueue<Event>();
+			queuesServer[i] = new PriorityQueue<Event>(eventComparator);
 		}
 
 		// Configuration
@@ -252,8 +271,9 @@ public class Simulator {
 				now = Math.min(now, queuesServer[i].peek().getTime());
 			}
 		}
-		CountDownLatch latch = new CountDownLatch(NUM_SERVER);
-
+		
+        
+       
 		// for (int i = 0; i < NUM_SERVER; i++) {
 		// 	System.out.println("Queue number " + i);
 		// 	while(!queuesServer[i].isEmpty()){
@@ -266,13 +286,12 @@ public class Simulator {
 		for (int i = 0; i < NUM_SERVER; i++) {
 			final int numServer = i; // Capturing the row index for each thread
 			// check how many threads run(have events to trigger)
-			if (!queuesServer[numServer].isEmpty()) {
-				numThreadRun++;
-			}
-			executor.submit(() -> {
-                runThread(queuesServer[numServer], flowsFromStartToFinishFinal, numServer);
-                latch.countDown(); 
-            });
+			// if (!queuesServer[numServer].isEmpty()) {
+			// 	numThreadRun++;
+			// }
+			
+			executor.submit(() -> runThread(queuesServer[numServer], flowsFromStartToFinishFinal, barrier,Thread.currentThread().getId(),numServer)); 
+           
 		}
 
 		// wait for all the threads
@@ -280,7 +299,7 @@ public class Simulator {
 		try {
 			// Wait indefinitely until all tasks have completed execution
 			// executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-			latch.await();
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -297,15 +316,23 @@ public class Simulator {
 
 	}
 
-	private static void runThread(PriorityQueue<Event> queueServer, long flowsFromStartToFinish, int numServer) {
+	private static void runThread(PriorityQueue<Event> queueServer, long flowsFromStartToFinish,CyclicBarrier barrier,long threadID,int numServer) {
 		long realTime = System.currentTimeMillis();
 		long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
 		long nowThread = 0;
 		Event event;
-
+		synchronized (System.out) {
+			System.out.println("Thread ID: " + threadID + " is processing server " + numServer + " start run in time: " + realTime + " ,size: " + queueServer.size());
+		}
 		while (!queueServer.isEmpty()) {
+			synchronized (System.out) {
+				System.out.println("---Thread ID " + threadID + ", the window betweeen " + now + " to " + (now+offsetTime)+" ,size: "+queueServer.size() + "---");
+			}
 			while (!queueServer.isEmpty() && (nowThread = queueServer.peek().getTime()) <= (now+offsetTime)) {
 				event = queueServer.peek();
+				synchronized (System.out) {
+					System.out.println("Thread ID " + threadID + " ,Event peeked: " + event.getEid() + " ,Event Type: " + event.getClass().getSimpleName() + " ,time: " + event.getTime());
+			    }
 				if (nowThread <= totalRuntimeNs) {
 					queueServer.poll();
 					event.trigger();
@@ -331,48 +358,66 @@ public class Simulator {
 				}
 
 				if (finishedFlows.size() >= flowsFromStartToFinish) {
-					lockThreshold.lock();
-					endedDueToFlowThreshold = true;
-					lockThreshold.unlock();
+					synchronized (lockThreshold) {
+                        endedDueToFlowThreshold = true;
+                    }
 					// break;
 				}
 
 			}
 
+
 			if (nowThread > totalRuntimeNs || queueServer.isEmpty()) {
-				locknumThreadRun.lock();
-				numThreadRun--;
-				locknumThreadRun.unlock();
-				break;
+				synchronized(lockRemainThread){
+					int remainingThreads = activeThreads.decrementAndGet();
+					System.out.println("Thread" + threadID + "completed. Remaining threads: " + remainingThreads);
+					if(remainingThreads > 0){
+						reinitializeBarrier(remainingThreads);
+					}
+					break; 
+				}
+
 			}
 
-			lockCountThreadFinish.lock();
-			countThreadFinish++;
-			lockCountThreadFinish.unlock();
+			try {
+                // Wait for all threads to reach this point
+                int index = barrier.await();
+                if (index == 0) {
+                    // Only one thread (the last one to arrive) will execute this
+                    synchronized (lockNow) {
+						long min = checkMinEventTime();
+						now = (min/offsetTime) * offsetTime;
+						// now = min;
+                    }
+                }
 
-			// The first thread finish the iteration will update the now variable
-			lockNow.lock();
-			if (!nowChanged) {
-				nowChanged = true;
-				now += offsetTime;
-			}
-			lockNow.unlock();
-
-			// All thread wait thus the now variable will be in the next iteration the same
-			while (countThreadFinish != numThreadRun)
-				;
-			// The if exists that only one thread make it
-			lockNow.lock();
-			if (nowChanged) {
-				nowChanged = false;
-				countThreadFinish = 0;
-			}
-			lockNow.unlock();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 		}
 
 	}
-
-
+	/* check min time event of all head queues*/
+	private static long checkMinEventTime() {
+		long min = queuesServer[0].peek().getTime();
+		long minCheck;
+        for (int i = 1; i < NUM_SERVER; i++) {
+			if((minCheck = queuesServer[i].peek().getTime()) < min){
+				min = minCheck;
+			}
+		}
+		return min;
+		
+    }
+    
+	private static void reinitializeBarrier(int remainingThreads) {
+        synchronized (lockBarrier) {
+            if (remainingThreads > 0) {
+                barrier.reset(); 
+                barrier = new CyclicBarrier(remainingThreads); 
+            }
+        }
+    }
 
 	
 	/**
