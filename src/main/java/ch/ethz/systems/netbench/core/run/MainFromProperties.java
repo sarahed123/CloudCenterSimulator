@@ -101,8 +101,14 @@ public class MainFromProperties {
         } while (runConfigurations.get(0).hasSubConfiguration());
         SimulationLogger.closeCommon();
 
+        new java.util.Scanner(System.in).nextLine();
+    
+
     }
 
+    
+    
+    
     /**
      * Generate the configuration from the arguments.
      *

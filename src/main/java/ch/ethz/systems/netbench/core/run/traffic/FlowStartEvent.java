@@ -14,6 +14,7 @@ public class FlowStartEvent extends Event {
     protected int networkDeviceId;
     protected TransportLayer transportLayer;
     protected TransportLayer dstTransportLayer;
+    
 
     /**
      * Create event which will happen the given amount of nanoseconds later.

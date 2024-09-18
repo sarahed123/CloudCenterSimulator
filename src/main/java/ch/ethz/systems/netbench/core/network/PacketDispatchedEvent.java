@@ -24,6 +24,10 @@ public class PacketDispatchedEvent extends Event {
     private final int targetId;
     private final OutputPort dispatchPort;
 
+    private static final int MAX_TRIGGER_COUNT = 3; 
+    private int triggerCount = 0;
+
+
     /**
      * Packet dispatched event constructor.
      *
@@ -47,9 +51,20 @@ public class PacketDispatchedEvent extends Event {
         return packet;
     }
 
+    // @Override
+    // public void trigger() {
+    //     dispatchPort.dispatch(packet);
+    //     // NetworkDevice nd = getOwnDevice();
+    //     // getOutputPort(nd).dispatch(packet);
+
+    // }
     @Override
     public void trigger() {
-        dispatchPort.dispatch(packet);
+        if (triggerCount < MAX_TRIGGER_COUNT) {
+            dispatchPort.dispatch(packet);
+            triggerCount++; 
+        }
+        
         // NetworkDevice nd = getOwnDevice();
         // getOutputPort(nd).dispatch(packet);
 
