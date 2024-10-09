@@ -13,6 +13,7 @@ public abstract class Event implements Comparable<Event>, Serializable {
 	// Added for absolute determinism in the event priority queue
     private static long c = 0;
     private final long eid;
+    private final long timeFromNowNs;
     
     // Time to trigger
     protected long time;
@@ -24,6 +25,7 @@ public abstract class Event implements Comparable<Event>, Serializable {
      */
     public Event(long timeFromNowNs) {
         this.time = Simulator.getTimeFromNow(timeFromNowNs);
+        this.timeFromNowNs = timeFromNowNs;
         this.eid = c;
         c++;
     }
@@ -42,6 +44,14 @@ public abstract class Event implements Comparable<Event>, Serializable {
      */
     public long getTime() {
         return time;
+    }
+
+    public void updateTime(long timeFromNowNs) {
+        this.time = Simulator.getTimeFromNow(timeFromNowNs);
+    }
+
+    public long getTimeFromNowNs() {
+        return timeFromNowNs;
     }
 
     @Override
