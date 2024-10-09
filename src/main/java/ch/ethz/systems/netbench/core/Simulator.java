@@ -3,38 +3,23 @@ package ch.ethz.systems.netbench.core;
 import ch.ethz.systems.netbench.core.config.NBProperties;
 import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Event;
-import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.core.network.PacketArrivalEvent;
 import ch.ethz.systems.netbench.core.network.PacketDispatchedEvent;
 import ch.ethz.systems.netbench.core.network.TransportLayer;
 import ch.ethz.systems.netbench.core.random.RandomManager;
-import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 import ch.ethz.systems.netbench.core.run.routing.remote.RemoteRoutingController;
 import ch.ethz.systems.netbench.core.run.traffic.FlowStartEvent;
 import ch.ethz.systems.netbench.core.state.SimulatorStateSaver;
-import ch.ethz.systems.netbench.ext.basic.IpPacket;
-import ch.ethz.systems.netbench.ext.basic.TcpPacket;
 import ch.ethz.systems.netbench.xpt.simple.TcpPacketResendEvent;
-import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
-import ch.ethz.systems.netbench.xpt.xpander.XpanderRouter;
 import org.json.simple.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -51,20 +36,16 @@ public class Simulator {
 	// Main ordered event queue (run variable)
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
 	// Event queues map according to servers(source_id)
-	final static int NUM_SERVER = 8;
+	final static int NUM_THREADS = 8;
 
-	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_SERVER];
+	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_THREADS];
 
 	private static final Object lockThreshold = new Object();
 	private static final Object lockNow = new Object();
-	private static final Object lockBarrier = new Object();
-	private static final Object lockRemainThread = new Object();
-	private static AtomicInteger activeThreads = new AtomicInteger(NUM_SERVER);
-	private static volatile CyclicBarrier barrier = new CyclicBarrier(NUM_SERVER);
 	
-
 	// Current time in ns in the simulation (run variable)
 	private static long now;
+	private static long[] nowThreads = new long[NUM_THREADS];
 	private static boolean endedDueToFlowThreshold;
 	private static final long offsetTime = 200000;
 	
@@ -167,8 +148,9 @@ public class Simulator {
 		eventQueue.clear();
 
 		// Initialize the queues of servers
-		for (int i = 0; i < NUM_SERVER; i++) {
+		for (int i = 0; i < NUM_THREADS; i++) {
 			queuesServer[i] = new PriorityQueue<Event>(eventComparator);
+			nowThreads[i] = 0;
 		}
 
 		// Configuration
@@ -263,34 +245,19 @@ public class Simulator {
 
 		endedDueToFlowThreshold = false;
 
-		ExecutorService executor = Executors.newFixedThreadPool(NUM_SERVER);
+		ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
 
 		now = Long.MAX_VALUE;
-		for (int i = 0; i < NUM_SERVER; i++) {
+		for (int i = 0; i < NUM_THREADS; i++) {
 			if (!queuesServer[i].isEmpty() && queuesServer[i].peek().getTime() <= totalRuntimeNs) {
-				now = Math.min(now, queuesServer[i].peek().getTime());
+				nowThreads[i] = queuesServer[i].peek().getTime();
+				now = Math.min(now, nowThreads[i]);
 			}
 		}
 		
-        
-       
-		// for (int i = 0; i < NUM_SERVER; i++) {
-		// 	System.out.println("Queue number " + i);
-		// 	while(!queuesServer[i].isEmpty()){
-		// 		System.out.println("event: " + queuesServer[i].peek().getTime());
-		// 		queuesServer[i].poll();
-				
-		// 	}
-		// }
-
-		for (int i = 0; i < NUM_SERVER; i++) {
+		for (int i = 0; i < NUM_THREADS; i++) {
 			final int numServer = i; // Capturing the row index for each thread
-			// check how many threads run(have events to trigger)
-			// if (!queuesServer[numServer].isEmpty()) {
-			// 	numThreadRun++;
-			// }
-			
-			executor.submit(() -> runThread(queuesServer[numServer], flowsFromStartToFinishFinal, barrier,Thread.currentThread().getId(),numServer)); 
+			executor.submit(() -> runThread(queuesServer[numServer], flowsFromStartToFinishFinal,Thread.currentThread().getId(),numServer)); 
            
 		}
 
@@ -316,22 +283,23 @@ public class Simulator {
 
 	}
 
-	private static void runThread(PriorityQueue<Event> queueServer, long flowsFromStartToFinish,CyclicBarrier barrier,long threadID,int numServer) {
+	private static void runThread(PriorityQueue<Event> queueServer, long flowsFromStartToFinish,long threadID,int numThread) {
 		long realTime = System.currentTimeMillis();
 		long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
 		long nowThread = 0;
 		Event event;
 		synchronized (System.out) {
-			System.out.println("Thread ID: " + threadID + " is processing server " + numServer + " start run in time: " + realTime + " ,size: " + queueServer.size());
+			System.out.println("Thread ID: " + threadID + " is processing server " + numThread + " start run in time: " + realTime + ", size: " + queueServer.size());
 		}
 		while (!queueServer.isEmpty()) {
 			synchronized (System.out) {
-				System.out.println("---Thread ID " + threadID + ", the window betweeen " + now + " to " + (now+offsetTime)+" ,size: "+queueServer.size() + "---");
+				System.out.println("---Thread ID " + threadID + ", the window betweeen " + now + " to " + (now+offsetTime)+", size: "+queueServer.size() + "---");
 			}
-			while (!queueServer.isEmpty() && (nowThread = queueServer.peek().getTime()) <= (now+offsetTime)) {
+			while (!queueServer.isEmpty() && (nowThread = queueServer.peek().getTime()) <= totalRuntimeNs) {
 				event = queueServer.peek();
+				nowThreads[numThread] = nowThread;
 				synchronized (System.out) {
-					System.out.println("Thread ID " + threadID + " ,Event peeked: " + event.getEid() + " ,Event Type: " + event.getClass().getSimpleName() + " ,time: " + event.getTime());
+					System.out.println("Thread ID " + threadID + ", Event id peeked: " + event.getEid() + ", Event Type: " + event.getClass().getSimpleName() + ", time: " + event.getTime());
 			    }
 				if (nowThread <= totalRuntimeNs) {
 					queueServer.poll();
@@ -366,60 +334,14 @@ public class Simulator {
 
 			}
 
-
 			if (nowThread > totalRuntimeNs || queueServer.isEmpty()) {
-				synchronized(lockRemainThread){
-					int remainingThreads = activeThreads.decrementAndGet();
-					System.out.println("Thread" + threadID + "completed. Remaining threads: " + remainingThreads);
-					if(remainingThreads > 0){
-						reinitializeBarrier(remainingThreads);
-					}
 					break; 
-				}
-
 			}
 
-			try {
-                // Wait for all threads to reach this point
-                int index = barrier.await();
-                if (index == 0) {
-                    // Only one thread (the last one to arrive) will execute this
-                    synchronized (lockNow) {
-						long min = checkMinEventTime();
-						now = (min/offsetTime) * offsetTime;
-						// now = min;
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 		}
 
 	}
-	/* check min time event of all head queues*/
-	private static long checkMinEventTime() {
-		long min = queuesServer[0].peek().getTime();
-		long minCheck;
-        for (int i = 1; i < NUM_SERVER; i++) {
-			if((minCheck = queuesServer[i].peek().getTime()) < min){
-				min = minCheck;
-			}
-		}
-		return min;
-		
-    }
     
-	private static void reinitializeBarrier(int remainingThreads) {
-        synchronized (lockBarrier) {
-            if (remainingThreads > 0) {
-                barrier.reset(); 
-                barrier = new CyclicBarrier(remainingThreads); 
-            }
-        }
-    }
-
-	
 	/**
      * Register an event in the simulation.
      *
@@ -431,19 +353,28 @@ public class Simulator {
         if (event instanceof FlowStartEvent) {
             FlowStartEvent flowStartEvent = (FlowStartEvent) event;
             int targetId = flowStartEvent.getTargetId();
-            queuesServer[targetId % NUM_SERVER].add(event);
+            queuesServer[targetId % NUM_THREADS].add(event);
         } else if (event instanceof PacketArrivalEvent) {
             PacketArrivalEvent packetArrivalEvent = (PacketArrivalEvent) event;
             flowId = packetArrivalEvent.getPacket().getFlowId();
-            queuesServer[(int) flowId % NUM_SERVER].add(event);
+			int threadId = (int) flowId % NUM_THREADS;
+			long timeFromNowNs = nowThreads[threadId] + event.getTimeFromNowNs();
+			event.updateTime(timeFromNowNs);
+            queuesServer[threadId].add(event);
         } else if (event instanceof PacketDispatchedEvent) {
             PacketDispatchedEvent packetDispatchedEvent = (PacketDispatchedEvent) event;
             flowId = packetDispatchedEvent.getPacket().getFlowId();
-            queuesServer[(int) flowId % NUM_SERVER].add(event);
+			int threadId = (int) flowId % NUM_THREADS;
+			long timeFromNowNs = nowThreads[threadId] + event.getTimeFromNowNs();
+			event.updateTime(timeFromNowNs);
+            queuesServer[threadId].add(event);
         } else if (event instanceof TcpPacketResendEvent) {
 			TcpPacketResendEvent tcpPacketResendEvent = (TcpPacketResendEvent) event;
 			flowId = tcpPacketResendEvent.getFlowId();
-			queuesServer[(int) flowId % NUM_SERVER].add(event);
+			int threadId = (int) flowId % NUM_THREADS;
+			long timeFromNowNs = nowThreads[threadId] + event.getTimeFromNowNs();
+			event.updateTime(timeFromNowNs);
+			queuesServer[threadId].add(event);
 		}
     }
    
@@ -518,7 +449,7 @@ public class Simulator {
 	 */
 	public static int getEventSize() {
 		int eventSize = 0;
-		for (int i = 0; i < NUM_SERVER; i++) {
+		for (int i = 0; i < NUM_THREADS; i++) {
 			eventSize += queuesServer[i].size();
 		}
 		return eventSize;
@@ -555,7 +486,7 @@ public class Simulator {
 		TransportLayer.staticReset();
 		finishFlowIdThreshold = -1;
 
-		for (int i = 0; i < NUM_SERVER; i++) {
+		for (int i = 0; i < NUM_THREADS; i++) {
 			if (queuesServer[i] != null) {
 				queuesServer[i].clear(); // Clear the queue
 			}
