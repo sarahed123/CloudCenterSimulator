@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 
 /**
@@ -36,7 +36,7 @@ public class Simulator {
 	// Main ordered event queue (run variable)
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
 	// Event queues map according to servers(source_id)
-	final static int NUM_THREADS = 8;
+	final static int NUM_THREADS = 16;
 
 	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_THREADS];
 
@@ -64,7 +64,6 @@ public class Simulator {
 	// Configuration
 	private static NBProperties configuration;
 
-	private static int currentCommand;
 
 	private Simulator() {
 		// Static class only
@@ -288,19 +287,19 @@ public class Simulator {
 		long nextProgressLog = PROGRESS_SHOW_INTERVAL_NS;
 		long nowThread = 0;
 		Event event;
-		synchronized (System.out) {
-			System.out.println("Thread ID: " + threadID + " is processing server " + numThread + " start run in time: " + realTime + ", size: " + queueServer.size());
-		}
+		// synchronized (System.out) {
+		// 	System.out.println("Thread ID: " + threadID + " is processing server " + numThread + " start run in time: " + realTime + ", size: " + queueServer.size());
+		// }
 		while (!queueServer.isEmpty()) {
-			synchronized (System.out) {
-				System.out.println("---Thread ID " + threadID + ", the window betweeen " + now + " to " + (now+offsetTime)+", size: "+queueServer.size() + "---");
-			}
+			// synchronized (System.out) {
+			// 	System.out.println("---Thread ID " + threadID + ", the window betweeen " + now + " to " + (now+offsetTime)+", size: "+queueServer.size() + "---");
+			// }
 			while (!queueServer.isEmpty() && (nowThread = queueServer.peek().getTime()) <= totalRuntimeNs) {
 				event = queueServer.peek();
 				nowThreads[numThread] = nowThread;
-				synchronized (System.out) {
-					System.out.println("Thread ID " + threadID + ", Event id peeked: " + event.getEid() + ", Event Type: " + event.getClass().getSimpleName() + ", time: " + event.getTime());
-			    }
+				// synchronized (System.out) {
+				// 	System.out.println("Thread ID " + threadID + ", Event id peeked: " + event.getEid() + ", Event Type: " + event.getClass().getSimpleName() + ", time: " + event.getTime());
+			    // }
 				if (nowThread <= totalRuntimeNs) {
 					queueServer.poll();
 					event.trigger();
@@ -325,11 +324,12 @@ public class Simulator {
 					}
 				}
 
+				//check if the num of the flows that finished bigger than the max flows to trigger.
 				if (finishedFlows.size() >= flowsFromStartToFinish) {
 					synchronized (lockThreshold) {
                         endedDueToFlowThreshold = true;
                     }
-					// break;
+					break;
 				}
 
 			}
@@ -378,35 +378,7 @@ public class Simulator {
 		}
     }
    
-	// public static void registerEvent(Event event) {
-	// 	eventQueue.add(event);
-	// 	int source_id;
-	// 	Packet packet;
-	// 	if (event instanceof FlowStartEvent) {
-	// 		source_id = ((FlowStartEvent) event).getNetWorkDeviceId();
-	// 	} else if (event instanceof PacketArrivalEvent) {
-	// 		packet = ((PacketArrivalEvent) event).getPacket();
-	// 		source_id = (int) (((IpPacket) packet).getSourceId());
-	// 	} else {
-	// 		packet = ((PacketDispatchedEvent) event).getPacket();
-	// 		source_id = (int) (((IpPacket) packet).getSourceId());
-	// 	}
-	// 	queuesServer[source_id].add(event);
 
-	// }
-
-	private static boolean handleUserInput(String input) {
-		switch (input) {
-			case "s":
-			case "start":
-				return false;
-			case "dump-state":
-				SimulatorStateSaver.save(configuration);
-				break;
-		}
-		return true;
-
-	}
 
 	/**
 	 * Register to the simulator that a flow has been finished.
