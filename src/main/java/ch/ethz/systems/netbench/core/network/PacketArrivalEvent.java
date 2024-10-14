@@ -1,6 +1,5 @@
 package ch.ethz.systems.netbench.core.network;
 
-import ch.ethz.systems.netbench.core.run.infrastructure.BaseInitializer;
 
 /**
  * Event for the complete arrival of a packet in its entirety.
@@ -19,9 +18,6 @@ public class PacketArrivalEvent extends Event {
     private final int arrivalNetworkDeviceId;
     private final Packet packet;
     private final InputPort inputPort;
-
-    private static final int MAX_TRIGGER_COUNT = 3; 
-    private int triggerCount = 0;
 
     /**
      * Packet arrival event constructor.
@@ -45,16 +41,11 @@ public class PacketArrivalEvent extends Event {
         return packet;
     }
 
-    // @Override
-    // public void trigger() {
-    //     inputPort.receive(packet);
-    // }
+    @Override
     public void trigger() {
-        if (triggerCount < MAX_TRIGGER_COUNT) {
-            inputPort.receive(packet);
-            triggerCount++; // עדכון המונה לאחר הפעלת האירוע
-        }
-    }    
+        inputPort.receive(packet);
+    }
+    
 
     /*
      * protected NetworkDevice getNetworkDevice() {
