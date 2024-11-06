@@ -1,0 +1,11 @@
+Seed randomly chosen: FALSE
+Seed: 546854
+Port: ECN_TAIL_DROP(maxQueueSizeBytes=150000, ecnThresholdKBytes=30000)
+Network device flowlet intermediary: IDENTITY
+Graph: Dummy Log
+Network device: ECMP_SWITCH(numNodes=80)
+Link: PERFECT_SIMPLE_LINK(delayNs=10, bandwidthBitPerNs=100)
+Link: PERFECT_SIMPLE_LINK(serverLanes=1)
+Transport layer: SIMPLE_DCTCP
+Routing: ECMP
+Flow planner flow size dist.: pFabric web search upper bound discrete
