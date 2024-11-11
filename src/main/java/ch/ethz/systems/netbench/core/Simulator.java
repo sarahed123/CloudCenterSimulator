@@ -36,7 +36,7 @@ public class Simulator {
 	// Main ordered event queue (run variable)
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
 	// Event queues map according to servers(source_id)
-	final static int NUM_THREADS = 2;
+	final static int NUM_THREADS = 8;
 			
 
 	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_THREADS];
