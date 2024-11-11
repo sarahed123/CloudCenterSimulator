@@ -36,7 +36,7 @@ public class Simulator {
 	// Main ordered event queue (run variable)
 	private static PriorityQueue<Event> eventQueue = new PriorityQueue<>();
 	// Event queues map according to servers(source_id)
-	final static int NUM_THREADS = 4;
+	final static int NUM_THREADS = 2;
 			
 
 	private static PriorityQueue<Event>[] queuesServer = new PriorityQueue[NUM_THREADS];
@@ -278,7 +278,7 @@ public class Simulator {
 		}
 
 		// Log end
-		System.out.println("Num thraeds: " + NUM_THREADS +"\nSimulation finished (simulated " + (runtimeNanoseconds / 1e9) + "s in a real-world time of "
+		System.out.println("Num threads: " + NUM_THREADS +"\nSimulation finished (simulated " + (runtimeNanoseconds / 1e9) + "s in a real-world time of "
 				+ ((System.currentTimeMillis() - startTime) / 1000.0) + "s).");
 
 	}

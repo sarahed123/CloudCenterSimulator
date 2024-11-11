@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 threads = [1, 2, 4, 8, 16]
 
 # run time of the threads
-run_times = [50.145, 10.16, 0.047, 0.049, 0.058]  
+run_times = [50.346, 12.128, 0.687, 0.038, 0.044]  
 
 #create graph
 plt.figure(figsize=(8, 6))
