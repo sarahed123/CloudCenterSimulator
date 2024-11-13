@@ -11,3 +11,5 @@ bin/
 *.stdout.txt
 *.stderr.txt
 NetBench.jar
+**/console.txt
+
