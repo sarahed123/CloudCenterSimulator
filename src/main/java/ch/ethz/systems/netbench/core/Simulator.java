@@ -51,7 +51,7 @@ public class Simulator {
 	private static final long offsetTime = 200000;
 	
 
-	// Threshold to end
+	// Threshold to end.
 	private static long finishFlowIdThreshold;
 	private static final Set<Long> finishedFlows = new HashSet<>();
 
