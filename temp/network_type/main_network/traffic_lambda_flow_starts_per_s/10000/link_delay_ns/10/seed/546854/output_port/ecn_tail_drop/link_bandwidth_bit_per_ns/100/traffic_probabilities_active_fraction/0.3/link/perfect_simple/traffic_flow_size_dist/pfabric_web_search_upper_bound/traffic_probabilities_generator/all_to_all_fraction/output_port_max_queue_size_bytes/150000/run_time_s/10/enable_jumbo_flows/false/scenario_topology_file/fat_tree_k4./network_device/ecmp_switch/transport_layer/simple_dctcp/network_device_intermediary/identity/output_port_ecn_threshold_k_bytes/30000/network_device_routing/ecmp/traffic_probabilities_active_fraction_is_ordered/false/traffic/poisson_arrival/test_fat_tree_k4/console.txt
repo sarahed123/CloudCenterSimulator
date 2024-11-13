@@ -1,0 +1,31 @@
+Copying file "example/topologies/fat_tree/fat_tree_k4.topology" to run folder using new file name "original_topology.txt"...
+Running command "cp example/topologies/fat_tree/fat_tree_k4.topology temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/10/seed/546854/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/output_port_max_queue_size_bytes/150000/run_time_s/10/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k4./network_device/ecmp_switch/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/network_device_routing/ecmp/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/test_fat_tree_k4/original_topology.txt"...
+... command has been executed (any output is shown above).
+Copying file "./example/runs/multi-threading/test_fat_tree_k4.properties" to run folder...
+Running command "cp ./example/runs/multi-threading/test_fat_tree_k4.properties temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/10/seed/546854/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/output_port_max_queue_size_bytes/150000/run_time_s/10/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k4./network_device/ecmp_switch/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/network_device_routing/ecmp/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/test_fat_tree_k4"...
+... command has been executed (any output is shown above).
+
+INFRASTRUCTURE
+==================
+Finished creating infrastructure for network num 0
+
+finished reading graph
+finished creating nodes
+finished creating nodes and edges
+ROUTING STATE
+==================
+Calculating shortest path lengths... done.
+Populating ECMP forward routing tables... 10.0%... 20.0%... 30.0%... 40.0%... 50.0%... 60.0%... 70.0%... 80.0%... 90.0%... 100.0%...ecmp num shortest paths average 1.6842105263157894
+ done.
+Finished routing state setup.
+
+TRAFFIC
+==================
+Exception in thread "main" ch.ethz.systems.netbench.core.config.exceptions.PropertyMissingException: [./example/runs/multi-threading/test_fat_tree_k4.properties]: essential property "scenario_topology_extend_servers_per_tl_node" was not found in the configuration file.
+	at ch.ethz.systems.netbench.core.config.NBProperties.getPropertyOrFail(NBProperties.java:198)
+	at ch.ethz.systems.netbench.core.config.NBProperties.getIntegerPropertyOrFail(NBProperties.java:227)
+	at ch.ethz.systems.netbench.ext.poissontraffic.PoissonArrivalPlanner.setPairProbabilitiesAllToAllInFraction(PoissonArrivalPlanner.java:302)
+	at ch.ethz.systems.netbench.ext.poissontraffic.PoissonArrivalPlanner.<init>(PoissonArrivalPlanner.java:77)
+	at ch.ethz.systems.netbench.core.run.TrafficSelector.selectPlanner(TrafficSelector.java:131)
+	at ch.ethz.systems.netbench.core.run.MainFromProperties.planTraffic(MainFromProperties.java:302)
+	at ch.ethz.systems.netbench.core.run.MainFromProperties.main(MainFromProperties.java:66)

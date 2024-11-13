@@ -1,0 +1,50 @@
+Copying file "example/topologies/fat_tree/fat_tree_k8.topology" to run folder using new file name "original_topology.txt"...
+Running command "cp example/topologies/fat_tree/fat_tree_k8.topology temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/10/seed/546854/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k8./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/output_port_max_queue_size_bytes/150000/run_time_s/10/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/test_fat_tree_k4/original_topology.txt"...
+... command has been executed (any output is shown above).
+Extending topology file "example/topologies/fat_tree/fat_tree_k8.topology" by adding 8 servers to each ToR.
+Writing to output topology file... done.
+Overriding property scenario_topology_file: "example/topologies/fat_tree/fat_tree_k8.topology" (old) -> "temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/10/seed/546854/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k8./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/output_port_max_queue_size_bytes/150000/run_time_s/10/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/test_fat_tree_k4/extended_topology.txt" (new).
+Copying file "./example/runs/multi-threading/test_fat_tree_k8.properties" to run folder...
+Running command "cp ./example/runs/multi-threading/test_fat_tree_k8.properties temp/network_type/main_network/traffic_lambda_flow_starts_per_s/10000/link_delay_ns/10/seed/546854/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k8./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/output_port_max_queue_size_bytes/150000/run_time_s/10/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/test_fat_tree_k4"...
+... command has been executed (any output is shown above).
+
+INFRASTRUCTURE
+==================
+Finished creating infrastructure for network num 0
+
+finished reading graph
+finished creating nodes
+finished creating nodes and edges
+ROUTING STATE
+==================
+Calculating shortest path lengths... done.
+Populating ECMP forward routing tables... 9.821428571428571%... 19.642857142857142%... 29.464285714285715%... 39.285714285714285%... 49.107142857142854%... 58.92857142857143%... 68.75%... 78.57142857142857%... 88.39285714285714%... 98.21428571428571%...ecmp num shortest paths average 1.5283582089552228
+ done.
+Finished routing state setup.
+
+TRAFFIC
+==================
+Generating all-to-all pair probabilities in 30.0% fraction 32 ToRs between their servers... done.
+Creating arrival plan... 10%... 20%... 30%... 40%... 50%... 60%... 70%... 80%... 90%... 100%... done.
+Poisson Arrival plan created.
+Number of flows created: 100232.
+Mean inter-arrival time: 99769 (expectation: 99999.99999999999)
+Total bytes in traffic plan 243430830000
+Finished generating traffic flow starts.
+
+ACTUAL RUN
+==================
+Starting simulation (total time: 10000000000ns);...
+Elapsed 0.2s simulation in 2.262s real (total progress: 2.00001207%).
+Elapsed 0.2s simulation in 0.338s real (total progress: 4.00001207%).
+Elapsed 0.2s simulation in 0.532s real (total progress: 6.00001207%).
+Elapsed 0.2s simulation in 0.652s real (total progress: 8.00000348%).
+Elapsed 0.2s simulation in 0.945s real (total progress: 10.00000348%).
+Elapsed 0.2s simulation in 1.476s real (total progress: 12.00000348%).
+Elapsed 0.2s simulation in 1.958s real (total progress: 14.00000348%).
+Elapsed 0.2s simulation in 2.756s real (total progress: 16.00000322%).
+Elapsed 0.2s simulation in 2.864s real (total progress: 18.00000322%).
+Elapsed 0.2s simulation in 3.139s real (total progress: 20.00000322%).
+Elapsed 0.2s simulation in 4.379s real (total progress: 22.00000322%).
+Elapsed 0.2s simulation in 4.253s real (total progress: 24.00000322%).
+Elapsed 0.2s simulation in 7.862s real (total progress: 26.00000322%).

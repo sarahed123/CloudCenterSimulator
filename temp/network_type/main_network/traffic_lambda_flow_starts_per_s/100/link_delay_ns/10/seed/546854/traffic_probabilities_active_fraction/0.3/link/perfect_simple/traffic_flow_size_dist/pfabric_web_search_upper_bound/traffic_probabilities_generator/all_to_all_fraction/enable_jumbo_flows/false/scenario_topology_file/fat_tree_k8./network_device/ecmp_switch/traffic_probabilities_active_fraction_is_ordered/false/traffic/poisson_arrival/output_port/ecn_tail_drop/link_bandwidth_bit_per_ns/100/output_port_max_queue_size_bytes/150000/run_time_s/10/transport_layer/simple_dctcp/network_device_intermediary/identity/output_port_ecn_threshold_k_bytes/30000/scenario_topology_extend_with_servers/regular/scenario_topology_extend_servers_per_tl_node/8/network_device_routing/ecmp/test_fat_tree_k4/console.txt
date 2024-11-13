@@ -1,0 +1,92 @@
+Copying file "example/topologies/fat_tree/fat_tree_k8.topology" to run folder using new file name "original_topology.txt"...
+Running command "cp example/topologies/fat_tree/fat_tree_k8.topology temp/network_type/main_network/traffic_lambda_flow_starts_per_s/100/link_delay_ns/10/seed/546854/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k8./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/output_port_max_queue_size_bytes/150000/run_time_s/10/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/test_fat_tree_k4/original_topology.txt"...
+... command has been executed (any output is shown above).
+Extending topology file "example/topologies/fat_tree/fat_tree_k8.topology" by adding 8 servers to each ToR.
+Writing to output topology file... done.
+Overriding property scenario_topology_file: "example/topologies/fat_tree/fat_tree_k8.topology" (old) -> "temp/network_type/main_network/traffic_lambda_flow_starts_per_s/100/link_delay_ns/10/seed/546854/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k8./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/output_port_max_queue_size_bytes/150000/run_time_s/10/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/test_fat_tree_k4/extended_topology.txt" (new).
+Copying file "./example/runs/multi-threading/test_fat_tree_k8-100_flows.properties" to run folder...
+Running command "cp ./example/runs/multi-threading/test_fat_tree_k8-100_flows.properties temp/network_type/main_network/traffic_lambda_flow_starts_per_s/100/link_delay_ns/10/seed/546854/traffic_probabilities_active_fraction/0.3/link/perfect_simple/traffic_flow_size_dist/pfabric_web_search_upper_bound/traffic_probabilities_generator/all_to_all_fraction/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k8./network_device/ecmp_switch/traffic_probabilities_active_fraction_is_ordered/false/traffic/poisson_arrival/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/output_port_max_queue_size_bytes/150000/run_time_s/10/transport_layer/simple_dctcp/network_device_intermediary/identity/output_port_ecn_threshold_k_bytes/30000/scenario_topology_extend_with_servers/regular/scenario_topology_extend_servers_per_tl_node/8/network_device_routing/ecmp/test_fat_tree_k4"...
+... command has been executed (any output is shown above).
+
+INFRASTRUCTURE
+==================
+Finished creating infrastructure for network num 0
+
+finished reading graph
+finished creating nodes
+finished creating nodes and edges
+ROUTING STATE
+==================
+Calculating shortest path lengths... done.
+Populating ECMP forward routing tables... 9.821428571428571%... 19.642857142857142%... 29.464285714285715%... 39.285714285714285%... 49.107142857142854%... 58.92857142857143%... 68.75%... 78.57142857142857%... 88.39285714285714%... 98.21428571428571%...ecmp num shortest paths average 1.5283582089552228
+ done.
+Finished routing state setup.
+
+TRAFFIC
+==================
+Generating all-to-all pair probabilities in 30.0% fraction 32 ToRs between their servers... done.
+Creating arrival plan... 10%... 20%... 30%... 40%... 50%... 60%... 70%... 80%... 90%... 100%... done.
+Poisson Arrival plan created.
+Number of flows created: 1042.
+Mean inter-arrival time: 9631966 (expectation: 1.0E7)
+Total bytes in traffic plan 2515650000
+Finished generating traffic flow starts.
+
+ACTUAL RUN
+==================
+Starting simulation (total time: 10000000000ns);...
+Elapsed 0.2s simulation in 0.029s real (total progress: 2.58260255%).
+Elapsed 0.2s simulation in 0.032s real (total progress: 3.84444531%).
+Elapsed 0.2s simulation in 0.016s real (total progress: 5.0521858900000005%).
+Elapsed 0.2s simulation in 0.025s real (total progress: 6.07898582%).
+Elapsed 0.2s simulation in 0.013s real (total progress: 2.0557%).
+Elapsed 0.2s simulation in 0.024s real (total progress: 2.45122547%).
+Elapsed 0.2s simulation in 0.035s real (total progress: 2.4822290000000002%).
+Elapsed 0.2s simulation in 0.01s real (total progress: 6.58221739%).
+Elapsed 0.2s simulation in 0.001s real (total progress: 7.81343511%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 8.42635029%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 23.33727009%).
+Elapsed 0.2s simulation in 0.001s real (total progress: 25.83996638%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 27.234339730000002%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 29.22976802%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 29.60670544%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 29.61670544%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 29.626705440000002%).
+Elapsed 0.2s simulation in 0.001s real (total progress: 29.63670544%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 29.646705439999998%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 29.656705439999996%).
+Elapsed 0.2s simulation in 0.018s real (total progress: 10.00310839%).
+Elapsed 0.2s simulation in 0.021s real (total progress: 6.07898591%).
+Elapsed 0.2s simulation in 0.003s real (total progress: 10.2789208%).
+Elapsed 0.2s simulation in 0.017s real (total progress: 2.85727795%).
+Elapsed 0.2s simulation in 0.001s real (total progress: 15.40710099%).
+Elapsed 0.2s simulation in 0.035s real (total progress: 2.0889107399999998%).
+Elapsed 0.2s simulation in 0.018s real (total progress: 4.47161571%).
+Elapsed 0.2s simulation in 0.026s real (total progress: 2.7940591599999998%).
+Elapsed 0.2s simulation in 0.034s real (total progress: 2.5268776%).
+Elapsed 0.2s simulation in 0.038s real (total progress: 2.3739931%).
+Elapsed 0.2s simulation in 0.03s real (total progress: 2.7053781900000002%).
+Elapsed 0.2s simulation in 0.018s real (total progress: 5.05218598%).
+Elapsed 0.2s simulation in 0.019s real (total progress: 4.4716157999999995%).
+Elapsed 0.2s simulation in 0.044s real (total progress: 4.00891074%).
+Elapsed 0.2s simulation in 0.009s real (total progress: 6.00891074%).
+Elapsed 0.2s simulation in 0.057s real (total progress: 4.18316845%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 15.407101079999999%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 6.07898591%).
+Elapsed 0.2s simulation in 0.041s real (total progress: 15.40710118%).
+Elapsed 0.2s simulation in 0.0s real (total progress: 15.407101270000002%).
+Elapsed 0.2s simulation in 0.052s real (total progress: 30.00670658%).
+Elapsed 0.2s simulation in 0.003s real (total progress: 16.00710099%).
+Elapsed 0.2s simulation in 0.007s real (total progress: 18.007100989999998%).
+Elapsed 0.2s simulation in 0.02s real (total progress: 6.00316845%).
+Elapsed 0.2s simulation in 0.039s real (total progress: 8.00891074%).
+Elapsed 0.2s simulation in 0.11s real (total progress: 4.00773851%).
+Elapsed 0.2s simulation in 0.113s real (total progress: 4.007277950000001%).
+Elapsed 0.2s simulation in 0.044s real (total progress: 20.00710099%).
+Elapsed 0.2s simulation in 0.089s real (total progress: 32.00670658%).
+Elapsed 0.2s simulation in 0.055s real (total progress: 22.00710099%).
+Elapsed 0.2s simulation in 0.006s real (total progress: 24.007100989999998%).
+Elapsed 0.2s simulation in 0.007s real (total progress: 26.007100989999998%).
+Elapsed 0.2s simulation in 0.006s real (total progress: 28.00710099%).
+Num threads: 16
+Simulation finished (simulated 10.0s in a real-world time of 0.243s).

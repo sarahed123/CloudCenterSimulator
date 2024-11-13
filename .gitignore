@@ -13,3 +13,4 @@ bin/
 NetBench.jar
 **/console.txt
 
+temp/network_type/main_network/traffic_pair_type/custom/link_delay_ns/10/seed/546854/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/link/perfect_simple/output_port_max_queue_size_bytes/150000/run_time_s/0.1/

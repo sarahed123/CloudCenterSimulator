@@ -1,0 +1,30 @@
+Copying file "example/topologies/fat_tree/fat_tree_k4.topology" to run folder using new file name "original_topology.txt"...
+Running command "cp example/topologies/fat_tree/fat_tree_k4.topology temp/network_type/main_network/traffic_pair_type/custom/link_delay_ns/10/seed/546854/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/link/perfect_simple/output_port_max_queue_size_bytes/150000/run_time_s/0.0002/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k4./network_device/ecmp_switch/transport_layer/simple_dctcp/network_device_intermediary/identity/traffic_pairs/0->1,1->2,2->0,3->4,4->5,5->3,5->6,6->7,7->5,0->4,4->6,6->0/output_port_ecn_threshold_k_bytes/30000/traffic_pair_flow_size_byte/1250000000/network_device_routing/ecmp/traffic/traffic_pair/test_fat_tree_k4/original_topology.txt"...
+... command has been executed (any output is shown above).
+Copying file "./example/runs/multi-threading/test_fat_tree_k4.properties" to run folder...
+Running command "cp ./example/runs/multi-threading/test_fat_tree_k4.properties temp/network_type/main_network/traffic_pair_type/custom/link_delay_ns/10/seed/546854/output_port/ecn_tail_drop/link_bandwidth_bit_per_ns/100/link/perfect_simple/output_port_max_queue_size_bytes/150000/run_time_s/0.0002/enable_jumbo_flows/false/scenario_topology_file/fat_tree_k4./network_device/ecmp_switch/transport_layer/simple_dctcp/network_device_intermediary/identity/traffic_pairs/0->1,1->2,2->0,3->4,4->5,5->3,5->6,6->7,7->5,0->4,4->6,6->0/output_port_ecn_threshold_k_bytes/30000/traffic_pair_flow_size_byte/1250000000/network_device_routing/ecmp/traffic/traffic_pair/test_fat_tree_k4"...
+... command has been executed (any output is shown above).
+
+INFRASTRUCTURE
+==================
+Finished creating infrastructure for network num 0
+
+finished reading graph
+finished creating nodes
+finished creating nodes and edges
+ROUTING STATE
+==================
+Calculating shortest path lengths... done.
+Populating ECMP forward routing tables... 10.0%... 20.0%... 30.0%... 40.0%... 50.0%... 60.0%... 70.0%... 80.0%... 90.0%... 100.0%...ecmp num shortest paths average 1.6842105263157894
+ done.
+Finished routing state setup.
+
+TRAFFIC
+==================
+Total bytes in traffic plan 15000000000
+Finished generating traffic flow starts.
+
+ACTUAL RUN
+==================
+Starting simulation (total time: 200000ns);...
+Simulation finished (simulated 2.0E-4s in a real-world time of 0.025s).
