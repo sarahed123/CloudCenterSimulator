@@ -19,4 +19,4 @@ plt.xticks(threads)
 plt.grid(True)
 plt.legend()
 
-plt.savefig('Graph1 - simulation_runtime_vs_threads.png')
+plt.savefig('./graph/Graph1-simulation_runtime_vs_threads.png')
